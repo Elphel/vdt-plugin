@@ -1,0 +1,1430 @@
+/*******************************************************************************
+ * Copyright (c) 2004, 2012 KOBAYASHI Tadashi and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    KOBAYASHI Tadashi - initial API and implementation
+ *******************************************************************************/
+
+options {
+	JAVA_UNICODE_ESCAPE = true ;
+	STATIC = false ;
+}
+
+PARSER_BEGIN(VerilogParserCore)
+
+package com.elphel.vdt.veditor.parser.verilog;
+
+public abstract class VerilogParserCore
+{
+	public static final int STATEMENT = 0;
+	public static final int ASSIGN_STMT = 1;
+	public static final int INITIAL_BLOCK = 2;
+	public static final int ALWAYS_BLOCK = 3;
+
+	protected abstract void begin(int mode);
+	protected abstract void end(int mode);
+	protected abstract void beginOutlineElement(Token begin, String name, String type);
+	protected abstract void endOutlineElement(Token end, String name, String type);
+
+	protected void beginOutlineElement(Token begin, String type) {
+		beginOutlineElement(begin, begin.image, type);
+	}
+	protected void endOutlineElement(Token end, String type) {
+		endOutlineElement(end, end.image, type);
+	}
+
+	protected abstract void addCollapsible(int startLine,int endLine);
+	protected abstract Expression operator(Expression arg, Token op);
+	protected abstract Expression operator(Expression arg1, Token op, Expression arg2);
+	protected abstract Expression operator(Expression arg1, Token op, Expression arg2, Expression arg3);
+	protected abstract Expression variableReference(Identifier ident);
+	protected abstract Expression functionReference(Identifier ident);
+
+	protected abstract void parameterAssignment(String name, Expression value);
+	protected abstract void variableAssignment(Identifier ident);
+	protected abstract void taskReference(Identifier ident);
+	protected abstract void variableConnection(Expression arg, String module, Identifier port);
+	protected abstract void variableConnection(Expression arg, String module, int portIndex);
+	protected abstract void evaluateAssignment(Token asn, int lvalue, Expression exp);
+	protected abstract void beginGenerateBlock(Identifier block);
+	protected abstract void endGenerateBlock(Identifier block);
+}
+
+PARSER_END(VerilogParserCore)
+
+//
+// operation for /* */
+//
+MORE :
+{
+	"/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_MULTI_LINE_COMMENT>
+SKIP :
+{
+	<MULTI_LINE_COMMENT: "*/"> : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+MORE :
+{
+	< ~[] >
+}
+
+//
+// operation for (* *)
+//
+MORE :
+{
+	<"(*" ~[")"]> : IN_PROPERTY
+}
+
+<IN_PROPERTY>
+SKIP :
+{
+	<PROPERTY_COMMENT: "*)"> : DEFAULT
+}
+
+<IN_PROPERTY>
+MORE :
+{
+	< ~[] >
+}
+
+SKIP :
+{
+	" " | "\t" | "\r" | "\n" | "\f"
+}
+
+SPECIAL_TOKEN :
+{
+	<SINGLE_LINE_COMMENT: "//" (~["\n"])* >
+}
+
+TOKEN :
+{
+	<MODULE: "module">
+|	<ENDMODULE: "endmodule">
+|	<BEGIN: "begin">
+|	<END: "end">
+|	<FORK: "fork">
+|	<JOIN: "join">
+|	<SPECIFY: "specify">
+|	<ENDSPECIFY:"endspecify">
+|	<IF: "if">
+|	<ELSE: "else">
+|	<WHILE: "while">
+|	<FOR: "for">
+|	<FOREVER: "forever">
+|	<REPEAT: "repeat">
+|	<WAIT: "wait">
+|	<CASE: ("case" | "casex" | "casez") >
+|	<DEFAULT_LABEL: "default">
+|	<ENDCASE: "endcase">
+|	<FUNCTION: "function">
+|	<ENDFUNCTION: "endfunction">
+|	<TASK: "task">
+|	<ENDTASK: "endtask">
+|	<GENERATE: "generate">
+|	<ENDGENERATE: "endgenerate">
+|	<INPUT: "input">
+|	<OUTPUT: "output">
+|	<INOUT: "inout">
+|	<INTEGER: "integer">
+|	<REG: "reg">
+|  < WIRE: "wire" >
+|	<EVENT: "event">
+|	<GENVAR: "genvar">
+|	<REAL: "real">
+|	<PARAMETER: "parameter"> 
+|	<LOCALPARAM: "localparam">
+|	<SIGNED: "signed">
+|	<PROPERTY: "property" >
+|	<ENDPROPERTY: "endproperty" >
+|	<ASSERT: "assert" | "cover">
+|  <ASSIGN: "assign" >
+|  <DEASSIGN: "deassign" >
+|  <FORCE : "force" >
+|  <RELEASE: "release" >
+|  < TIME: "time" >
+|  < REALTIME: "realtime" >
+|  < DEFPARAM: "defparam" >
+|  < OR: "or" >
+|  < DISABLE: "disable" >
+|   <ALWAYS: "always" >
+|   <INITIAL: "initial" >
+|  < EDGE: ( "posedge" | "negedge" ) >
+|  < SUPPLY : ( "supply0" | "supply1" ) >
+|  < NET_TYPE: ( "tri" | "tri1" | "wand" | "triand" | "tri0" | "wor" | "trior" ) >
+|  < STRENGTH: ("strong0" | "strong1" | "pull0" | "pull1" | "weak0" | "weak1" |"highz0" | "highz1" ) >
+|   <PRIM_1IN_XOUT: ( "and" | "xor" | "nand" | "nor" | "xnor")>
+|   <PRIM_1OUT_XIN: ( "buf" | "not" )>
+|   <PRIM_1OUT_1IN_1CNTL: ( "bufif0" | "bufif1" | "notif0" | "notif1" | "pmos" | "nmos" | "rpmos" | "rnmos")>
+|   <PRIM_1OUT: ( "pullup" | "pulldown")>
+|   <PRIM_1OUT_1IN_NC_PC: ("cmos" | "rcmos" )>
+|   <PRIM_BI: ("tran" |  "rtran" | "tranif0" | "rtranif0" | "rtranif1")>
+|	<LPAREN: "(" >
+|	<RPAREN: ")" >
+|	<LBRACE: "{" >
+|	<RBRACE: "}" >
+|	<LBRACKET: "[" >
+|	<RBRACKET: "]" >
+|	<EOS: ";" >
+|	<PARA: "#" >
+|	<AT: "@" >
+|	<DOLLAR: "$" >
+|	<COMMA: "," >
+|  < DOT: "." >
+//|	<OTHER: "[.]" >
+}
+
+TOKEN :
+{
+  < AGN: "=" >
+| < GT: ">" >
+| < LT: "<" >
+| < BANG: "!" >
+| < TILDE: "~" >
+| < HOOK: "?" >
+| < COLON: ":" >
+| < PCOLON: "+:" >
+| < MCOLON: "-:" >
+| < EQ: "==" >
+| < LE: "<=" >
+| < GE: ">=" >
+| < NE: "!=" >
+| < SC_OR: "||" >
+| < SC_AND: "&&" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < STAR: "*" >
+| < SLASH: "/" >
+| < BIT_AND: "&" >
+| < BIT_OR: "|" >
+| < XOR: "^" >
+| < REM: "%" >
+| < LSHIFT: "<<" >
+| < RSHIFT: ">>" >
+| < NEG_AND: "~&" >
+| < NEG_OR: "~|" >
+| < NEG_XOR: "~^" >
+| < XOR_NEG: "^~" >
+| < EQ_C: "===" >
+| < NE_C: "!==" >
+| < POWER: "**" >
+| < ALSHIFT: "<<<" >
+| < ARSHIFT: ">>>" >
+}
+
+TOKEN :
+{
+  < IDENT :
+  	 // No matching macro means simple identifier
+     ("`")? < LETTER > (< LETTER > | ["0"-"9"] )*
+   | < BACKSLASH > (~[ " " ])+
+     >
+| < SYSTEM_IDENT:
+     "$" < LETTER > (< LETTER > | ["0"-"9"])*
+     >
+| < #LETTER : [ "a"-"z", "A"-"Z", "_" ] >
+| < #BACKSLASH : "\\" >
+}
+
+TOKEN :
+{
+  < INTEGER_LITERAL :
+    < NUMBER_LITERAL >
+  | < DECIMAL_LITERAL >
+  | < HEX_LITERAL >
+  | < OCTAL_LITERAL >
+  | < BINARY_LITERAL >
+    >
+| < #NUMBER_LITERAL : ([ "0"-"9", "_" ])+ >
+| < #DECIMAL_LITERAL : ([ "0"-"9" ])* "'" (["s", "S"])? [ "d", "D" ] ([" ", "\t"])* ([ "0"-"9", "_", "x", "X", "z", "Z", "?"])* >
+| < #HEX_LITERAL : ([ "0"-"9" ])* "'" (["s", "S"])? [ "h", "H" ] ([" ", "\t"])* ([ "0"-"9", "a"-"f", "A"-"F", "_", "x", "X", "z", "Z", "?" ])+ >
+| < #OCTAL_LITERAL : ([ "0"-"9" ])* "'" (["s", "S"])? [ "o", "O" ] ([" ", "\t"])* ([ "0"-"7", "_", "x", "X", "z", "Z", "?" ])* >
+| < #BINARY_LITERAL : ([ "0"-"9" ])* "'" (["s", "S"])? [ "b", "B" ] ([" ", "\t"])* ([ "0"-"1", "_", "x", "X", "z", "Z", "?" ])* >
+| < REAL_LITERAL :
+    ([ "0"-"9" ])+ "." ([ "0"-"9" ])*
+  | ([ "0"-"9" ])+ ( "." ([ "0"-"9" ])*)? [ "e", "E" ] ([ "+", "-" ])? ([ "0"-"9" ])+ >
+| < STRING_LITERAL:
+      "\""
+      (   (~["\"","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""  >
+}
+
+void verilogText() :
+{}
+{
+	( moduleDecl() )*
+}
+
+void moduleDecl() :
+{
+	Identifier name;
+	Token end;
+}
+{
+	( <IDENT>)* // ignore preprocessor directive
+	< MODULE > name = identifier()
+	{
+		beginOutlineElement(name, "module#");
+	}
+	[ "#" "(" [ parameterArg() ( "," parameterArg() )* ] ")"  ]
+	[ "(" [ argument() ( "," argument() )* ] ")" ]
+	";"
+	( moduleItem() )*
+	end = < ENDMODULE >
+	{
+	    endOutlineElement(end, name. image, "module#");
+	}
+}
+
+void parameterArg() :
+{
+	Token name,value;
+	String mod, range;
+}
+{ 
+	<PARAMETER> mod = parameterModifier() range = bitRange()
+	parameterAssign("parameter", mod, range)
+}
+
+String parameterModifier() :
+{
+	String ret = " ";
+}
+{
+	(
+		("real" | "integer" | "signed" )
+		{
+			ret += token.image + " ";
+		}
+	)*
+	{
+		return ret;
+	}
+}
+
+
+void parameterAssign(String type, String mod, String range) :
+{
+	Identifier name;
+	Expression value;
+}
+{
+	name = identifier()
+	"="
+	value = constantExpression()
+	{
+		String types = type + "#" + mod + "#" + range + "#" + value.toString();
+		beginOutlineElement(name, types);
+		parameterAssignment(name.image, value);
+		endOutlineElement(name, types);
+	}
+}
+
+void argument() :
+{
+	Token direction;
+	Identifier name;
+	String modifier="";
+	String range;
+	Token asn;
+	Expression exp;
+}
+{
+		// C++ style argument
+		( direction=<INPUT>  | direction=<OUTPUT>  | direction=<INOUT> )
+		modifier = variableModifier()
+		range = bitRange()
+		name = identifier()
+		{
+			String types = "port#" + direction.image + "#" + modifier + "#" + range;
+			beginOutlineElement(name, types);
+			endOutlineElement(name, types);
+		}
+		[
+			asn = "=" exp = expression()
+			{
+				variableAssignment(name);
+				evaluateAssignment(asn, name.getWidth(), exp);
+			}
+		]
+	|
+		// C style argument, portDecl will add it to OutlineContainer
+		identifier()
+}
+
+void moduleItem() :
+{}
+{
+	moduleOrGenerateItem()
+| 	portDecl()
+|	<SPECIFY> {begin(STATEMENT);} skipTo( ENDSPECIFY ) {end(STATEMENT);}
+|	generate()
+|	<PROPERTY> skipTo(ENDPROPERTY)
+}
+
+void moduleOrGenerateItem() :
+{}
+{
+	variableDecl()
+|	parameterDecl()
+|	taskDecl()
+|	functionDecl()
+| <DEFPARAM> {begin(STATEMENT);} skipTo( EOS ) {end(STATEMENT);}
+|  assign()
+|  primitiveInstance()
+|  LOOKAHEAD(3) moduleInstance()
+|	initialAlways() // initial and always
+|	<ASSERT>  skipTo(EOS)
+|	identifier() ":" <ASSERT>  skipTo(EOS)
+| 	";"
+}
+
+void portDecl() :
+{
+	Token direction;
+	String modifier;
+	String range;
+}
+{
+	( direction=<INPUT>  | direction=<OUTPUT>  | direction=<INOUT> )
+	modifier = variableModifier()
+	{ begin(STATEMENT); }
+	range = bitRange()
+	portDeclSingle(direction, modifier, range)
+	("," portDeclSingle(direction, modifier, range))* ";"
+	{ end(STATEMENT); }
+}
+
+String variableModifier() :
+{
+	String ret = "";
+}
+{
+	(
+		( "real" | "realtime" | "integer" | "wire" | "reg" | "signed" | "time" )
+		{
+			ret += token.image + " ";
+		}
+	)*
+	{
+		return ret;
+	}
+}
+
+void portDeclSingle(Token direction, String modifier, String range) :
+{
+	Identifier name;
+	Token asn;
+	Expression exp;
+}
+{
+	name = identifier()
+	{
+		String type = "port#" + direction.image + "#" + modifier + "#" + range + "#cstyle";
+		beginOutlineElement(name, type);
+		endOutlineElement(name, type);
+	}
+	[
+		asn = "=" exp = expression()
+		{
+			variableAssignment(name);
+			evaluateAssignment(asn, name.getWidth(), exp);
+		}
+	]
+}
+ 
+void primitiveInstance():
+{
+	String prim;
+}
+{
+	(     <PRIM_1IN_XOUT> | "or"
+      	| <PRIM_1OUT_XIN>      
+		| <PRIM_1OUT_1IN_1CNTL>
+		| <PRIM_1OUT>
+		| <PRIM_1OUT_1IN_NC_PC>
+		| <PRIM_BI>
+	) { prim = token.image;}
+	[ LOOKAHEAD(2) strength() ] [ delay3() ]
+	[ identifier() bitRange() ] "(" portConnect(prim) ")"
+	( "," identifier() bitRange() "(" portConnect(prim) ")" )*
+	";"
+}
+
+void moduleInstance():
+{
+	Identifier module, inst;
+	Token iend ;
+}
+{ 
+	module = identifier() 
+	{ begin(STATEMENT); }
+	
+	(   //module instantiation
+		(   [ "#" ( identifier() | number() | "(" parameterConnect() ")" ) ]
+			inst = identifier()
+			{
+				beginOutlineElement(module, inst.image, "instance#"+module.image);
+			}
+			[ "(" [ portConnect(module.image) ] ")" ]
+		    iend = ";"
+		    {			
+				endOutlineElement(iend, inst.image, "instance#"+module.image);
+				addCollapsible(module.beginLine, iend.endLine);
+		     }
+		 )
+	 |   //user defined primitive	 
+		 (  "(" portConnect(module.image) ")"
+		 	iend = ";"
+		 )
+	)
+	{ end(STATEMENT); }
+}
+
+void parameterConnect() :
+{}
+{
+	"." identifier() "(" [ constantExpression() ] ")" ( "," "." identifier() "(" [ constantExpression() ] ")" )*
+|	constantExpression() ( "," constantExpression() )*	
+}
+
+void portConnect(String module) :
+{
+	int count = 0;
+}
+{
+	count = portConnectSingle(module, count)
+	( "," count = portConnectSingle(module, count) )*
+}
+
+int portConnectSingle(String module, int count) :
+{
+	Identifier port;
+	Expression arg = null;
+}
+{
+	"." port = identifier() "(" [ arg = expression() ] ")"
+	{
+		variableConnection(arg, module, port);
+		return count + 1;
+	}
+|	arg = expression()
+	{
+		variableConnection(arg, module, count);
+		return count + 1;
+	}
+}
+
+void assign() :
+{
+	int width;
+	Token asn;
+	Expression exp;
+}
+{
+	"assign"
+	{begin(ASSIGN_STMT); }
+	[ strength() ] [ delay3() ]
+	width = lvalue() asn = "=" exp = expression()
+	{
+		evaluateAssignment(asn, width, exp);
+	}
+	(
+		"," width = lvalue() asn = "=" exp = expression()
+		{
+			evaluateAssignment(asn, width, exp);
+		}
+	)*
+	";"
+	{end(ASSIGN_STMT); }
+}
+
+void variableDecl():
+{
+	Token variable;
+	String type;
+	String range;
+}
+{
+	type = variableType()
+	{ begin(STATEMENT); }
+	[ strength() ]
+	[ "signed" 	{ type += " signed";}	]
+	range = bitRange()
+	[ delay3() ]
+	variableDeclSingle(type, range) ( "," variableDeclSingle(type, range) )* ";"
+	{ end(STATEMENT); }
+}
+
+String variableType() :
+{
+	String type;
+}
+{
+	 type = netType()
+	 {
+	 	return type;
+	}
+|	( "reg" | "real" | "integer" | "event" |"genvar" | "time" | "realtime" )
+	{
+		return token.image;
+	}
+}
+
+void variableDeclSingle(String mod, String range) :
+{
+	Identifier variable;
+	Token asn;
+	Expression exp;
+	int dimension = 0;
+}
+{
+	variable = identifier()
+	("[" constantExpression() ":" constantExpression() "]" { dimension++; })*
+	{
+		String type = "variable#" + mod + "#" + range + "#" + dimension;
+		beginOutlineElement(variable, type);
+		endOutlineElement(variable, type);
+	}
+	[
+		asn = "=" exp = expression()
+		{
+			variableAssignment(variable);
+			evaluateAssignment(asn, variable.getWidth(), exp);
+		}
+	]
+}
+
+void delay3() :
+{}
+{
+	"#"
+	(
+		LOOKAHEAD(3)
+		delayValue()
+	| 	"(" minTypMaxExpresstion() [ "," minTypMaxExpresstion() ["," minTypMaxExpresstion() ] ] ")"
+	)
+}
+
+void parameterDecl():
+{
+	String type;
+	String mod, range;
+}
+{ 
+	(
+		<PARAMETER>  {type = "parameter";}
+	|	<LOCALPARAM> {type = "localparam";}
+	)
+	mod = parameterModifier()
+	range = bitRange()
+	parameterAssign(type, mod, range) ( "," parameterAssign(type, mod, range) )* ";"
+}
+
+void initialAlways():
+{
+	Token start;
+}
+{
+	( start = <INITIAL> | start = <ALWAYS> )
+	{
+		if (start.image.equals("initial"))
+			begin(INITIAL_BLOCK);
+		else
+			begin(ALWAYS_BLOCK);
+	} 
+	statement() 
+	{
+		if (start.image.equals("initial"))
+			end(INITIAL_BLOCK);
+		else
+			end(ALWAYS_BLOCK);
+		addCollapsible(start.beginLine,token.endLine);
+	}
+}
+
+void statement() :
+{
+	Token end;
+}
+{
+ 	assignOrTaskEnable()
+| 	proceduralContinuousAssignment()
+|  proceduralTimingControlStatement()
+|	ifStatement()
+|	caseStatement()
+|	whileStatement()
+|	forStatement()
+|	foreverStatement()
+|	repeatStatement()
+|	waitStatement()
+| 	"disable" identifier() ";"
+|  "->" identifier() ";"
+|	block()
+|  ";"
+}
+
+void assignOrTaskEnable() :
+{
+	Identifier ident;
+	Token asn;
+	Expression exp;
+	int width;
+}
+{
+	ident = complexIdentifier()
+	(
+		(asn = "="  | asn = "<=") [delayOrEventControl() ] exp = expression() ";"
+		{
+			variableAssignment(ident);
+			evaluateAssignment(asn, ident.getWidth(), exp);
+		}
+	| 	[ "(" expression() ("," expression())* ")"] ";"
+		{
+			taskReference(ident);
+		}
+	)
+|	width = lvalueConcatenation() (asn = "="  | asn = "<=") [delayOrEventControl() ] exp = expression() ";"
+	{
+		evaluateAssignment(asn, width, exp);	
+	}
+|	<SYSTEM_IDENT> [ "(" expression() ("," expression())* ")"] ";"
+}
+
+void delayOrEventControl() :
+{}
+{
+	delayContol() | eventContol()
+}
+
+void delayContol() :
+{}
+{
+	"#" ( delayValue() | "(" minTypMaxExpresstion() ")" )
+}
+
+void delayValue() :
+{}
+{
+	number() | identifier()
+}
+
+void eventContol() :
+{}
+{
+ 	"@"
+	(	identifier()
+	|	 "*"
+	|	"(" (eventExpression() | "*" ) ")"
+	)
+}
+
+void eventExpression():
+{}
+{
+	( expression() | < EDGE > expression() )
+	( ("," | "or") ( expression() | < EDGE > expression() ) )*
+	// 'repeat' '(' expression ')' event_control -> ignored
+}
+
+void proceduralContinuousAssignment() :
+{
+	int width;
+	Token asn;
+	Expression exp;
+}
+{
+	"assign" width = lvalue() asn = "=" exp = expression() ";"
+	{
+		evaluateAssignment(asn, width, exp);
+	}
+|	"deassign" lvalue() ";"
+|	"force"  width = lvalue() asn = "=" exp = expression() ";"
+	{
+		evaluateAssignment(asn, width, exp);
+	}
+|	"release" lvalue() ";"
+}
+
+void proceduralTimingControlStatement() :
+{}
+{
+	delayOrEventControl() statement()
+}
+
+void ifStatement() :
+{}
+{
+	<IF> "(" expression() ")" statement()
+	[ LOOKAHEAD(1) <ELSE> statement() ]
+}
+
+void caseStatement() :
+{}
+{
+	<CASE>"(" expression() ")"
+	(
+		expression() ("," expression())* ":" statement()
+	| 	"default" [":"] statement()
+	)+
+	<ENDCASE>
+}
+
+void whileStatement() :
+{}
+{
+	<WHILE> "(" expression() ")" statement()
+}
+
+void forStatement() :
+{}
+{
+	<FOR> "("
+	lvalue() "=" expression() ";"
+	expression() ";"
+	lvalue() "=" expression() ")"
+	statement()
+}
+
+void foreverStatement() :
+{}
+{
+	<FOREVER> statement()
+}
+
+void repeatStatement() :
+{}
+{
+	<REPEAT> "(" expression() ")" statement()
+}
+
+void waitStatement() :
+{}
+{
+	<WAIT> "(" expression() ")" statement()
+}
+
+void block() :
+{}
+{
+	( <BEGIN> | <FORK> )
+	[ ":" identifier() ( blockItem() )* ]
+	( statement() )*
+	(<END> | <JOIN> )
+}
+
+void blockItem():
+{}
+{
+	parameterDecl()	
+| 	variableDecl()
+}
+  
+void functionDecl():
+{}
+{
+	<FUNCTION> {begin(STATEMENT);} function() {end(STATEMENT);}
+}
+
+void taskDecl():
+{}
+{
+	<TASK> {begin(STATEMENT);} task() {end(STATEMENT);}
+}
+
+void function() :
+{
+	String range;
+	Identifier name;
+	Token end ;
+}
+{
+	variableModifier() range = bitRange() name = identifier()
+	[ "(" skipTo(RPAREN) ]
+	";"
+	{
+		beginOutlineElement(name, "function#" + range);
+	}
+	end = skipTo( ENDFUNCTION )
+	{		
+		endOutlineElement(end, name.image, "function#" + range);
+		addCollapsible(name.beginLine, end.endLine);				
+	}
+}
+
+void task() :
+{
+	Identifier name;
+	Token end ;
+}
+{
+	name = identifier() ";"
+	{
+		beginOutlineElement(name, "task#");
+	}
+	end = skipTo( ENDTASK )
+	{	
+		endOutlineElement(end, name.image, "task#");
+		addCollapsible(name.beginLine, end.endLine);
+	}
+}
+
+void generate() :
+{}
+{
+	<GENERATE>
+	( generateItem() )*
+	<ENDGENERATE>
+}
+
+void generateItem() :
+{
+	Identifier block = null;
+}
+{
+	moduleOrGenerateItem()
+|  generateIfStatement()
+|  generateCaseStatement()
+|  generateForStatement()
+|	(
+		<BEGIN> [ ":" block = identifier() ]
+		{
+			if (block != null)
+				beginGenerateBlock(block);
+		}
+		( generateItem() )*
+		<END> 
+		{
+			if (block != null) {
+				endGenerateBlock(block);
+			}
+		}
+	)
+}
+
+void generateIfStatement() :
+{}
+{
+	<IF> "(" constantExpression() ")" generateItem()
+	[ LOOKAHEAD(1) <ELSE> generateItem() ]
+}
+
+void generateCaseStatement() :
+{}
+{
+	<CASE> "(" constantExpression() ")"
+	(
+		constantExpression() ("," constantExpression())* ":" generateItem()
+	| 	"default" ":" generateItem()
+	)+
+	<ENDCASE>
+}
+
+void generateForStatement() :
+{}
+{
+	<FOR> "("
+	lvalue() "=" expression() ";"
+	expression() ";"
+	lvalue() "=" expression() ")"
+	generateItem()
+}
+
+
+String netType() :
+{}
+{
+	( "wire" | < NET_TYPE > | < SUPPLY > )
+	{
+		return token.image;
+	}
+}
+
+void strength() :
+{}
+{
+	"(" ( < STRENGTH > | < SUPPLY > ) ["," ( < STRENGTH > | < SUPPLY > ) ]")"
+}
+
+int lvalue() :
+{
+	int width;
+	Identifier ident;
+}
+{
+	ident = complexIdentifier()
+	{
+		variableAssignment(ident);
+		return ident.getWidth();
+	}
+|	width = lvalueConcatenation()
+	{
+		return width;
+	}
+}
+
+int lvalueConcatenation() :
+{
+	int width;
+	int ret;
+}
+{
+	"{" ret = lvalue()
+	(	","
+		width = lvalue()
+		{
+			if (width == 0 || ret == 0)
+				ret = 0;
+			else
+				ret += width;
+		}
+	)*
+	"}"
+	{
+		return ret;
+	}
+}
+
+Identifier identifier() :
+{
+	Token token;
+}
+{
+	token = < IDENT >
+	{
+		return new Identifier(token);
+	}
+}
+
+Expression constantExpression() :
+{
+	Expression ret;
+}
+{
+	ret = expression()
+	{
+		return ret;
+	}
+}
+    
+Expression expression() :
+{
+	Expression ret, exp1, exp2;
+	Token op;
+}
+{
+	ret = logicalOrExpresstion()
+	[
+		op = "?" exp1 = expression() ":" exp2 = expression()
+		{
+			ret = operator(ret, op, exp1, exp2);
+		}
+	]
+	{
+	 	return ret;
+	}
+}
+
+Expression logicalOrExpresstion() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = logicalAndExpresstion()
+	( op = "||" exp = logicalAndExpresstion() { ret = operator(ret, op, exp); } )*
+	{
+		return ret;
+	}
+}
+
+Expression logicalAndExpresstion() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = bitOrExpresstion()
+	( op = "&&" exp = bitOrExpresstion() { ret = operator(ret, op, exp); } )*
+	{
+		return ret;
+	}
+}
+
+Expression bitOrExpresstion() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = bitAndExpresstion()
+	( op = "|" exp = bitAndExpresstion() { ret = operator(ret, op, exp); } )*
+	{
+		return ret;
+	}
+}
+
+Expression bitAndExpresstion() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = equalityExpression()
+	(
+		(op = "&" | op = "^" | op = "~^" | op = "^~")
+		exp = equalityExpression() { ret = operator(ret, op, exp); }
+	)*
+	{
+		return ret;
+	}
+}
+
+Expression equalityExpression() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = relationalExpression()
+	(
+		(op = "==" | op = "===" | op = "!=" | op = "!==")
+		exp = relationalExpression() { ret = operator(ret, op, exp); }
+	)*
+	{
+		return ret;
+	}
+}
+
+Expression relationalExpression() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = shiftExpression()
+	(
+		(op = "<" | op = "<=" | op = ">" | op = ">=")
+		exp = shiftExpression() { ret = operator(ret, op, exp); }
+	)*
+	{
+		return ret;
+	}
+}
+
+Expression shiftExpression() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = addExpression()
+	(
+		(op = "<<" | op = ">>" | op = "<<<" | op = ">>>")
+		exp = addExpression() { ret = operator(ret, op, exp); }
+	)*
+	{
+		return ret;
+	}
+}
+
+Expression addExpression() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = multiplyExpression()
+	(
+		(op = "+" | op = "-" )
+		exp = multiplyExpression() { ret = operator(ret, op, exp); }
+	)*
+	{
+		return ret;
+	}
+}
+
+Expression multiplyExpression() :
+{
+	Expression ret, exp;
+	Token op;
+}
+{
+	ret = unaryExpression()
+	(
+		(op = "*" | op = "/" | op = "%" | op = "**")
+		exp = unaryExpression() { ret = operator(ret, op, exp); }
+	)*
+	{
+		return ret;
+	}
+}
+
+Expression unaryExpression() :
+{
+	Expression ret, exp;
+	Token op = null;
+}
+{
+	[ op = unaryOperator() ]
+	ret = primary()
+	{
+		if (op != null)
+			return operator(ret, op);
+		else
+			return ret;
+	}
+}
+
+Expression primary() :
+{
+	Expression ret;
+	Identifier ident;
+	boolean isFunc = false;
+}
+{
+	(
+		ret = number()
+	|  ident = complexIdentifier() [ functionArgs() {isFunc = true; }]
+		{
+			if (isFunc) {
+				ret = functionReference(ident);
+			} else {
+				ret = variableReference(ident);
+			}
+		}
+	|	< SYSTEM_IDENT > (<SYSTEM_IDENT >)* [ LOOKAHEAD(2) functionArgs()]
+		{
+			ret = new Expression();
+		}
+	|	ret = concatenation()
+	|	"(" ret = minTypMaxExpresstion() ")"
+	)
+	{
+	 	if (ret == null)
+	 		return new Expression();
+		else
+			return ret;
+	}
+}
+
+Identifier complexIdentifier() :
+{
+	Identifier ident, concat;
+}
+{
+	ident = identifier() bitOrAry(ident)
+	(
+		"." concat = identifier() bitOrAry(concat)
+		{
+			ident.endLine = concat.endLine;
+			ident.endColumn = concat.endColumn;
+			ident.image += "." + concat.image;
+			ident.setWidth(concat.getWidth());
+			ident.setDimension(concat.getDimension());
+		}
+	)*
+	{
+		return ident;
+	}
+}
+
+Expression minTypMaxExpresstion() :
+{
+	Expression exp;
+}
+{
+	exp = expression()
+	[
+		":" expression()
+		":" expression()
+	]
+	{
+		return exp;
+	}
+}
+
+void bitOrAry(Identifier ident) :
+{
+	int width = 0;
+	int dim = 0;
+	Expression msb, lsb;
+	Token token;
+}
+{
+  	(
+		"[" msb = expression() { width = 1;  dim++; }
+		[
+			( token = ":" | token = "+:" | token = "-:" ) lsb = expression()
+			{
+				if (token.image.equals(":")) {
+					if (msb.isValid() && lsb.isValid())
+						width = msb.intValue() - lsb.intValue() + 1;
+					else
+						width = 0;
+				} else {
+					if (lsb.isValid())
+						width = lsb.intValue();
+					else
+						width = 0;
+				}
+			}
+		]
+		"]"
+	)*
+	{
+		ident.setWidth(width);
+		ident.setDimension(dim);
+	}
+}
+
+String bitRange() :
+{
+	Expression msb, lsb;
+}
+{
+	[
+		"[" msb = expression()  ":" lsb = expression() "]" 
+		{
+			if (msb.isValid() && lsb.isValid())
+				return "[" + msb.intValue() + ":" + lsb.intValue() + "]";
+			else
+				return "";
+		}
+	]
+	{
+		return "";
+	}
+}
+
+Token unaryOperator() :
+{}
+{
+	( "~" | "+" |  "-" |  "!" |  "&" |  "~&" | "|" |  "~|" |  "^" |  "~^" |  "^~" )
+	{
+		return token;
+	}
+}
+
+Expression concatenation() :
+{
+	int width;
+	int value;
+	boolean valid;
+	boolean assignable;
+	Expression exp;
+	Expression refs = new Expression();
+}
+{
+	"{" exp = expression()
+	{
+		width = exp.getWidth();
+		value = exp.intValue();
+		valid = exp.isValid();
+		assignable = exp.isAssignable();
+		refs.addReference(exp);
+	}
+	[
+		( "," exp = expression()
+		{
+			if (width == 0 || exp.getWidth() == 0)
+				width = 0;
+			else
+				width += exp.getWidth();
+			value = (value << width) | exp.intValue();
+			valid = valid && exp.isValid();
+			assignable = assignable && exp.isAssignable();
+			refs.addReference(exp);
+		}
+		)+
+	|	"{" exp = expression() "}"
+		{
+			width = valid ? value : 0;
+			value = exp.intValue();
+			valid = exp.isValid();
+			assignable = exp.isAssignable();
+			refs = exp;
+		}
+	]
+	"}"
+	{
+		Expression ret = new Expression(width);
+		if (valid)
+			ret.setValue(value);
+		ret.setAssignable(assignable);
+		ret.addReference(refs);
+		return ret;
+	}
+}
+
+void functionArgs():
+{}
+{
+	"(" expression() ( "," expression() )* ")"
+}
+
+Expression number() :
+{
+	Expression ret = new Expression();
+}
+{
+	(
+	< INTEGER_LITERAL > { ret.parseIntegerLiteral(token.image); }
+	|  < REAL_LITERAL > { ret.parseRealLiteral(token.image); }
+	|  < STRING_LITERAL > { ret.parseStringLiteral(token.image); }
+	)
+	{
+		return ret;
+	}	
+}
+
+
+JAVACODE
+void unexpectedEof(Token token)
+{
+	ParseException ex = new ParseException("unexpected EOF");
+	ex.currentToken = token;
+	throw ex;
+}
+
+JAVACODE
+Token skipTo(int skip)
+{
+	Token current = token;
+	Token token ;
+	StringBuffer image = new StringBuffer();
+
+	for(;;)
+	{
+		token = getToken(1);
+		if (token.kind == EOF)
+			unexpectedEof(current);
+		if (token.kind == skip)
+		{
+			getNextToken();
+			break ;
+		}
+
+		image.append(token.image);
+		getNextToken();
+	}
+	token.image = image.toString();
+	return token ;
+}
+

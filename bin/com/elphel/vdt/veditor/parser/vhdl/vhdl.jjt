@@ -1,0 +1,3443 @@
+
+/**
+ *
+ * VHDL-93, VHDL-AMS grammar for JavaCC 
+ * (c) 1997 Christoph Grimm
+ * 
+ * EMail: grimm@ti.informatik.uni-frankfurt.de
+ * Address:
+ * Christoph Grimm
+ * J. W. Goethe-University Frankfurt
+ * Robert-Mayer-Strasse 11-15
+ * 60054 Frankfurt
+ * Germany
+ *
+ *
+ * By using this file, I agree with the following:
+ * -----------------------------------------------
+ *
+ * 1. This grammar is free for evaluation purposes.
+ *
+ * 2. You may use and modify it, but when distributing is, you must also
+ *    include the original files and copyright notes from me.
+ *
+ * 3. For commercial use of derived works contact me.
+ *   
+ * 4. The grammar is NOT optimized for speed. The aim is to keep the grammar 
+ *    similar to the original productions in the LRM.
+ *
+ * 5. Don't complain about errors - report them, maybe with fixes to me.
+ *
+ */
+
+
+options
+{
+  // DEBUG_PARSER = true;
+  // CHOICE_AMBIGUITY_CHECK=3;
+  IGNORE_CASE=false;
+  NODE_SCOPE_HOOK=true;
+  MULTI=true;
+}
+
+ 
+
+
+/**
+ * The parser is instanciated in the file vhdl.java
+ */
+PARSER_BEGIN(VhdlParserCore)
+
+package com.elphel.vdt.veditor.parser.vhdl;
+
+@SuppressWarnings("all")
+
+public class VhdlParserCore
+{
+  /**
+   * Called, whenever a new node in jjtree is generated.
+   * - store first token of the production.
+   * - check, if production is supported in subsets that are to be
+   *   checked.
+   */
+   void jjtreeOpenNodeScope(Node n)
+  {
+    
+    ((SimpleNode) n).setFirstToken(getToken(1));
+    ((SimpleNode) n).setParser(this);
+  }
+
+  /**
+   * Called, whenever a node in jjtree is closed.
+   */
+   void jjtreeCloseNodeScope(Node n)
+  {
+    ((SimpleNode) n).setLastToken(getToken(0)); 
+  }
+  
+  public ErrorHandler getErrorHandler(){
+  	return errs;
+  }
+    
+  public SymbolTable getSymbolTable(){
+  	return m_SymbolTable;
+  }
+  
+  public void setSymbolTable(SymbolTable symbolTable){
+    m_SymbolTable=symbolTable;
+  }
+  
+  ErrorHandler errs = new ErrorHandler(this);
+  SymbolTable m_SymbolTable=null;
+}
+
+PARSER_END(VhdlParserCore)
+
+
+SKIP :
+{
+    " "
+  | "\n"
+  | "\r"
+  | "\t"
+  | "\f"
+}
+
+
+SPECIAL_TOKEN :
+{
+  <COMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+}
+
+
+/** 
+ * Section 13: Lexical elements
+ * with extensions from IEEE 1076.1
+ */
+TOKEN [IGNORE_CASE] :
+{
+    <ABS:          "abs">
+  | <ACCESS:       "access">
+  | <ACROSS:       "across">
+  | <AFTER:        "after">
+  | <ALIAS:        "alias">
+  | <ALL:          "all">
+  | <AND:          "and">
+  | <ARCHITECTURE: "architecture">
+  | <ARRAY:        "array">
+  | <ASSERT:       "assert">
+  | <ATTRIBUTE:    "attribute">
+  | <BEGIN:        "begin">
+  | <BLOCK:        "block">
+  | <BODY:         "body">
+  | <BREAK:        "break">
+  | <BUFFER:       "buffer">
+  | <BUS:          "bus">
+  | <CASE:         "case">
+  | <COMPONENT:    "component">
+  | <CONFIGURATION: "configuration">
+  | <CONSTANT:      "constant">
+  | <DISCONNECT:    "disconnect">
+  | <DOWNTO:        "downto">
+  | <ELSE:          "else">
+  | <ELSIF:         "elsif">
+  | <END:           "end">
+  | <ENTITY:        "entity">
+  | <EXIT:          "exit">
+  | <FILE:          "file">
+  | <FOR:           "for">
+  | <FUNCTION:      "function">
+  | <GENERATE:      "generate">
+  | <GENERIC:       "generic">
+  | <GROUP:         "group">
+  | <GUARDED:       "guarded">
+  | <IF:            "if">
+  | <IMPURE:        "impure">
+  | <IN:            "in">
+  | <INERTIAL:      "inertial">
+  | <INOUT:         "inout">
+  | <IS:            "is">
+  | <LABEL:         "label">
+  | <LIBRARY:       "library">
+  | <LINKAGE:       "linkage">
+  | <LITERAL:       "literal">
+  | <LOOP:          "loop">
+  | <MAP:           "map">
+  | <MOD:           "mod">
+  | <NAND:          "nand">
+  | <NATURE:        "nature">
+  | <NEW:           "new">
+  | <NEXT:          "next">
+  | <NOISE:         "noise">
+  | <NOR:           "nor">
+  | <NOT:           "not">
+  | <NULL:          "null">
+  | <OF:            "of">
+  | <ON:            "on">
+  | <OPEN:          "open">
+  | <OR:            "or">
+  | <OTHERS:        "others">
+  | <OUT:           "out">
+  | <PACKAGE:       "package">
+  | <PORT:          "port">
+  | <POSTPONED:     "postponed">
+  | <PROCEDURAL:    "procedural">
+  | <PROCEDURE:     "procedure">
+  | <PROCESS:       "process">
+  | <PROTECTED:     "protected">
+  | <PURE:          "pure">
+  | <QUANTITY:      "quantity">
+  | <RANGE:         "range">
+  | <RECORD:        "record">
+  | <REGISTER:      "register">
+  | <REJECT:        "reject">
+  | <REM:           "rem">
+  | <REPORT:        "report">
+  | <RETURN:        "return">
+  | <ROL:           "rol">
+  | <ROR:           "ror">
+  | <SELECT:        "select">
+  | <SEVERITY:      "severity">
+  | <SIGNAL:        "signal">
+  | <SHARED:        "shared">
+  | <SLA:           "sla">
+  | <SLL:           "sll">
+  | <SPECTRUM:      "spectrum">
+  | <SRA:           "sra">
+  | <SRL:           "srl">
+  | <SUBNATURE:     "subnature">
+  | <SUBTYPE:       "subtype">
+  | <TERMINAL:      "terminal">
+  | <THEN:          "then">
+  | <THROUGH:       "through">
+  | <TO:            "to">
+  | <TOLERANCE:     "tolerance">
+  | <TRANSPORT:     "transport">
+  | <TYPE:          "type">
+  | <UNAFFECTED:    "unaffected">
+  | <UNITS:         "units">
+  | <UNTIL:         "until">
+  | <USE:           "use">
+  | <VARIABLE:      "variable">
+  | <WAIT:          "wait">
+  | <WHEN:          "when">
+  | <WHILE:         "while">
+  | <WITH:          "with">
+  | <XNOR:          "xnor">
+  | <XOR:           "xor">
+}
+
+
+
+TOKEN :
+{
+    <#upper_case_letter:               ["A"-"Z"]>
+  | <#lower_case_letter:               ["a"-"z"]>
+  | <#digit:                           ["0"-"9"]>
+  | <#extended_digit:                  ["0"-"9","A"-"F","a"-"f"]>
+  | <#special_character:               ["#","&","'","(",")","*","+",",","-",
+                                        ".","/",":",";","<","=",">","[","]",
+                                        "_","|"]>
+  | <#other_special_character:         ["!","$","%","@","?","^","`","{","}","~",
+                                        "\\"]>
+  | <#format_effector:                 ["\n","\t"]>
+  | <#base_specifier:                  ["B","O","X","b","o","x"]>
+  | <#underline:                       "_">
+  | <#letter:                          ["a"-"z","A"-"Z"]>
+  | <#letter_or_digit:                 ["a"-"z","A"-"Z","0"-"9"]>
+  | <#integer: <digit> (("_")? <digit>)*>
+  | <#base: <integer>>
+  | <#based_integer: (("_")? <extended_digit>)*>
+  | <based_literal: <base> "#" <based_integer> ("." <based_integer>)? "#" (<exponent>)?>
+  | <#basic_character: (<basic_graphic_character>|<format_effector>)>
+  | <#basic_graphic_character: (["A"-"Z"]|<digit>|<special_character>|" ")>
+  | <basic_identifier: <letter> ( ("_")? <letter_or_digit> )*>
+  | <bit_string_literal: <base_specifier> "\"" <bit_value> "\"">
+  | <#bit_value: <extended_digit> ( ("_")? <extended_digit>)*>
+  | <character_literal:  "'" (<graphic_character>|"\"") "'">
+  | <decimal_literal: <integer> ( "." <integer>)? ( <exponent> )?>
+  | <#exponent: ("E" ("+")? <integer>) | ("E" "-" <integer>)>
+  | <extended_identifier: "\\" <graphic_character> ( <graphic_character> )* "\\">
+  | <#graphic_character: (<basic_graphic_character>
+                          | <lower_case_letter>
+                          | <other_special_character>)>
+  | <string_literal: "\"" (<graphic_character>|"\"\"")* "\"">
+
+  | <EXP: "**">
+  | <MUL: "*">
+  | <DIV: "/">
+  | <ADD: "+">
+  | <SUB: "-">
+  | <CONCAT: "&">
+  | <EQ:  "=">
+  | <NEQ: "/=">
+  | <GE:  ">=">
+  | <LE:  "<=">
+  | <GT:  ">">
+  | <LO:  "<">
+  | <SEMICOLON: ";">
+  | <COLON: ":">
+  | <ASSIGN: ":=">
+  | <RARROW: "=>">
+}
+
+
+
+
+void abstract_literal() #void :
+{}
+{
+    <decimal_literal>
+  | <based_literal>
+}
+
+
+
+void access_type_definition() #void :
+{}
+{
+  <ACCESS> subtype_indication()
+}
+
+
+
+void actual_designator() #void :
+{}
+{
+    LOOKAHEAD(expression()) 
+    expression()
+  | LOOKAHEAD(signal_name())
+    signal_name()
+  | LOOKAHEAD(variable_name())
+    variable_name()
+  | LOOKAHEAD(file_name())
+    file_name()
+  | <OPEN>
+
+  // 1076.1 extensions:
+  | LOOKAHEAD(terminal_name())
+    terminal_name()
+  | quantity_name()
+}
+
+
+
+void actual_parameter_part() #void :
+{}
+{
+  parameter_association_list()
+}
+
+
+void actual_part() :
+{}
+{
+    LOOKAHEAD( function_name() "(" actual_designator() ")")
+    function_name() "(" actual_designator() ")"
+  | LOOKAHEAD( type_mark() "(" actual_designator() ")")
+    type_mark() "(" actual_designator() ")"
+  | actual_designator()
+}
+
+
+int adding_operator() #void :
+{}
+{
+    <ADD>               { return ADD; }
+  | <SUB>               { return SUB; }
+  | <CONCAT>            { return CONCAT; }
+}
+
+
+void aggregate() :
+{}
+{
+  "(" element_association()  ("," element_association())*  ")"
+}    
+
+void alias_declaration() :
+{}
+{
+  <ALIAS> alias_designator()
+   [ ":" subtype_indication() ] <IS> name() signature() ";"
+}
+
+
+void alias_designator() :
+{}
+{
+    identifier()
+  | <character_literal>
+  | operator_symbol()
+}
+
+void allocator() :
+{}
+{
+  <NEW>
+  (
+      LOOKAHEAD( type_mark() "'")
+      qualified_expression()
+    | subtype_indication()
+  )
+}
+
+
+
+void architecture_body() :
+{}
+{
+  <ARCHITECTURE> identifier() <OF> entity_name() <IS> { jjtThis.newBlock(); }
+    architecture_declarative_part()
+  <BEGIN>
+    architecture_statement_part()
+  <END> [ <ARCHITECTURE> ] [ architecture_simple_name() ] ";"
+
+  {
+    jjtThis.endBlock();
+    jjtThis.Check();
+  }
+}
+
+
+
+void architecture_declarative_part() :
+{}
+{
+  ( block_declarative_item() )*
+}
+
+void architecture_statement_part() :
+{}
+{
+  ( architecture_statement() )*
+}
+
+/**
+ *  This rule also contains the concurrent statements.
+ */
+void architecture_statement() #void :
+{}
+{
+  // 
+  // lookahead would really be annoying here. Therefore I have
+  // moved the concurrent statement into this rule.
+  // concurrent_statements:
+  //
+
+  try {
+
+    LOOKAHEAD([block_label() ":"] <BLOCK>)
+    block_statement()
+  | LOOKAHEAD([process_label() ":"] [<POSTPONED>] <PROCESS>)
+    process_statement()
+  | LOOKAHEAD([label() ":"] [<POSTPONED>] procedure_call() ";")
+    concurrent_procedure_call_statement()
+  | LOOKAHEAD([label() ":"] [<POSTPONED>] <ASSERT>)
+    concurrent_assertion_statement()
+  | LOOKAHEAD([label() ":"] [<POSTPONED>] conditional_signal_assignment()|
+              [label() ":"] [<POSTPONED>] selected_signal_assignment())
+    concurrent_signal_assignment_statement()
+  | LOOKAHEAD(instantiation_label() ":" instantiated_unit() )
+    component_instantiation_statement()
+  | LOOKAHEAD(generate_statement())
+    generate_statement()
+
+  /** 1076.1 extensions: */
+  | LOOKAHEAD(concurrent_break_statement())
+    concurrent_break_statement()
+  | simultaneous_statement()
+
+  }
+
+  /** Error handling: Skip until next semicolon */
+  catch(ParseException e)
+  {
+    error_skipto(SEMICOLON, "syntax error in statement");
+  }
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void array_nature_definition() #void  :
+{}
+{
+    LOOKAHEAD(<ARRAY> "(" index_subtype_definition() )
+    unconstrained_nature_definition()
+  | constrained_nature_definition()
+}
+
+/**
+  * 1076.1 extension:
+  */
+void unconstrained_nature_definition() :
+{}
+{
+  <ARRAY> "(" index_subtype_definition() ("," index_subtype_definition())* ")" 
+  <OF> subnature_indication()
+}
+
+/**
+  * 1076.1 extension:
+  */
+void constrained_nature_definition() :
+{}
+{
+  <ARRAY> index_constraint() <OF> subnature_indication()
+}
+
+
+void array_type_definition() #void:
+{}
+{
+    LOOKAHEAD(unconstrained_array_definition())
+    unconstrained_array_definition()
+  | constrained_array_definition()
+}
+
+void assertion() :
+{}
+{
+  <ASSERT> condition()
+  [ <REPORT> expression() ]
+  [ <SEVERITY> expression() ]
+}
+
+
+void assertion_statement() :
+{}
+{
+  [ label() ":" ] assertion() ";"
+}
+
+
+
+void association_element() :
+{}
+{
+  [ LOOKAHEAD( formal_part() "=>" ) formal_part() "=>" ]
+  actual_part()
+}
+
+void association_list() :
+{}
+{
+  association_element() ( "," association_element() )*
+}
+
+
+void attribute_declaration() :
+{}
+{
+  <ATTRIBUTE> identifier() ":" type_mark() ";"
+}
+
+
+void attribute_designator() #void :
+{}
+{
+  attribute_simple_name()
+}
+
+
+void attribute_name() :
+{}
+{
+  prefix() signature() "'" attribute_designator() [ "(" expression() ("," expression())* ")" ]
+}
+
+
+void attribute_specification() :
+{}
+{
+  <ATTRIBUTE> attribute_designator() <OF>
+  entity_specification() <IS> expression() ";"
+}
+
+void base_unit_declaration() #void :
+{}
+{
+  identifier() ";"
+}
+
+
+
+void binding_indication() :
+{}
+{
+  [ <USE> entity_aspect() ]
+  [ generic_map_aspect() ]
+  [ port_map_aspect() ]
+}
+
+void block_configuration() :
+{}
+{
+  <FOR> block_specification()
+                ( use_clause() )*
+                ( configuration_item() )*
+  <END> <FOR> ";"
+}
+
+void block_declarative_item() #void :
+{}
+{
+  try {
+
+    LOOKAHEAD(subprogram_declaration())
+    subprogram_declaration()
+  | subprogram_body()
+  | type_declaration()
+  | subtype_declaration()
+  | constant_declaration()
+  | signal_declaration()
+  | shared_variable_declaration()
+  | file_declaration()
+  | alias_declaration()
+  | component_declaration()
+  | LOOKAHEAD(attribute_declaration())
+    attribute_declaration()
+  | attribute_specification()
+  | configuration_specification()
+  | disconnection_specification()
+  | use_clause()
+  | LOOKAHEAD(<GROUP> identifier() <IS>)
+    group_template_declaration()
+  | group_declaration()
+
+  /** 1076.1 - Extensions: */
+  | nature_declaration()
+  | subnature_declaration()
+  | quantity_declaration()
+  | terminal_declaration()
+
+  }
+
+  // Error handling: skip until next semicolon
+  catch (ParseException e)
+  {
+    error_skipto(SEMICOLON, "syntax error in declarative item");
+  }
+}
+
+
+void block_declarative_part() :
+{}
+{
+  ( block_declarative_item() )*
+}
+
+void block_header() :
+{}
+{
+  [ generic_clause()  [ generic_map_aspect() ";" ] ]
+  [ port_clause()     [ port_map_aspect() ";"    ] ]
+}
+
+void block_specification() :
+{}
+{
+    LOOKAHEAD(architecture_name())
+    architecture_name()
+  | LOOKAHEAD(block_statement_label())
+    block_statement_label()
+  | LOOKAHEAD(generate_statement_label())
+    generate_statement_label() [ "(" index_specification() ")" ]
+}
+
+
+void block_statement() :
+{}
+{
+  block_label() ":"
+                <BLOCK> [ "(" guard_expression() ")" ] [ <IS> ]
+                        block_header()
+                        block_declarative_part()
+                <BEGIN>
+                        block_statement_part()
+                <END> <BLOCK> [ block_label() ] ";"
+}
+
+
+void block_statement_part() :
+{}
+{
+  (architecture_statement() )*
+}
+
+/**
+ * Section 8.14: Break statement
+ * 1076.1 extension:
+ */
+void break_statement() :
+{}
+{
+  [label()  ":"] <BREAK> [break_list()] [<WHEN> condition() ] ";"
+}
+
+/**
+ * 1076.1 extension:
+ */
+void break_list() :
+{}
+{
+  break_element() ("," break_element() )*
+}
+
+/**
+ * 1076.1 extension:
+ */
+void break_element() :
+{}
+{
+  [selector_clause() ] quantity_name() "=>" expression()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void selector_clause() #void :
+{}
+{
+  <FOR> quantity_name() <USE>
+}
+
+void case_statement() :
+{}
+{
+  [ case_label() ":" ]
+                <CASE> expression() <IS>
+                        case_statement_alternative()
+                        ( case_statement_alternative() )*
+                <END> <CASE> [ case_label() ] ";"
+}
+
+
+void case_statement_alternative() :
+{}
+{
+  <WHEN> choices() "=>"
+                sequence_of_statements()
+}
+
+
+void choice() :
+{}
+{
+  /** Dirty Solution */
+    LOOKAHEAD( discrete_range()  ("=>" | "|" | ";" | ",") )
+    discrete_range()
+  | LOOKAHEAD( simple_expression()  ("=>" | "|" | ";" | ",") )
+    simple_expression()
+  | element_simple_name()
+  | <OTHERS>
+}
+
+
+void choices() :
+{}
+{
+  choice() ( "|" choice() )*
+}
+
+
+void component_configuration() :
+{}
+{
+  <FOR> component_specification()
+                [ binding_indication() ";" ]
+                [ block_configuration() ]
+  <END> <FOR> ";"
+}
+
+void component_declaration() :
+{}
+{
+  <COMPONENT> identifier() [ <IS> ]
+      [ local_generic_clause() ]
+      [ local_port_clause() ]
+  <END> <COMPONENT> [ component_simple_name() ] ";"
+}
+
+void component_instantiation_statement() :
+{}
+{
+  instantiation_label() ":"
+         instantiated_unit()
+         [ generic_map_aspect() ]
+         [ port_map_aspect() ] ";"
+}
+
+
+// 1076.1 - extension:
+void composite_nature_definition() #void :
+{}
+{
+    array_nature_definition()
+  | record_nature_definition()
+}
+
+void component_specification() :
+{}
+{
+  instantiation_list() ":" component_name()
+}
+
+
+void composite_type_definition() :
+{}
+{
+    array_type_definition()
+  | record_type_definition()
+}
+
+
+void concurrent_assertion_statement() :
+{}
+{
+  [ label() ":" ] [ <POSTPONED> ] assertion() ";"
+}
+
+
+void concurrent_procedure_call_statement() :
+{}
+{
+  [ LOOKAHEAD( label() ":") label() ":" ]
+  [ <POSTPONED> ] procedure_call() ";"
+}
+
+void concurrent_signal_assignment_statement() :
+{}
+{
+    [ LOOKAHEAD( label() ":") label() ":" ]
+    [ <POSTPONED> ]
+    ( LOOKAHEAD(  target() "<=" options_() conditional_waveforms() ";") 
+        conditional_signal_assignment() 
+      | selected_signal_assignment() )
+}
+
+
+void condition() #void :
+{}
+{
+  boolean_expression()
+}
+
+
+void condition_clause() #void :
+{}
+{
+  <UNTIL> condition()
+}
+
+
+void conditional_signal_assignment() :
+{}
+{
+  target() "<=" options_() conditional_waveforms() ";"
+}
+
+
+void conditional_waveforms() :
+{}
+{
+  //( waveform() <WHEN> condition() <ELSE> )*
+  //waveform() [ <WHEN> condition() ]
+  waveform()
+    ( LOOKAHEAD( <WHEN> condition() <ELSE>)
+        <WHEN> condition() <ELSE> waveform() )*
+    [ <WHEN> condition() ]
+}
+
+
+void configuration_declaration() :
+{}
+{
+  <CONFIGURATION> identifier() <OF> entity_name() <IS>
+    configuration_declarative_part()
+    block_configuration()
+  <END> [ <CONFIGURATION> ] [ configuration_simple_name() ] ";"
+}
+
+
+void configuration_declarative_item() #void :
+{}
+{
+  try {
+    use_clause()
+  | attribute_specification()
+  | group_declaration()
+  }
+
+  catch(ParseException e)
+  {
+    error_skipto(SEMICOLON, "syntax error in declarative item");
+  }
+}
+
+
+void configuration_declarative_part() :
+{}
+{
+  ( configuration_declarative_item() )*
+}
+
+
+
+void configuration_item() #void :
+{}
+{
+    LOOKAHEAD(block_configuration())
+    block_configuration()
+  | component_configuration()
+}
+
+void configuration_specification() :
+{}
+{
+  <FOR> component_specification() binding_indication() ";"
+}
+
+void constant_declaration() :
+{}
+{
+  <CONSTANT> identifier_list() ":" subtype_indication()
+    [ ":=" expression() ] ";"
+}
+
+
+
+void constrained_array_definition() :
+{}
+{
+  <ARRAY> index_constraint() <OF> element_subtype_indication()
+}
+
+
+void constraint() #void :
+{}
+{
+    range_constraint()
+  | index_constraint()
+}
+
+void context_clause() :
+{}
+{
+  ( context_item() )*
+}
+
+void context_item() #void :
+{}
+{
+    library_clause()
+  | use_clause()
+}
+
+
+/** 
+ * Section 4:
+ * Declarations
+ */
+
+
+/**
+ * 1076.1 extension:
+ */
+void terminal_declaration() :
+{}
+{
+  <TERMINAL> identifier_list() ":" subnature_indication() ";"
+}
+
+void terminal_aspect() :
+{}
+{
+  plus_terminal_name() [ <TO> minus_terminal_name() ]
+}
+
+
+void delay_mechanism() :
+{}
+{
+    <TRANSPORT>
+  | [ <REJECT> time_expression() ] <INERTIAL>
+}
+
+ASTdesign_file design_file() :
+{}
+{
+  ( design_unit() )*
+  { return jjtThis; }
+}
+
+
+void design_unit() :
+{}
+{
+  context_clause() library_unit()
+}
+
+void designator() #void :
+{}
+{
+    identifier()
+  | operator_symbol()
+}
+
+void direction() :
+{}
+{
+  <TO> | <DOWNTO>
+}
+
+
+void disconnection_specification() :
+{}
+{
+  <DISCONNECT> guarded_signal_specification() <AFTER>
+    time_expression() ";"
+}
+
+void discrete_range() #void  :
+{}
+{
+    LOOKAHEAD(simple_expression() direction() )
+    range()
+  | LOOKAHEAD( discrete_subtype_indication() )
+    discrete_subtype_indication()
+  | range() 
+}
+
+
+void element_association() #void :
+{}
+{
+  [ LOOKAHEAD(choices() "=>") choices() "=>" ]
+  expression()
+}
+
+
+void element_declaration() :
+{}
+{
+  identifier_list() ":" element_subtype_definition() ";"
+}
+
+
+void element_subtype_definition() #void :
+{}
+{
+  subtype_indication()
+}
+
+
+void entity_aspect() :
+{}
+{
+    <ENTITY> entity_name()
+    [ LOOKAHEAD("(" architecture_identifier() ")")
+    "(" architecture_identifier() ")" ]
+  | <CONFIGURATION> configuration_name()
+  | <OPEN>
+}
+
+/**
+ * Section 5: Specifications
+ */
+int entity_class() #void :
+{}
+{
+    <ENTITY>                    { return ENTITY; }
+  | <ARCHITECTURE>              { return ARCHITECTURE; }
+  | <CONFIGURATION>             { return CONFIGURATION; }
+  | <PROCEDURE>                 { return PROCEDURE; }
+  | <FUNCTION>                  { return FUNCTION; }
+  | <PACKAGE>                   { return PACKAGE; }
+  | <TYPE>                      { return TYPE; }
+  | <SUBTYPE>                   { return SUBTYPE; }
+  | <CONSTANT>                  { return CONSTANT; }
+  | <SIGNAL>                    { return SIGNAL; }
+  | <VARIABLE>                  { return VARIABLE; }
+  | <COMPONENT>                 { return COMPONENT; }
+  | <LABEL>                     { return LABEL; }
+  | <LITERAL>                   { return LITERAL; }
+  | <UNITS>                     { return UNITS; }
+  | <GROUP>                     { return GROUP; }
+  | <FILE>                      { return FILE; }
+
+  /** 1076.1 extensions: */
+  | <SUBNATURE>                 { return SUBNATURE; }
+  | <NATURE>                    { return NATURE; }
+  | <TERMINAL>                  { return TERMINAL; }
+}
+
+
+void entity_class_entry()  :
+{}
+{
+  entity_class() [ "<>" ]
+}
+
+
+void entity_class_entry_list() :
+{}
+{
+  entity_class_entry() ( "," entity_class_entry() )*
+}
+
+
+void entity_declaration() :
+{}
+{
+  <ENTITY> identifier() <IS>                       { jjtThis.newBlock(); }
+          entity_header()
+          entity_declarative_part()
+  [ <BEGIN>
+    entity_statement_part() ]
+  <END> [ <ENTITY> ] [ entity_simple_name() ] ";"
+
+  {
+    jjtThis.Check();
+    jjtThis.endBlock();
+  }
+}
+
+
+void entity_declarative_item() #void :
+{}
+{
+  try {
+    LOOKAHEAD(subprogram_declaration())
+    subprogram_declaration()
+  | subprogram_body()
+  | type_declaration()
+  | subtype_declaration()
+  | constant_declaration()
+  | signal_declaration()
+  | shared_variable_declaration()
+  | file_declaration()
+  | alias_declaration()
+  | LOOKAHEAD(attribute_declaration())
+    attribute_declaration()
+  | attribute_specification()
+  | disconnection_specification()
+  | use_clause()
+  | LOOKAHEAD(<GROUP> identifier() <IS>)
+    group_template_declaration()
+  | group_declaration()
+
+  // 1076.1 - Extensions:
+  | nature_declaration()
+  | subnature_declaration()
+  | terminal_declaration()
+  }
+  catch( ParseException e )
+  {
+    error_skipto(SEMICOLON, "syntax error in declarative item");
+  }
+}
+
+/**
+ * 4.8: Nature Declaration
+ * 1076.1 extension
+ */
+void nature_declaration() :
+{}
+{
+  <NATURE> identifier() <IS> nature_definition() ";"
+}
+
+/**
+ * 1076.1 extension
+ */
+void nature_definition() #void :
+{}
+{
+    scalar_nature_definition()
+  | composite_nature_definition()
+}
+
+void subnature_declaration() :
+{}
+{
+  <SUBNATURE> identifier() <IS> subnature_indication() ";"
+}
+
+
+void subnature_indication() :
+{}
+{
+  nature_mark() [index_constraint() ] 
+  [ <TOLERANCE> string_expression() <ACROSS> string_expression() <THROUGH>]
+}
+
+void nature_mark() #void :
+{}
+{
+    LOOKAHEAD(nature_name())
+    nature_name() 
+  | LOOKAHEAD(subnature_name())
+    subnature_name()
+}
+
+void entity_declarative_part() :
+{}
+{
+  ( entity_declarative_item() )*
+}
+
+void entity_designator() :
+{}
+{
+  entity_tag() signature()
+}
+
+
+
+void entity_header() :
+{}
+{
+  [ formal_generic_clause() ]
+  [ formal_port_clause() ]
+}
+
+
+void entity_name_list() :
+{}
+{
+  entity_designator() ( "," entity_designator() )*
+  | <OTHERS>
+  | <ALL>
+}
+
+
+void entity_specification() :
+{}
+{
+        entity_name_list() ":" entity_class()
+}
+
+
+void entity_statement() #void :
+{}
+{   LOOKAHEAD( concurrent_assertion_statement() )
+    concurrent_assertion_statement()
+  | LOOKAHEAD([process_label() ":"] [<POSTPONED>] <PROCESS>)
+    passive_process_statement()
+  | passive_concurrent_procedure_call_statement()
+}
+
+
+void entity_statement_part() :
+{}
+{
+  ( entity_statement() )*
+}
+
+void entity_tag() :
+{}
+{
+    simple_name()
+  | <character_literal>
+  | operator_symbol()
+}
+
+
+void enumeration_literal() :
+{}
+{
+  <character_literal>
+  | identifier()
+}
+
+
+
+void enumeration_type_definition() :
+{}
+{
+  "(" enumeration_literal() ( "," enumeration_literal())* ")"
+}
+
+
+void exit_statement() :
+{}
+{
+  [ label() ":" ] <EXIT> [ loop_label() ]
+    [ <WHEN> condition() ] ";"
+}
+
+void expression() #void :
+{ int op; }
+{
+/**  relation() (
+ *   ( <AND> relation() )* |
+ *    ( <OR> relation() )*  |
+ *    ( <XOR> relation() )* |
+ *    [ <NAND> relation() ] |
+ *    [ <NOR> relation() ]  |
+ *    ( <XNOR> relation() )*
+ *  )
+ */
+  relation() 
+  ( LOOKAHEAD(1) op=logical_operator() relation()
+  #relation(2) )*
+
+}
+
+
+void factor() #void :
+{}
+{
+    <ABS> primary()
+  | <NOT> primary()
+  | primary() [ LOOKAHEAD("**" primary() ) <EXP> primary() #factor(2) ]
+}
+
+
+void file_declaration() :
+{}
+{
+  <FILE> identifier_list() ":" subtype_indication()
+     [ file_open_information() ] ";"
+}
+
+
+void file_logical_name() #void :
+{}
+{
+  string_expression()
+}
+
+
+void file_open_information() :
+{}
+{
+  <OPEN> file_open_kind_expression() <IS> file_logical_name()
+  | <IS> [ <IN> | <OUT> ] file_logical_name()
+}
+
+void file_type_definition() #void :
+{}
+{
+  <FILE> <OF> type_mark()
+}
+
+void floating_type_definition() #void :
+{}
+{
+  range_constraint()
+}
+
+
+void formal_designator() #void :
+{}
+{
+    LOOKAHEAD( generic_name() )
+    generic_name()
+  | LOOKAHEAD( port_name() )
+    port_name()
+  | parameter_name()
+}
+
+void formal_parameter_list() :
+{}
+{
+  parameter_interface_list()
+}
+
+
+void formal_part() #void :
+{}
+{
+    LOOKAHEAD( function_name() "(" formal_designator() ")")
+    function_name() "(" formal_designator() ")"
+  | LOOKAHEAD( type_mark() "(" formal_designator() ")")
+    type_mark() "(" formal_designator() ")"
+  | formal_designator()
+}
+
+void full_type_declaration() :
+{}
+{
+  <TYPE> identifier() <IS> type_definition() ";"
+}
+
+
+void function_call() :
+{}
+{
+  function_name()
+  [ LOOKAHEAD( "(" actual_parameter_part() ")" ) "(" actual_parameter_part() ")" ]
+}
+
+
+/**
+ * Section 9.7
+ */
+void generate_statement() :
+{}
+{
+  generate_label() ":"
+  generation_scheme() <GENERATE>
+    [ LOOKAHEAD(2) ( block_declarative_item() )* <BEGIN> ]
+    ( architecture_statement() )*
+  <END> <GENERATE> [ generate_label() ] ";"
+}
+
+/** 1076.1 extension: */
+void concurrent_break_statement() :
+{}
+{
+  [label() ":"] <BREAK> [break_list()] [sensitivity_clause() ] [ <WHEN> condition()] ";"
+}
+
+
+void generation_scheme() :
+{}
+{
+    <FOR> generate_parameter_specification()
+  | <IF> condition()
+}
+
+
+void generic_clause() :
+{}
+{
+  <GENERIC> "(" generic_list() ")" ";"
+}
+
+
+void generic_list() #void :
+{}
+{
+  generic_interface_list()
+}
+
+
+void generic_map_aspect() #void :
+{}
+{
+  <GENERIC> <MAP> "(" generic_association_list() ")"
+}
+
+
+void group_constituent() :
+{}
+{
+    name()
+  | <character_literal>
+}
+
+
+void group_constituent_list() :
+{}
+{
+  group_constituent() ( "," group_constituent() )*
+}
+
+
+void group_template_declaration() :
+{}
+{
+  <GROUP> identifier() <IS> "(" entity_class_entry_list() ")" ";"
+}
+
+void group_declaration() :
+{}
+{
+  <GROUP> identifier() ":" group_template_name()
+  "(" group_constituent_list() ")" ";"
+}
+
+
+
+void guarded_signal_specification() :
+{}
+{
+  guarded_signal_list() ":" type_mark()
+}
+
+
+void identifier() :
+{ Token t; }
+{  
+     t=<basic_identifier>    { jjtThis.name = t.image; }
+  |  t=<extended_identifier> { jjtThis.name = t.image; }
+}
+
+
+void identifier_list() :
+{}
+{
+  identifier() ( "," identifier() )*
+}
+
+
+void if_statement() :
+{}
+{
+  [ if_label() ":" ]
+  <IF> condition() <THEN>
+  sequence_of_statements()
+  ( <ELSIF> condition() <THEN>
+    sequence_of_statements() )*
+  [ <ELSE>
+    sequence_of_statements() ]
+  <END> <IF> [ if_label() ] ";"
+}
+
+void incomplete_type_declaration() :
+{}
+{
+  <TYPE> identifier() ";"
+}
+
+
+void index_constraint() :
+{}
+{
+  "(" discrete_range() ( "," discrete_range() )* ")"
+}
+
+
+
+void index_specification() :
+{}
+{
+    LOOKAHEAD( discrete_range() )
+    discrete_range()
+  | static_expression()
+}
+
+
+void index_subtype_definition() :
+{}
+{
+  type_mark() <RANGE> "<>"
+}
+
+void indexed_name() :
+{}
+{
+  prefix() "(" expression() ( "," expression() )* ")"
+}
+
+void instantiated_unit() :
+{}
+{
+    [ <COMPONENT> ] component_name()
+  | <ENTITY> entity_name() [ "(" architecture_identifier() ")" ]
+  | <CONFIGURATION> configuration_name()
+}
+
+
+void instantiation_list() :
+{}
+{
+    instantiation_label() ( "," instantiation_label() )*
+  | <OTHERS>
+  | <ALL>
+}
+
+void integer_type_definition() #void :
+{}
+{
+  range_constraint()
+}
+
+
+
+void interface_constant_declaration() :
+{}
+{
+  [ <CONSTANT> ] identifier_list() ":" [ <IN> ]
+    subtype_indication() [ ":=" static_expression() ]
+}
+
+/**
+ * Section 4.3.2:
+ */
+void interface_declaration() #void :
+{}
+{
+    LOOKAHEAD(interface_constant_declaration() ) 
+    interface_constant_declaration()
+  | LOOKAHEAD(interface_signal_declaration() )
+    interface_signal_declaration()
+  | LOOKAHEAD(interface_variable_declaration() )
+    interface_variable_declaration()
+  | LOOKAHEAD(interface_file_declaration() )
+    interface_file_declaration()
+
+  /** 1076.1 extensions: */
+  | interface_terminal_declaration() 
+  | interface_quantity_declaration()
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void interface_terminal_declaration()  :
+{}
+{
+  <TERMINAL> identifier_list() ":" subnature_indication()
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void interface_quantity_declaration() :
+{}
+{
+  <QUANTITY> identifier_list() ":" 
+  [ <IN> | <OUT> ] subtype_indication() [ ":=" static_expression() ]
+}
+
+
+void interface_element() #void :
+{}
+{
+  interface_declaration()
+}
+
+
+void interface_file_declaration() :
+{}
+{
+  <FILE> identifier_list() ":" subtype_indication()
+}
+
+
+void interface_list() :
+{}
+{
+  interface_element() ( ";" interface_element() )*
+}
+
+void interface_signal_declaration() :
+{}
+{
+  [<SIGNAL>] identifier_list() ":"
+  [ mode() ] subtype_indication() [ <BUS> ] [ ":=" static_expression() ]
+}
+
+
+void interface_variable_declaration() :
+{}
+{
+  [<VARIABLE>] identifier_list() ":"
+  [ mode() ] subtype_indication() [ ":=" static_expression() ]
+}
+
+
+
+void iteration_scheme() :
+{}
+{
+    <WHILE> condition()
+  | <FOR> loop_parameter_specification()
+}
+
+
+void label() #void :
+{}
+{
+  identifier()
+}
+
+
+
+void library_clause() #void :
+{}
+{
+  <LIBRARY> logical_name_list() ";"
+}
+
+
+void library_unit() #void :
+{}
+{   LOOKAHEAD(<ENTITY> | <CONFIGURATION> | <PACKAGE> identifier() )
+    primary_unit()
+  | secondary_unit()
+}
+
+
+
+void literal() :
+{}
+{
+    LOOKAHEAD( numeric_literal() )
+    numeric_literal()
+  | enumeration_literal()
+  | <string_literal>
+  | <bit_string_literal>
+  | <NULL>
+}
+
+
+void logical_name() #void :
+{}
+{
+  identifier()
+}
+
+
+
+void logical_name_list() :
+{}
+{
+  logical_name() ( "," logical_name() )*
+}
+
+
+int logical_operator() #void :
+{}
+{
+    <AND>             { return AND; }
+  | <OR>              { return OR; }
+  | <NAND>            { return NAND; }
+  | <NOR>             { return NOR; }
+  | <XOR>             { return XOR; }
+  | <XNOR>            { return XNOR; }
+}
+
+
+void loop_statement() :
+{}
+{
+  [ loop_label() ":" ]
+  [ iteration_scheme() ] <LOOP>
+                        sequence_of_statements()
+  <END> <LOOP> [ loop_label() ] ";"
+}
+
+
+int miscellaneous_operator() #void :
+{}
+{
+    <EXP>               { return EXP; }
+  | <ABS>               { return ABS; }
+  | <NOT>               { return NOT; }
+}
+
+
+void mode() :
+{}
+{
+    <IN>
+  | <OUT>
+  | <INOUT>
+  | <BUFFER>
+  | <LINKAGE>
+}
+
+int multiplying_operator() #void :
+{}
+{
+    "*"                 { return MUL; }
+  | "/"                 { return DIV; }
+  | <MOD>               { return MOD; }
+  | <REM>               { return REM; }
+}
+
+
+void name() :
+{}
+{
+/**  simple_name()
+ * | operator_symbol()
+ *  | selected_name()
+ *  | indexed_name()
+ *  | slice_name()
+ *  | attribute_name()
+ *
+ * Kann ohne Linksrekursion wie folgt geschrieben werden:
+ */
+  ( simple_name() | operator_symbol() )
+  [ LOOKAHEAD(name_extension()) name_extension()   ]
+}
+
+void name_extension() #void :
+{}
+{
+  (
+        LOOKAHEAD( signature() "'"  )
+        signature() "'" attribute_designator()
+        [ LOOKAHEAD( "(" expression() ")") "(" expression() ")"]
+      | "." suffix()
+      | LOOKAHEAD( "(" discrete_range() ")" ) 
+        "(" discrete_range() ")"  
+      | LOOKAHEAD( "(" expression() ("," expression() )* ")" )
+        "(" expression() ("," expression() )* ")"
+      /**
+       * The following production is already in sign. "'" ... ,
+       * since signature can be empty!
+       * | "'" attribute_designator() [ "(" expression() ")"]
+       */
+  )
+  [  LOOKAHEAD(name_extension() ) name_extension() ]
+}
+
+/**
+ * 1076.1 extension:
+ */
+void nature_element_declaration() :
+{}
+{
+  identifier_list() ":" element_subnature_definition()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void element_subnature_definition() #void :
+{}
+{
+  subnature_indication()
+}
+
+
+void next_statement() :
+{}
+{                                                               
+  [ label() ":" ] <NEXT> [ loop_label() ] [ <WHEN> condition() ] ";"
+}
+
+void null_statement() :
+{}
+{
+  [ label() ":" ] <NULL> ";"
+}
+
+
+
+void numeric_literal() #void :
+{}
+{
+    LOOKAHEAD(physical_literal())
+    physical_literal()
+  | abstract_literal()
+}
+
+
+void object_declaration() #void :
+{}
+{
+  try {
+    constant_declaration()
+  | signal_declaration()
+  | variable_declaration()
+  | file_declaration()
+  /** 1076.1 extensions: */
+  | terminal_declaration()
+  | quantity_declaration()
+
+  }
+  catch( ParseException e )
+  {
+    error_skipto(SEMICOLON, "syntax error in declaration");
+  }
+}
+
+
+void operator_symbol() :
+{}
+{
+  <string_literal>
+}
+
+
+void options_() :
+{}
+{
+  [ <GUARDED> ] [ delay_mechanism() ]
+}
+
+
+void package_body() :
+{}
+{
+  <PACKAGE> <BODY> package_simple_name() <IS>
+       package_body_declarative_part()
+  <END> [ <PACKAGE> <BODY> ] [ package_simple_name() ] ";"
+}
+
+void package_body_declarative_item() #void :
+{}
+{
+  try {
+    LOOKAHEAD(subprogram_declaration())
+    subprogram_declaration()
+  | subprogram_body()
+  | type_declaration()
+  | subtype_declaration()
+  | constant_declaration()
+  | shared_variable_declaration()
+  | file_declaration()
+  | alias_declaration()
+  | use_clause()
+  | LOOKAHEAD(<GROUP> identifier() <IS>)
+    group_template_declaration()
+  | group_declaration()
+  }
+  catch( ParseException e )
+  {
+    error_skipto(SEMICOLON, "syntax error in declarative item");
+  }
+}
+
+
+void package_body_declarative_part() :
+{}
+{
+  ( package_body_declarative_item() )*
+}
+
+
+
+void package_declaration() :
+{}
+{
+  <PACKAGE> identifier() <IS>
+     package_declarative_part()
+  <END> [ <PACKAGE> ] [ package_simple_name() ] ";"
+}
+
+
+void package_declarative_item() #void :
+{}
+{
+  try {
+    subprogram_declaration()
+  | type_declaration()
+  | subtype_declaration()
+  | constant_declaration()
+  | signal_declaration()
+  | shared_variable_declaration()
+  | file_declaration()
+  | alias_declaration()
+  | component_declaration()
+  | LOOKAHEAD( attribute_declaration() )
+    attribute_declaration()
+  | attribute_specification()
+  | disconnection_specification()
+  | use_clause()
+  | LOOKAHEAD(<GROUP> identifier() <IS>)
+    group_template_declaration()
+  | group_declaration()
+
+  // 1076.1 extensions:
+  | nature_declaration()
+  | subnature_declaration()
+  | terminal_declaration()
+  }
+  catch(ParseException e)
+  {
+    error_skipto(SEMICOLON, "syntax error in declaration");
+  }
+}
+
+void package_declarative_part() :
+{}
+{
+  ( package_declarative_item() )*
+}
+
+
+void parameter_specification() :
+{}
+{
+  identifier() <IN> discrete_range()
+}
+
+void physical_literal() :
+{}
+{
+  [ LOOKAHEAD(abstract_literal() unit_name() )
+    abstract_literal() ]
+  unit_name()
+}
+
+
+void physical_type_definition() :
+{}
+{
+  range_constraint()
+  <UNITS>
+  base_unit_declaration()
+  ( secondary_unit_declaration() )*
+  <END> <UNITS> [ physical_type_simple_name() ]
+}
+
+
+void port_clause() :
+{}
+{
+  <PORT> "(" port_list() ")" ";"
+}
+
+void port_list() #void :
+{}
+{
+  port_interface_list()
+}
+
+
+void port_map_aspect() :
+{}
+{
+  <PORT> <MAP> "(" port_association_list() ")"
+}
+
+
+void prefix() :
+{}
+{
+    LOOKAHEAD( function_call() )
+    function_call()
+  | name()
+}
+
+
+void primary() #void :
+{}
+{
+    LOOKAHEAD( qualified_expression() )
+    qualified_expression()
+
+  | LOOKAHEAD( function_call() )
+    function_call()
+
+  | LOOKAHEAD(name())
+    name()
+
+  | LOOKAHEAD(literal())
+    literal()
+
+  | LOOKAHEAD( aggregate() )
+    aggregate()
+
+  | LOOKAHEAD( "(" expression() ")")
+    "(" expression() ")"
+
+  | LOOKAHEAD( type_conversion() )
+    type_conversion()
+
+  | allocator()
+
+}
+
+
+void primary_unit() #void :
+{}
+{
+    entity_declaration()
+  | configuration_declaration()
+  | LOOKAHEAD(<PACKAGE> identifier())
+    package_declaration()
+}
+
+
+void procedure_call() :
+{}
+{
+  procedure_name() [ "(" actual_parameter_part() ")" ]
+}
+
+void procedure_call_statement() :
+{}
+{
+   [ LOOKAHEAD( label() ":") label() ":" ]
+   procedure_call() ";"
+}
+
+
+void process_declarative_item() #void :
+{}
+{
+    LOOKAHEAD(subprogram_declaration())
+    subprogram_declaration()
+  | subprogram_body()
+  | type_declaration()
+  | subtype_declaration()
+  | constant_declaration()
+  | variable_declaration()
+  | file_declaration()
+  | alias_declaration()
+  | LOOKAHEAD( attribute_declaration() )
+    attribute_declaration()
+  | attribute_specification()
+  | use_clause()
+  | LOOKAHEAD( <GROUP> identifier() <IS> )
+    group_template_declaration()
+  | group_declaration()
+}
+
+void process_declarative_part() :
+{}
+{
+  ( process_declarative_item() )*
+}
+
+
+void process_statement() :
+{}
+{
+   [ process_label() ":" ]
+   [ <POSTPONED> ] <PROCESS>                    { jjtThis.newBlock(); }
+   [ "(" sensitivity_list() ")" ] [ <IS> ]
+     process_declarative_part()
+   <BEGIN>
+     process_statement_part()
+   <END> [ <POSTPONED> ] <PROCESS> [ process_label() ] ";"
+
+   {
+     jjtThis.Check();
+     jjtThis.endBlock();
+   }
+}
+
+
+void process_statement_part() :
+{}
+{
+  ( sequential_statement() )*
+}
+
+
+/*
+    VHDL 2002: protected types:
+*/
+
+void protected_type_body() #void :
+{}
+{
+  <PROTECTED> <BODY>
+    protected_type_body_declarative_part()
+  <END> <PROTECTED> <BODY> [ simple_name() ]
+}
+
+void protected_type_body_declarative_item() #void :
+{}
+{
+    LOOKAHEAD(subprogram_declaration())
+    subprogram_declaration()
+    | subprogram_body()
+    | type_declaration() 
+    | subtype_declaration() 
+    | constant_declaration() 
+    | variable_declaration() 
+    | file_declaration() 
+    | alias_declaration() 
+    | LOOKAHEAD(attribute_declaration())
+    attribute_declaration() 
+    | attribute_specification() 
+    | use_clause() 
+    | LOOKAHEAD(group_template_declaration())
+    group_template_declaration()
+    | group_declaration() 
+}
+
+void protected_type_body_declarative_part() #void :
+{}
+{ 
+  (protected_type_body_declarative_item())+
+}
+
+void protected_type_declaration() #void :
+{}
+{
+  <PROTECTED>
+    protected_type_declarative_part()
+  <END> <PROTECTED> [ simple_name() ]
+}
+
+void protected_type_declarative_item() #void :
+{}
+{
+    subprogram_declaration()
+    | attribute_declaration()
+    | use_clause()
+}
+
+void protected_type_declarative_part() #void :
+{}
+{ 
+  (protected_type_declarative_item())+
+}
+
+void protected_type_definition() #void :
+{}
+{
+    LOOKAHEAD(protected_type_body()) protected_type_body()
+    | protected_type_declaration()
+}
+
+void qualified_expression() :
+{}
+{
+  type_mark() "'"
+  (   LOOKAHEAD( aggregate() )
+      aggregate()
+    | "(" expression() ")"
+  )
+}
+
+void range() :
+{}
+{
+    LOOKAHEAD( simple_expression() direction() )
+    simple_expression() direction() simple_expression()
+  | range_attribute_name()
+}
+
+
+void range_constraint() #void :
+{}
+{
+  <RANGE> range()
+}
+
+void record_nature_definition() :
+{}
+{
+  <RECORD>
+  ( nature_element_declaration() )+
+  <END> <RECORD> [ record_nature_simple_name() ]
+}
+
+void record_type_definition() :
+{}
+{
+  <RECORD>
+  ( element_declaration() )+
+  <END> <RECORD> [ record_type_simple_name() ]
+}
+
+
+
+void relation() #void :
+{ int op; }
+{
+  shift_expression() 
+  [ LOOKAHEAD(1)
+  op=relational_operator()
+  shift_expression()
+  #shift_expression(2) ]
+}
+
+
+int relational_operator() #void :
+{}
+{
+    <EQ>                { return EQ; }
+  | <NEQ>               { return NEQ; } 
+  | <LO>                { return LO; }
+  | <LE>                { return LE; }
+  | <GT>                { return GT; }
+  | <GE>                { return GE; }
+}
+
+
+void report_statement() :
+{}
+{
+  [ label() ":" ]  <REPORT> expression()
+  [ <SEVERITY> expression() ] ";"
+}
+
+
+void return_statement() :
+{}
+{
+  [ label() ":" ] <RETURN> [ expression() ] ";"
+}
+
+
+// 1076.1 - extension:
+void scalar_nature_definition() :
+{}
+{
+  type_mark() <ACROSS> type_mark() <THROUGH>
+}
+
+
+void scalar_type_definition() #void :
+{}
+{
+    LOOKAHEAD(range_constraint() <UNITS> )
+    physical_type_definition()
+  |
+    LOOKAHEAD(enumeration_type_definition())
+    enumeration_type_definition()
+/**  | integer_type_definition()
+ *  | floating_type_definition()
+ * integer- and floating_type_definition are both range_constraint,
+ * thus:
+ */
+  |
+    range_constraint()
+}
+
+void secondary_unit() #void :
+{}
+{
+    LOOKAHEAD( <ARCHITECTURE> )
+    architecture_body()
+  | LOOKAHEAD( <PACKAGE> <BODY> )
+    package_body()
+}
+
+
+void secondary_unit_declaration() :
+{}
+{
+  identifier() "=" physical_literal() ";"
+}
+
+
+void selected_name() :
+{}
+{
+  /**
+   * prefix() "." suffix()
+   * results in left-recursion...
+   * the follwoing does the same (i hope ...)
+   */
+
+  ( simple_name() | operator_symbol() )
+  [ LOOKAHEAD( name_extension() )  name_extension() ]
+
+  /**
+   * semantic analysis has to ensure that last production
+   * was "." suffix()
+   */
+}
+
+
+void selected_signal_assignment() :
+{}
+{
+  <WITH> expression() <SELECT>
+  target()  "<=" options_() selected_waveforms() ";"
+}
+
+void selected_waveforms() :
+{}
+{
+  waveform() <WHEN> choices()
+  ("," waveform() <WHEN> choices() )*
+}
+
+void sensitivity_clause() #void :
+{}
+{
+  <ON> sensitivity_list()
+}
+
+
+void sensitivity_list() :
+{}
+{
+  signal_name() ( "," signal_name() )*
+}
+
+
+void sequence_of_statements() :
+{}
+{
+  ( sequential_statement() )*
+}
+
+void sequential_statement() #void :
+{}
+{
+  try {
+    (
+      LOOKAHEAD(3)
+      wait_statement()
+    | LOOKAHEAD(3)
+      assertion_statement()
+    | LOOKAHEAD(3)
+      report_statement()
+    | LOOKAHEAD(  [ label() ":" ] target() "<=" )
+      signal_assignment_statement()
+    | LOOKAHEAD(  [ label() ":" ] target() ":=" )
+      variable_assignment_statement()
+    | LOOKAHEAD(3)
+      procedure_call_statement()
+    | LOOKAHEAD(3)
+      if_statement()
+    | LOOKAHEAD(3)
+      case_statement()
+    | LOOKAHEAD(3)
+      loop_statement()
+    | LOOKAHEAD(3)
+      next_statement()
+    | LOOKAHEAD(3)
+      exit_statement()
+    | LOOKAHEAD(3)
+      return_statement()
+    | LOOKAHEAD(3)
+      null_statement()
+
+    /** 1076.1 extensions: */
+    | break_statement()
+    )
+  }
+
+  // Error handling: skip till next semicolon.
+  catch (ParseException e)
+  {
+    error_skipto(SEMICOLON, "syntax error in sequential statement");
+  } 
+}
+
+
+void shift_expression() #void :
+{ int op; }
+{
+  simple_expression() 
+  [ LOOKAHEAD(2) op=shift_operator()
+  simple_expression() #simple_expression(2)  ]
+}
+
+int shift_operator() #void :
+{}
+{
+    <SLL>               { return SLL; }
+  | <SRL>               { return SRL; }
+  | <SLA>               { return SLA; }
+  | <SRA>               { return SRA; }
+  | <ROL>               { return ROL; }
+  | <ROR>               { return ROR; }
+}
+
+void sign() :
+{}
+{
+    "+"
+  | "-"
+}
+
+
+void signal_assignment_statement() :
+{}
+{
+  [ LOOKAHEAD( label() ":") label() ":" ]
+  target() "<=" [ delay_mechanism() ] waveform() ";"
+
+}
+
+
+void signal_declaration() :
+{}
+{
+    <SIGNAL> identifier_list() ":"
+    subtype_indication() [ signal_kind() ] [ ":=" expression() ] ";"
+}
+
+
+void signal_kind() :
+{}
+{
+    <REGISTER>
+  | <BUS>
+}
+
+void signal_list() :
+{}
+{
+    signal_name() ( "," signal_name() )*
+  | <OTHERS>
+  | <ALL>
+}
+
+
+void signature() :
+{}
+{
+  [ type_mark() ( LOOKAHEAD( "," type_mark() ) "," type_mark() )* ]
+  [ <RETURN> type_mark() ]
+}
+
+
+void simple_expression() #void :
+{ int op; }
+{
+   [ sign() ] term()
+   ( LOOKAHEAD(2) op=adding_operator() term()
+     #term(2) )*
+}
+
+
+void simple_name() #void :
+{}
+{
+  identifier()
+}
+
+void slice_name() :
+{}
+{
+  prefix() "(" discrete_range() ")"
+}
+
+
+
+void subprogram_body() :
+{}
+{
+  subprogram_specification() <IS>
+     subprogram_declarative_part()
+  <BEGIN>
+         subprogram_statement_part()
+  <END> [ subprogram_kind() ] [ designator() ] ";"
+}
+
+
+void subprogram_declaration() #void :
+{}
+{
+  subprogram_specification() ";"
+}
+
+
+void subprogram_declarative_item() #void :
+{}
+{
+    LOOKAHEAD(subprogram_declaration())
+    subprogram_declaration()
+  | subprogram_body()
+  | type_declaration()
+  | subtype_declaration()
+  | constant_declaration()
+  | variable_declaration()
+  | file_declaration()
+  | alias_declaration()
+  | LOOKAHEAD(attribute_declaration())
+    attribute_declaration()
+  | attribute_specification()
+  | use_clause()
+  | LOOKAHEAD( <GROUP> identifier() <IS>)
+    group_template_declaration()
+  | group_declaration()
+}
+
+void subprogram_declarative_part() :
+{}
+{
+  ( subprogram_declarative_item() )*
+}
+
+
+int subprogram_kind() #void :
+{}
+{
+    <PROCEDURE>                 { return PROCEDURE; }
+  | <FUNCTION>                  { return FUNCTION; }
+}
+
+void subprogram_specification() :
+{}
+{
+  <PROCEDURE> designator() [ "(" formal_parameter_list() ")" ]
+  | [ <PURE> | <IMPURE> ]  <FUNCTION> designator()
+     [ "(" formal_parameter_list() ")" ]
+                <RETURN> type_mark()
+}
+
+
+
+void subprogram_statement_part() :
+{}
+{
+  ( sequential_statement() )*
+}
+
+
+void subtype_declaration() :
+{}
+{
+  <SUBTYPE> identifier() <IS> subtype_indication() ";"
+}
+
+
+/**
+ * Section 4.1:
+ */
+void subtype_indication() :
+{}
+{
+  /*
+   * enumeration resolves conflict ! After implementation of symbol tables
+   * this can be replaced by semantic lookahead.
+   */ 
+    LOOKAHEAD(resolution_function_name() type_mark() constraint())
+    resolution_function_name() type_mark() constraint() 
+      [ LOOKAHEAD(tolerance_aspect())tolerance_aspect() ]
+
+  | LOOKAHEAD( type_mark() constraint() )
+    type_mark() constraint() 
+      [ LOOKAHEAD(tolerance_aspect()) tolerance_aspect() ]
+
+  | LOOKAHEAD( resolution_function_name() type_mark() )
+    resolution_function_name() type_mark() 
+      [ LOOKAHEAD(tolerance_aspect())tolerance_aspect() ]
+
+  | LOOKAHEAD( type_mark() )
+    type_mark()  
+      [ LOOKAHEAD(tolerance_aspect()) tolerance_aspect() ]
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void tolerance_aspect() #void :
+{}
+{
+  <TOLERANCE> string_expression()
+}
+
+
+/**
+ * Section 4.3.1.6: Quantity declaration
+ * 1076.1 extension:
+ */
+void quantity_declaration() #void :
+{}
+{
+    LOOKAHEAD(free_quantity_declaration() )
+    free_quantity_declaration()
+  | LOOKAHEAD(branch_quantity_declaration() )
+    branch_quantity_declaration()
+  | source_quantity_declaration()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void free_quantity_declaration() :
+{}
+{
+  <QUANTITY> identifier_list() ":" subtype_indication() [":=" expression()] ";"
+}
+
+/**
+ * 1076.1 extension:
+ */
+void branch_quantity_declaration() :
+{}
+{
+  <QUANTITY> [LOOKAHEAD(across_aspect()) across_aspect()] 
+	     [LOOKAHEAD(through_aspect()) through_aspect()] 
+	     terminal_aspect() ";"
+}
+
+/**
+ * 1076.1 extension:
+ */
+void source_quantity_declaration() :
+{}
+{ 
+  <QUANTITY> identifier_list() ":" subtype_indication() source_aspect() ";"
+}
+
+/**
+ * 1076.1 extension:
+ */
+void across_aspect() :
+{}
+{
+  identifier_list() [ tolerance_aspect() ] [ ":=" expression() ] <ACROSS>
+}
+
+/**
+ * 1076.1 extension:
+ */
+void through_aspect() :
+{}
+{
+  identifier_list() [ tolerance_aspect() ] [ ":=" expression() ] <THROUGH>
+} 
+
+/**
+ * 1076.1 extension:
+ */
+void source_aspect() :
+{}
+{
+    <SPECTRUM> magnitude_simple_expression() "," phase_simple_expression() 
+  | <NOISE>    magnitude_simple_expression() 
+}
+
+void suffix() #void :
+{}
+{
+    simple_name()
+  | <character_literal>
+  | operator_symbol()
+  | <ALL>
+}
+
+void target() #void :
+{}
+{
+    name()
+  | aggregate()
+}
+
+
+void term() #void :
+{ int op; }
+{
+  factor() ( LOOKAHEAD(2) op = multiplying_operator() factor() #factor(2)
+  )*
+}
+
+void timeout_clause() #void :
+{}
+{
+  <FOR> time_or_real_expression()
+}
+
+
+void type_conversion() :
+{}
+{
+  type_mark() "(" expression() ")"
+}
+
+
+void type_declaration() #void :
+{}
+{
+    LOOKAHEAD( <TYPE> identifier() <IS> )
+    full_type_declaration()
+  | incomplete_type_declaration()
+}
+
+
+void type_definition() #void :
+{}
+{
+    scalar_type_definition()
+  | composite_type_definition()
+  | access_type_definition()
+  | file_type_definition()
+  | protected_type_definition()
+}
+
+
+void type_mark() #void :
+{}
+{
+    LOOKAHEAD(type_name())
+    type_name()
+  | LOOKAHEAD(subtype_name())
+    subtype_name()
+}
+
+
+void unconstrained_array_definition() :
+{}
+{
+  <ARRAY> "(" index_subtype_definition()
+    ( "," index_subtype_definition() )* ")"
+      <OF> element_subtype_indication()
+}
+
+
+void use_clause() :
+{}
+{
+   <USE> selected_name() ( "," selected_name() )* ";"
+}
+
+
+void variable_assignment_statement() :
+{}
+{
+  [ LOOKAHEAD( label() ":") label() ":" ]
+  target()  ":=" expression() ";"
+}
+
+
+void variable_declaration() :
+{}
+{
+  [ <SHARED> ] <VARIABLE> identifier_list() ":"
+  subtype_indication() [ ":=" expression() ] ";"
+}
+
+
+void wait_statement() :
+{}
+{
+   [ LOOKAHEAD( label() ) ":" label() ":"]
+   <WAIT> [ sensitivity_clause() ]
+   [ condition_clause() ] [ timeout_clause() ] ";"
+}
+
+
+void waveform() :
+{}
+{
+  waveform_element() ( "," waveform_element() )*
+  | <UNAFFECTED>
+}
+
+void waveform_element() :
+{}
+{
+     LOOKAHEAD(<NULL>)
+     <NULL>             [<AFTER> time_expression() ]
+  |  value_expression() [ <AFTER> time_expression() ]
+}
+
+
+/** 
+ *Section 15: Simultaneous statements
+ * 1076.1 extension
+ */
+void simultaneous_statement_part()   :
+{}
+{
+  ( simultaneous_statement() )*
+}
+
+/**
+ * 1076.1 extension:
+ */
+void simultaneous_statement() #void :
+{}
+{
+    LOOKAHEAD(simple_simultaneous_statement())
+    simple_simultaneous_statement()
+  | LOOKAHEAD( [if_label()] ":" <IF> condition() <USE> )
+    simultaneous_if_statement()
+  | LOOKAHEAD(simultaneous_case_statement())
+    simultaneous_case_statement()
+  | LOOKAHEAD(4) // procedural is at least as 4th position...
+    simultaneous_procedural_statement()
+  | simultaneous_null_statement()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void simple_simultaneous_statement() :
+{}
+{
+  [ LOOKAHEAD( label() ":") label() ":"] 
+  [<PURE>|<IMPURE>] simple_expression() 
+  "==" simple_expression() [ tolerance_aspect() ] ";"
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void simultaneous_if_statement() :
+{}
+{
+  [ if_label() ":"] <IF> condition() <USE>
+     simultaneous_statement_part()
+  ( <ELSIF> condition() <USE> simultaneous_statement_part() )*
+  [ <ELSE> simultaneous_statement_part() ]
+  <END> <USE> [ if_label()] ";"
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void simultaneous_case_statement() :
+{}
+{
+  [ case_label() ":"] <CASE> expression() <USE>
+    (simultaneous_alternative())*
+  <END> <CASE> [ case_label() ] ";"
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void simultaneous_alternative() :
+{}
+{
+  <WHEN> choices() <USE> simultaneous_statement_part()
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void simultaneous_procedural_statement() :
+{}
+{
+  [procedural_label() ":"] [<PURE>|<IMPURE>] <PROCEDURAL> [<IS>]
+    procedural_declarative_part()
+   <BEGIN>
+     procedural_statement_part()
+   <END> <PROCEDURAL> [ procedural_label()] ";"
+}
+
+
+// 1076.1 extension:
+void procedural_label() #void :
+{}
+{
+  label()
+}
+
+// 1076.1 extension:
+void procedural_declarative_part() :
+{}
+{
+  ( procedural_declarative_item() )*
+}
+
+/**
+ * 1076.1 extension:
+ */
+void procedural_declarative_item() #void :
+{}
+{
+    LOOKAHEAD(subprogram_declaration())
+    subprogram_declaration()
+  | subprogram_body()
+  | type_declaration()
+  | subtype_declaration()
+  | constant_declaration()
+  | variable_declaration()
+  | alias_declaration()
+  | LOOKAHEAD(attribute_declaration())
+    attribute_declaration()
+  | attribute_specification()
+  | use_clause()
+  | LOOKAHEAD(group_template_declaration())
+    group_template_declaration()
+  | group_declaration()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void procedural_statement_part() :
+{}
+{
+  ( sequential_statement() )*
+}
+
+
+
+// 1076.1 extension:
+void simultaneous_null_statement() :
+{}
+{
+  [ label() ":"] <NULL> ";"
+}
+
+
+
+
+//
+// parts of grammar, which have to be checked during semantic analysis
+// by semantic lookahead:
+//
+void block_label() #void :
+{}
+{
+  label()
+}
+
+void block_statement_label() #void :
+{}
+{
+  label()
+}
+
+void case_label() #void :
+{}
+{
+  label()
+}
+
+void generate_label() #void :
+{}
+{
+  label()
+}
+
+void generate_statement_label() #void :
+{}
+{
+  label()
+}
+
+void if_label() #void :
+{}
+{
+  label()
+}
+
+void instantiation_label() #void :
+{}
+{
+  label()
+}
+
+void loop_label() #void :
+{}
+{
+  label()
+}
+
+void process_label() #void :
+{}
+{
+  label()
+}
+
+void architecture_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+void attribute_simple_name() #void :
+{}
+{
+  simple_name()
+  | <RANGE>
+}
+
+void component_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+void configuration_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+void element_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+void entity_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+void package_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+
+
+void architecture_name() #void :
+{}
+{
+  name()
+}
+
+void entity_name() #void :
+{}
+{
+  name()           
+}
+
+void file_name() #void :
+{}
+{
+  name()
+}
+
+void function_name() #void :
+{}
+{
+  name()
+}
+
+void configuration_name() #void :
+{}
+{
+  name()
+}
+
+void component_name() #void :
+{}
+{
+  name()
+}
+
+void generic_name() #void :
+{}
+{
+  name()
+}
+
+void group_template_name() #void :
+{}
+{
+  name()
+}
+
+void parameter_name() #void :
+{}
+{
+  name()
+}
+
+void physical_type_simple_name() #void :
+{}
+{
+  simple_name() 
+}
+
+void port_name() #void :
+{}
+{
+  name()
+}
+
+void procedure_name() #void :
+{}
+{
+  name()
+}
+
+void range_attribute_name() #void :
+{}
+{
+  name()
+}
+
+void signal_name() #void:
+{}
+{
+  name()
+}
+
+//
+// Name, der einen Typen bezeichnet...
+//
+void type_name() #void:
+{}
+{
+  name()
+}
+
+
+// 1076.1 extension:
+void record_nature_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+void record_type_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+void resolution_function_name() #void :
+{}
+{
+  name()
+}
+
+void subtype_name() #void :
+{}
+{
+  name()
+}
+
+void unit_name() #void :
+{}
+{
+  name()
+}
+
+void variable_name() #void :
+{}
+{
+  name()
+}
+
+void architecture_identifier() #void :
+{}
+{
+  identifier()
+}
+
+void static_expression() #void :
+{}
+{
+  expression()
+}
+
+
+void boolean_expression() #void :
+{}
+{
+  expression()
+}
+
+void file_open_kind_expression() #void :
+{}
+{
+  expression()
+}
+
+void guard_expression() #void :
+{}
+{
+  expression()
+}
+
+void time_expression() #void :
+{}
+{
+  expression() // unit_name()
+  // unit_name can be derived by expression!!! 
+}
+
+// 1076.1 extension:
+void time_or_real_expression() #void :
+{}
+{
+  expression() // unit_name()
+  // unit_name can be derived by expression!!!
+}
+
+
+void value_expression() #void :
+{}
+{
+  expression()
+}
+
+void string_expression() #void :
+{}
+{
+  expression()
+}
+
+
+void guarded_signal_list() #void :
+{}
+{
+  signal_list()
+}
+
+void parameter_association_list() #void :
+{}
+{
+  association_list()
+}
+
+void port_association_list() #void :
+{}
+{
+  association_list()
+}
+
+void generic_association_list() #void :
+{}
+{
+  association_list()
+}
+
+void generic_interface_list() #void :
+{}
+{
+  interface_list()
+}
+
+void parameter_interface_list() #void :
+{}
+{
+  interface_list()
+}
+
+void port_interface_list() #void :
+{}
+{
+  interface_list()
+}
+
+//
+// fraglich:
+//
+void formal_port_clause() #void :
+{}
+{
+  port_clause()
+}
+
+void local_port_clause() #void :
+{}
+{
+  port_clause()
+}
+
+void formal_generic_clause() #void :
+{}
+{
+  generic_clause()
+}
+
+void local_generic_clause() #void :
+{}
+{
+  generic_clause()
+}
+
+void element_subtype_indication() #void :
+{}
+{
+  subtype_indication()
+}
+
+void discrete_subtype_indication() #void :
+{}
+{
+  subtype_indication()
+}
+
+void loop_parameter_specification() #void :
+{}
+{
+  parameter_specification()
+}
+
+void generate_parameter_specification() #void :
+{}
+{
+  parameter_specification()
+}
+
+void passive_concurrent_procedure_call_statement() #void :
+{}
+{
+  concurrent_procedure_call_statement()
+}
+
+void passive_process_statement() #void :
+{}
+{
+  process_statement()
+}
+
+
+void magnitude_simple_expression() #void :
+{}
+{ 
+  simple_expression() 
+}
+
+void phase_simple_expression() #void :
+{}
+{
+  simple_expression()
+}
+
+
+void nature_name() #void :
+{}
+{
+  name() 
+}
+
+void subnature_name() #void :
+{}
+{
+  name()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void terminal_name() #void :
+{}
+{
+  name()
+}
+
+
+/**
+ * 1076.1 extension:
+ */
+void quantity_name() #void :
+{}
+{
+  name()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void plus_terminal_name() #void :
+{}
+{
+  name()
+}
+
+/**
+ * 1076.1 extension:
+ */
+void minus_terminal_name() #void :
+{}
+{
+  name()
+}
+
+
+/**
+ * still missing:
+ */
+void shared_variable_declaration() :
+{}
+{
+  [ <SHARED> ] <VARIABLE> identifier_list() ":"
+  subtype_indication() [ ":=" expression() ] ";"
+}
+
+
+
+
+/**
+ *
+ * for error recovery:
+ *
+ */
+JAVACODE void error_skipto(int kind, String message) 
+{
+  errs.Error(message,null);
+  Token t;
+  do 
+  {
+    t = getNextToken();
+  } while ((t.kind != kind) && t.next != null);
+}
+
+

@@ -1,0 +1,957 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+
+<!-- ===== XDS interface ===== -->
+  <interface name = "intfDemoXDS">
+
+    <typedef name = "EnumDbgFmt">
+      <paramtype kind="enum" base="String">
+        <item value="CODEVIEW" />
+        <item value="HLL" />
+        <item value="DWARF" />
+      </paramtype>
+    </typedef>
+
+    <typedef name = "EnumCComp">
+      <paramtype kind="enum" base="String">
+        <item value="MSVC" />                            
+        <item value="Watcom" />                            
+      </paramtype>
+    </typedef>
+
+  <!-- Syntax definitions -->
+    <syntax name="Equation"        format="-%%ParamName=%%ParamValue"  />
+    <syntax name="EquationList"    format="-%%ParamName=%(%%ParamValue%|;%)" />
+    <syntax name="EquationNew"     format="-%%ParamName:=%%ParamValue" />
+    <syntax name="EquationListNew" format="-%%ParamName:=%(%%ParamValue%|;%)" />
+    <syntax name="Option"          format="-%%ParamName%%ParamValue"   />
+    <syntax name="OptionNew"       format="-%%ParamName:%%ParamValue"  />
+
+    <syntax name="SimplestOption"  format="%%ParamValue" />
+
+  </interface>
+
+<!-- ===== XDS Package section ===== -->
+  <package name="XDSPackage"
+           label="XDS Package"
+           interface="intfDemoXDS">
+
+  <!-- Parameters defintions -->
+    <!-- XDS directory -->
+    <parameter id      = "xdsdir"
+               label   = "XDS Directory"
+               type    = "Pathname"
+               default = ""
+               format  = "Equation" />
+
+    <!-- File Extensions -->
+    <parameter id      = "extmod"
+               label   = "MODULA-2 Module File Type"
+               type    = "String"
+               default = "mod"
+               format  = "Equation" />
+
+    <parameter id      = "extdef"
+               label   = "MODULA-2 Definition File Type"
+               type    = "String"
+               default = "def"
+               format  = "Equation" />
+
+    <parameter id      = "extob2"
+               label   = "OBERON-2 Module File Type"
+               type    = "String"
+               default = "ob2"
+               format  = "Equation" />
+
+    <parameter id      = "extcode"
+               label   = "Target C File Type"
+               type    = "String"
+               default = "c"
+               format  = "Equation" />
+
+    <parameter id      = "exthead"
+               label   = "Target C Header File Type"
+               type    = "String"
+               default = "h"
+               format  = "Equation" />
+
+    <parameter id      = "extasm"
+               label   = "Assembly Language File Type"
+               type    = "String"
+               default = "asm"
+               format  = "Equation" />
+
+    <parameter id      = "extobj"
+               label   = "Object File Type"
+               type    = "String"
+               default = "obj"
+               format  = "Equation" />
+
+    <parameter id      = "extsym"
+               label   = "Symbolic Info File Type"
+               type    = "String"
+               default = "sym"
+               format  = "Equation" />
+
+    <parameter id      = "extexe"
+               label   = "Target Executable File Type"
+               type    = "String"
+               default = "exe"
+               format  = "Equation" />
+
+    <parameter id      = "extdll"
+               label   = "Target DLL File Type"
+               type    = "String"
+               default = "dll"
+               format  = "Equation" />
+
+    <parameter id      = "extexp"
+               label   = "DLL Export File Type"
+               type    = "String"
+               default = "exp"
+               format  = "Equation" />
+
+    <parameter id      = "mkfextc"
+               outid   = "mkfext"
+               label   = "XM Make File Type"
+               type    = "String"
+               default = "mkf"
+               format  = "Equation" />
+
+    <parameter id      = "extmkfn"
+               outid   = "mkfext"
+               label   = "XC Make File Type"
+               type    = "String"
+               default = "lnk"
+               format  = "Equation" />
+
+    <parameter id      = "mkfname"
+               label   = "Make File Name"
+               type    = "String"
+               default = "tmp"
+               format  = "Equation" />
+
+    <!-- Source options -->
+    <parameter id      = "m2extensions"       readonly="true"
+               label   = "MODULA-2 Language Extensions"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "m2addtypes"         readonly="true"
+               label   = "MODULA-2 Extra Types"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "m2base16"
+               label   = "16-bit INTEGER/CARDINAL"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "o2extensions"       readonly="true"
+               label   = "OBERON-2 Language Extensions"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "o2isopragma"        readonly="true"
+               label   = "OBERON-2 ISO-Style Pragmae"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "o2numext"
+               label   = "OBERON-2 Extended Numbers"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <!-- Make Settings -->
+    <parameter id      = "exename"            visible="false"
+               label   = "Executable File Name"
+               type    = "String"
+               default = ""
+               format  = "EquationNew" />
+
+    <parameter id      = "libname"            visible="false"
+               label   = "Library File Name"
+               type    = "String"
+               default = ""
+               format  = "EquationNew" />
+
+    <parameter id      = "genlib"             visible="false"
+               label   = "Target Is Library"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "OptionNew" />
+
+    <!-- XC Compiler Settings -->
+    <parameter id      = "compilerheap"
+               label   = "Compiler Heap Limit"
+               type    = "LongCardinal"
+               default = "4000000"
+               format  = "Equation" />
+
+    <parameter id      = "compilerthres"
+               label   = "Compiler Threshold Limit"
+               type    = "LongCardinal"
+               default = "24000000"
+               format  = "Equation" />
+
+    <parameter id      = "dbgfmt"
+               label   = "Debug Info Format"
+               type    = "EnumDbgFmt"
+               default = "HLL"
+               format  = "Equation" />
+
+    <parameter id      = "genhistory"
+               label   = "Generate Post-Mortem History"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <!-- XM Converter Settings  -->
+    <parameter id      = "cc"
+               label   = "Target C/C++ Compiler"
+               type    = "EnumCComp"
+               default = "MSVC"
+               format  = "Equation" />
+
+    <parameter id      = "include"
+               label   = "Extra Include Directories"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationListNew" />
+
+    <!-- C Generation Settings -->
+    <parameter id      = "cstdlib"
+               label   = "Use C Standard Libraries"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "comment"
+               label   = "Preserve Comments"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "longname"
+               label   = "No Crunch of Long Names"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "noheader"
+               label   = "No Header Files Generation"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "genkrc"
+               label   = "KR-C Compliance"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "genctypes"
+               label   = "Generate C Types"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "gencpp"
+               label   = "Generate C++ Code"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "genproclass"
+               label   = "Generate Classes Prototypes"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "lineno"
+               label   = "Generate Line Numbers"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <!-- Target Program Settings -->
+    <parameter id      = "gui"             visible="false"
+               label   = "With GUI"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "Option" />
+
+    <parameter id      = "heaplimit"
+               label   = "Program Heap Limit"
+               type    = "LongCardinal"
+               default = "4000000"
+               format  = "Equation" />
+
+    <parameter id      = "stacklimit"
+               label   = "Stack Heap Limit"
+               type    = "LongCardinal"
+               default = "100000"
+               format  = "Equation" />
+
+    <parameter id      = "gcthreshold"
+               label   = "GC Threshold Limit"
+               type    = "LongCardinal"
+               default = "20000000"
+               format  = "Equation" />
+
+    <parameter id      = "gcauto"
+               label   = "Auto GC"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "gendebug"
+               label   = "Generate Debug Info"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "alignment"
+               label   = "Alignment (bytes)"
+               type    = "Cardinal"
+               default = "4"
+               format  = "Equation" />
+
+    <parameter id      = "multithread"
+               label   = "Multithreaded"
+               type    = "BoolPlusMinus"
+               default = "false"
+               format  = "OptionNew" />
+
+    <!-- Decoration Settings -->
+    <parameter id      = "decor"
+               label   = "Protocole Decoration Style"
+               type    = "String"
+               default = "rht"
+               format  = "Equation" />
+
+    <parameter id      = "errlim"
+               label   = "Errors Limit"
+               type    = "Cardinal"
+               default = "16"
+               format  = "Equation" />
+
+    <parameter id      = "errfmt"
+               label   = "Error Message Format"
+               type    = "String"
+               default = "16"
+               format  = "Equation" />
+               
+               <!-- &qt;\n* [%s&qt;,file; %d&qt;,line;.%02d&qt;,column; %.1s&qt;,mode;%03d]\n&qt;,errno;* %s\n&qt;,errmsg"
+                 -->
+
+    <!-- Run-Time Checks -->
+    <parameter id      = "checkindex"
+               label   = "Index Range Check"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "checkdindex"
+               label   = "Dynamic Index Range"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "checkrange"
+               label   = "Range Overflow"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "checknil"
+               label   = "Null Pointer Dereference"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "checktype"
+               label   = "Types Control"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "checkset"
+               label   = "Sets Control"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "checkdiv"
+               label   = "Zero Division"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "checkproc"
+               label   = "Procedure Pointers"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "ioverflow"
+               label   = "Integer Overflow"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "coverflow"
+               label   = "Complex Overflow"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "foverflow"
+               label   = "Float Overflow"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <parameter id      = "assert"
+               label   = "ASSERT Enable"
+               type    = "BoolPlusMinus"
+               default = "true"
+               format  = "Option" />
+
+    <!-- Output placements -->
+    <parameter id      = "lookup_def"
+               outid   = "lookup=*.def"
+               label   = "Directories for DEF files"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationList" 
+               omit    = "" />
+
+    <parameter id      = "lookup_mod"
+               outid   = "lookup=*.mod"
+               label   = "Directories for MOD files"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationList" 
+               omit    = "" />
+
+    <parameter id      = "lookup_ob2"
+               outid   = "lookup=*.ob2"
+               label   = "Directories for OB2 files"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationList" 
+               omit    = "" />
+
+    <parameter id      = "lookup_sym"
+               outid   = "lookup=*.sym"
+               label   = "Directories for SYM files"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationList" 
+               omit    = "" />
+
+    <parameter id      = "lookup_obj"
+               outid   = "lookup=*.obj"
+               label   = "Directories for OBJ files"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationList" 
+               omit    = "" />
+
+    <parameter id      = "lookup_lib"
+               outid   = "lookup=*.lib"
+               label   = "Directories for LIB files"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationList" 
+               omit    = "" />
+        
+    <if OSName="Windows">
+      <parameter id      = "lookup_exe"
+                 outid   = "lookup=*.exe"
+                 label   = "Output directory for generated EXE files"
+                 type    = "Pathname"
+                 default = ""
+                 format  = "Equation" 
+                 omit    = "" />
+    </if>
+    <if-not OSName="Windows">
+      <parameter id      = "lookup_exe"
+                 outid   = "lookup=*"
+                 label   = "Output directory for generated executable files"
+                 type    = "Pathname"
+                 default = ""
+                 format  = "Equation" 
+                 omit    = "" />
+    </if-not>
+
+    <!-- Config files -->
+    <parameter id      = "xc_config_file"
+               type    = "Filename"
+               default = "xc.cfg"
+               format  = "Option" 
+               visible = "false" />
+
+    <parameter id      = "xm_config_file"
+               type    = "Filename"
+               default = "xm.cfg"
+               format  = "Option" 
+               visible = "false" />
+
+  <!-- Input definitions -->
+    <input label="XDS Configuration">
+      <group label="Setup">
+        "xdsdir"
+      </group>
+      <group label="Source">
+        "extdef"
+        "extmod"
+        "extob2"
+        "extasm"
+        "extobj"
+        "extsym"
+        "m2extensions"
+        "m2addtypes"
+        "m2base16"
+        "o2extensions"
+        "o2isopragma"
+        "o2numext"
+      </group>
+      <group label="XC Compiler">
+        "compilerheap"
+        "compilerthres"
+        "dbgfmt"
+        "genhistory"
+      </group>
+      <group label="XM Convertor">
+        "cc"
+        "include"
+        "extcode"
+        "exthead"
+        "gencpp"
+        "genkrc"
+        "genctypes"
+        "genproclass"
+        "cstdlib"
+        "comment"
+        "longname"
+        "lineno"
+        "noheader"
+      </group>
+      <group label="Make">
+        "mkfname"
+        <!-- "extmkfc" -->
+        "extmkfn"
+      </group>
+      <group label="Target">
+        "multithread"
+        "heaplimit"
+        "stacklimit"
+        "gcthreshold"
+        "gcauto"
+        "gendebug"
+        "alignment"
+        "checkindex"
+        "checknil"
+        "checkdindex"
+        "checktype"
+        "checkrange"
+        "checkset"
+        "checkdiv"
+        "checkproc"
+        "assert"
+        "ioverflow"
+        "coverflow"
+        "foverflow"
+      </group>
+      <group label="Decor">
+        "decor"
+        "errlim"
+        "errfmt"
+      </group>
+    </input>
+
+  <!-- Output definitions -->
+    <output>
+      <line name = "xc_cfg" 
+            dest = "xc_config_file" 
+            sep="\n">
+
+        "-backend=X86"
+        <!-- setup -->
+        "%xdsdir"
+        <!-- source -->
+        "%extmod" "%extob2" "%extdef" "%extasm" "%extobj" "%extsym"
+        "%extexe" "%extdll" "%extexp"
+        "%m2extensions" "%m2addtypes" "%o2extensions" "%o2isopragma" "%o2numext" "%m2base16"
+        <!-- make -->
+        "-template=xc.tem"
+        "-linker:=xds"
+        "-makefile+" "%mkfname" "%extmkfn"
+        "%genlib" "%exename" "%libname"
+        <!-- compiler -->
+        "%compilerheap" "%compilerthres"
+        "%dbgfmt" 
+        "%genhistory"
+        <!-- target -->
+        "%gui" "%multithread"
+        "%heaplimit" "%stacklimit" "%gcthreshold" "%gcauto" "%gendebug" "%alignment"
+        "%checkindex" "%checknil" "%checkdindex" "%checktype" "%checkrange" "%checkset"
+        "%checkdiv" "%checkproc" "%assert" "%ioverflow" "%coverflow"
+        <!-- decor -->
+        "%decor" "%errlim" "%errfmt"
+
+      </line>
+      <line name = "xm_cfg" 
+            dest = "xm_config_file" 
+            sep="\n">
+
+        "-backend=C"
+        <!-- setup -->
+        "%xdsdir"
+        <!-- source -->
+        "%extmod" "%extob2" "%extdef" "%extasm" "%extobj" "%extsym"
+        "%extcode" "%exthead" "%extexe" "%extdll" "%extexp"
+        "%m2extensions" "%m2addtypes" "%o2extensions" "%o2isopragma" "%o2numext" "%m2base16"
+        <!-- make -->
+        "-template=xm.tem"
+        "%makefile" "%mkfname" "%extmkfc"
+        "%genlib" "%exename" "%libname"    
+        <!-- converter -->
+        "%cc" "%include"
+        "%gencpp" "%genkrc" "%genctypes" "%genproclass" "%cstdlib"
+        "%comment" "%longname" "%lineno" "%noheader"
+        <!-- target -->
+        "%gui" "%multithread"
+        "%heaplimit" "%stacklimit" "%gcthreshold" "%gcauto" "%gendebug" "%alignment"
+        "%checkindex" "%checknil" "%checkdindex" "%checktype" "%checkrange" "%checkset"
+        "%checkdiv" "%checkproc" "%assert" "%ioverflow" "%coverflow" "%foverflow"
+        <!-- decor -->
+        "%decor" "%errlim" "%errfmt"
+
+     </line>
+   </output>
+
+  </package>
+
+  <project name="XDSProject"
+           label="XDS Project"
+           package="XDSPackage"
+           interface="intfDemoXDS">
+  </project>
+
+<!-- ===== Tools Definitions section ===== -->
+
+  <tool name     ="toolXDS-XC"
+        label    ="XDS-XC"
+        project  ="XDSProject"
+        package  ="XDSPackage"
+        exe      ="?%%OS: Windows=xc.exe, Linux=xc"
+        interface="intfDemoXDS" >
+
+    <extensions-list>
+        <extension mask="%extdef"/>
+        <extension mask="%extmod"/>
+        <extension mask="%extob2"/>
+    </extensions-list>
+
+    <parameter id      = "CompilationModule"
+               visible = "false"
+               type    = "String"
+               default = "%%CurrentFile"
+               format  = "SimplestOption"
+               readonly= "true" /> 
+
+    <!-- Overriding parameters -->
+    <parameter id      = "exename"            visible="true"
+               format  = "Equation" />
+
+    <parameter id      = "libname"            visible="true"
+               format  = "Equation" />
+
+    <parameter id      = "genlib"             visible="true"
+               format  = "Option" />
+
+    <parameter id      = "multithread"
+               format  = "Option" />
+
+    <!-- Input definitions -->
+    <input label="XC Call">
+      <group label="Source">
+        "m2extensions"
+        "m2addtypes"
+        "m2base16"
+        "o2extensions"
+        "o2isopragma"
+        "o2numext"
+      </group>
+      <group label="XC Compiler">
+        "compilerheap"
+        "compilerthres"
+        "dbgfmt"
+        "genhistory"
+      </group>
+      <group label="Make">
+        "extexe"
+        "extdll"
+        "extexp"
+      </group>
+      <group label="Target">
+        "multithread"
+        "genlib"
+        "exename"
+        "libname"
+        "heaplimit"
+        "stacklimit"
+        "gcthreshold"
+        "gcauto"
+        "gendebug"
+        "alignment"
+        "checkindex"
+        "checknil"
+        "checkdindex"
+        "checktype"
+        "checkrange"
+        "checkset"
+        "checkdiv"
+        "checkproc"
+        "assert"
+        "ioverflow"
+        "coverflow"
+        "foverflow"
+      </group>
+      <group label="Decor">
+        "decor"
+        "errlim"
+        "errfmt"
+      </group>
+      <group label="Project Options">
+        "lookup_def"
+        "lookup_mod"
+        "lookup_ob2"
+        "lookup_sym"
+        "lookup_obj"
+        "lookup_lib"
+        "lookup_exe"
+      </group>
+    </input>
+
+  <!-- Output definitions -->
+    <output>
+      <line name = "cmdline" sep=" ">
+        "=a" "=m" "%CompilationModule"
+        "%m2extensions" "%m2addtypes" "%o2extensions" "%o2isopragma" "%o2numext" "%m2base16"
+        "%genlib" "%exename" "%libname"
+        "%compilerheap" "%compilerthres"
+        "%dbgfmt" 
+        "%genhistory"
+        "%gui" "%multithread"
+        "%heaplimit" "%stacklimit" "%gcthreshold" "%gcauto" "%gendebug" "%alignment"
+        "%checkindex" "%checknil" "%checkdindex" "%checktype" "%checkrange" "%checkset"
+        "%checkdiv" "%checkproc" "%assert" "%ioverflow" "%coverflow"
+        "%decor" "%errlim" "%errfmt"
+        "%lookup_def" "%lookup_mod" "%lookup_ob2"
+        "%lookup_sym" "%lookup_obj" "%lookup_lib"
+        "%lookup_exe"
+      </line>
+    </output>
+
+  </tool>
+
+  <!-- =============================== -->
+  <tool name     ="toolXDS-XM"
+        label    ="XDS-XM"
+        project  ="XDSProject"
+        package  ="XDSPackage"
+        exe      ="?%%OS: Windows=xm.exe, Linux=xm"
+        interface="intfDemoXDS" >
+
+    <extensions-list>
+        <extension mask="%extdef"/>
+        <extension mask="%extmod"/>
+        <extension mask="%extob2"/>
+    </extensions-list>
+
+    <parameter id      = "CompilationModule"
+               visible = "false"
+               type    = "String"
+               default = "%%CurrentFile"
+               format  = "SimplestOption"
+               readonly= "true" /> 
+
+    <!-- Overriding parameters -->
+    <parameter id      = "exename"            visible="true"
+               format  = "Equation" />
+
+    <parameter id      = "libname"            visible="true"
+               format  = "Equation" />
+
+    <parameter id      = "genlib"             visible="true"
+               format  = "Option" />
+
+    <parameter id      = "multithread"
+               format  = "Option" />
+
+    <parameter id      = "include"
+               label   = "Extra Include Directories"
+               type    = "Pathlist"
+               default = ""
+               format  = "EquationList" />
+
+    <!-- Input definitions -->
+    <input label="XM Call">
+      <group label="Source">
+        "m2extensions"
+        "m2addtypes"
+        "m2base16"
+        "o2extensions"
+        "o2isopragma"
+        "o2numext"
+      </group>
+      <group label="XM Convertor">
+        "cc"
+        "include"
+        "gencpp"
+        "genkrc"
+        "genctypes"
+        "genproclass"
+        "cstdlib"
+        "comment"
+        "longname"
+        "lineno"
+        "noheader"
+      </group>
+      <group label="Make">
+        "extexe"
+        "extdll"
+        "extexp"
+      </group>
+      <group label="Target">
+        "multithread"
+        "genlib"
+        "exename"
+        "libname"
+        "heaplimit"
+        "stacklimit"
+        "gcthreshold"
+        "gcauto"
+        "gendebug"
+        "alignment"
+        "checkindex"
+        "checknil"
+        "checkdindex"
+        "checktype"
+        "checkrange"
+        "checkset"
+        "checkdiv"
+        "checkproc"
+        "assert"
+        "ioverflow"
+        "coverflow"
+        "foverflow"
+      </group>
+      <group label="Decor">
+        "decor"
+        "errlim"
+        "errfmt"
+      </group>
+      <group label="Project Options">
+        "lookup_def"
+        "lookup_mod"
+        "lookup_ob2"
+        "lookup_sym"
+        "lookup_obj"
+        "lookup_lib"
+        "lookup_exe"
+      </group>
+    </input>
+
+  <!-- Output definitions -->
+    <output>
+      <line name="cmdline" sep=" ">
+        "=a" "=m" "%CompilationModule"
+        "%m2extensions" "%m2addtypes" "%o2extensions" "%o2isopragma" "%o2numext" "%m2base16"
+        "%genlib" "%exename" "%libname"    
+        "%include"
+        "%gencpp" "%genkrc" "%genctypes" "%genproclass" "%cstdlib"
+        "%comment" "%longname" "%lineno" "%noheader"
+        "%gui" "%multithread"
+        "%heaplimit" "%stacklimit" "%gcthreshold" "%gcauto" "%gendebug" "%alignment"
+        "%checkindex" "%checknil" "%checkdindex" "%checktype" "%checkrange" "%checkset"
+        "%checkdiv" "%checkproc" "%assert" "%ioverflow" "%coverflow" "%foverflow"
+        "%decor" "%errlim" "%errfmt"
+        "%lookup_def" "%lookup_mod" "%lookup_ob2"
+        "%lookup_sym" "%lookup_obj" "%lookup_lib"
+        "%lookup_exe"
+      </line>
+    </output>
+  </tool>
+
+  <!-- =============================== -->
+  <tool name     ="toolXDS-XD"
+        label    ="XDS-XD"
+        project  ="XDSProject"
+        package  ="XDSPackage"
+        exe      ="xd.exe"
+        interface="intfDemoXDS" >
+
+    <parameter id      = "debugged_file"
+               label   = "Executable file to debug"
+               type    = "Filename"
+               default = ""
+               format  = "SimplestOption" />
+
+    <input label="XD Call">
+      <group label="Debugging options">
+        "debugged_file"
+      </group>
+    </input>
+
+    <output>
+      <line name="cmdline">
+        "%debugged_file"
+      </line>
+    </output>
+  </tool>
+</vdt-project>
+
+<!-- ===== Menu section ===== -->
+
+<!-- 
+<menu name="menuXDS" label="Demo XDS Tools">
+
+  <menu name="menuXC" label="Native Complilation">
+    <menuitem name ="itemCompileXC"
+              label="Compile"
+              call ="callXCcomp"/>
+    <menuitem name ="itemBuildXC"
+              label="Build"
+              call ="callXCmake"/>
+  </menu>
+
+  <menu name="menuXM" label="Via C Complilation">
+    <menuitem name ="itemConvertXM"
+              label="Convert"
+              call ="callXMcomp"/>
+    <menuitem name ="itemBuildXM"
+              label="Build"
+              call ="callXMmake"/>
+  </menu>
+
+  <menuitem name ="itemDebug"
+            label="Debug"
+            call ="callXD"/>
+  </menuitem>
+
+</menu>
+
+-->
+

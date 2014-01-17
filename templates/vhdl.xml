@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	description="Defines an architecture block" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.templates.vhdl.architecture"
+	name="architecture">architecture  ${name} of ${entity} is &#13;
+&#13;
+end architecture  ${name};
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	description="creates an entity block"
+	id="com.elphel.vdt.veditor.templates.vhdl.entity" 
+	enabled="true" 
+	name="entity">--&#13;
+-- Created: ${date}&#13;
+-- Author: ${user}&#13;
+--&#13;
+entity ${name} is
+	port(
+		${cursor}
+	);
+end entity ${name};
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	description="Port definitions"
+	id="com.elphel.vdt.veditor.templates.vhdl.port" 
+	enabled="true" 
+	name="port">port (
+	${cursor}
+);
+</template>
+
+<template
+	name="package"	
+	description="Package definitions"
+	id="com.elphel.vdt.veditor.templates.vhdl.package"	
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	enabled="true">package ${name} is
+	${cursor}	
+end package ${name};
+</template>
+
+<template
+	name="packagebody"	
+	description="Package body definitions"
+	id="com.elphel.vdt.veditor.templates.vhdl.packageBody"	
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	enabled="true">package body ${name} is
+	${cursor}
+end package body ${name};
+</template>
+
+<template
+	name="component"	
+	description="component definition"
+	id="com.elphel.vdt.veditor.templates.vhdl.component"	
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	enabled="true">component ${name} is
+	${cursor}	
+end component ${name};
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	description="Test Bench Template. This template is also used to automatically instantiate test benches. test_bench: name of the test bench arch, signals: the section where the signals will be placed, module: The name of the module under test, mod_def: the definition of the module"
+	id="com.elphel.vdt.veditor.templates.vhdl.testBench" 
+	enabled="true" 
+	name="testbench">library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+library work;
+
+entity ${testbench} is
+end ${testbench};
+
+-------------------------------
+-- Test bench for ${module}
+-------------------------------
+architecture Test of ${testbench} is
+${signals}
+begin
+  uut:
+   ${mod_def}
+end architecture Test;
+</template>
+
+
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+    id="com.elphel.vdt.veditor.templates.vhdl.constant"
+	name="constant"
+>constant</template>	
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="signal" 
+    id="com.elphel.vdt.veditor.templates.vhdl.signal"
+>signal</template>
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="std_logic"
+    id="com.elphel.vdt.veditor.templates.vhdl.std_logic"
+>std_logic</template>
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="std_logic_vector"
+    id="com.elphel.vdt.veditor.templates.vhdl.std_logic_vector"
+>std_logic_vector(${cursor} downto 0);</template>
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="conv_std_logic_vector"
+    id="com.elphel.vdt.veditor.templates.vhdl.conv_std_logic_vector"
+>conv_std_logic_vector(${cursor},${size});</template>
+
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description="(others=>'0')"
+	enabled="true"
+	name="others"
+    id="com.elphel.vdt.veditor.templates.vhdl.others"
+>(others=>'0')</template>
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description="Create asynchronous process"
+	enabled="true"
+	id="com.elphel.vdt.veditor.templates.vhdl.process"
+	name="process"    
+>process()
+begin
+	${cursor}
+end process;
+</template>
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description="Create synchronous process"
+	enabled="true"
+	name="process(clk)"
+    id="com.elphel.vdt.veditor.templates.vhdl.process_clk"
+>process(clk)
+begin
+	if rising_edge(clk) then
+		${cursor}
+	end if;
+end process;
+</template>
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description="Create synchronous process with asynchronous reset"
+	enabled="true"
+	name="process(clk,rst)"
+    id="com.elphel.vdt.veditor.templates.vhdl.process_clk_rst"
+>process(${rst},${clk})
+begin
+	if ${rst}='1' then
+		${cursor}
+	elsif rising_edge(${clk}) then
+		
+	end if;
+end process;
+</template>
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="if"
+    id="com.elphel.vdt.veditor.templates.vhdl.if"
+>if ${cursor} then
+	
+end if;
+</template>
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="if-else"
+    id="com.elphel.vdt.veditor.templates.vhdl.if_else"
+>if ${cursor} then
+	
+else
+	
+end if;
+</template>
+
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="type-record"
+    id="com.elphel.vdt.veditor.templates.vhdl.type_record"
+>type ${cursor} is record
+	
+end record;
+</template>
+
+<template
+	autoinsert="true"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="type-array"
+    id="com.elphel.vdt.veditor.templates.vhdl.type_array"
+>type ${name} is array(0 to ${top}) of ${type};</template>
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="subtype"
+    id="com.elphel.vdt.veditor.templates.vhdl.subtype"
+>subtype ${name} is std_logic_vector(${top} downto 0);</template>
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="for"
+    id="com.elphel.vdt.veditor.templates.vhdl.for"
+>for ${var}  in ${ll} to ${ul} loop
+	${cursor}
+end loop;
+</template>
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="assert"
+    id="com.elphel.vdt.veditor.templates.vhdl.assert"
+>assert ${cursor} report "Error: " severity failure;</template>
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="case"
+    id="com.elphel.vdt.veditor.templates.vhdl.case"
+>case ${cursor} is
+	when "0" =>
+		
+	when "1" =>
+		
+	when others =>
+		
+end case;
+</template>	
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="statemachine"
+    id="com.elphel.vdt.veditor.templates.vhdl.statemachine"
+>b_statemachine: block
+	type t_State is (sIDLE, sRUNNING);
+	signal mystate: t_State:=sIDLE;
+begin
+	process(Clk)
+	begin
+		if rising_edge(Clk) then
+			case mystate is
+				when sIDLE =&gt;
+					${cursor}
+				when sRUNNING =&gt;
+					
+				when others =&gt;
+					mystate &lt;= sIDLE;
+			end case;
+		end if;
+	end process;
+end block;
+</template>
+
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="statemachine with reset"
+    id="com.elphel.vdt.veditor.templates.vhdl.statemachine_rst"
+>b_statemachine: block
+	type t_State is (sIDLE, sRUNNING);
+	signal mystate: t_State:=sIDLE;
+begin
+	process(Clk)
+	begin
+		if rising_edge(Clk) then
+			if rst='1' then
+				mystate &lt;= sIDLE;
+			else
+				case mystate is
+					when sIDLE =&gt;
+						${cursor}
+					when sRUNNING =&gt;
+						
+					when others =&gt;
+						mystate &lt;= sIDLE;
+				end case;
+			end if;
+		end if;
+	end process;
+end block;
+</template>	
+
+<template
+	autoinsert="false"
+	context="com.elphel.vdt.veditor.templates.vhdl.context.newfile"
+	deleted="false"
+	description="This is a special template that is used to create new files."
+	enabled="true"
+	id="com.elphel.vdt.veditor.templates.vhdl.newFile"
+	name="VHDL NewFile"
+>--------------------------------------------------------------------------------
+-- Entity: ${modulename}
+-- Date:${year}-${month}-${day}  
+-- Author: ${user}     
+--
+-- Description: ${brief}
+--------------------------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+
+entity ${modulename} is
+	port  (
+		clk : in std_logic        -- input clock, xx MHz.
+	);
+end ${modulename};
+
+architecture arch of ${modulename} is
+
+begin
+
+
+
+end arch;
+
+</template>
+
+</templates>

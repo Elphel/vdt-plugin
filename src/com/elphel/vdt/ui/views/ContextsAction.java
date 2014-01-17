@@ -1,0 +1,124 @@
+/*******************************************************************************
+ * Copyright (c) 2006 Elphel, Inc and Excelsior, LLC.
+ * This file is a part of Eclipse/VDT plug-in.
+ * Eclipse/VDT plug-in is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * Eclipse/VDT plug-in is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with Eclipse VDT plug-in; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *******************************************************************************/
+package com.elphel.vdt.ui.views;
+
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+
+import com.elphel.vdt.core.tools.contexts.Context;
+import com.elphel.vdt.ui.VDTPluginImages;
+
+/**
+ * Drop-down action for contexts list.
+ * 
+ * Created: 12.04.2006
+ * @author  Lvov Konstantin
+ */
+abstract public class ContextsAction extends Action
+                                     implements IMenuCreator
+{
+    private Menu menu;
+
+    private List<Context> contexts;
+
+    protected String title;
+    protected Context lastSelected;
+    
+    public ContextsAction(String title) {
+        this.title = title;
+        setMenuCreator(this);
+        setEnabled(false);
+    }
+    
+    public void setContexts(List<Context> contexts) {
+        this.contexts = contexts;
+        if (contexts != null) {
+            for (Iterator<Context> i = contexts.iterator(); i.hasNext(); ) {
+                Context context = i.next();
+                if (context.isVisible()) {
+                    setEnabled(true);
+                    lastSelected = context;
+                    return;
+                }
+            }
+        }
+        setEnabled(false);
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.action.IMenuCreator#dispose()
+     */
+    public void dispose() {
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.action.IMenuCreator#getMenu(org.eclipse.swt.widgets.Control)
+     */
+    public Menu getMenu(Control parent) {
+        if (menu != null) {
+            menu.dispose();
+        }
+        
+        menu = new Menu(parent);
+        for (Iterator<Context> i = contexts.iterator(); i.hasNext(); ) {
+            Context context = (Context)i.next();
+            if (context.isVisible()) {
+                Action action = createContextAction(context);
+                ActionContributionItem item= new ActionContributionItem(action);
+                item.fill(menu, -1);
+            }
+        }
+        return menu;
+    }
+
+    abstract protected ShowContextAction createContextAction(Context context);
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.action.IMenuCreator#getMenu(org.eclipse.swt.widgets.Menu)
+     */
+    public Menu getMenu(Menu parent) {
+        return null;
+    }
+
+    // ------------------------------------------------------------------------
+    protected abstract class ShowContextAction extends Action {
+        protected Context context; 
+        
+        ShowContextAction(Context context) {
+            this.context = context;
+            
+            setText(context.getLabel());
+            
+            ImageDescriptor image = VDTPluginImages.getImageDescriptor(context);
+            if (image == null) {
+                image =  ContextsAction.this.getImageDescriptor(); // VDTPluginImages.DESC_PACKAGE_PROPERTIES;
+            }
+            setImageDescriptor(image);
+        }
+        
+        abstract public void run();
+    } // class ShowContextAction
+    
+} // class ContextsAction

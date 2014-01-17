@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--iverilog -Dlegacy_model -gno-specify -v -o x353mjpeg_test -sglbl -stestbench353 -y./unisims -y. x353_1.tf glbl.v-->
+<vdt-project>
+
+<interface name="IVerilog"
+     extends="project_interface">
+    <!-- Syntax definitions -->
+    <syntax name="BoolParamSyntax"     format="-%%ParamName"/>
+    <syntax name="InputPatternSyntax"  format= "’%%ParamValue’"/>
+            
+    <typedef name= "ModuleLibraryType" list="true">
+        <paramtype kind="string"
+                   default=""
+		           textkind="dir"
+                   maxlength="256"
+                   sensitivity="sensitive"/>
+    </typedef>
+            
+            
+
+            
+            
+
+    <syntax name   = "D_ParamSyntax"
+            format = "-D%%ParamName"/>
+    <syntax name   = "g_ParamSyntax"
+            format = "-g%%ParamName"/>
+
+    <typedef name="LegacyModelType">
+        <paramtype kind="bool"
+                   formatTrue="-Dlegacy_model"
+                   formatFalse=""/>
+    </typedef>
+    <typedef name="NoSpecifyType">
+        <paramtype kind="bool"
+                   formatTrue="-gno-specify"
+                   formatFalse=""/>
+    </typedef>
+                   
+            
+        <syntax name   = "QuotedFileListSyntax"
+                format = "--%%ParamName %(&quot;%%FileList&quot;%| %)"/>
+        <syntax name   = "QuotedTopModuleSyntax"
+                format = "--%%ParamName=%%TopModule"/>
+        <syntax name   = "QuotedTopModulesSyntax"
+                format = "--%%ParamName %(&quot;%%TopModules&quot;%| %)"/>
+        <syntax name   = "QuotedSourceListSyntax"
+                format = "--%%ParamName %(&quot;%%SourceList&quot;%| %)"/>
+        <syntax name   = "QuotedCurrentFileSyntax"
+                format = "--%%ParamName=&quot;%%CurrentFile&quot;"/>
+        <syntax name   = "QuotedCurrentFileBaseSyntax"
+                format = "--%%ParamName=&quot;%%CurrentFileBase&quot;"/>
+        <syntax name   = "QuotedProjectNameSyntax"
+                format = "--%%ParamName=&quot;%%ProjectName&quot;"/>
+                
+                
+                
+ <!-- Actually used -->           
+        <syntax name   = "JustValueSyntax"
+                format = "%%ParamValue"></syntax>
+        <syntax name   = "TopModuleSyntax"
+                format = "-s%%TopModule"/>
+        <syntax name   = "TopModulesOtherSyntax"
+                format = "%(-s%%ParamValue%| %)"/>
+        <syntax name   = "ModuleLibrarySyntax"
+                format = "%(-y%%ParamValue%| %)"/>
+        <syntax name   = "SourceListSyntax"
+                format = "%(%%SourceList%| %)"/>
+
+        <syntax name   = "ExtraFilesSyntax"
+                format = "%(%%ParamValue%| %)"/>
+         <syntax name   = "exeFileSyntax"
+                format = "%%ParamValue"/>
+    <syntax name   = "SwitchSyntax"
+            format = "-%%ParamName"/>
+            
+                
+                
+                
+                
+  <!-- typedef -->
+
+        <typedef name="MyTypeList" list="true">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="sensitive"/>
+        </typedef>
+
+    
+        <typedef name= "ExtraFilesType" list="true">
+            <paramtype kind="string"
+		           textkind="file"
+                   maxlength="256"
+                   sensitivity="sensitive"/>
+        </typedef>
+        
+        <typedef name="exeType">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="sensitive"
+                       textkind="file"/>
+        </typedef>
+        
+        <typedef name="SwitchType">
+            <paramtype kind="bool"
+                   formatTrue="-%%ParamName"
+                   formatFalse=""/>
+        </typedef>
+<!--        
+        <typedef name= "StringType" list="true">
+            <paramtype kind="string"
+		           textkind="text"
+                   maxlength="256"
+                   sensitivity="sensitive"/>
+        </typedef>
+-->            
+
+</interface>
+
+<project name="IVerilogProject"
+             label="iverilog project"
+             interface="IVerilog">
+</project>
+
+<tool name        = "iverilog"
+      label       = "Icarus Verilog compiler"
+      exe="iverilog"
+      shell       = "bash"
+      interface   = "IVerilog"
+      errors      = "(.*):([0-9]+): [a-z_\- ]*error: (.*)"
+      warnings    = "(.*):([0-9]+): [a-z_\- ]*warning: (.*)"
+      info        = "(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--does not actually exist -->
+      
+      <extensions-list>
+          <extension mask="v"/>
+          <extension mask="tf"/>
+      </extensions-list>
+      
+      
+    <parameter id       = "Param_Shell_Options"
+               label    = "Param_Shell_Options"
+               type     = "StringType"
+               format   = "JustValueSyntax"
+               default  = "-c"
+               readonly = "false"
+               visible  = "true"/>
+
+    <parameter id       = "Param_PreExe"
+               label    = "Param_PreExe"
+               type     = "StringType"
+               format   = "JustValueSyntax"
+               default  = ""
+               readonly = "false"
+               visible  = "true"/>
+
+    <parameter id       = "Param_Exe"
+               label    = "Param_Exe"
+               type     = "exeType"
+               format   = "exeFileSyntax"
+               default  = "/usr/bin/iverilog"
+               readonly = "false"
+               visible  = "true"/>
+      
+    <parameter id       = "Param_TopModule"
+               label    = "Param_TopModule"
+               type     = "StringType"
+               format   = "TopModuleSyntax"
+               default  = "%%TopModule"
+               readonly = "true"
+               visible  = "true"/>
+      
+    <parameter id       = "TopModulesOther"
+               type     = "StringListType"
+               format   = "TopModulesOtherSyntax"
+               default  = ""
+               omit     = ""
+               label    = "Select top modules (not referenced by other modules)"
+               readonly = "false"
+               visible  = "true"/>
+               
+    <parameter id       = "ModuleLibrary"
+               type     = "ModuleLibraryType"
+               format   = "ModuleLibrarySyntax"
+               default  = ""
+               label    = "Select libraries to include"
+               omit     = ""
+               readonly = "false"
+               visible  = "true"/>
+               
+               
+    <parameter id       = "ExtraFiles"
+               type     = "ExtraFilesType"
+               format   = "ExtraFilesSyntax"
+               default  = ""
+               label    = "Select extra files to include"
+               readonly = "false"
+               visible  = "true"/>
+               
+               
+    <parameter id      = "LegacyModel"
+	       outid   = "legacy_model"
+               type    = "LegacyModelType"
+               format  = "D_ParamSyntax"
+               default = "true"
+               label   = "Use legacy model"/>
+
+    <parameter id      = "NoSpecify"
+	       outid   = "no-specify"
+               type    = "NoSpecifyType"
+               format  = "g_ParamSyntax"
+               default = "true"
+               label   = "Use no-specify"/>
+<!-- -->
+    <parameter id       = "SourceList"
+               type     = "MyTypeList"
+               format   = "SourceListSyntax"
+               default  = ""
+               readonly = "true"
+               visible  = "false"/>
+<!--    -->
+    <parameter id      = "v"
+               type    = "SwitchType"
+               format  = "SwitchSyntax"
+               default = "true"
+               label   = "Verbose"/>
+               
+    <parameter id       = "Param_SourceList"
+               label    = "Param_SourceList"
+               type     = "MyTypeList"
+               format   = "SourceListSyntax"
+               default  = ""
+               readonly = "true"
+               visible  = "true"/>
+
+    <parameter id      = "ErrorsOnly"
+               type    = "LegacyModelType"
+               format  = "D_ParamSyntax"
+               default = "false"
+               label   = "Only errors/warning to console"/>
+               
+    <parameter id       = "Filter_String"
+               label    = "Filter_String"
+               type     = "StringType"
+               format   = "JustValueSyntax"
+               default  = "2&gt;&amp;1 | tee iverilog.log | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
+               readonly = "false"
+               visible  = "true"/>
+               
+	<input>
+	  <group name="files" label="Files">
+	    "Param_PreExe"
+	    "Param_Exe"
+	    "Param_Shell_Options"
+	    "Param_TopModule"
+	    "TopModulesOther"
+	    "ModuleLibrary"
+	    "ExtraFiles"
+	  </group>
+	  <group name="options" label="Options">
+	    "ErrorsOnly"
+	    "Filter_String"
+	    "v"
+	    "LegacyModel"
+	    "NoSpecify"
+	    <!--	    "SourceList" -->
+	  </group>
+	</input>
+
+	<output>
+		<line name = "command_line" sep = " ">
+		"%Param_Shell_Options"
+		"%Param_PreExe"
+		"%Param_Exe"
+	    "%Param_TopModule"
+	    "%TopModulesOther"
+	    "%ModuleLibrary"
+	    "%LegacyModel"
+	    "%NoSpecify"
+	    "%v"
+	    "%SourceList"
+	    "%ExtraFiles"
+	    <if ErrorsOnly="true">
+	        "%Filter_String"
+	    </if>
+<!--
+		"-s counter_tb"
+		"%SourceList" -->
+		</line>
+	</output>
+
+
+</tool>
+
+
+
+</vdt-project>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+    <interface name = "installation_interface">
+        <typedef name = "OSKind">
+            <paramtype kind="enum" base="String">
+                <item value="Windows" />                            
+                <item value="Linux" />                            
+            </paramtype>
+        </typedef>
+
+        <syntax name="Equation" format="-%%ParamName=%%ParamValue"  />
+    </interface>
+
+    <installation name="system"
+                  label="System Installation"
+                  interface="installation_interface"
+                  menu="MainDesignMenu3">
+
+        <parameter id      = "OSName"
+                   label   = "OS Name"
+                   type    = "OSKind"
+                   default = "%%OS"
+                   format  = "Equation"
+                   readonly= "true" />
+
+        <input>
+          <group name="General" label="System properties">
+            "OSName"
+          </group>
+        </input>
+
+        <output>
+        </output>
+    </installation>
+</vdt-project>

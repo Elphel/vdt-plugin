@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="veditor" default="compile" basedir=".">
+
+	<!-- Eclipse & JavaCC installation directry -->
+	<property file="build.properties"/>
+	<property environment="env"/>
+	<property name="eclipse_plugin_dir" value="/${env.ECLIPSE_HOME}/plugins"/>
+	<property name="javacc_dir" value="/${env.JAVACC_HOME}"/>
+
+	<!-- must be linked with plugin.xml -->
+	<property name="project" value="com.elphel.vdt.veditor"/>
+	<property name="plugin_version" value="1.1.1"/>
+
+	<property name="src" value="src"/>
+	<property name="dst" value="bin"/>
+
+	<property name="javacc_generated" value="_generated"/>
+	<property name="javacc_file_dir_verilog" value="net/sourceforge/veditor/parser/verilog"/>
+	<property name="javacc_file_dir_vhdl" value="net/sourceforge/veditor/parser/vhdl"/>
+	<property name="javacc_src_verilog" value="${src}/${javacc_file_dir_verilog}/VerilogParserCore.jj"/>
+	<property name="javacc_src_vhdl" value="${src}/${javacc_file_dir_vhdl}/vhdl.jj"/>
+	<property name="jtree_src_vhdl" value="${src}/${javacc_file_dir_vhdl}/vhdl.jjt"/>
+	<property name="javacc_dst_verilog" value="${javacc_generated}/${javacc_file_dir_verilog}"/>
+	<property name="javacc_dst_vhdl" value="${javacc_generated}/${javacc_file_dir_vhdl}"/>
+	<property name="jjtree_dst" value="${src}/${javacc_file_dir_vhdl}"/>
+
+	<property name="jar" value="veditor.jar"/>
+	<property name="project_version" value="${project}_${plugin_version}"/>
+	<property name="zip" value="${project_version}.jar"/>
+
+	<path id="compile.classpath">
+		<fileset dir="${eclipse_plugin_dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+	</path>
+	
+   <target name="jjtree">       
+            <jjtree
+                javacchome="${javacc_dir}"
+                target="${jtree_src_vhdl}"  
+            	static="false"
+                outputdirectory="${jjtree_dst}" />
+    </target>
+
+	<target name="verilogParser">
+		<mkdir dir="${javacc_dst_verilog}" />		
+		<javacc
+			javacchome="${javacc_dir}"
+	 		target="${javacc_src_verilog}"
+	 		outputdirectory="${javacc_dst_verilog}" />		
+	</target>
+	
+	<target name="vhdlParser" depends="jjtree">	        
+	        <mkdir dir="${javacc_dst_vhdl}" />	       
+	        <javacc
+	            javacchome="${javacc_dir}"
+	            target="${javacc_src_vhdl}"
+	            static="false"
+	            outputdirectory="${javacc_dst_vhdl}" />
+	</target>
+
+	<target name="compile" depends="verilogParser,vhdlParser">
+		<mkdir dir="plugins"/>
+		<mkdir dir="${dst}" />
+		<javac
+			target="1.5"
+			source="1.5"
+			debug="on"
+			srcdir="${src};${javacc_generated}"
+			destdir="${dst}">
+			<classpath refid="compile.classpath"/>
+		</javac>
+		<copy todir="${dst}" >
+			<fileset dir="${src}" includes="**/*.properties"/>
+		</copy>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar
+			jarfile="${jar}"
+		  	basedir="${dst}">
+		</jar>
+	</target>
+	
+	<target name="export" depends="jar">
+		<mkdir dir="plugins"/>
+		<copydir src="icons" dest="plugins/icons"/>
+		<copydir src="templates" dest="plugins/templates"/>
+		<copydir src="META-INF" dest="plugins/META-INF"/>
+		<copy file="plugin.xml" todir="plugins"/>
+		<copy file="about.html" todir="plugins"/>
+		<copy file="${jar}" todir="plugins"/>
+		<zip
+			zipfile="${zip}"
+			basedir="plugins"
+			includes="**">
+		</zip>
+		<delete dir="plugins"/>
+	</target>
+
+	<target name="clean">		
+		<delete dir="${javacc_dst_vhdl}"/>
+		<delete dir="${javacc_dst_verilog}"/>
+		<delete file="${javacc_src_vhdl}"/>
+		<delete dir="${dst}"/>
+		<delete file="${jar}"/>		
+		<delete file="${zip}"/>
+	</target>
+	
+</project>
+

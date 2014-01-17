@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+    <interface name="ModelSIMControlInterface">
+        <typedef name="DoFileType">
+            <paramtype kind="string"
+                       maxlength="256"
+                       textkind="file"
+                       filemask="*.fdo"
+                       sensitivity="uppercase"/>
+        </typedef>
+
+        <typedef name="StringType">
+            <paramtype kind="string"
+                       maxlength="32"
+                       sensitivity="uppercase"/>
+        </typedef>
+
+        <typedef name="SourceListType">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="uppercase"/>
+        </typedef>
+
+        <typedef name="SimPropType">
+            <paramtype kind="string"
+                       maxlength="32"
+                       sensitivity="uppercase"/>
+        </typedef>
+
+        <typedef name="EnumBaseType">
+            <paramtype kind="string"
+                       maxlength="32"
+                       sensitivity="uppercase"/>
+        </typedef>
+        
+        <typedef name="SimResolutionType">
+            <paramtype kind="enum" base="EnumBaseType">
+                <item label="1 fs"    value="1fs"/>
+                <item label="10 fs"   value="10fs"/>
+                <item label="100 fs"  value="100fs"/>
+                <item label="1 ps"    value="1ps"/>
+                <item label="10 ps"   value="10ps"/>
+                <item label="100 ps"  value="100ps"/>
+                <item label="1 ns"    value="1ns"/>
+                <item label="10 ns"   value="10ns"/>
+                <item label="100 ns"  value="100ns"/>
+                <item label="1 us"    value="1us"/>
+                <item label="10 us"   value="10us"/>
+                <item label="100 us"  value="100us"/>
+                <item label="1 ms"    value="1ms"/>
+                <item label="10 ms"   value="10ms"/>
+                <item label="100 ms"  value="100ms"/>
+                <item label="1 sec"   value="1sec"/>
+                <item label="10 sec"  value="10sec"/>
+                <item label="100 sec" value="100sec"/>
+            </paramtype>
+        </typedef>
+
+        <typedef name="SignalWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view signals"
+                       formatFalse=""/>
+        </typedef>
+
+        <typedef name="WaveWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view wave; add wave *"
+                       formatFalse=""/>
+        </typedef>
+
+        <typedef name="StructWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view structure"
+                       formatFalse=""/>
+        </typedef>
+
+        <typedef name="SourceWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view source"
+                       formatFalse=""/>
+        </typedef>
+
+        <typedef name="ListWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view list; add list -r *"
+                       formatFalse=""/>
+        </typedef>
+
+        <typedef name="VariableWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view variables"
+                       formatFalse=""/>
+        </typedef>
+
+        <typedef name="ProcessWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view process"
+                       formatFalse=""/>
+        </typedef>
+
+        <typedef name="DataFlowWindowType">
+            <paramtype kind="bool"
+                       formatTrue="view dataflow"
+                       formatFalse=""/>
+        </typedef>
+        <syntax name   = "DoFileSyntax"
+                format = "-%%ParamName %%ParamValue"/>
+
+        <syntax name   = "SourceListSyntax"
+                format = "%%FileList"/>
+
+        <syntax name   = "StringSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "SimPropSyntax"
+                format = "%%ParamName %%ParamValue"/>
+
+        <syntax name   = "SimResolutionSyntax"
+                format = "-t %%ParamValue"/>
+
+        <syntax name   = "SignalWindowSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "WaveWindowSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "StructWindowSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "SourceWindowSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "ListWindowSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "VariableWindowSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "ProcessWindowSyntax"
+                format = "%%ParamValue"/>
+
+        <syntax name   = "DataFlowWindowSyntax"
+                format = "%%ParamValue"/>
+    </interface>
+
+    <project name="ModelSIMProject"
+             label="ModelSIM Project"
+             interface="ModelSIMControlInterface">
+    </project>
+
+    <tool name        = "ModelSIM"
+          project     = "ModelSIMProject"
+          label       = "Run ModelSIM simulator tool"
+          exe         = "?%%OS: Windows=modelsim.exe, Linux=modelsim"
+          interface   = "ModelSIMControlInterface"
+          description = "ModelSIM simulator">
+
+        <parameter id       = "do"
+                   type     = "DoFileType"
+                   format   = "DoFileSyntax"
+                   default  = "testbench.fdo"
+                   readonly = "true"
+                   visible  = "false"/>
+                            
+        <parameter id       = "SourceList"
+                   type     = "SourceListType"
+                   format   = "SourceListSyntax"
+                   default  = ""
+                   readonly = "true"
+                   visible  = "false"/>
+
+        <parameter id      = "run"
+                   type    = "SimPropType"
+                   format  = "SimPropSyntax"
+                   default = "1000ns"
+                   label   = "Simulation Run Time"/>
+
+        <parameter id      = "SimResolution"
+                   type    = "SimResolutionType"
+                   format  = "SimResolutionSyntax"
+                   default = "1ps"
+                   label   = "Simulation Resolution"/>
+
+        <parameter id      = "SignalWindow"
+                   type    = "SignalWindowType"
+                   format  = "SignalWindowSyntax"
+                   default = "true"
+                   label   = "Signal Window"/>
+                                              
+        <parameter id      = "WaveWindow"
+                   type    = "WaveWindowType"
+                   format  = "WaveWindowSyntax"
+                   default = "true"
+                   label   = "Wave Window"/>
+                                              
+        <parameter id      = "StructWindow"
+                   type    = "StructWindowType"
+                   format  = "StructWindowSyntax"
+                   default = "true"
+                   label   = "Struct Window"/>
+                                              
+        <parameter id      = "SourceWindow"
+                   type    = "SourceWindowType"
+                   format  = "SourceWindowSyntax"
+                   default = "false"
+                   label   = "Source Window"/>
+                                              
+        <parameter id      = "ListWindow"
+                   type    = "ListWindowType"
+                   format  = "ListWindowSyntax"
+                   default = "false"
+                   label   = "List Window"/>
+                                              
+        <parameter id      = "VariableWindow"
+                   type    = "VariableWindowType"
+                   format  = "VariableWindowSyntax"
+                   default = "false"
+                   label   = "Variable Window"/>
+                                              
+        <parameter id      = "ProcessWindow"
+                   type    = "ProcessWindowType"
+                   format  = "ProcessWindowSyntax"
+                   default = "false"
+                   label   = "Process Window"/>
+                                              
+        <parameter id      = "DataFlowWindow"
+                   type    = "DataFlowWindowType"
+                   format  = "DataFlowWindowSyntax"
+                   default = "false"
+                   label   = "DataFlow Window"/>
+
+        <input>
+            <group name="sim" label="Simulation Properties">
+                "run"
+                "SimResolution"
+            </group>
+            <group name="display" label="Display Properties">
+                "SignalWindow"
+                "WaveWindow"
+                "StructWindow"
+                "SourceWindow"
+                "ListWindow"
+                "VariableWindow"
+                "ProcessWindow"
+                "DataFlowWindow"
+            </group>
+        </input>
+
+        <output>
+            <line name="general_output" dest="do">
+                "# Auto generated by Elphel VDT plugin"
+                "vlib work"
+                "%SourceList"
+                "%SimRunTime"
+                "vsim %SimResolution -L xilinxcorelib_ver -L unisims_ver -lib work testbench glbl"
+                "%SignalWindow"
+                "%WaveWindow"
+                "%StructWindow"
+                "%SourceWindow"
+                "%ListWindow"
+                "%VariableWindow"
+                "%ProcessWindow"
+                "%DataFlowWindow"
+                "%run"
+            </line>
+        </output>
+    </tool>
+</vdt-project>

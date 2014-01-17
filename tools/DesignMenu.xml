@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+    <menu name="MainDesignMenu"
+          label="Design Menu"
+          icon="sample.gif"
+          tip="This is a common menu that contains common items">
+
+        <menu name="Verilog" 
+              label="Verilog Development Tools"
+              icon="newmod_wiz.gif">
+
+            <menuitem name="cver"
+                      label="Run CVer simulator"
+                      icon="cver.gif"
+                      call="cver"/>
+
+            <menuitem name="modelsim"
+                      label="Run ModelSIM simulator"
+                      icon="modelsim.gif"
+                      call="ModelSIM"/>
+
+            <menuitem name="xst"
+                      label="Run XST (Synthesis)"
+                      icon="xst.gif"
+                      call="XST"/>
+
+            <menuitem name="IVerilog"
+                      label="Run Icarus Verilog (Simulation)"
+                      icon="iverilog.ico"
+                      call="iverilog"/>
+
+            <menuitem name="GTKWave"
+                      label="Run GTKWave (Waves viewer)"
+                      icon="gtkwave.ico"
+                      call="iverilog"/>
+        </menu>
+
+        <menu name="XDS" 
+              label="Demo XDS Tools"
+              icon="xds.gif">
+
+            <menu name="menuXC" 
+                  label="Native Complilation"
+                  icon="xds.gif">
+
+                <menuitem name="toolXDS-XC"
+                          label="Run XDS Native Compiler"
+                          icon="xds.gif"
+                          call="toolXDS-XC"/>
+            </menu>
+
+            <menu name="menuXM"
+                  label="Via C Complilation"
+                  icon="xds.gif">
+
+                <menuitem name="toolXDS-XM"
+                          label="Run XDS Convertor"
+                  visible="false"
+                          icon="xds.gif"
+                          call="toolXDS-XM"/>
+            </menu>
+
+            <menuitem name="toolXDS-XD"
+                      label="Run XDS Debugger"
+                      icon="xds.gif"
+                      call="toolXDS-XD"/>
+        </menu>
+
+        <menu name="OtherStuff" 
+              label="Various Sample Tools">
+
+            <menuitem name="tool1"
+                      label="MyTool_exe"
+                      icon="my_tool.gif"
+                      call="MyTool_exe"/>
+
+            <menuitem name="tool2"
+                      label="MyTool2_exe"
+                      icon="my_tool.gif"
+                      call="MyTool2_exe"/>
+
+            <menuitem name="tool3"
+                      label="MyTool"
+                      icon="my_tool.gif"
+                      call="MyTool"/>
+        </menu>
+
+    </menu>
+    
+    <menu name="MainDesignMenu2"
+          label="Design Menu 2"
+          icon="sample.gif"
+          tip="This is an user menu"
+          inherits="MainDesignMenu">
+                              
+        <menu name="OtherStuff">
+            <menuitem name="tool4"
+                      label="Run My Tool (4)"
+                      icon="my_tool.gif"
+                      call="MyTool"/>
+        </menu>
+
+    </menu>
+
+    <menu name="MainDesignMenu3"
+          label="Design Menu 3"
+          icon="sample.gif"
+          tip="This is another custom user menu"
+          inherits="MainDesignMenu2">
+                              
+        <menu name="JustAnotherStuff"
+              label="Just Another Stuff"
+              icon="sample.gif"
+              inherits="MainDesignMenu2"
+              after="XDS"/>
+
+        <menuitem name="GREP"
+                  label="Run GREP"
+                  call="grep"/>
+
+    </menu>
+
+</vdt-project>

@@ -1,0 +1,1110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+
+<!-- ===== Interface Definitions section ===== -->
+
+    <interface name = "XilinxInterface">
+
+        <typedef name = "EnumProjectType">
+          <paramtype kind="enum" base="String">
+            <item value="FPGA" /> 
+            <item value="CPLD" /> 
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumDeviceFamily">
+          <paramtype kind="enum" base="String">
+            <item label="Automative Spartan2E"  value="aspartan2e" />  
+            <item label="Automative Spartan3"   value="aspartan3"  />         
+            <item label="Spartan2"              value="spartan2"   />
+            <item label="Spartan2E"             value="spartan2e"  />
+            <item label="Spartan3"              value="spartan3"   />
+            <item label="Spartan3E"             value="spartan3e"  />
+            <item label="Virtex2"               value="virtex2"    />           
+            <item label="Virtex2P"              value="virtex2p"   /> 
+            <item label="Virtex4"               value="virtex4"    />
+            <item label="VirtexE"               value="virtexe"    />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumDevice">
+          <paramtype kind="enum" base="String">
+            <item value="xc3s50"    />    
+            <item value="xc3s200"   /> 
+            <item value="xc3s400"   /> 
+            <item value="xc3s1000"  />  
+            <item value="xc3s1000I" />   
+            <item value="xc3s1500"  />     
+            <item value="xc3s1500I" />      
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumPackage">
+          <paramtype kind="enum" base="String">
+            <item value="fg320" />       
+            <item value="fg456" />   
+            <item value="fg676" />      
+            <item value="ft256" />      
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumSpeedGrade">
+          <paramtype kind="enum" base="String">
+            <item value="-5" />       
+            <item value="-4" />   
+          </paramtype>
+        </typedef>
+
+
+        <typedef name = "EnumPrjFormat">
+          <paramtype kind="enum" base="String">
+            <item value="Mixed"   />                            
+            <item value="Verilog" />
+            <item value="VHDL"    />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumLogFormat">
+          <paramtype kind="enum" base="String">
+            <item label="Full"   value = "" />                            
+            <item value="Silent" />                            
+            <item value="ISE"    />
+            <item value="XFLOW"  />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumSpeedArea">
+          <paramtype kind="enum" base="String">
+            <item value="Speed" />                            
+            <item value="Area"  />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumNormalHigh">
+          <paramtype kind="enum" base="String">
+            <item label="Normal" value="1" />                            
+            <item label="High"   value="2" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumNoIncrem">
+          <paramtype kind="enum" base="String">
+            <item                            value="No" />                            
+            <item label="Incremental Design" value="incremental_design" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumYesNoAuto">
+          <paramtype kind="enum" base="String">
+            <item value="Yes"  />                            
+            <item value="No"   />
+            <item value="Auto" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumYesNoOpt">
+          <paramtype kind="enum" base="String">
+            <item value="Yes"/>                            
+            <item value="No" />
+            <item value="Optimize" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumTrueFalseAuto">
+          <paramtype kind="enum" base="String">
+            <item label="Yes" value="true"  />                            
+            <item label="No"  value="false" />
+            <item value="Auto" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumYesNoForce">
+          <paramtype kind="enum" base="String">
+            <item value="Yes"   />                            
+            <item value="No"    />
+            <item value="Force" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumYesNoSoft">
+          <paramtype kind="enum" base="String">
+            <item value="Yes"  />                            
+            <item value="No"   />
+            <item value="Soft" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumYesNoOnly">
+          <paramtype kind="enum" base="String">
+            <item value="Yes"  />                            
+            <item value="No"   />
+            <item value="Only" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumYesNoFwBw">
+          <paramtype kind="enum" base="String">
+            <item value="Yes"  />                            
+            <item value="No"   />
+            <item value="Forward"  />
+            <item value="Backward" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumAutoMuxfMuxcy">
+          <paramtype kind="enum" base="String">
+            <item value="Auto"  />                            
+            <item value="MUXF"  />
+            <item value="MUXCY" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumAutoDistrBlock">
+          <paramtype kind="enum" base="String">
+            <item value="Auto"       />                            
+            <item value="Distributed"/>
+            <item value="Block"      />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumAutoBlockLut">
+          <paramtype kind="enum" base="String">
+            <item value="Auto"       />                            
+            <item value="Block"      />
+            <item value="LUT"        />
+            <item value="Pipe-LUT"   />                            
+            <item value="Pipe-Block" />
+            <item value="CSD"        />
+            <item value="KCM"        />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumOptGoal">
+          <paramtype kind="enum" base="String">
+            <item label="AllClockNets"     value="allclocknets"     />
+            <item label="Inpad to Outpad"  value="inpad_to_outpad"  />
+            <item label="Offset In Before" value="offset_in_before" />
+            <item label="Offset In After"  value="offset_in_after"  />
+            <item label="Maximum Delay"    value="max_delay"        />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumHiSeparator">
+          <paramtype kind="enum" base="String">
+            <item value="/" />
+            <item value="_" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumBusDelim">
+          <paramtype kind="enum" base="String">
+            <item value="&lt;>" />
+            <item value="{}" />
+            <item value="[]" />
+            <item value="()" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumCase">
+          <paramtype kind="enum" base="String">
+            <item value="Upper"    />
+            <item value="Lower"    />
+            <item value="Maintain" />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumFSM">
+          <paramtype kind="enum" base="String">
+            <item value="Auto"      />
+            <item value="One-Hot"   />
+            <item value="Compact"   />
+            <item value="Sequential"/>
+            <item value="Gray"      />
+            <item value="Johnson"   />
+            <item value="User"      />
+            <item value="Speed1"    />
+            <item value="None"      />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumAutoUser">
+          <paramtype kind="enum" base="String">
+            <item value="Auto"   />
+            <item value="User"   />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumAutoHotUser">
+          <paramtype kind="enum" base="String">
+            <item value="Auto"   />
+            <item value="One-Hot"/>
+            <item value="User"   />
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumFullPar">
+          <paramtype kind="enum" base="String">
+            <item value="No"           />
+            <item value="Full"         />
+            <item value="Parallel"     />
+            <item value="Full-Parallel"/>
+          </paramtype>
+        </typedef>
+
+        <typedef name = "EnumLutBram">
+          <paramtype kind="enum" base="String">
+            <item value="LUT"  />
+            <item value="Bram" />
+          </paramtype>
+        </typedef>
+     <!-- end of types -->
+
+  <!-- Syntax definitions -->
+        <syntax name="CommonParameter" format="-%%ParamName %%ParamValue" />
+        <syntax name="ListParameter"   format="-%%ParamName {%(%%ParamValue%|,%)}" />
+
+    </interface>
+
+<!-- ===== Xilinx Package section ===== -->
+  <package name="XilinxPackage"
+           label="Xilinx Package"
+           interface="XilinxInterface">
+
+  <!-- Input definitions -->
+    <input label="Xilinx">
+    </input>
+
+  <!-- Output definitions -->
+    <output>
+    </output>
+
+  </package>
+
+
+<!-- ===== Xilinx Project section ===== -->
+
+  <project name="XilinxProject"
+           label="Xilinx"
+           package="XilinxPackage"
+           interface="XilinxInterface">
+
+    <parameter id      = "project_type"
+               label   = "Project Type"
+               type    = "EnumProjectType"
+               default = "FPGA"
+               format  = "None" />
+        
+  <!-- Parameters defintions -->
+    <parameter id      = "device_family"
+               label   = "Device Family"
+               type    = "EnumDeviceFamily"
+               default = "spartan3"
+               format  = "None" />
+
+    <parameter id      = "device"
+               label   = "Device"
+               type    = "EnumDevice"
+               default = "xc3s1000"
+               format  = "CopyValue" />
+
+    <parameter id      = "package"
+               label   = "Package"
+               type    = "EnumPackage"
+               default = "ft256"
+               format  = "CopyValue" />
+
+    <parameter id      = "speed_grade"
+               label   = "Speed Grade"
+               type    = "EnumSpeedGrade"
+               default = "-4"
+               format  = "CopyValue" />
+
+    <parameter id      = "TargetDevice" visible="false"
+               type    = "String"
+               default = "%device-%package%speed_grade"
+               format  = "None" />
+                              
+  <!-- Input definitions -->
+    <input label="Xilinx">
+        <group label="Target technology">
+            "project_type"
+            "device_family"
+            "device"
+            "package"
+            "speed_grade"
+        </group>
+    </input>
+
+  <!-- Output definitions -->
+    <output>
+    </output>
+
+  </project>
+
+
+<!-- ===== Tools Definitions section ===== -->
+
+    <tool name    = "XST"
+          label   = "Synthesis"
+          package = "XilinxPackage"
+          project = "XilinxProject"
+          exe     = "?%%OS: Windows=xst.exe, Linux=xst"
+          interface = "XilinxInterface"
+          description = "Xilinx Synthesis Tool" >
+
+      <extensions-list>
+          <extension mask="v"/>
+      </extensions-list>
+
+      <!-- File containing source files names -->
+      <parameter id      = "projectfn" visible = "false"
+                 outid   = "pfn"
+                 type    = "Filename"
+                 default = "project.xst"
+                 format  = "CommonParameter" />
+
+      <!-- Script file name for other options -->
+      <parameter id      = "scriptfn" visible = "false"
+                 outid   = "ifn"                
+                 type    = "Filename"
+                 default = "%%ProjectName.xst"
+                 format  = "CommonParameter" />
+
+      <!-- Project file format -->
+      <parameter id      = "ifmt" visible = "false"
+                 type    = "EnumPrjFormat"
+                 default = "Mixed"
+                 format  = "CommonParameter" />
+
+      <!-- input top file name (Verilog only) -->
+      <parameter id      = "ifn"
+                 label   = "Project file"
+                 type    = "Filename"
+                 default = "%%ProjectName.prj"
+                 format  = "CommonParameter"
+                 readonly= "true" />             
+
+      <!-- output project format -->
+      <parameter id      = "ofmt" visible = "false"
+                 type    = "String"
+                 default = "ngc"
+                 format  = "CommonParameter" />
+
+      <!-- output file name -->
+      <parameter id      = "ofn" visible = "false"
+                 type    = "Filename"
+                 default = "%%ProjectName"
+                 format  = "CommonParameter" />
+
+      <!-- output log file name -->
+      <parameter id      = "logfn" visible = "false"
+                 outid   = "ofn"
+                 type    = "Filename"
+                 default = "%%ProjectName.srp"
+                 format  = "CommonParameter" />
+
+      <!-- log file contents format -->
+      <parameter id      = "intstyle"
+                 label   = "Log Format"
+                 type    = "EnumLogFormat"
+                 default = ""
+                 format  = "CommonParameter"
+                 omit    = "" />
+
+      <!-- HDL compilation work directory -->
+      <parameter id      = "xsthdpdir"
+                 label   = "HDL Work Directory"
+                 type    = "Pathname"
+                 default = "./XST"
+                 format  = "CommonParameter" />
+
+      <!-- HDL INI file -->
+      <parameter id      = "xsthdpini"
+                 label   = "HDL INI file"
+                 type    = "Filename"
+                 default = ""
+                 format  = "CommonParameter" />
+
+      <!-- temporary directory path -->
+      <parameter id      = "tmpdir"
+                 label   = "Temporary Directory"
+                 type    = "Pathname"
+                 default = "__projnav"
+                 format  = "CommonParameter" />
+
+      <!-- Target technology -->
+      <parameter id      = "p" visible = "false"
+                 type    = "String"
+                 default = "%TargetDevice"
+                 format  = "CommonParameter" />
+
+      <!-- Work Library - library where the top level block was compiled -->
+      <parameter id      = "work_lib"
+                 label   = "Work library"
+                 type    = "Pathname"
+                 default = "work"
+                 format  = "CommonParameter" />
+
+      <!-- Duplication suffix <str>%d<str> -->
+      <parameter id      = "duplication_suffix"
+                 label   = "Duplication Suffix"
+                 type    = "String"
+                 default = "_%d"
+                 format  = "CommonParameter" />
+
+      <!-- Respect HDL file order, specified in XST project during compilation step -->
+      <parameter id      = "hdl_compilation_order"
+                 label   = "HDL Compilation Order"
+                 type    = "EnumAutoUser"
+                 default = "Auto"
+                 format  = "CommonParameter" />
+
+      <!-- Top module name (invalid if "ifmt"="VHDL") -->
+      <parameter id      = "top"                       
+                 label   = "Top Module Name"
+                 type    = "String"
+                 default = "%%TopModule"
+                 format  = "CommonParameter"
+                 readonly= "true" />             <!-- now fixed as main module -->
+
+      <!-- Verilog include directories -->
+      <parameter id      = "vlgincdir"
+                 label   = "Verilog Include Directories"
+                 type    = "Pathlist"
+                 default = ""
+                 format  = "ListParameter"
+                 omit    = "" />
+
+      <!-- Verilog-2001 -->
+      <parameter id      = "verilog2001"
+                 label   = "Verilog 2001"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <!-- Optimization goal -->
+      <parameter id      = "opt_mode"
+                 label   = "Optimization Goal"
+                 type    = "EnumSpeedArea"
+                 default = "Speed"
+                 format  = "CommonParameter" />
+
+      <!-- Optimization effort -->
+      <parameter id      = "opt_level"
+                 label   = "Optimization Effort"
+                 type    = "EnumNormalHigh"
+                 default = "1"
+                 format  = "CommonParameter" />
+
+      <!-- Ignore user constraints -->
+      <parameter id      = "iuc"
+                 label   = "Ignore Synthesis Constraints File"
+                 type    = "BoolYesNo"
+                 default = "false"
+                 format  = "CommonParameter" />
+
+      <!-- Synthesis constraints file -->
+      <parameter id      = "uc"
+                 label   = "Synthesis Constraints File"
+                 type    = "Filename"
+                 default = "%%ProjectName.xcf"
+                 format  = "CommonParameter" />
+
+      <!-- Library search order file -->
+      <parameter id      = "lso"
+                 label   = "Library Search Order"
+                 type    = "Filename"
+                 default = "%%ProjectName.lso"
+                 format  = "CommonParameter"
+                 omit    = "%%ProjectName.lso" />
+
+      <!-- Keep Hierarchy -->
+      <parameter id      = "keep_hierarchy"
+                 label   = "Keep Hierarchy"
+                 type    = "EnumYesNoSoft"
+                 default = "?%project_type=FPGA: No, Yes"
+                 format  = "CommonParameter" />
+
+      <!-- Generate RTL Schematic -->
+      <parameter id      = "rtlview"
+                 label   = "Generate RTL Schematic"
+                 type    = "EnumYesNoOnly"
+                 default = "Yes"
+                 format  = "CommonParameter" />
+
+      <!-- Hierarchy separator -->
+      <parameter id      = "hierarchy_separator"
+                 label   = "Hierarchy Separator"
+                 type    = "EnumHiSeparator"
+                 default = "/"
+                 format  = "CommonParameter" />
+
+      <!-- Bus delimiter -->
+      <parameter id      = "bus_delimiter"
+                 label   = "Bus Delimiter"
+                 type    = "EnumBusDelim"
+                 default = "&lt;>"
+                 format  = "CommonParameter" />
+
+      <!-- Case recognition -->
+      <parameter id      = "case"
+                 label   = "Case"
+                 type    = "EnumCase"
+                 default = "Maintain"
+                 format  = "CommonParameter" />
+
+      <!-- Global Optimization Goal -->
+      <parameter id      = "glob_opt"
+                 label   = "Global Optimization Goal"
+                 type    = "EnumOptGoal"
+                 default = "allclocknets"
+                 format  = "CommonParameter" />
+
+      <!-- Read Cores -->
+      <parameter id      = "read_cores"
+                 label   = "Read Cores"
+                 type    = "EnumYesNoOpt"
+                 default = "Yes"
+                 format  = "CommonParameter" />
+
+      <!-- Cores Search Directories -->
+      <parameter id      = "sd"
+                 label   = "Cores Search Directories"
+                 type    = "Pathname"
+                 default = ""
+                 format  = "ListParameter" />
+
+      <!-- Write Timing Constraints -->
+      <parameter id      = "write_timing_constraints"
+                 label   = "Write Timing Constraints"
+                 type    = "BoolYesNo"
+                 default = "false"
+                 format  = "CommonParameter" />
+
+      <!-- Enable cross clock domain optimization -->
+      <parameter id      = "cross_clock_analysis"
+                 label   = "Cross Clock Analysis"
+                 type    = "BoolYesNo"
+                 default = "false"
+                 format  = "CommonParameter" />
+
+      <!-- Slice Utilization Ratio -->
+      <parameter id      = "slice_utilization_ratio"
+                 label   = "Slice Utilization Ratio"
+                 type    = "Cardinal"
+                 default = "100"
+                 format  = "CommonParameter" />
+
+      <!-- Slice Utilization Ratio Delta -->
+      <parameter id      = "slice_utilization_ratio_maxmargin"
+                 label   = "Slice Utilization Ratio Delta"
+                 type    = "Cardinal"
+                 default = "5"
+                 format  = "CommonParameter" />
+
+      <!-- FSM Encoding Algorythm -->
+      <parameter id      = "fsm_encoding"
+                 label   = "FSM Encoding Algorithm"
+                 type    = "EnumFSM"
+                 default = "Auto"
+                 format  = "CommonParameter" />
+
+      <!-- FSM extract -->
+      <parameter id      = "fsm_extract"
+                 label   = "FSM Extract"
+                 type    = "BoolYesNo"
+                 default = "?%fsm_encoding=None: false, true"
+                 format  = "CommonParameter"
+                 visible = "false" />
+
+      <if project_type="FPGA">
+          <!-- Enable auto floorplaning -->
+          <parameter id      = "enable_auto_floorplanning"
+                     label   = "Enable Auto Floorplanning"
+                     type    = "EnumNoIncrem"
+                     default = "No"
+                     format  = "CommonParameter" />
+
+          <!-- FSM Style -->
+          <parameter id      = "fsm_style"
+                     label   = "FSM Style"
+                     type    = "EnumLutBram"
+                     default = "LUT"
+                     format  = "CommonParameter" />
+
+          <!-- Safe implementation -->
+          <parameter id      = "safe_implementation"
+                     label   = "Safe Implementation"
+                     type    = "BoolYesNo"
+                     default = "false"
+                     format  = "CommonParameter" />
+    
+          <!-- RAM extract -->
+          <parameter id      = "ram_extract"
+                     label   = "RAM Extraction"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- RAM style -->
+          <parameter id      = "ram_style"
+                     label   = "RAM Style"
+                     type    = "EnumAutoDistrBlock"
+                     default = "Distributed"
+                     format  = "CommonParameter"
+                     readonly= "?%ram_extract=false: true, false" />
+
+          <!-- RAM extract -->
+          <parameter id      = "rom_extract"
+                     label   = "ROM Extraction"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- ROM style -->
+          <parameter id      = "rom_style"
+                     label   = "ROM Style"
+                     type    = "EnumAutoDistrBlock"
+                     default = "Distributed"
+                     format  = "CommonParameter"
+                     readonly= "?%rom_extract=false: true, false" />
+
+          <!-- Mux extract -->
+          <parameter id      = "mux_extract"
+                     label   = "Mux Extraction"
+                     type    = "EnumYesNoForce"
+                     default = "Yes"
+                     format  = "CommonParameter" />
+
+          <!-- Mux style -->
+          <parameter id      = "mux_style"
+                     label   = "Mux Style"
+                     type    = "EnumAutoMuxfMuxcy"
+                     default = "Auto"
+                     format  = "CommonParameter" />
+
+          <!-- Decoder extract -->
+          <parameter id      = "decoder_extract"
+                     label   = "Decoder Extraction"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- Priority Encoder extract -->
+          <parameter id      = "priority_extract"
+                     label   = "Priority Encoder Exraction"
+                     type    = "EnumYesNoForce"
+                     default = "Yes"
+                     format  = "CommonParameter" />
+
+          <!-- Shift Register Extract -->
+          <parameter id      = "shreg_extract"
+                     label   = "Shift Register Extraction"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- Logical Shifter Extract -->
+          <parameter id      = "shift_extract"
+                     label   = "Logical Shifter Extraction"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- XOR collapsing -->
+          <parameter id      = "xor_collapse"
+                     label   = "XOR Collapsing"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- Multiplier style -->
+          <parameter id      = "mult_style"
+                     label   = "Multiplier Style"
+                     type    = "EnumAutoBlockLut"
+                     default = "Auto"
+                     format  = "CommonParameter" />
+
+          <!-- Max Fanout -->
+          <parameter id      = "max_fanout"
+                     label   = "Max Fanout"
+                     type    = "Cardinal"
+                     default = "500"
+                     format  = "CommonParameter" />
+
+          <!-- Number of Clock Buffers -->
+          <parameter id      = "bufg"
+                     label   = "Number of Clock Buffers"
+                     type    = "Cardinal"
+                     default = "8"
+                     format  = "CommonParameter" />
+
+          <!-- Number of Regional Clock Buffers -->
+          <parameter id      = "bufr"
+                     label   = "Number of Regional Clock Buffers"
+                     type    = "Cardinal"
+                     default = "UNKNOWN"
+                     format  = "CommonParameter" />
+
+          <!-- Use Synchronous Set -->
+          <parameter id      = "use_sync_set"
+                     label   = "Use Synchronous Set"
+                     type    = "EnumYesNoAuto"
+                     default = "Auto"
+                     format  = "CommonParameter" />
+
+          <!-- Use Synchronous Reset -->
+          <parameter id      = "use_sync_reset"
+                     label   = "Use Synchronous Reset"
+                     type    = "EnumYesNoAuto"
+                     default = "Auto"
+                     format  = "CommonParameter" />
+
+          <!-- Optimize Instantiate Primitives -->
+          <parameter id      = "optimize_primitives"
+                     label   = "Optimize Instantiated Primitives"
+                     type    = "BoolYesNo"
+                     default = "false"
+                     format  = "CommonParameter" />
+      </if>
+
+      <!-- Case Implementation Style (Verilog only) -->
+      <parameter id      = "vlgcase"
+                 label   = "Case Implementation Style"
+                 type    = "EnumFullPar"
+                 default = "No"
+                 format  = "CommonParameter"
+                 omit    = "No" />
+
+      <!-- Resource Sharing -->
+      <parameter id      = "resource_sharing"
+                 label   = "Resource Sharing"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <!-- Use DSP48 Resources -->
+      <parameter id      = "use_dsp48"
+                 label   = "Use DSP48 Resources"
+                 type    = "EnumYesNoAuto"
+                 default = "Auto"
+                 format  = "CommonParameter" />
+
+      <!-- Add I/O Buffers -->
+      <parameter id      = "iobuf"
+                 label   = "Add I/O Buffers"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <!-- Equivalent Register Removal -->
+      <parameter id      = "equivalent_register_removal"
+                 label   = "Equivalent Register Removal"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <!-- Register Duplication -->
+      <parameter id      = "register_duplication"
+                 label   = "Register Duplication"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <!-- Register Balancing -->
+      <parameter id      = "register_balancing"
+                 label   = "Register Balancing"
+                 type    = "EnumYesNoFwBw"
+                 default = "No"
+                 format  = "CommonParameter" />
+
+      <!-- Move First Flip-Flop Stage -->
+      <parameter id      = "move_first_stage"
+                 label   = "Move First Flip-Flop Stage"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter"
+                 readonly= "?%register_balancing=No: true, false" />
+
+      <!-- Move Last Flip-Flop Stage -->
+      <parameter id      = "move_last_stage"
+                 label   = "Move Last Flip-Flop Stage"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter"
+                 readonly= "?%register_balancing=No: true, false" />
+
+      <!-- Pack I/O Registers into IOBs -->
+      <parameter id      = "iob"
+                 label   = "Pack I/O Registers into IOBs"
+                 type    = "EnumTrueFalseAuto"
+                 default = "Auto"
+                 format  = "CommonParameter" />
+
+      <!-- Slice Packing --> 
+      <parameter id      = "slice_packing"
+                 label   = "Slice Packing"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <!-- Convert Tristates To Logic (applicable device only) -->
+      <parameter id      = "tristate2logic"
+                 label   = "Convert Tristates To Logic"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <!-- Use Clock Enable -->
+      <parameter id      = "use_clock_enable"
+                 label   = "Use Clock Enable"
+                 type    = "EnumYesNoAuto"
+                 default = "Auto"
+                 format  = "CommonParameter" />
+
+      <if project_type="CPLD">
+          <!-- Clock enable -->
+          <parameter id      = "pld_ce"
+                     label   = "Clock Enable"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- Macro Preserve -->
+          <parameter id      = "pld_mp"
+                     label   = "Macro Preserve"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- XOR Preserve -->
+          <parameter id      = "pld_xp"
+                     label   = "XOR Preserve"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- Flip-Flop Optimization -->
+          <parameter id      = "pld_ffopt"
+                     label   = "Flip-Flop Optimization"
+                     type    = "BoolYesNo"
+                     default = "true"
+                     format  = "CommonParameter" />
+
+          <!-- What You See Is What You Get -->
+          <parameter id      = "wysiwyg"
+                     label   = "WYSIWYG"
+                     type    = "BoolYesNo"
+                     default = "false"
+                     format  = "CommonParameter" />
+      </if>
+
+      <!-- Signal Encoding -->
+      <parameter id      = "signal_encoding"
+                 label   = "Signal Encoding"
+                 type    = "EnumAutoHotUser"
+                 default = "Auto"
+                 format  = "CommonParameter" />
+
+      <!-- Use Carry Chain -->
+      <parameter id      = "use_carry_chain"
+                 label   = "Use Carry Chain"
+                 type    = "BoolYesNo"
+                 default = "true"
+                 format  = "CommonParameter" />
+
+      <input>
+        <group name = "Launch">
+          "ifn"
+          "intstyle"
+          "xsthdpdir"
+          "xsthdpini"
+          "tmpdir"
+          "work_lib"
+          "duplication_suffix"
+          "hdl_compilation_order"
+        </group>
+        <group name = "Source" label = "Verilog Source Options">
+          "top"                       
+          "vlgincdir"
+          "verilog2001"
+        </group>
+        <group name = "Synthesis" label = "Synthesis Options">
+          "opt_mode"
+          "opt_level"
+          "iuc"
+          "uc"
+          "lso"
+          "keep_hierarchy"
+          "rtlview"
+          "hierarchy_separator"
+          "bus_delimiter"
+          "case"
+
+          <if project_type="FPGA">
+            "enable_auto_floorplanning"
+          </if>
+
+          "glob_opt"
+          "read_cores"
+          "sd"
+          "write_timing_constraints"
+          "cross_clock_analysis"
+          "slice_utilization_ratio"
+          "slice_utilization_ratio_maxmargin"
+        </group>
+        <group name = "HDL" label = "HDL Options">
+          "fsm_encoding"
+          "fsm_extract"
+          "vlgcase"
+          "resource_sharing"
+          "use_dsp48"
+
+          <if project_type="FPGA">
+            "fsm_style"
+            "safe_implementation"
+            "ram_extract"
+            "ram_style"
+            "rom_extract"
+            "rom_style"
+            "mux_extract"
+            "mux_style"
+            "decoder_extract"
+            "priority_extract"
+            "shreg_extract"
+            "shift_extract"
+            "xor_collapse"
+            "mult_style"
+          </if>
+
+          <if project_type="CPLD">
+            "pld_mp"
+            "pld_xp"
+            "pld_ce"
+            "pld_ffopt"
+            "wysiwyg"
+          </if>
+        </group>
+        <group name = "Xilinx" label = "Xilinx Specific Options">
+          "iobuf"
+          "equivalent_register_removal"
+          "register_duplication"
+          "register_balancing"
+          "move_first_stage"
+          "move_last_stage"
+          "iob"
+          "slice_packing"
+          "tristate2logic"
+          "use_clock_enable"
+
+          <if project_type="FPGA">
+            "use_sync_set"
+            "use_sync_reset"
+            "optimize_primitives"
+            "max_fanout"
+            "bufg"
+            "bufr"
+          </if>
+          
+          "signal_encoding"
+          "use_carry_chain"
+        </group>
+      </input>
+
+<!-- ===== Calls Definitions section ===== -->
+
+      <output>
+        <line name = "command_line">
+           "%scriptfn" "%logfn" "%intstyle"
+        </line>
+
+        <line name = "project" dest = "projectfn">
+           "%(verilog work %%SourceList%|\n%)"
+        </line>
+
+        <line name = "script" dest = "scriptfn" sep = "\n">
+           "set %tmpdir"
+           "set %xsthdpdir"
+           "set %xsthdpini"
+           "run"
+           "%ifn"
+           "%ifmt"
+           "%ofn"
+           "%ofmt"
+           "%p"
+           "%top"
+           "%opt_mode"
+           "%opt_level"
+           "%iuc"
+           "%uc"
+           "%lso"
+           "%keep_hierarchy"
+           "%glob_opt"
+           "%rtlview"
+           "%vlgcase"
+           "%vlgincdir"
+           "%verilog2001"
+           "%read_cores"
+           "%write_timing_constraints"
+           "%cross_clock_analysis"
+           "%hierarchy_separator"
+           "%bus_delimiter"
+           "%case"
+           "%slice_utilization_ratio"
+           "%fsm_extract"
+           "%fsm_encoding"
+           "%fsm_style"
+           "%ram_extract"
+           "%ram_style"
+           "%rom_extract"
+           "%rom_style"
+           "%mux_extract"
+           "%mux_style"
+           "%decoder_extract"
+           "%priority_extract"
+           "%safe_implementation"
+           "%shreg_extract"
+           "%shift_extract"
+           "%xor_collapse"
+           "%resource_sharing"
+           "%mult_style"
+           "%iobuf"
+           "%max_fanout"
+           "%bufg"
+           "%register_duplication"
+           "%equivalent_register_removal"
+           "%register_balancing"
+           "%slice_packing"
+           "%optimize_primitives"
+           "%use_clock_enable"
+           "%use_sync_set"
+           "%use_sync_reset"
+           "%enable_auto_floorplanning"
+           "%iob"
+           "%slice_utilization_ratio_maxmargin"
+           "%work_lib"
+           "%duplication_suffix"
+           "%hdl_compilation_order"
+           "%use_dsp48"
+           "%bufr"
+           "%move_first_stage"
+           "%move_last_stage"
+           "%sd"
+           "%tristate2logic"
+           "%signal_encoding""
+           "%use_carry_chain"
+
+          <if project_type="CPLD">
+<!-- CPLD options: put in special command line: -->
+             "%pld_mp"
+             "%pld_xp"
+             "%pld_ce"
+             "%pld_ffopt"
+             "%wysiwyg"
+          </if>
+        </line>
+      </output>
+    </tool>
+
+</vdt-project>

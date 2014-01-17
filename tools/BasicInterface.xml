@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+
+<!-- ===== Basic interface ===== -->
+  <interface name = "BasicInterface">
+
+   <!-- Basic types -->
+    <typedef name = "BoolYesNo">
+      <paramtype kind="bool" formatTrue="YES" formatFalse="NO" />
+    </typedef>
+
+    <typedef name = "BoolPlusMinus">
+      <paramtype kind="bool" formatTrue="+" formatFalse="-" />
+    </typedef>
+
+    <typedef name = "BoolOnOff">
+      <paramtype kind="bool" formatTrue="On" formatFalse="Off" />
+    </typedef>
+
+    <typedef name = "Cardinal">
+      <paramtype kind="number" lo="0" hi="65535" format="%d" />
+    </typedef>
+
+    <typedef name = "LongCardinal">
+      <paramtype kind="number" lo="0" hi="2147483647" format="%d" />
+    </typedef>
+
+    <typedef name="String">
+      <paramtype kind="string" sensitivity="insensitive" textkind="text" />
+    </typedef>
+
+    <typedef name="Filename">
+      <paramtype kind="string" sensitivity="insensitive" textkind="file" />
+    </typedef>
+
+    <typedef name="Filelist" list="true">
+      <paramtype kind="string" sensitivity="insensitive" textkind="file" />
+    </typedef>
+
+    <typedef name="Pathname">
+      <paramtype kind="string" sensitivity="insensitive" textkind="dir" />
+    </typedef>
+
+    <typedef name="Pathlist" list="true">
+      <paramtype kind="string" sensitivity="insensitive" textkind="dir" />
+    </typedef>
+
+<!-- Syntax definitions -->
+    <syntax name="None"      format="" />
+    <syntax name="CopyValue" format="%%ParamValue" />
+
+  </interface>
+
+</vdt-project>

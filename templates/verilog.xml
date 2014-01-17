@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogOutModule" 
+	deleted="false" 
+	description="Defines a module" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.module"
+	name="module">module  ${name}(
+	
+);
+	
+endmodule
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInModule" 
+	deleted="false" 
+	description="Always block" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.always"
+	name="always">always @(${name}) begin
+	${cursor}
+end
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInModule" 
+	deleted="false" 
+	description="Always block with posedge clk" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.alwaysWithClock"
+	name="always">always @(posedge clk) begin
+	${cursor}
+end
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInModule" 
+	deleted="false" 
+	description="Initial block" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.initial"
+	name="initial">initial begin
+	${cursor}
+end
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInModule" 
+	deleted="false" 
+	description="Function" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.function"
+	name="function">function[${bit_range}] ${name};
+begin
+	${cursor}
+end
+endfunction
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInModule" 
+	deleted="false" 
+	description="Task" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.task"
+	name="task">task ${name};
+begin
+	${cursor}
+end
+endtask
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInModule" 
+	deleted="false" 
+	description="Generate" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.generate"
+	name="generate">generate
+	${cursor}
+endgenerate
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInModule" 
+	deleted="false" 
+	description="Generate with for" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.generateWithFor"
+	name="generate">genvar ${var};
+generate
+	for (${var} = 0; ${var} &lt; ${nloop}; ${var} = ${var} + 1) begin : ${block}
+		${cursor}
+	end
+endgenerate
+</template>
+
+<template 
+	autoinsert="false" 
+	context="com.elphel.vdt.veditor.verilogInStatement" 
+	deleted="false" 
+	description="block" 
+	enabled="true" 
+	id="com.elphel.vdt.veditor.verilog.block"
+	name="begin/end">begin
+	${cursor}
+end
+</template>
+
+<template
+    autoinsert="false"
+    context="com.elphel.vdt.veditor.templates.verilog.context.newfile"
+    deleted="false"
+    description="This is a special template that is used to create new files."
+    enabled="true"
+    id="com.elphel.vdt.veditor.templates.verilog.newFile"
+    name="Verilog NewFile"
+>/**************************************
+* Module: ${modulename}
+* Date:${year}-${month}-${day}  
+* Author: ${user}     
+*
+* Description: ${brief}
+***************************************/
+module  ${modulename}(
+);
+
+
+endmodule
+
+</template>
+
+</templates>

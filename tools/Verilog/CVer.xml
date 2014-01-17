@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+    <interface name="CVerInterface">
+        <typedef name="StringT">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <typedef name="FileT">
+            <paramtype kind="string"
+                       maxlength="256"
+                       textkind="file"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <typedef name="DirT">
+            <paramtype kind="string"
+                       maxlength="256"
+                       textkind="dir"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <typedef name="MaxErrorsT">
+            <paramtype kind="number"
+                       lo="0"
+                       hi="300"
+                       format="xx"/>
+        </typedef>
+        <typedef name="StopBeforeSimT">
+            <paramtype kind="bool"
+                       formatTrue="-s"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="TranslateSourceT">
+            <paramtype kind="bool"
+                       formatTrue="-c"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="SuppressWarningsT">
+            <paramtype kind="bool"
+                       formatTrue="-w"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="DumpSourcesT">
+            <paramtype kind="bool"
+                       formatTrue="-d"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="DontPrintProgressT">
+            <paramtype kind="bool"
+                       formatTrue="-q"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="TraceProceduralT">
+            <paramtype kind="bool"
+                       formatTrue="-t"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="libnocellT">
+            <paramtype kind="bool"
+                       formatTrue="+libnocell"
+                       formatFalse=""/>
+        </typedef>                
+        <typedef name="notimingchecksT">
+            <paramtype kind="bool"
+                       formatTrue="+notimingchecks"
+                       formatFalse=""/>
+        </typedef>                
+        <typedef name="VerboseT">
+            <paramtype kind="bool"
+                       formatTrue="+verbose"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="NonFatalT">
+            <paramtype kind="bool"
+                       formatTrue="-e"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="InformsT">
+            <paramtype kind="bool"
+                       formatTrue="-informs"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="FastSimT">
+            <paramtype kind="bool"
+                       formatTrue="-O"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="TraceEventsT">
+            <paramtype kind="bool"
+                       formatTrue="-et"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="PrintStatsT">
+            <paramtype kind="bool"
+                       formatTrue="+printstats"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="PrintAllStatsT">
+            <paramtype kind="bool"
+                       formatTrue="+printallstats"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="RemoveGate0DelaysT">
+            <paramtype kind="bool"
+                       formatTrue="+remove_gate_0delays"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="NoKeepCommandsT">
+            <paramtype kind="bool"
+                       formatTrue="+nokeepcommands"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="SDFVerboseT">
+            <paramtype kind="bool"
+                       formatTrue="+sdfverbose"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="SDFNoErrorsT">
+            <paramtype kind="bool"
+                       formatTrue="+sdf_noerrors"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="SDFNoWarningsT">
+            <paramtype kind="bool"
+                       formatTrue="+sdf_nowarns"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="SwitchVerboseT">
+            <paramtype kind="bool"
+                       formatTrue="+switchverbose"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="ChangePortT">
+            <paramtype kind="bool"
+                       formatTrue="+change_port_type"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="NoSpecifySectionT">
+            <paramtype kind="bool"
+                       formatTrue="+nospecify"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="NoInteractiveT">
+            <paramtype kind="bool"
+                       formatTrue="+nointeractive"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="SnapshotT">
+            <paramtype kind="bool"
+                       formatTrue="+snapshot"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="librescanT">
+            <paramtype kind="bool"
+                       formatTrue="+librescan"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="libverboseT">
+            <paramtype kind="bool"
+                       formatTrue="+libverbose"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="show_canceled_eT">
+            <paramtype kind="bool"
+                       formatTrue="+show_canceled_e"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="noshow_canceled_eT">
+            <paramtype kind="bool"
+                       formatTrue="+noshow_canceled_e"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="pulse_e_style_ondetectT">
+            <paramtype kind="bool"
+                       formatTrue="+pulse_e_style_ondetect"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="pulse_e_style_oneventT">
+            <paramtype kind="bool"
+                       formatTrue="+pulse_e_style_onevent"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="warn_canceled_eT">
+            <paramtype kind="bool"
+                       formatTrue="+warn_canceled_e"
+                       formatFalse=""/>
+        </typedef>
+        <typedef name="delaysT">
+            <paramtype kind="enum" base="StringT">
+                <item label="Default" value=""/>
+                <item label="Min"     value="+mindelays"/>
+                <item label="Typical" value="+typdelays"/>
+                <item label="Max"     value="+maxdelays"/>
+            </paramtype>
+        </typedef>
+        <typedef name="suppress_warnsT" list="true">
+            <paramtype kind="string"
+                       maxlength="16"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <typedef name="LibExtT" list="true">
+            <paramtype kind="string"
+                       maxlength="16"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <typedef name="incdirT" list="true">
+            <paramtype kind="string"
+                       textkind="dir"
+                       maxlength="256"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <typedef name="DefineSymbolT" list="true">
+            <paramtype kind="string"
+                       maxlength="64"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <!-- common syntax -->
+        <syntax name="SimpleSyntax"     format="%%ParamValue"/>
+        <syntax name="CommonSyntax"     format="+%%ParamName %%ParamValue"/>
+        <syntax name="CommonSyntax2"    format="-%%ParamName %%ParamValue"/>
+        <syntax name="UDPLibrarySyntax" format="-v %%ParamValue"/>
+        <syntax name="CommonListSyntax" format="+%%ParamName+%(%%ParamValue%|+%)+"/>
+
+        <!-- specific syntax -->
+        <syntax name   = "DefineSymbolSyntax"
+                format = "%(+define+%%ParamValue%| %)"/>
+
+        <syntax name   = "LibExtSyntax"
+                format = "+libext+%(.%%ParamValue%|+%)+"/>
+    </interface>
+
+    <project name="CVerProject"
+             label="cver project"
+             interface="CVerInterface">
+    </project>
+
+    <tool name        = "cver"
+          label       = "Run CVer simulator tool"
+          project     = "CVerProject"
+          exe         = "?%%OS: Windows=cver.exe, Linux=cver"
+          interface   = "CVerInterface"
+          description = "CVer simulator">
+
+        <input>
+            <group name="sim" label="Simulation">
+                "StopBeforeSim"           "TranslateSource"
+                "DumpSources"             "TraceProcedural"
+                "f"                       "l"
+                "i"                       "libnocell"
+                "notimingchecks"          "delays"
+                "UDPLibrary"              "UDPLibraryDirectory"
+                "librescan"               "show_canceled_e"
+                "noshow_canceled_e"       "pulse_e_style_ondetect"
+                "pulse_e_style_onevent"   "warn_canceled_e"
+                "LibExt"                  "maxerrors"
+                "FastSim"                 "TraceEvents"
+                "tracefile"               "PrintStats"
+                "PrintAllStats"           "RemoveGate0Delays"
+                "NoKeepCommands"          "sdf_log_file"
+                "ChangePort"              "NoSpecifySection"
+                "NoInteractive"           "Snapshot"
+                "incdir"                  "DefineSymbol"
+            </group>
+            <group name="Messages">
+                "SuppressWarnings"        "DontPrintProgress" 
+                "libverbose"              "suppress_warns"    
+                "Verbose"                 "NonFatal"          
+                "Informs"                 "SDFVerbose"        
+                "SDFNoErrors"             "SDFNoWarnings"     
+                "SwitchVerbose"          
+            </group>
+        </input>
+
+        <output>
+            <line name="command_line">
+                "%StopBeforeSim"
+                "%TranslateSource"
+                "%SuppressWarnings"
+                "%DumpSources"
+                "%DontPrintProgress"
+                "%TraceProcedural"
+                "%f"
+                "%l"
+                "%i"
+                "%libnocell"
+                "%notimingchecks"
+                "%delays"
+                "%UDPLibrary"
+                "%UDPLibraryDirectory"
+                "%librescan"
+                "%libverbose"
+                "%show_canceled_e"
+                "%noshow_canceled_e"
+                "%pulse_e_style_ondetect"
+                "%pulse_e_style_onevent"
+                "%warn_canceled_e"
+                "%maxerrors"
+                "%Verbose"
+                "%NonFatal"
+                "%Informs"
+                "%FastSim"
+                "%TraceEvents"
+                "%tracefile"
+                "%PrintStats"
+                "%PrintAllStats"
+                "%RemoveGate0Delays"
+                "%NoKeepCommands"
+                "%sdf_log_file"
+                "%SDFVerbose"
+                "%SDFNoErrors"
+                "%SDFNoWarnings"
+                "%SwitchVerbose"
+                "%ChangePort"
+                "%NoSpecifySection"
+                "%NoInteractive"
+                "%Snapshot"
+                "%suppress_warns"
+                "%incdir"
+                "%DefineSymbol"
+                "%LibExt"
+            </line>
+        </output>
+
+        <parameter id      = "StopBeforeSim"
+                   type    = "StopBeforeSimT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Stop just before starting simulation and enter interactive debugger"/>
+
+        <parameter id      = "TranslateSource"
+                   type    = "TranslateSourceT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Translate source and all referenced library models only"/>
+
+        <parameter id      = "DumpSources"
+                   type    = "DumpSourcesT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Dump source that is constructed from internal representation"/>
+
+        <parameter id      = "TraceProcedural"
+                   type    = "TraceProceduralT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Trace procedural statement execution"/>
+
+        <parameter id      = "f"
+                   type    = "FileT"
+                   format  = "CommonSyntax2"
+                   default = ""
+                   omit    = ""
+                   label   = "File containing options and source file names"/>
+
+        <parameter id      = "l"
+                   type    = "FileT"
+                   format  = "CommonSyntax2"
+                   default = ""
+                   omit    = ""
+                   label   = "Output file (default is verilog.log and stdout)"/>
+
+        <parameter id      = "i"
+                   type    = "FileT"
+                   format  = "CommonSyntax2"
+                   default = ""
+                   omit    = ""
+                   label   = "Interactive debugger commands file"/>
+
+        <parameter id      = "libnocell"
+                   type    = "libnocellT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Ignore `celldefine directives in source and libraries"/>
+
+        <parameter id      = "notimingchecks"
+                   type    = "notimingchecksT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "After checking for correct syntax, ignore timing checks"/>
+
+        <parameter id      = "delays"
+                   type    = "delaysT"
+                   format  = "SimpleSyntax"
+                   default = ""
+                   label   = "Delay values that become constant numbers at translation time"/>
+
+        <parameter id      = "UDPLibrary"
+                   type    = "FileT"
+                   format  = "UDPLibrarySyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "Library containing module and UDP definitions"/>
+
+        <parameter id      = "UDPLibraryDirectory"
+                   type    = "DirT"
+                   format  = "UDPLibrarySyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "Directory containing libraries modules and UDP definitions"/>
+
+        <parameter id      = "librescan"
+                   type    = "librescanT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Rescan to beginning of library file and directory list"/>
+
+        <parameter id      = "show_canceled_e"
+                   type    = "show_canceled_eT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Path and gate outputs set to X when pulses occur"/>
+
+        <parameter id      = "noshow_canceled_e"
+                   type    = "noshow_canceled_eT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Path and gate outputs not driven (shown) as X when pulses occur"/>
+
+        <parameter id      = "pulse_e_style_ondetect"
+                   type    = "pulse_e_style_ondetectT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Set output to X (shown) when the pulse (glitch) is detected"/>
+
+        <parameter id      = "pulse_e_style_onevent"
+                   type    = "pulse_e_style_oneventT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Set output to X (shown) when glitch propagates to output"/>
+
+        <parameter id      = "warn_canceled_e"
+                   type    = "warn_canceled_eT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Emit warning for every gate or path event cancel"/>
+
+        <parameter id      = "LibExt"
+                   type    = "LibExtT"
+                   format  = "LibExtSyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "File name extensions to be removed before matching file names"/>
+
+        <parameter id      = "maxerrors"
+                   type    = "MaxErrorsT"
+                   format  = "CommonSyntax"
+                   default = "0"
+                   omit    = "0"
+                   label   = "Maximum errors number "/>
+
+        <parameter id      = "FastSim"
+                   type    = "FastSimT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Compilation to byte codes faster simulation"/>
+
+        <parameter id      = "TraceEvents"
+                   type    = "TraceEventsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Event tracing"/>
+
+        <parameter id      = "tracefile"
+                   type    = "FileT"
+                   format  = "CommonSyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "Output file for any trace output"/>
+
+        <parameter id      = "PrintStats"
+                   type    = "PrintStatsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Print tables of design contents"/>
+
+        <parameter id      = "PrintAllStats"
+                   type    = "PrintAllStatsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Print tables of design contents and the declarative content of every module"/>
+
+        <parameter id      = "RemoveGate0Delays"
+                   type    = "RemoveGate0DelaysT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Change all gates with #0 or #(0, 0, 0) delay to no delay"/>
+
+        <parameter id      = "NoKeepCommands"
+                   type    = "NoKeepCommandsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Do not save interactive commands to history list"/>
+
+        <parameter id      = "sdf_log_file"
+                   type    = "FileT"
+                   format  = "CommonSyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "File used for SDF annotation"/>
+
+        <parameter id      = "ChangePort"
+                   type    = "ChangePortT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Change port to inout/output for in/out ports with loconn/highconn drivers"/>
+
+        <parameter id      = "NoSpecifySection"
+                   type    = "NoSpecifySectionT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Run simulation with specify section ignored"/>
+
+        <parameter id      = "NoInteractive"
+                   type    = "NoInteractiveT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Turn off interactive environment"/>
+
+        <parameter id      = "Snapshot"
+                   type    = "SnapshotT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Print a port mortem activity snapshot before program termination"/>
+
+        <parameter id      = "incdir"
+                   type    = "incdirT"
+                   format  = "CommonListSyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "Define paths that are searched for `include files"/>
+
+        <parameter id      = "DefineSymbol"
+                   type    = "DefineSymbolT"
+                   format  = "DefineSymbolSyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "Define back quote macros"/>
+
+        <parameter id      = "SuppressWarnings"
+                   type    = "SuppressWarningsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Suppress all warning messages"/>
+
+        <parameter id      = "DontPrintProgress"
+                   type    = "DontPrintProgressT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Do not print normal progress messages"/>
+
+        <parameter id      = "libverbose"
+                   type    = "libverboseT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Emit detailed trace messages giving resolution order and reason"/>
+        
+        <parameter id      = "suppress_warns"
+                   type    = "suppress_warnsT"
+                   format  = "CommonListSyntax"
+                   default = ""
+                   omit    = ""
+                   label   = "Suppress following warnings and informatory messages"/>
+
+        <parameter id      = "Verbose"
+                   type    = "VerboseT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Print various simulation progress messages and design component counts"/>
+
+        <parameter id      = "NonFatal"
+                   type    = "NonFatalT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Print non fatal error messages"/>
+
+        <parameter id      = "Informs"
+                   type    = "InformsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Print informatory messages"/>
+
+        <parameter id      = "SDFVerbose"
+                   type    = "SDFVerboseT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Emit trace messages giving new delay value for every changed delay"/>
+
+        <parameter id      = "SDFNoErrors"
+                   type    = "SDFNoErrorsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Do not emit SDF annotation error messages"/>
+
+        <parameter id      = "SDFNoWarnings"
+                   type    = "SDFNoWarningsT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Do not emit warning messages during SDF annotation"/>
+
+        <parameter id      = "SwitchVerbose"
+                   type    = "SwitchVerboseT"
+                   format  = "SimpleSyntax"
+                   default = "false"
+                   label   = "Emit trace and size messages for inout and tran gate switch channels elaboration"/>
+    </tool>
+</vdt-project>

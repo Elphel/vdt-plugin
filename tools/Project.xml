@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+    <interface name = "project_interface">
+        <typedef name="StringType">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="sensitive"/>
+        </typedef>
+
+        <typedef name="StringListType"  list="true">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="sensitive"/>
+        </typedef>
+        <typedef name="DirType">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="sensitive"
+                       textkind="dir"/>
+        </typedef>
+
+        <syntax name="ValueSyntax" format="%%ParamValue"  />
+    </interface>
+
+    <project name="project_settings"
+                  label="Project parameters"
+                  interface="project_interface">
+
+        <parameter id      = "SimulationTopModule"
+                   label   = "Project top simulation module"
+                   type    = "StringType"
+                   default = ""
+                   format  = "ValueSyntax"
+                   readonly= "false" />
+
+        <parameter id      = "BuildDir"
+                   label   = "project build directory"
+                   type    = "DirType"
+                   default = "build"
+                   format  = "ValueSyntax"
+                   readonly= "false" />
+
+        <input>
+          <group name="General" label="Project properties">
+            "SimulationTopModule"
+            "BuildDir"
+          </group>
+        </input>
+        <output>
+        </output>
+    </project>
+    
+</vdt-project>
