@@ -15,26 +15,27 @@
  * with Eclipse VDT plug-in; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *******************************************************************************/
-package com.elphel.vdt.core.tools.config.xml;
+package com.elphel.vdt.core.tools.generators;
 
-import org.w3c.dom.Node;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.ui.IPageLayout;
 
-import com.elphel.vdt.core.tools.config.ConfigException;
-import com.elphel.vdt.core.tools.contexts.Context;
-import com.elphel.vdt.core.tools.params.conditions.Condition;
+import com.elphel.vdt.VDT;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
-public abstract class AbstractConditionNodeReader {
-    protected XMLConfig config;
-    protected Context context;
+public class ViewSelectedFileGenerator extends AbstractGenerator {
+    private static final String NAME = VDT.GENERATOR_ID_SELECTED_FILE;
+
+    public String getName() {
+        return NAME;
+    }
+    
+    protected String[] getStringValues() {
+        IResource resource = SelectedResourceManager.getDefault().getViewSelectedResource(IPageLayout.ID_RES_NAV);
+        if((resource != null) && (resource.getType() == IResource.FILE))
+            return new String[] { ((IFile)resource).getLocation().toOSString() };
         
-    public AbstractConditionNodeReader(XMLConfig config, Context context) {
-        this.config = config;
-        this.context = context;
+        return new String[] { "" };
     }
-    
-    public abstract void readNode(Node node, Condition condition) throws ConfigException;
-    
-    public String getConfigFileName(){
-    	return config.getConfigFileName();
-    }
-}
+} //ViewSelectedFileGenerator

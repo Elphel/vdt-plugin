@@ -39,6 +39,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
 
 
     private List<String> extensions;
+    private List<RunFor> runfor;
+    
+    
     private Tool baseTool;
     private PackageContext parentPackage;
     private ProjectContext parentProject;
@@ -48,7 +51,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private boolean isShell = false; /* Tool is a shell, preserve first argument, merge all others */
     private String projectPath=null;
     private boolean initialized = false;
-    
+    public class RunFor{
+    	String prompt;
+    	String resource;
+    }
     public Tool(String name,
                 String controlInterfaceName,
                 String label,
@@ -63,6 +69,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 String toolErrors,
                 String toolWarnings,
                 String toolInfo,
+                List<RunFor> runfor,
                 /* never used ??? */
                 List<Parameter> params,
                 List<ParamGroup> paramGroups,
@@ -76,7 +83,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
               params, 
               paramGroups, 
               commandLinesBlocks);
-        
+        this.runfor=runfor;
         this.baseToolName = baseToolName;
         this.label = label;
         this.parentPackageName = parentPackageName;
@@ -107,7 +114,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         
         initParentPackage();
         initParentProject();
-        initParams();
+        initParams(); // *Inherits and sets up contexts? Also Error with copying context to items
         initOtherAttributes();
         initCommandLines();
         
@@ -227,9 +234,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     
     public Parameter findParam(String paramID) {
-        Parameter param = super.findParam(paramID);
+        Parameter param = super.findParam(paramID); //Andrey: happily finds ProjectContext parameter, thinks it is tool context
         
-        if(param != null)
+//        if(param != null)  
+        if ((param != null) && !param.getIsChild())  
             return param;
         
         if(baseTool != null) {
@@ -288,8 +296,16 @@ public class Tool extends Context implements Cloneable, Inheritable {
     //
     
     protected void initParams() throws ConfigException {
+/*
+ *  Seems that inheritance is implemented twice - here and when generating output lines, and the parameters are cloned, so when say
+ *  project parameters are modified, the changes are not propagated to the tool parameters. I'll try to disable inheritance here,
+ *  see what happens (this intermediate inheritance may be still needed somewhere - exe name, extensions?). Another option would be to reference instead of cloning
+ *  and skip initialization of the "alien" context parameters.
+ *  
+ *  Yes,  exe name wants it        	
+ */
         if(parentProject != null)
-            inheritParams(parentProject);        
+            inheritParams(parentProject);    // Here inheriting project parameters    
 
         if(parentPackage != null)
             inheritParams(parentPackage);
@@ -308,9 +324,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
             inheritParams(baseTool);
             inheritParamGroups();
         }
-        
-        paramContainer.init(config, this);
-        
+        paramContainer.init(config, this); // Error inside here when context is cloned in inheritance. Parameter ('SimulationTopFile') cannot be re-initialized
         initParamGroups();
     }
     
@@ -390,7 +404,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }    
     
     private void inheritParams(Context context) throws ConfigException {
-        EntityUtils.update(context.getParams(), paramContainer.getParams());
+//        EntityUtils.update(context.getParams(), paramContainer.getParams());
+        EntityUtilsMarkChildren.update(context.getParams(), paramContainer.getParams());
     }
 
     private void inheritParamGroups() throws ConfigException {

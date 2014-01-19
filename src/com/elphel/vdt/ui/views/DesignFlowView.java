@@ -87,7 +87,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     private TreeViewer viewer;
     private DrillDownAdapter drillDownAdapter;
-    private Action showLunchConfigAction;
+    private Action showLaunchConfigAction;
     private Action launchAction;
 
     private Action showInstallationPropertiesAction;
@@ -237,7 +237,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(showPackagePropertiesAction);
         manager.add(showProjectAction);
         manager.add(showPropertiesAction);
-//        manager.add(showLunchConfigAction);
+//        manager.add(showLaunchConfigAction);
         manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
     }
         
@@ -250,7 +250,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(showPackagePropertiesToolbarAction);
         manager.add(showProjectPropertiesToolbarAction);
         manager.add(showPropertiesAction);
-//        manager.add(showLunchConfigAction);
+//        manager.add(showLaunchConfigAction);
     }
 
     private void makeActions() {
@@ -296,7 +296,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         
         showProjectPropertiesToolbarAction = new LocalContextsAction("Project Parameters");
         showProjectPropertiesToolbarAction.setText("Project Parameters");
-        showProjectPropertiesToolbarAction.setToolTipText("Set project parameters");
+        showProjectPropertiesToolbarAction.setToolTipText("Set project parameters (toolbar)");
         showProjectPropertiesToolbarAction.setImageDescriptor(VDTPluginImages.DESC_PROJECT_PROPERTIES);
 
         showProjectAction = new Action() {
@@ -307,7 +307,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             }
         };
         showProjectAction.setText("Project Parameters");
-        showProjectAction.setToolTipText("Set project parameters");
+        showProjectAction.setToolTipText("Set project parameters (context menue)");
         showProjectAction.setImageDescriptor(VDTPluginImages.DESC_PROJECT_PROPERTIES);
         
         clearProjectPropertiesAction = new ClearLocalContextAction("Do you wish to delete values of projects parameters?");
@@ -341,7 +341,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         selectDesignMenuAction.setText("Change Design Menu");
         selectDesignMenuAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
             
-        showLunchConfigAction = new Action() {
+        showLaunchConfigAction = new Action() {
             public void run() {
                 try {
                     openToolLaunchDialog(selectedItem); 
@@ -352,9 +352,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 }    
             }
         };
-        showLunchConfigAction.setText("Launch configuration");
-        showLunchConfigAction.setToolTipText("Open launch configuration dialog for this tool");
-        showLunchConfigAction.setImageDescriptor(VDTPluginImages.DESC_LAUNCH_CONFIG);
+        showLaunchConfigAction.setText("Launch configuration");
+        showLaunchConfigAction.setToolTipText("Open launch configuration dialog for this tool");
+        showLaunchConfigAction.setImageDescriptor(VDTPluginImages.DESC_LAUNCH_CONFIG);
 
         launchAction = new Action() {
             public void run() {
@@ -429,14 +429,24 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         showProjectPropertiesToolbarAction.setProject(project);
         clearProjectPropertiesAction.setProject(project);
 
-        boolean enabled = (selectedItem != null)
-                       && (selectedResource != null)
+        boolean enabled = (selectedItem != null) // At startup null (twice went through this); Right Click - "Icarus Ver..."
+                       && (selectedResource != null) // at startup x353_1.tf;  Right Click - "L/x353/x353_1.tf
                        && (selectedItem.isEnabled(selectedResource));
 
         launchAction.setEnabled(enabled);
+
+        
+        //Just trying        
+        
+        
         if (enabled){
             launchAction.setText(Txt.s("Action.ToolLounch.Caption", new String[]{selectedResource.getName()}));
             launchAction.setToolTipText(Txt.s("Action.ToolLounch.ToolTip", new String[]{selectedItem.getLabel(), selectedResource.getName()}));
+            Tool tool = selectedItem.getTool();
+            if (tool!=null){
+            	System.out.println("Tool:"+tool.getName()); // Not yet parsed
+            }
+            
         } else {
             launchAction.setText(Txt.s("Action.ToolLounch.Caption.Default"));
             launchAction.setToolTipText(Txt.s("Action.ToolLounch.ToolTip.Default"));
@@ -522,22 +532,23 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             String newDesignMenuName = newDesignMenu == null ? null
                                                              : newDesignMenu.getName();
             if (newDesignMenuName != null) {
-                try {
+/*                try {
                     Utils.addNature(VDT.VERILOG_NATURE_ID, project, null);
                     desigMenuName.setValue(newDesignMenuName);
                 } catch (CoreException e) {
                     MessageUI.error( "Cannot set " + VDT.VERILOG_NATURE_ID + "nature for " + project.getName() 
                                    , e);
                 }
+*/                
             } else {
-                try {
+/*                try {
                     Utils.removeNature(VDT.VERILOG_NATURE_ID, project, null);
                     desigMenuName.doClear();
                 } catch (CoreException e) {
                     MessageUI.error( "Cannot remove " + VDT.VERILOG_NATURE_ID + "nature for " + project.getName() 
                                    , e);
                 }
-            }
+*/            }
             OptionsCore.doStoreOption(desigMenuName, project);
             doLoadDesignMenu(newDesignMenuName);
         }

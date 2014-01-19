@@ -50,6 +50,31 @@ public class Parameter implements Cloneable, Updateable {
 
     private boolean hasDependentParameters;
     
+    private boolean isChild; // Andrey: trying to resolve double inheritance  - at configuration time and when generating output
+    private String sourceXML; // Andrey: For error reporting - individual to parameter
+/*    
+    public Parameter(String id,
+    		String outid, 
+    		String typeName, 
+    		String syntaxName, 
+    		String defaultValue,
+    		String label,
+    		String omitValue,
+    		String readonly, 
+    		String visible,
+    		Condition relevant){
+    	this(id,
+    			outid,
+    			typeName,
+    			syntaxName,
+    			defaultValue,
+    			label,
+    			omitValue,
+    			readonly,
+    			visible,
+    			relevant,
+    			null);
+    }
     public Parameter(String id,
                      String outid, 
                      String typeName, 
@@ -71,7 +96,7 @@ public class Parameter implements Cloneable, Updateable {
              visible,
              null);
     }
-    
+  */  
     public Parameter(String id,
                      String outid, 
                      String typeName, 
@@ -81,9 +106,11 @@ public class Parameter implements Cloneable, Updateable {
                      String omitValue,
                      String readonly, 
                      String visible,
-                     Condition relevant) 
+                     Condition relevant,
+                     String sourceXML) 
     {
         this.id = id;
+        this.isChild=false;
         this.outid = outid != null? outid : id;
         this.typeName = typeName;
         this.syntaxName = syntaxName;
@@ -94,10 +121,10 @@ public class Parameter implements Cloneable, Updateable {
         this.visible = visible;
         this.relevant = relevant;
         this.hasDependentParameters = false;
+        this.sourceXML=sourceXML;
     }   
-    
     protected Parameter(Parameter param) {
-        this(param.id,
+        this(param.id, 
              param.outid,      
              param.typeName,   
              param.syntaxName, 
@@ -106,14 +133,22 @@ public class Parameter implements Cloneable, Updateable {
              param.omitValue,
              param.readonly,  
              param.visible,
-             param.relevant);
-
+             param.relevant,
+             param.sourceXML);
         this.type = param.type;
         this.syntax = param.syntax;
+        this.context = param.context; // Added by Andrey - may break something else? Supposed not to clone, otherwise fails in Tools.initParams()
     }
 
-    public Object clone() {
+    public Object clone() { // did not clone context (intentionally)
         return new Parameter(this);
+    }
+    
+    public boolean getIsChild(){
+    	return isChild;
+    }
+    public void setIsChild(boolean isChild){
+    	this.isChild=isChild;
     }
     
     public boolean matches(Updateable other) {
@@ -124,13 +159,25 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     public void init(Context context) throws ConfigException {
-        if(this.context != null)
+/*        if(this.context != null)
             throw new ConfigException("Parameter ('" + id + "') cannot be re-initialized");
-        
-        this.context = context;
-        
+          this.context = context;
+    
+             */
+    	
+// replacing:    	
+        if(this.context == context)
+            throw new ConfigException("Parameter ('" + id + "') cannot be re-initialized on the same context level"); // wrong file name, should be per-parameter
+        if(this.context == null) {
+        	this.context = context;
+        } else {
+        	System.out.println ("Andrey: Trying to use already defined context '"+this.context.getName()+
+        			"' instead of the currently processed '"+context.getName()+"' for parameter '"+this.getID()+"'");
+// Andrey: Not sure if initialization is still needed - it is probably done before cloning        	
+//        	System.out.println("Skipping initialization - it is already done");
+//        	return;
+        }
         String contextInfo = "Context '" + context.getName() + "'";
-        
         if(typeName == null)
             throw new ConfigException(contextInfo + ": Type name of parameter '" + id + "' is absent");
         else if(syntaxName == null)
@@ -155,18 +202,22 @@ public class Parameter implements Cloneable, Updateable {
                                           BooleanUtils.VALUE_FALSE);
         }
         
-        this.type = context.getControlInterface().findParamType(typeName);
+//        this.type = context.getControlInterface().findParamType(typeName);
+        this.type = this.context.getControlInterface().findParamType(typeName);
         
         if(this.type == null)
             throw new ConfigException(contextInfo + ": Parameter type '" + typeName + 
-                                      "' doesn't exist in control interface '" + context.getControlInterface().getName() +
+//                    "' doesn't exist in control interface '" + context.getControlInterface().getName() +
+                                      "' doesn't exist in control interface '" + this.context.getControlInterface().getName() +
                                       "'");
         
-        this.syntax = context.getControlInterface().findSyntax(syntaxName);
+//        this.syntax = context.getControlInterface().findSyntax(syntaxName);
+        this.syntax = this.context.getControlInterface().findSyntax(syntaxName);
 
         if(this.syntax == null)
             throw new ConfigException(contextInfo + ": Syntax '" + syntaxName + 
-                                      "' doesn't exist in control interface '" + context.getControlInterface().getName() +
+//                                      "' doesn't exist in control interface '" + context.getControlInterface().getName() +
+                                      "' doesn't exist in control interface '" + this.context.getControlInterface().getName() +
                                       "'");
     }
     

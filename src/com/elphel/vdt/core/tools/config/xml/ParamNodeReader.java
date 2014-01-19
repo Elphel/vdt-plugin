@@ -60,10 +60,9 @@ public class ParamNodeReader extends AbstractConditionNodeReader {
         String label        = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_LABEL_ATTR);
         String readOnly     = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_READONLY_ATTR);
         String visible      = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_VISIBLE_ATTR);
-        
         if(id == null)
             throw new ConfigException("Context '" + context.getName() + ": Parameter id is absent");
-                
+//getConfigFileName                
         return new Parameter(id,
                              outid,
                              typeName,
@@ -73,6 +72,8 @@ public class ParamNodeReader extends AbstractConditionNodeReader {
                              omitValue,
                              readOnly,
                              visible,
-                             condition);
+                             condition,
+                             getConfigFileName() //.getConfigFileName()
+                             );
     }
 }

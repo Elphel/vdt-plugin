@@ -150,12 +150,10 @@
                 format = "%%ParamValue"></syntax>
                 
     </interface>
-
     <project name="SampleProject"
              label="Sample Project"
              interface="MyControlInterface">
     </project>
-
     <!--
     ===========================================================
 

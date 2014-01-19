@@ -19,13 +19,26 @@
                        sensitivity="sensitive"
                        textkind="dir"/>
         </typedef>
+        <typedef name="FileType">
+            <paramtype kind="string"
+                       maxlength="256"
+                       sensitivity="sensitive"
+                       textkind="file"/>
+        </typedef>
 
         <syntax name="ValueSyntax" format="%%ParamValue"  />
     </interface>
-
+<!-- 
     <project name="project_settings"
-                  label="Project parameters"
+                  label="Project parameters for project_settings"
                   interface="project_interface">
+
+        <parameter id      = "SimulationTopFile"
+                   label   = "Project top simulation file"
+                   type    = "FileType"
+                   default = ""
+                   format  = "ValueSyntax"
+                   readonly= "false" />
 
         <parameter id      = "SimulationTopModule"
                    label   = "Project top simulation module"
@@ -43,6 +56,7 @@
 
         <input>
           <group name="General" label="Project properties">
+            "SimulationTopFile"
             "SimulationTopModule"
             "BuildDir"
           </group>
@@ -50,5 +64,5 @@
         <output>
         </output>
     </project>
-    
+     -->
 </vdt-project>

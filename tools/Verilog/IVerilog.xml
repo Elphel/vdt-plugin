@@ -116,16 +116,56 @@
 -->            
 
 </interface>
-
+<!-- 
 <project name="IVerilogProject"
-             label="iverilog project"
+             label="iverilog project label"
              interface="IVerilog">
 </project>
+-->
+    <project name="project_settings"
+                  label="Project parameters for project_settings"
+                  interface="project_interface">
+
+        <parameter id      = "SimulationTopFile"
+                   label   = "Project top simulation file"
+                   type    = "FileType"
+                   default = ""
+                   format  = "ValueSyntax"
+                   readonly= "false" />
+
+        <parameter id      = "SimulationTopModule"
+                   label   = "Project top simulation module"
+                   type    = "StringType"
+                   default = ""
+                   format  = "ValueSyntax"
+                   readonly= "false" />
+
+        <parameter id      = "BuildDir"
+                   label   = "project build directory"
+                   type    = "DirType"
+                   default = "build"
+                   format  = "ValueSyntax"
+                   readonly= "false" />
+
+        <input>
+          <group name="General" label="Project properties">
+            "SimulationTopFile"
+            "SimulationTopModule"
+            "BuildDir"
+          </group>
+        </input>
+        <output>
+        </output>
+    </project>
+
+
 
 <tool name        = "iverilog"
+      project     = "project_settings"
       label       = "Icarus Verilog compiler"
-      exe="iverilog"
-      shell       = "bash"
+      exe         = "iverilog"
+      shell       = "?%%OS: Windows=shell:, Linux=/bin/bash"
+      
       interface   = "IVerilog"
       errors      = "(.*):([0-9]+): [a-z_\- ]*error: (.*)"
       warnings    = "(.*):([0-9]+): [a-z_\- ]*warning: (.*)"
@@ -135,6 +175,12 @@
           <extension mask="v"/>
           <extension mask="tf"/>
       </extensions-list>
+
+	<action-menu>
+		<option label="Simulate" resource="%SimulationTopFile" />
+		<option label="Simulate" resource="%%SelectedFile" />
+		<option label="Just try for" resource="%%OS" />
+	</action-menu>
       
       
     <parameter id       = "Param_Shell_Options"
@@ -245,6 +291,14 @@
                default  = "2&gt;&amp;1 | tee iverilog.log | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
                readonly = "false"
                visible  = "true"/>
+<!--  intentional error below - duplicate -->               
+        <parameter id      = "BuildDir"
+                   label   = "project build directory"
+                   type    = "DirType"
+                   default = "build1"
+                   format  = "ValueSyntax"
+                   readonly= "false" />
+               
                
 	<input>
 	  <group name="files" label="Files">
@@ -267,29 +321,33 @@
 	</input>
 
 	<output>
-		<line name = "command_line" sep = " ">
-		"%Param_Shell_Options"
-		"%Param_PreExe"
-		"%Param_Exe"
-	    "%Param_TopModule"
-	    "%TopModulesOther"
-	    "%ModuleLibrary"
-	    "%LegacyModel"
-	    "%NoSpecify"
-	    "%v"
-	    "%SourceList"
-	    "%ExtraFiles"
-	    <if ErrorsOnly="true">
-	        "%Filter_String"
-	    </if>
-<!--
-		"-s counter_tb"
-		"%SourceList" -->
+		<line name="command_line" sep=" ">
+			"%Param_Shell_Options"
+			"echo BuildDir=%BuildDir ;"
+			"echo SimulationTopFile=%SimulationTopFile ;"
+			"echo SimulationTopModule=%SimulationTopModule ;"
+			"echo BuildDir=%BuildDir ;"
+			"%Param_PreExe"
+			"%Param_Exe"
+			"%Param_TopModule"
+			"%TopModulesOther"
+			"%ModuleLibrary"
+			"%LegacyModel"
+			"%NoSpecify"
+			"%v"
+			"%SourceList"
+			"%ExtraFiles"
+			<if ErrorsOnly="true">
+				"%Filter_String"
+			</if>
 		</line>
 	</output>
 
-
 </tool>
+<!-- 	"echo %SimulationTopFile %%SelectedFile ;" -->
+<!--
+		"-s counter_tb"
+		"%SourceList" -->
 
 
 

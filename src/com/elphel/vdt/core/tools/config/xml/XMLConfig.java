@@ -156,6 +156,10 @@ public class XMLConfig extends Config {
         }
     }
     
+    public String getConfigFileName(){
+    	return currentConfigFileName;
+    }
+    
     public void logError(Exception e) throws ConfigException {
         if(errorCount++ < MAX_ERRORS_TO_SHOW) {
             MessageUI.error("Error reading config file '" + currentConfigFileName + ". \n" +
@@ -370,14 +374,12 @@ public class XMLConfig extends Config {
                                                         SAXException, 
                                                         IOException  
     {
-        //System.out.println("Reading file '" + configFile + "'");
+        System.out.println("Reading file '" + configFile + "'");
         
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(configFile);
-        
         currentConfigFileName = configFile.getAbsolutePath();
-
         findRootNode(document);
         
         // read and tie control interface list
@@ -422,6 +424,8 @@ public class XMLConfig extends Config {
         List<DesignMenu> menuComponents = readDesignMenu(document);
 
         designMenuManager.addDesignMenuComponents(menuComponents);
+        System.out.println("Done reading file '" + configFile + "'");
+
     }
 
     private void addControlInterfaceList(List<ControlInterface> controlInterfaces)
@@ -553,7 +557,6 @@ public class XMLConfig extends Config {
                 String toolWarnings = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_WARNINGS);
                 String toolInfo     = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_INFO);
                 
-                
                 boolean isShell=false;
                 if (toolShell != null){
                 	toolExe=toolShell;
@@ -564,6 +567,15 @@ public class XMLConfig extends Config {
 //                if(toolShell == null) toolShell="";
                     
                 List<String> toolExtensionsList = readToolExtensionsList(contextNode, contextName);
+                
+                
+                System.out.println("contextNode.getNodeValue()="+contextNode.getNodeValue());
+                System.out.println("toolPackage="+toolPackage);
+                System.out.println("toolProject="+toolProject);
+                System.out.println("toolExe="+toolExe);
+                System.out.println("toolShell="+toolShell);
+                
+                List<Tool.RunFor> toolRunfor=     readToolRunForList(contextNode, contextName);
                 
                 context = new Tool(contextName,
                                    contextInterfaceName, 
@@ -579,6 +591,7 @@ public class XMLConfig extends Config {
                                    toolErrors,
                                    toolWarnings,
                                    toolInfo,
+                                   toolRunfor,
                                    null,
                                    null,
                                    null);
@@ -594,11 +607,14 @@ public class XMLConfig extends Config {
         // creation routines really DO need to have a reference to the context
         //
         List<Parameter> contextParams = readParameters(contextNode, context);
-        List<CommandLinesBlock> contextCommandLinesBlocks = readCommandLinesBlocks(contextNode, context);
+        List<CommandLinesBlock> contextCommandLinesBlocks = readCommandLinesBlocks(contextNode, context);  // Correct? for "project_parameters" in /vdt/tools/Verilog/IVerilog.xml
+        // Each of contextParams (3 total, correct) has null context. Probably OK, same for the tool context
         ContextInputDefinition contextInputDefinition = readContextInputDefinition(contextNode, context);
-        
+        if (contextKind==ContextKind.PROJECT){
+        	System.out.println("processing project context");
+        }
         context.setParams(contextParams);
-        context.setParamGroups(contextInputDefinition.getParamGroups());
+        context.setParamGroups(contextInputDefinition.getParamGroups()); // "Project Properties", "General"
         context.setInputDialogLabel(contextInputDefinition.getLabel());
         context.setCommandLinesBlocks(contextCommandLinesBlocks);
         
@@ -924,6 +940,14 @@ public class XMLConfig extends Config {
         }
         
         return extList;
+    }
+    
+    
+    private  List<Tool.RunFor> readToolRunForList(Node toolNode, String toolName){
+    	if (toolNode.getNodeValue()==null) return null;
+    	System.out.println("FIXME: readToolRunForList("+toolNode.getNodeName()  +", "+toolName+")"+
+    		    " rootNode="+rootNode.getNodeName()+" filename="+currentConfigFileName);
+    	return null;
     }
 
     private List<Parameter> readParameters(Node node, Context context)

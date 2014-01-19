@@ -35,11 +35,11 @@ public class ProjectContext extends Context {
                           String controlInterfaceName,
                           String label,
                           String iconName,            
-                          String inputDialogLabel,
+                          String inputDialogLabel, // null
                           String parentPackageName,
-                          List<Parameter> params,
-                          List<ParamGroup> paramGroups,
-                          List<CommandLinesBlock> commandLinesBlocks,
+                          List<Parameter> params, // null
+                          List<ParamGroup> paramGroups, // null
+                          List<CommandLinesBlock> commandLinesBlocks, //null
                           String designMenuName) 
         throws ConfigException
     {
@@ -47,10 +47,10 @@ public class ProjectContext extends Context {
               controlInterfaceName, 
               label,
               iconName,            
-              inputDialogLabel,
-              params, 
-              paramGroups,
-              commandLinesBlocks);
+              inputDialogLabel, // null
+              params, // null
+              paramGroups, // null
+              commandLinesBlocks); // null
         
         this.parentPackageName = parentPackageName;
         this.designMenuName = designMenuName;

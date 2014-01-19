@@ -156,14 +156,14 @@ public class LaunchCore {
             packageContext.setWorkingDirectory(project.getLocation().toOSString()); /* TODO - Modify for actual directory */
             packageContext.buildParams();    
         }
-        Context context = tool.getParentProject();
+        Context context = tool.getParentProject(); // for iverilog - "project_settings"
         if (context != null) {
-            OptionsCore.doLoadContextOptions(context, project);
+            OptionsCore.doLoadContextOptions(context, project); // stored values
             context.setWorkingDirectory(project.getLocation().toOSString());
-            context.buildParams();    
+            context.buildParams(); // correct context, but nothing got - Should it be? What the sense of the output - some control files?
         }
         OptionsCore.doLoadContextOptions(tool, project);
-        OptionsCore.doLoadLocation(tool);
+        OptionsCore.doLoadLocation(tool); // here it resolves condition with OS
     } // updateContextOptions()
     
     public static ILaunchConfiguration createLaunchConfiguration( Tool tool

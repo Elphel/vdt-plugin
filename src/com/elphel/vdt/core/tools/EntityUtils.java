@@ -22,7 +22,7 @@ import java.util.*;
 import com.elphel.vdt.core.tools.config.ConfigException;
 
 public class EntityUtils {
-
+// Updating tool context (to) from project context (from), items in to have now null context, in from - ProjectContext
     public static <T extends Updateable> void update(List<T> from, List<T> to)
         throws ConfigException 
     {
@@ -34,7 +34,7 @@ public class EntityUtils {
             T itemToUpdate = null;
 
             for(T toItem : to) {                
-                if(baseItem.matches(toItem)) {
+                if(baseItem.matches(toItem)) { // Did we miss redefined item here? (after I adding copying context to clone)? - no, just supposed to have no context
                     itemToUpdate = toItem;          
                     break;
                 }    

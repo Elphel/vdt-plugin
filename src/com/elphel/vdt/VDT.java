@@ -19,6 +19,8 @@ package com.elphel.vdt;
 
 import org.eclipse.core.runtime.QualifiedName;
 
+import com.elphel.vdt.veditor.HdlNature;
+
 /**
  * Central access point for the VDT plug-in (id <code>"com.elphel.vdt.ui"</code>).
  *
@@ -44,7 +46,8 @@ public class VDT {
     /** The identifier for the Verilog nature */
     
 //??????????????????????????????    
-    public static final String VERILOG_NATURE_ID  = ID_VDT + ".VerilogNature";
+//    public static final String VERILOG_NATURE_ID  = ID_VDT + ".VerilogNature";
+    public static final String VERILOG_NATURE_ID  = HdlNature.NATURE_ID; // TODO
     public static final String PREFERENCE_PAGE_ID = ID_VDT + ".ui.preferences.PreferencePage";
         
     //-------------------------------------------------------------------------
@@ -140,6 +143,7 @@ public class VDT {
     public static final String GENERATOR_ID_TOP_MODULE    = "TopModule"; 
     public static final String GENERATOR_ID_TOP_MODULES   = "TopModules"; 
     public static final String GENERATOR_ID_CURRENT_FILE  = "CurrentFile"; 
+    public static final String GENERATOR_ID_SELECTED_FILE = "SelectedFile"; 
     public static final String GENERATOR_ID_CURRENT_BASE  = "CurrentFileBase"; 
     public static final String GENERATOR_ID_OS_NAME       = "OS";
 } // class VDT

@@ -54,7 +54,7 @@ public abstract class Context {
     private boolean initialized = false; 
     private String workingDirectory;
     private String version;
-    
+    private Context context=null;
     protected Context(String name,
                       String controlInterfaceName,
                       String label,
@@ -166,7 +166,8 @@ public abstract class Context {
 //            MessageUI.error(e); 
 //        }
 
-        return visibleParamGroups;
+        return visibleParamGroups; // project foriverilog: [com.elphel.vdt.core.tools.params.ParamGroup@775b1885, null, null, null, null, null, null, null, null, null]
+        // ... label "Project properties", name="General"
     }
     
     public boolean isVisible() {
@@ -191,7 +192,7 @@ public abstract class Context {
     // that array is then returned
     public String[] buildParams() throws ToolException {
         List<String> commandLineParams = new ArrayList<String>();
-        Iterator<CommandLinesBlock> commandLinesBlockIter = commandLinesBlocks.iterator();
+        Iterator<CommandLinesBlock> commandLinesBlockIter = commandLinesBlocks.iterator(); // command lines block is empty (yes, there is nothing in project output)
         
         createdControlFiles.clear();
         
@@ -203,7 +204,7 @@ public abstract class Context {
             
             String paramName = commandLinesBlock.getDestination();
             String sep = commandLinesBlock.getSeparator();
-            List<String> lines = commandLinesBlock.getLines();            
+            List<String> lines = commandLinesBlock.getLines();  // [%Param_Shell_Options, echo BuildDir=%BuildDir ;, echo SimulationTopFile=%SimulationTopFile ;, echo SimulationTopModule=%SimulationTopModule ;, echo BuildDir=%BuildDir;, %Param_PreExe, %Param_Exe, %Param_TopModule, %TopModulesOther, %ModuleLibrary, %LegacyModel, %NoSpecify, %v, %SourceList, %ExtraFiles, %Filter_String]          
             List<List<String>> commandSequence = new ArrayList<List<String>>();
             
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
@@ -211,7 +212,7 @@ public abstract class Context {
                 
                 commandSequence.add(buildCommandString(line));                
             }
-            
+ // Here - already resolved to empty            
             if(paramName != null) {
                 Parameter commandFileParam = findParam(paramName);
                 String controlFileName = commandFileParam != null? 
@@ -271,9 +272,10 @@ public abstract class Context {
     }
 
     protected void initParams() throws ConfigException {
-        paramContainer.init(config, this);
-
+        paramContainer.init(config, this); //??? label="iverilog project label", name="IVerilogProject", config.currentConfigFileName="/data/vdt/elphel-EclipseVDT/vdt/tools/XDS/XDS.xml"
+// config.currentConfigFileName is just the last file processed for this context, OK
         // do the first init to detect most errors
+        // This time got labelname="ModelSIMProject" (empty)
         initParamGroups();
     }
     
@@ -281,7 +283,7 @@ public abstract class Context {
         visibleParamGroups.clear();
         
         List<StringPair> foundParams = 
-            new ArrayList<StringPair>(paramContainer.getParams().size()); 
+            new ArrayList<StringPair>(paramContainer.getParams().size());  // [null, null, null, null, null, null, null, null, null, null]
         
         for(ParamGroup group : paramGroups) {
             List<String> paramIDs = group.getParams();

@@ -55,7 +55,7 @@ public class FormatProcessor {
         List<String> outputLines = null;
         
         try {
-            outputLines = processTemplate(template);
+            outputLines = processTemplate(template); // echo %SimulationTopFile %%SelectedFile ; -> null
         } finally {
             callCount--;
         }
