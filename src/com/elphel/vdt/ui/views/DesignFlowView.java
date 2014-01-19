@@ -361,14 +361,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 try {
                     launchTool(selectedItem);
                 } catch (Exception e) {
-                    MessageUI.error( Txt.s("Action.ToolLounch.Error", 
+                    MessageUI.error( Txt.s("Action.ToolLaunch.Error", 
                                            new String[] {selectedItem.getLabel(), e.getMessage()})
                                     , e);
                 }    
             }
         };
-        launchAction.setText(Txt.s("Action.ToolLounch.Caption.Default"));
-        launchAction.setToolTipText(Txt.s("Action.ToolLounch.ToolTip.Default"));
+        launchAction.setText(Txt.s("Action.ToolLaunch.Caption.Default"));
+        launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip.Default"));
         launchAction.setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
         launchAction.setEnabled(false);
 //        launchAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
@@ -440,16 +440,16 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         
         
         if (enabled){
-            launchAction.setText(Txt.s("Action.ToolLounch.Caption", new String[]{selectedResource.getName()}));
-            launchAction.setToolTipText(Txt.s("Action.ToolLounch.ToolTip", new String[]{selectedItem.getLabel(), selectedResource.getName()}));
+            launchAction.setText(Txt.s("Action.ToolLaunch.Caption", new String[]{selectedResource.getName()}));
+            launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip", new String[]{selectedItem.getLabel(), selectedResource.getName()}));
             Tool tool = selectedItem.getTool();
             if (tool!=null){
             	System.out.println("Tool:"+tool.getName()); // Not yet parsed
             }
             
         } else {
-            launchAction.setText(Txt.s("Action.ToolLounch.Caption.Default"));
-            launchAction.setToolTipText(Txt.s("Action.ToolLounch.ToolTip.Default"));
+            launchAction.setText(Txt.s("Action.ToolLaunch.Caption.Default"));
+            launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip.Default"));
         }
 
         enabled = (selectedItem != null)

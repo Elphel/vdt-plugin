@@ -60,7 +60,7 @@ public class LaunchShortcut implements ILaunchShortcut {
         try {
             LaunchCore.launch(tool, project, project.getName()); 
         } catch (CoreException e) {
-            MessageUI.error(Txt.s("Action.ToolLounch.Error", 
+            MessageUI.error(Txt.s("Action.ToolLaunch.Error", 
                                   new String[] {tool.getName(), e.getMessage()}),
                             e);
         }    
