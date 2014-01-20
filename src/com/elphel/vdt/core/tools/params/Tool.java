@@ -20,11 +20,15 @@ package com.elphel.vdt.core.tools.params;
 import java.util.*;
 import java.io.*;
 
+import org.eclipse.core.resources.IProject;
+
+import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.*;
 import com.elphel.vdt.core.tools.contexts.*;
 import com.elphel.vdt.core.tools.config.*;
 import com.elphel.vdt.core.tools.params.conditions.ConditionUtils;
 import com.elphel.vdt.core.tools.params.recognizers.*;
+import com.elphel.vdt.core.tools.params.types.RunFor;
 
 
 public class Tool extends Context implements Cloneable, Inheritable {
@@ -51,10 +55,6 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private boolean isShell = false; /* Tool is a shell, preserve first argument, merge all others */
     private String projectPath=null;
     private boolean initialized = false;
-    public class RunFor{
-    	String prompt;
-    	String resource;
-    }
     public Tool(String name,
                 String controlInterfaceName,
                 String label,
@@ -94,6 +94,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.toolErrors   = toolErrors;
         this.toolWarnings = toolWarnings;
         this.toolInfo     = toolInfo;
+    }
+    
+    public List<RunFor> getRunFor(){
+    	return runfor;
     }
 
     public void init(Config config) throws ConfigException {
@@ -200,7 +204,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
             return null;
         
         FormatProcessor processor = new FormatProcessor(
-                                            new Recognizer[] { new ContextParamRecognizer(this) });
+                                            new Recognizer[] {
+                                            		new ContextParamRecognizer(this),
+//                                                    new SimpleGeneratorRecognizer() // Andrey: Trying
+                                            		});
 
         String[] actualExtensions = new String[extensions.size()];
         
@@ -221,6 +228,76 @@ public class Tool extends Context implements Cloneable, Inheritable {
         return actualExtensions;
     }
     
+    public RunFor[] getMenuActions(IProject project) {
+        if(runfor == null)
+            return null;
+        updateContextOptions (project); // Fill in parameters
+// Can be two different processors for labels and resources 
+        
+//SimpleGeneratorRecognizer(true) may be not needed, as current file is already set here
+        
+        FormatProcessor processor = new FormatProcessor(
+                                            new Recognizer[] {
+                                            		new ContextParamRecognizer(this),
+                                                    new SimpleGeneratorRecognizer(true) // in menuMode
+//                                                    new SimpleGeneratorRecognizer(false) // in menuMode
+                                            		});
+
+        RunFor[] actualActions = new RunFor[runfor.size()];
+        
+        for(int i = 0; i < runfor.size(); i++) {
+            List<String> labels = null;
+            try {
+                labels = processor.process(runfor.get(i).getLabel());
+            } catch(ToolException e) {
+                assert false;
+            }
+            assert labels.size() == 1;            
+            List<String> resources = null;
+            String resource=null;
+            try {
+            	resources = processor.process(runfor.get(i).getResource());
+            } catch(ToolException e) {
+// OK to be null;
+            }
+            if (resources!=null) {
+            	assert ((resources==null) || (resources.size() == 1));
+            	resource = resources.get(0);
+            }
+            actualActions[i] = new RunFor(labels.get(0), resource);
+        }
+        return actualActions;
+    }
+    
+    private void updateContextOptions (IProject project){
+        PackageContext packageContext = getParentPackage();
+        if (packageContext != null) {
+            OptionsCore.doLoadContextOptions(packageContext);
+            try {
+            	packageContext.buildParams();
+            } catch (ToolException e) { // Do nothing here
+            	System.out.println("updateContextOptions ToolException for Package Context="+e.getMessage());
+            }
+        }
+        Context context = getParentProject();
+        if (context != null) {
+            OptionsCore.doLoadContextOptions(context, project);
+            try {
+            	context.buildParams();
+            } catch (ToolException e) { // Do nothing here
+            	System.out.println("updateContextOptions ToolException for Project Context="+e.getMessage());
+            }
+        }
+        OptionsCore.doLoadContextOptions(this, project);
+        try {
+        	buildParams();
+        } catch (ToolException e) { // Do nothing here
+        	System.out.println("updateContextOptions ToolException for Tool Context="+e.getMessage());
+        }
+    }
+    
+    
+    
     public List<Parameter> getParams() {
         return paramContainer.getParams();
     }
@@ -235,8 +312,16 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     public Parameter findParam(String paramID) {
         Parameter param = super.findParam(paramID); //Andrey: happily finds ProjectContext parameter, thinks it is tool context
+/*
+ * Andrey: Added isChild property to the Property, and still left static inheritance at XML parsing time. Then, during parameter
+ * processing that inheritance is ignored
+ */
+//        if(param != null) // Was before the change described above 
+        if ((param != null) &&(param.getID().equals("SimulationTopFile"))){ // Andrey
+        	System.out.println("Initializing parameter SimulationTopFile, isChild="+param.getIsChild());
+        }
         
-//        if(param != null)  
+        
         if ((param != null) && !param.getIsChild())  
             return param;
         
@@ -404,7 +489,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }    
     
     private void inheritParams(Context context) throws ConfigException {
-//        EntityUtils.update(context.getParams(), paramContainer.getParams());
+//      EntityUtils.update(context.getParams(), paramContainer.getParams());
         EntityUtilsMarkChildren.update(context.getParams(), paramContainer.getParams());
     }
 

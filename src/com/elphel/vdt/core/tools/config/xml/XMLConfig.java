@@ -24,7 +24,7 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.*;
- 
+
 import com.elphel.vdt.core.tools.BooleanUtils;
 import com.elphel.vdt.core.tools.params.*;
 import com.elphel.vdt.core.tools.params.conditions.*;
@@ -33,6 +33,8 @@ import com.elphel.vdt.core.tools.config.*;
 import com.elphel.vdt.core.tools.contexts.*;
 import com.elphel.vdt.core.tools.menu.*;
 import com.elphel.vdt.ui.MessageUI;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 public class XMLConfig extends Config {
@@ -98,6 +100,11 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_SHELL_ATTR = "shell";
     static final String CONTEXT_TOOL_EXTENSIONS_LIST_TAG = "extensions-list";
     static final String CONTEXT_TOOL_EXTENSION_TAG = "extension";
+    static final String CONTEXT_TOOL_ACTION_LIST_TAG = "action-menu";
+    static final String CONTEXT_TOOL_ACTION_TAG = "action";
+    static final String CONTEXT_TOOL_ACTION_LABEL = "label";
+    static final String CONTEXT_TOOL_ACTION_RESOURCE = "resource";
+    
     static final String CONTEXT_TOOL_EXTENSION_MASK_ATTR = "mask";
     static final String CONTEXT_TOOL_SYNTAX_ERRORS =  "errors";
     static final String CONTEXT_TOOL_SYNTAX_WARNINGS= "warnings";
@@ -374,7 +381,8 @@ public class XMLConfig extends Config {
                                                         SAXException, 
                                                         IOException  
     {
-        System.out.println("Reading file '" + configFile + "'");
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+            System.out.println("Reading file '" + configFile + "'");
         
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -424,7 +432,8 @@ public class XMLConfig extends Config {
         List<DesignMenu> menuComponents = readDesignMenu(document);
 
         designMenuManager.addDesignMenuComponents(menuComponents);
-        System.out.println("Done reading file '" + configFile + "'");
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        	System.out.println("Done reading file '" + configFile + "'");
 
     }
 
@@ -567,15 +576,19 @@ public class XMLConfig extends Config {
 //                if(toolShell == null) toolShell="";
                     
                 List<String> toolExtensionsList = readToolExtensionsList(contextNode, contextName);
+                List<RunFor> toolRunfor=  readToolRunForList(contextNode, contextName);
                 
                 
-                System.out.println("contextNode.getNodeValue()="+contextNode.getNodeValue());
-                System.out.println("toolPackage="+toolPackage);
-                System.out.println("toolProject="+toolProject);
-                System.out.println("toolExe="+toolExe);
-                System.out.println("toolShell="+toolShell);
-                
-                List<Tool.RunFor> toolRunfor=     readToolRunForList(contextNode, contextName);
+                if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+                	System.out.println("contextNode.getNodeValue()="+contextNode.getNodeValue());
+                	System.out.println("toolPackage="+toolPackage);
+                	System.out.println("toolProject="+toolProject);
+                	System.out.println("toolExe="+toolExe);
+                	System.out.println("toolShell="+toolShell);
+                	if (toolRunfor!=null){
+                		System.out.println("got toolRunfor.size()="+toolRunfor.size());
+                	}
+                }
                 
                 context = new Tool(contextName,
                                    contextInterfaceName, 
@@ -610,8 +623,10 @@ public class XMLConfig extends Config {
         List<CommandLinesBlock> contextCommandLinesBlocks = readCommandLinesBlocks(contextNode, context);  // Correct? for "project_parameters" in /vdt/tools/Verilog/IVerilog.xml
         // Each of contextParams (3 total, correct) has null context. Probably OK, same for the tool context
         ContextInputDefinition contextInputDefinition = readContextInputDefinition(contextNode, context);
-        if (contextKind==ContextKind.PROJECT){
-        	System.out.println("processing project context");
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+        	if (contextKind==ContextKind.PROJECT){
+        		System.out.println("processing project context");
+        	}
         }
         context.setParams(contextParams);
         context.setParamGroups(contextInputDefinition.getParamGroups()); // "Project Properties", "General"
@@ -943,11 +958,37 @@ public class XMLConfig extends Config {
     }
     
     
-    private  List<Tool.RunFor> readToolRunForList(Node toolNode, String toolName){
-    	if (toolNode.getNodeValue()==null) return null;
-    	System.out.println("FIXME: readToolRunForList("+toolNode.getNodeName()  +", "+toolName+")"+
-    		    " rootNode="+rootNode.getNodeName()+" filename="+currentConfigFileName);
-    	return null;
+    private  List<RunFor> readToolRunForList(Node toolNode, String toolName)
+        throws ConfigException 
+    {
+        String toolInfo = "Tool '" + toolName + "'";
+        
+        List<RunFor> runForList = new ArrayList<RunFor>();
+        List<Node> runForNodesList = findChildNodes(toolNode, CONTEXT_TOOL_ACTION_LIST_TAG);
+        
+        if(runForNodesList.isEmpty())
+            return null;
+        if(runForNodesList.size() > 1)
+            throw new ConfigException(toolInfo + 
+                                      " definition cannot contain several '" + 
+                                      CONTEXT_OUTPUT_SECTION_TAG + 
+                                      "' nodes");
+                
+        Node runForNode = runForNodesList.get(0);
+        List<Node> runForNodes = findChildNodes(runForNode, CONTEXT_TOOL_ACTION_TAG);
+        
+        for(Iterator<Node> n = runForNodes.iterator(); n.hasNext();) {
+        	Node node = (Node)n.next();
+        	String label = getAttributeValue(node, CONTEXT_TOOL_ACTION_LABEL);
+        	if (label == null)
+        		throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_ACTION_LABEL + "' is absent");
+        	String resource = getAttributeValue(node, CONTEXT_TOOL_ACTION_RESOURCE);
+        	if (resource == null)
+        		throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_ACTION_RESOURCE + "' is absent");
+        	runForList.add(new RunFor(label, resource));
+        }
+        
+        return runForList;
     }
 
     private List<Parameter> readParameters(Node node, Context context)

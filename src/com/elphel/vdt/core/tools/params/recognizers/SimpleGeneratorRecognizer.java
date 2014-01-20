@@ -31,10 +31,19 @@ public class SimpleGeneratorRecognizer implements Recognizer {
         new ProjectPathGenerator(),
         new TopModuleNameGenerator(),
         new CurrentFileGenerator(),
-        new ViewSelectedFileGenerator(),
+//        new ViewSelectedFileGenerator(),
         new CurrentFileBaseGenerator()
     };
   
+    public SimpleGeneratorRecognizer(){
+    	super();
+    }
+    public SimpleGeneratorRecognizer(boolean menuMode){
+    	super();
+    	for (int i=0;i<generators.length;i++){
+    		generators[i].setMenuMode(menuMode);
+    	}
+    }
 	public RecognizerResult recognize(String template, int startPos) {
         RecognizerResult result = new RecognizerResult(); 
                 

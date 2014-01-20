@@ -22,8 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.elphel.vdt.core.tools.config.ConfigException;
-
-
+//TODO: Andrey: Now Parameter has file name
 public class Checks {
     public static void checkCyclicInheritance(Inheritable inheritanceChainMember, String entityName)
         throws ConfigException

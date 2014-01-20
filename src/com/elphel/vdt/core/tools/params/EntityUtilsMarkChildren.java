@@ -23,11 +23,7 @@ import com.elphel.vdt.core.tools.Updateable;
 import com.elphel.vdt.core.tools.config.ConfigException;
 
 public class EntityUtilsMarkChildren {
-// Updating tool context (to) from project context (from), items in to have now null context, in from - ProjectContext
-/*
- * Andrey: Seems there should be only one instance of each parameter, no cloning?
- */
-		
+//Andrey debugging: Updating tool context (to) from project context (from), items in to have now null context, in from - ProjectContext
     public static <T extends Updateable> void update(List<Parameter> from, List<Parameter> to)
         throws ConfigException 
     {

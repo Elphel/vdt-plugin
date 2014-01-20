@@ -43,15 +43,13 @@ import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.menu.DesignMenu;
 import com.elphel.vdt.core.tools.params.Tool;
-
+import com.elphel.vdt.core.tools.params.types.RunFor;
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
-
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.VDTPluginImages;
-
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 import com.elphel.vdt.ui.views.DesignMenuModel;
 import com.elphel.vdt.ui.dialogs.DesignMenuSelectionDialog;
@@ -429,14 +427,25 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         showProjectPropertiesToolbarAction.setProject(project);
         clearProjectPropertiesAction.setProject(project);
 
+     // Selected item should be not null, but resource - may be        
+     // RunFor[] getMenuActions()
+        if (selectedItem != null){
+        	Tool tool= selectedItem.getTool();
+        	if (tool!=null){
+        		RunFor [] runFor=tool.getMenuActions(project);
+        		System.out.println("Got Runfor["+((runFor!=null)?runFor.length:"null")+"]");
+        		if (runFor!=null){
+        			for (int i=0;i<runFor.length;i++){
+                		System.out.println("    label='"+runFor[i].getLabel()+"', resource='"+runFor[i].getResource()+"'");
+        			}
+        		}
+        	}
+        }
+        
         boolean enabled = (selectedItem != null) // At startup null (twice went through this); Right Click - "Icarus Ver..."
                        && (selectedResource != null) // at startup x353_1.tf;  Right Click - "L/x353/x353_1.tf
                        && (selectedItem.isEnabled(selectedResource));
-
         launchAction.setEnabled(enabled);
-
-        
-        //Just trying        
         
         
         if (enabled){

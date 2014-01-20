@@ -129,7 +129,7 @@
         <parameter id      = "SimulationTopFile"
                    label   = "Project top simulation file"
                    type    = "FileType"
-                   default = ""
+                   default = "default_top (testing)"
                    format  = "ValueSyntax"
                    readonly= "false" />
 
@@ -177,9 +177,10 @@
       </extensions-list>
 
 	<action-menu>
-		<option label="Simulate" resource="%SimulationTopFile" />
-		<option label="Simulate" resource="%%SelectedFile" />
-		<option label="Just try for" resource="%%OS" />
+		<action label="Simulate" resource="%SimulationTopFile" />
+		<action label="Simulate for" resource="%%CurrentFile" />
+		<action label="Empty" resource="" />
+		<action label="Just try for" resource="%%OS" />
 	</action-menu>
       
       
@@ -190,6 +191,7 @@
                default  = "-c"
                readonly = "false"
                visible  = "true"/>
+<!-- Intentional error: No, does not detect duplicates yet-->
 
     <parameter id       = "Param_PreExe"
                label    = "Param_PreExe"
@@ -298,35 +300,34 @@
                    default = "build1"
                    format  = "ValueSyntax"
                    readonly= "false" />
-               
-               
-	<input>
-	  <group name="files" label="Files">
-	    "Param_PreExe"
-	    "Param_Exe"
-	    "Param_Shell_Options"
-	    "Param_TopModule"
-	    "TopModulesOther"
-	    "ModuleLibrary"
-	    "ExtraFiles"
-	  </group>
-	  <group name="options" label="Options">
-	    "ErrorsOnly"
-	    "Filter_String"
-	    "v"
-	    "LegacyModel"
-	    "NoSpecify"
-	    <!--	    "SourceList" -->
-	  </group>
-	</input>
 
+
+	<input>
+		<group name="files" label="Files">
+			<!-- "SimulationTopFile" -->
+			"Param_PreExe"
+			"Param_Exe"
+			"Param_Shell_Options"
+			"Param_TopModule"
+			"TopModulesOther"
+			"ModuleLibrary"
+			"ExtraFiles"
+		</group>
+		<group name="options" label="Options">
+			"ErrorsOnly"
+			"Filter_String"
+			"v"
+			"LegacyModel"
+			"NoSpecify"
+			<!-- "SourceList" -->
+		</group>
+	</input>
 	<output>
 		<line name="command_line" sep=" ">
 			"%Param_Shell_Options"
 			"echo BuildDir=%BuildDir ;"
 			"echo SimulationTopFile=%SimulationTopFile ;"
 			"echo SimulationTopModule=%SimulationTopModule ;"
-			"echo BuildDir=%BuildDir ;"
 			"%Param_PreExe"
 			"%Param_Exe"
 			"%Param_TopModule"
@@ -344,7 +345,7 @@
 	</output>
 
 </tool>
-<!-- 	"echo %SimulationTopFile %%SelectedFile ;" -->
+<!-- 	"echo %SimulationTopFile %%CurrentFile ;" -->
 <!--
 		"-s counter_tb"
 		"%SourceList" -->

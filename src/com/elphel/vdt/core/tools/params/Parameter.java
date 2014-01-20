@@ -122,6 +122,9 @@ public class Parameter implements Cloneable, Updateable {
         this.relevant = relevant;
         this.hasDependentParameters = false;
         this.sourceXML=sourceXML;
+        if (id.equals("SimulationTopFile")){ // Andrey
+        	System.out.println("Creating parameter SimulationTopFile, defaultValue="+defaultValue);
+        }
     }   
     protected Parameter(Parameter param) {
         this(param.id, 
@@ -164,26 +167,43 @@ public class Parameter implements Cloneable, Updateable {
           this.context = context;
     
              */
-    	
-// replacing:    	
-        if(this.context == context)
-            throw new ConfigException("Parameter ('" + id + "') cannot be re-initialized on the same context level"); // wrong file name, should be per-parameter
-        if(this.context == null) {
-        	this.context = context;
-        } else {
-        	System.out.println ("Andrey: Trying to use already defined context '"+this.context.getName()+
-        			"' instead of the currently processed '"+context.getName()+"' for parameter '"+this.getID()+"'");
-// Andrey: Not sure if initialization is still needed - it is probably done before cloning        	
-//        	System.out.println("Skipping initialization - it is already done");
-//        	return;
+        if (id.equals("SimulationTopFile")){ // Andrey
+        	System.out.println("Initializing parameter SimulationTopFile, defaultValue="+defaultValue);
         }
+
+    	
+// Andrey: replacing with
+        if(this.context == context) {
+// That kind of check never happens, same id parameter fro the same tool (not inherited) is silently ignored        	
+            throw new ConfigException("Parameter ('" + id + "') cannot be re-initialized on the same context level in "+sourceXML); // wrong file name, should be per-parameter
+        }
+        if(this.context != null) {
+/*        	
+        	 System.out.println ("Andrey: Trying to use already defined context for parameter '"+id+"', context='"+this.context.getName()+
+        			 "' instead of the currently processed '"+context.getName()+"' for parameter '"+this.getID()+"'"+
+        			 " isChild="+getIsChild());
+*/        			 
+         	setIsChild(true); // Still does not work with EntityUtils.update(), only with EntityUtilsMarkChildren.update()
+        	return; // this parameter is inherited, already processed 
+        }
+       	this.context = context;
+        if (getIsChild()){
+ /*
+         	 System.out.println ("Andrey: isChild is set for parameter '"+id+"' context '"+this.context.getName()+
+  
+    			 "' instead of the currently processed '"+context.getName()+"' for parameter '"+this.getID()+"'"+
+    			 " isChild="+getIsChild());
+*/    			 
+       	
+        }
+       	this.context = context;
         String contextInfo = "Context '" + context.getName() + "'";
         if(typeName == null)
-            throw new ConfigException(contextInfo + ": Type name of parameter '" + id + "' is absent");
+            throw new ConfigException(contextInfo + ": Type name of parameter '" + id + "' is absent in "+sourceXML);
         else if(syntaxName == null)
-            throw new ConfigException(contextInfo + ": Syntax name of parameter '" + id + "' is absent");
+            throw new ConfigException(contextInfo + ": Syntax name of parameter '" + id + "' is absent in "+sourceXML);
         else if(defaultValue == null)
-            throw new ConfigException(contextInfo + ": Default value of parameter '" + id + "' is absent");
+            throw new ConfigException(contextInfo + ": Default value of parameter '" + id + "' is absent in "+sourceXML);
         
         if(readonly == null)
             readonly = new String(BooleanUtils.VALUE_FALSE);
@@ -199,7 +219,7 @@ public class Parameter implements Cloneable, Updateable {
             if(label == null)
                 throw new ConfigException(contextInfo + ": Label of the parameter '" + id +
                                           "' is absent, while visible attribute is not " + 
-                                          BooleanUtils.VALUE_FALSE);
+                                          BooleanUtils.VALUE_FALSE+" in "+sourceXML);
         }
         
 //        this.type = context.getControlInterface().findParamType(typeName);
@@ -209,7 +229,7 @@ public class Parameter implements Cloneable, Updateable {
             throw new ConfigException(contextInfo + ": Parameter type '" + typeName + 
 //                    "' doesn't exist in control interface '" + context.getControlInterface().getName() +
                                       "' doesn't exist in control interface '" + this.context.getControlInterface().getName() +
-                                      "'");
+                                      "' in "+sourceXML);
         
 //        this.syntax = context.getControlInterface().findSyntax(syntaxName);
         this.syntax = this.context.getControlInterface().findSyntax(syntaxName);
@@ -218,7 +238,7 @@ public class Parameter implements Cloneable, Updateable {
             throw new ConfigException(contextInfo + ": Syntax '" + syntaxName + 
 //                                      "' doesn't exist in control interface '" + context.getControlInterface().getName() +
                                       "' doesn't exist in control interface '" + this.context.getControlInterface().getName() +
-                                      "'");
+                                      "' in "+sourceXML);
     }
     
     //
@@ -292,6 +312,10 @@ public class Parameter implements Cloneable, Updateable {
     //
     
     public void setCurrentValue(String value) throws ToolException {
+        if (id.equals("SimulationTopFile")){ // Andrey
+        	System.out.println("setCurrentValue() SimulationTopFile, value="+value);
+        }
+
         if(type.isList())
             throw new ToolException("Assigning a non-list value to list parameter");
         
@@ -304,6 +328,10 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     public void setCurrentValue(List<String> value) throws ToolException {
+        if (id.equals("SimulationTopFile")){ // Andrey
+        	System.out.println("setCurrentValue() SimulationTopFile a list value");
+        }
+
         if(!type.isList())
             throw new ToolException("Assigning a list value to non-list parameter");
 
@@ -315,6 +343,10 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     public List<String> getCurrentValue() {
+        if (id.equals("SimulationTopFile")){ // Andrey
+        	System.out.println("getCurrentValue() SimulationTopFile, value="+currentValue);
+        }
+
         if(currentValue.isEmpty())
             return null;
         
@@ -354,6 +386,10 @@ public class Parameter implements Cloneable, Updateable {
     // returns current value if it is set 
     // otherwise returns default value 
     public List<String> getValue() {
+        if (id.equals("SimulationTopFile")){ // Andrey
+        	System.out.println("getValue() SimulationTopFile");
+        }
+    	
         if(!currentValue.isEmpty())
             return currentValue;
         
@@ -363,6 +399,10 @@ public class Parameter implements Cloneable, Updateable {
     // returns external form of the current value unless it equals null; 
     // otherwise returns external form of the default value 
     public List<String> getExternalValueForm() {
+        if (id.equals("SimulationTopFile")){ // Andrey
+        	System.out.println("getExternalValueForm() SimulationTopFile");
+        }
+
         List<String> externalFormValue = new ArrayList<String>();
         
         for(Iterator<String> i = getValue().iterator(); i.hasNext();) {
@@ -425,8 +465,12 @@ public class Parameter implements Cloneable, Updateable {
         if(syntaxName == null)
             syntaxName = param.syntaxName;
         
-        if(defaultValue == null)
+        if(defaultValue == null) {
             defaultValue = param.defaultValue;
+            if (id.equals("SimulationTopFile")){ // Andrey
+            	System.out.println("Updating parameter SimulationTopFile, defaultValue="+defaultValue);
+            }
+        }            
         
         if(label == null)
             label = param.label;
@@ -543,7 +587,7 @@ public class Parameter implements Cloneable, Updateable {
                                        "' of parameter '" + id + 
                                        "' has value that is neither " + BooleanUtils.VALUE_TRUE +
                                        ", nor " + BooleanUtils.VALUE_FALSE +
-                                       ", nor a condition expression");
+                                       ", nor a condition expression in "+sourceXML);
         }            
     }
 
@@ -556,7 +600,7 @@ public class Parameter implements Cloneable, Updateable {
                                        "' of parameter '" + id + 
                                        "' has value '" + boolValue +
                                        "' that is neither " + BooleanUtils.VALUE_TRUE +
-                                       ", nor " + BooleanUtils.VALUE_FALSE);
+                                       ", nor " + BooleanUtils.VALUE_FALSE+" in "+sourceXML);
         }            
     }
     

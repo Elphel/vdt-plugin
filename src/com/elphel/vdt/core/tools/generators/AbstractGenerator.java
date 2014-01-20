@@ -31,7 +31,8 @@ public abstract class AbstractGenerator {
     protected final String prefix, suffix;
     protected String separator;
     private final boolean forcedMultiline;
-    
+    private boolean menuMode=false; // managing menu items, not running tool
+
     public AbstractGenerator() {
         this(false);
     }
@@ -60,7 +61,14 @@ public abstract class AbstractGenerator {
         separator = separator.replace("\\n", "\n");
         separator = separator.replace("\\t", "\t");
     }
+    public void setMenuMode(boolean menuMode){
+    	this.menuMode=menuMode;
+    }
+    public boolean getMenuMode(){
+    	return menuMode;
+    }
 
+    
     public abstract String getName();
     
     public String[] generate() {
