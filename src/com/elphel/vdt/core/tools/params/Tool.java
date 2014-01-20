@@ -83,7 +83,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
               params, 
               paramGroups, 
               commandLinesBlocks);
-        this.runfor=runfor;
+        this.runfor=runfor; // should it be cloned?
         this.baseToolName = baseToolName;
         this.label = label;
         this.parentPackageName = parentPackageName;
@@ -264,7 +264,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
             	assert ((resources==null) || (resources.size() == 1));
             	resource = resources.get(0);
             }
-            actualActions[i] = new RunFor(labels.get(0), resource);
+            actualActions[i] = new RunFor(
+            		labels.get(0),
+            		resource,
+            		runfor.get(i).getCheckExtension(),
+            		runfor.get(i).getCheckExistence());
         }
         return actualActions;
     }

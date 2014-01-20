@@ -104,6 +104,13 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_ACTION_TAG = "action";
     static final String CONTEXT_TOOL_ACTION_LABEL = "label";
     static final String CONTEXT_TOOL_ACTION_RESOURCE = "resource";
+    static final String CONTEXT_TOOL_ACTION_CHECK_EXTENSION = "check-extension";
+    static final String CONTEXT_TOOL_ACTION_CHECK_EXISTENCE = "check-existence";
+    
+    static final String CONTEXT_TOOL_DFLT_ACTION_LABEL = "Run for";
+    static final String CONTEXT_TOOL_DFLT_ACTION_RESOURCE = "%%CurrentFile";
+    static final String CONTEXT_TOOL_DFLT_ACTION_CHECK_EXTENSION = "true";
+    static final String CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE = "false";
     
     static final String CONTEXT_TOOL_EXTENSION_MASK_ATTR = "mask";
     static final String CONTEXT_TOOL_SYNTAX_ERRORS =  "errors";
@@ -957,38 +964,58 @@ public class XMLConfig extends Config {
         return extList;
     }
     
-    
-    private  List<RunFor> readToolRunForList(Node toolNode, String toolName)
-        throws ConfigException 
-    {
-        String toolInfo = "Tool '" + toolName + "'";
-        
-        List<RunFor> runForList = new ArrayList<RunFor>();
-        List<Node> runForNodesList = findChildNodes(toolNode, CONTEXT_TOOL_ACTION_LIST_TAG);
-        
-        if(runForNodesList.isEmpty())
-            return null;
-        if(runForNodesList.size() > 1)
-            throw new ConfigException(toolInfo + 
-                                      " definition cannot contain several '" + 
-                                      CONTEXT_OUTPUT_SECTION_TAG + 
-                                      "' nodes");
-                
-        Node runForNode = runForNodesList.get(0);
-        List<Node> runForNodes = findChildNodes(runForNode, CONTEXT_TOOL_ACTION_TAG);
-        
-        for(Iterator<Node> n = runForNodes.iterator(); n.hasNext();) {
-        	Node node = (Node)n.next();
-        	String label = getAttributeValue(node, CONTEXT_TOOL_ACTION_LABEL);
-        	if (label == null)
-        		throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_ACTION_LABEL + "' is absent");
-        	String resource = getAttributeValue(node, CONTEXT_TOOL_ACTION_RESOURCE);
-        	if (resource == null)
-        		throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_ACTION_RESOURCE + "' is absent");
-        	runForList.add(new RunFor(label, resource));
-        }
-        
-        return runForList;
+
+    private  List<RunFor> readToolRunForList(Node toolNode, String toolName) throws ConfigException {
+    	String toolInfo = "Tool '" + toolName + "'";
+
+    	List<RunFor> runForList = new ArrayList<RunFor>();
+    	List<Node> runForNodesList = findChildNodes(toolNode, CONTEXT_TOOL_ACTION_LIST_TAG);
+
+    	if(runForNodesList.isEmpty()) {
+    		runForList.add(new RunFor(
+    				CONTEXT_TOOL_DFLT_ACTION_LABEL,
+    				CONTEXT_TOOL_DFLT_ACTION_RESOURCE,
+    				getBoolAttrValue(CONTEXT_TOOL_DFLT_ACTION_CHECK_EXTENSION),
+    				getBoolAttrValue(CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE)));
+
+    	} else {            
+    		if(runForNodesList.size() > 1)
+    			throw new ConfigException(toolInfo + 
+    					" definition cannot contain several '" + 
+    					CONTEXT_TOOL_ACTION_LIST_TAG + 
+    					"' nodes");
+
+    		Node runForNode = runForNodesList.get(0);
+    		List<Node> runForNodes = findChildNodes(runForNode, CONTEXT_TOOL_ACTION_TAG);
+
+    		for(Iterator<Node> n = runForNodes.iterator(); n.hasNext();) {
+    			Node node = (Node)n.next();
+    			String label = getAttributeValue(node, CONTEXT_TOOL_ACTION_LABEL);
+    			if (label == null)
+    				label=CONTEXT_TOOL_DFLT_ACTION_LABEL;
+    			String resource = getAttributeValue(node, CONTEXT_TOOL_ACTION_RESOURCE);
+    			if (resource == null)
+    				resource= CONTEXT_TOOL_DFLT_ACTION_RESOURCE;
+
+    			String checkExtensionAttr=getAttributeValue(node, CONTEXT_TOOL_ACTION_CHECK_EXTENSION);
+    			if (checkExtensionAttr==null){
+    				checkExtensionAttr=CONTEXT_TOOL_DFLT_ACTION_CHECK_EXTENSION;
+    			}
+    			checkBoolAttr(checkExtensionAttr, CONTEXT_TOOL_ACTION_CHECK_EXTENSION);
+    			boolean checkExtension=getBoolAttrValue(checkExtensionAttr);
+    			
+
+    			String checkExistenceAttr=getAttributeValue(node, CONTEXT_TOOL_ACTION_CHECK_EXISTENCE);
+    			if (checkExistenceAttr==null){
+    				checkExistenceAttr=CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE;
+    			}
+    			checkBoolAttr(checkExistenceAttr, CONTEXT_TOOL_ACTION_CHECK_EXISTENCE);
+    			boolean checkExistence=getBoolAttrValue(checkExistenceAttr);
+
+    			runForList.add(new RunFor(label, resource, checkExtension, checkExistence));
+    		}
+    	}
+    	return runForList;
     }
 
     private List<Parameter> readParameters(Node node, Context context)

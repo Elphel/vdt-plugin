@@ -18,17 +18,39 @@
 package com.elphel.vdt.core.tools.params.types;
 
 
-public class RunFor{
+public class RunFor implements Cloneable{
 	public String label;
 	public String resource;
-	public RunFor(String label, String resource){
+	public boolean checkExtension;
+	public boolean checkExistence;
+	public RunFor(String label, String resource, boolean checkExtension, boolean checkExistence){
 		this.label=label;
 		this.resource=resource;
+		this.checkExtension=checkExtension;
+		this.checkExistence=checkExistence;
 	}
+
+	public RunFor(RunFor runFor){
+		this (
+				runFor.label,
+				runFor.resource,
+				runFor.checkExtension,
+				runFor.checkExistence);
+	}
+
 	public String getLabel(){
 		return label;
 	}
 	public String getResource(){
 		return resource;
 	}
+	public boolean getCheckExtension(){
+		return checkExtension;
+	}
+	public boolean getCheckExistence(){
+		return checkExistence;
+	}
+    public Object clone() { // did not clone context (intentionally)
+        return new RunFor(this);
+    }
 }

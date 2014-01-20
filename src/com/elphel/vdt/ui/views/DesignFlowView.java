@@ -87,6 +87,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     private DrillDownAdapter drillDownAdapter;
     private Action showLaunchConfigAction;
     private Action launchAction;
+    
+    private Action [] launchActions;
 
     private Action showInstallationPropertiesAction;
     private ClearAction clearInstallationPropertiesAction;
@@ -176,7 +178,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     }
 
     private void doLoadDesignMenu(String menuName) {
-        if (menuName != null) {
+        if (menuName != null) { // Horizontal menu bar
             DesignMenu designMenu = ToolsCore.getDesignMenuManager().findDesignMenu(menuName);
             viewer.setInput(designMenu);
             List<Context> packages = ToolsCore.getDesignMenuManager().getPackageContexts(designMenu);
@@ -226,10 +228,16 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     }
 
     private void fillContextMenu(IMenuManager manager) {
+    	
+    	
         manager.add(launchAction);
-//      manager.add(new Separator());
+
+//        manager.add(new Separator()); // test
+//        manager.add(launchAction); // test
+        
+        //      manager.add(new Separator());
 //      drillDownAdapter.addNavigationActions(manager);
-      // Other plug-ins can contribute there actions here
+      // Other plug-ins can contribute their actions here
         manager.add(new Separator());
         manager.add(showInstallationPropertiesAction);
         manager.add(showPackagePropertiesAction);
@@ -239,8 +247,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
     }
         
-    private void fillLocalToolBar(IToolBarManager manager) {
-        manager.add(launchAction);
+    private void fillLocalToolBar(IToolBarManager manager) { // On Horizontal bar
+        manager.add(launchAction); 
+//        manager.add(launchAction);  // test
 //      manager.add(new Separator());
 //      drillDownAdapter.addNavigationActions(manager);
         manager.add(new Separator());
@@ -351,7 +360,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             }
         };
         showLaunchConfigAction.setText("Launch configuration");
-        showLaunchConfigAction.setToolTipText("Open launch configuration dialog for this tool");
+        showLaunchConfigAction.setToolTipText("Open launch configuration dialog for this tool"+" ** DBG **");
         showLaunchConfigAction.setImageDescriptor(VDTPluginImages.DESC_LAUNCH_CONFIG);
 
         launchAction = new Action() {
@@ -366,7 +375,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             }
         };
         launchAction.setText(Txt.s("Action.ToolLaunch.Caption.Default"));
-        launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip.Default"));
+        launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip.Default")+" **DEBUGGING**");
         launchAction.setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
         launchAction.setEnabled(false);
 //        launchAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
@@ -436,7 +445,12 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         		System.out.println("Got Runfor["+((runFor!=null)?runFor.length:"null")+"]");
         		if (runFor!=null){
         			for (int i=0;i<runFor.length;i++){
-                		System.out.println("    label='"+runFor[i].getLabel()+"', resource='"+runFor[i].getResource()+"'");
+                		System.out.println(
+                				"    label='"+runFor[i].getLabel()+
+                				"', resource='"+runFor[i].getResource()+
+                				"', checkExtension='"+runFor[i].getCheckExtension()+
+                				"', checkExistence='"+runFor[i].getCheckExistence()+
+                				"'");
         			}
         		}
         	}
@@ -447,9 +461,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                        && (selectedItem.isEnabled(selectedResource));
         launchAction.setEnabled(enabled);
         
-        
         if (enabled){
-            launchAction.setText(Txt.s("Action.ToolLaunch.Caption", new String[]{selectedResource.getName()}));
+        	/* Andrey: Next apperas on right-click (context) menu for selected tool */
+            launchAction.setText(Txt.s("Action.ToolLaunch.Caption", new String[]{selectedResource.getName()})+"<<<<<");
+            /* Andrey: below sets tooltip on the horizontal bar */
             launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip", new String[]{selectedItem.getLabel(), selectedResource.getName()}));
             Tool tool = selectedItem.getTool();
             if (tool!=null){

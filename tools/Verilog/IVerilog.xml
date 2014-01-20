@@ -177,8 +177,8 @@
       </extensions-list>
 
 	<action-menu>
-		<action label="Simulate" resource="%SimulationTopFile" />
-		<action label="Simulate for" resource="%%CurrentFile" />
+		<action label="Simulate" resource="%SimulationTopFile" check-extension="false" check-existence="true" />
+		<action label="Simulate for" resource="%%CurrentFile" check-extension="true"/>
 		<action label="Empty" resource="" />
 		<action label="Just try for" resource="%%OS" />
 	</action-menu>
