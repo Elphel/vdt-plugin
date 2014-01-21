@@ -67,7 +67,12 @@
 
 	<syntax name="DbgCurrentFileSyntax" format="echo &quot;%%CurrentFile&quot; ;" />
 	<syntax name="DbgChosenActionIndexSyntax" format="echo &quot;index=%%ChosenActionIndex&quot; ;" />
+	<syntax name="BuildStampSyntax" format="%%BuildStamp" />
+	<syntax name="LogFileSyntax" format="%%BuildStamp.log" />
+	<syntax name="GrepSkipSyntax" format="| grep --line-buffered -v &quot;%%ParamValue&quot;" />
+
                 
+//
                 
   ChosenActionIndex              
                 
@@ -283,7 +288,7 @@
                label    = "Filter_String"
                type     = "StringType"
                format   = "JustValueSyntax"
-               default  = "2&gt;&amp;1 | tee iverilog.log | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
+               default  = "2&gt;&amp;1 | tee %LogFile | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
                readonly = "false"
                visible  = "true"/>
                
@@ -305,12 +310,22 @@
                readonly = "false"
                visible  = "true"/>
                
+    <parameter id       = "GrepSkip1"
+               label    = "GrepSkip"
+               type     = "StringType"
+               format   = "GrepSkipSyntax"
+               default  = "(null)"
+               readonly = "false"
+               visible  = "true"/>
+               
+               
+               
 <!--  intentional error below - duplicate -->               
-        <parameter id      = "BuildDir"
-                   label   = "project build directory"
-                   type    = "DirType"
-                   default = "build1"
-                   format  = "ValueSyntax"
+        <parameter id      = "LogFile"
+                   label   = "Simulator Log Filie"
+                   type    = "StringType"
+                   default = "logfile.log"
+                   format  = "LogFileSyntax"
                    readonly= "false" />
 
 
@@ -328,6 +343,7 @@
 		<group name="options" label="Options">
 			"ErrorsOnly"
 			"Filter_String"
+			"GrepSkip1"
 			"v"
 			"LegacyModel"
 			"NoSpecify"
@@ -343,6 +359,7 @@
 			"echo CurrentFile=%%CurrentFile ;"
 			"echo SimulationTopFile=%SimulationTopFile ;"
 			"echo SimulationTopModule=%SimulationTopModule ;"
+			"echo LogFile=%LogFile ;"
 			"%Param_PreExe"
 			"%Param_Exe"
 			"%Param_TopModule"
@@ -354,7 +371,11 @@
 			"%SourceList"
 			"%ExtraFiles"
 			<if ErrorsOnly="true">
-				"%Filter_String"
+               "2&gt;&amp;1"
+               "| tee %LogFile"
+               "| grep --line-buffered -E 'error|warning'"
+               "%GrepSkip1"
+ <!--			"%Filter_String" -->
 			</if>
 		</line>
 	</output>

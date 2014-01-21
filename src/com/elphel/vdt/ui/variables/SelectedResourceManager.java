@@ -66,7 +66,8 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     private String fChosenTarget=null; // full path of the chosen (for action) resource or any string. Used to calculate CurrentFile, verilog file, ...
     private IResource fChosenVerilogFile = null; // to keep fSelectedVerilogFile
     private int fChosenAction=0; // Chosen variant of running the tool
-    
+    private long timestamp=0;
+ //   
     private SelectedResourceManager() {
         IWorkbench workbench = PlatformUI.getWorkbench();
         if (workbench != null) { //may be running headless
@@ -255,7 +256,17 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     	else if (fChosenVerilogFile==null)
     		fChosenVerilogFile=fSelectedVerilogFile;
     }
-   
+    
+    public String setBuildStamp(){
+    	timestamp=System.nanoTime();
+    	return getBuildStamp();
+    }
+
+    public String getBuildStamp(){
+    	return ""+timestamp;
+    }
+    
+    
     public String getChosenTarget() {
         return fChosenTarget;
     }

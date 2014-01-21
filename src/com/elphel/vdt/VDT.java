@@ -142,9 +142,10 @@ public class VDT {
     public static final String GENERATOR_ID_FILE_LIST     = "FileList"; 
     public static final String GENERATOR_ID_TOP_MODULE    = "TopModule"; 
     public static final String GENERATOR_ID_TOP_MODULES   = "TopModules"; 
-    public static final String GENERATOR_ID_CURRENT_FILE  = "CurrentFile"; 
+    public static final String GENERATOR_ID_OS_NAME       = "OS";
     public static final String GENERATOR_ID_SELECTED_FILE = "SelectedFile"; 
+    public static final String GENERATOR_ID_CURRENT_FILE  = "CurrentFile"; 
     public static final String GENERATOR_ID_CURRENT_BASE  = "CurrentFileBase"; 
     public static final String GENERATOR_ID_CHOSEN_ACTION = "ChosenActionIndex"; 
-    public static final String GENERATOR_ID_OS_NAME       = "OS";
+    public static final String GENERATOR_ID_BUILD_STAMP   = "BuildStamp"; 
 } // class VDT

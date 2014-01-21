@@ -33,7 +33,8 @@ public class SimpleGeneratorRecognizer implements Recognizer {
         new SelectedFileGenerator(),
         new CurrentFileGenerator(),
         new CurrentFileBaseGenerator(),
-        new ChosenActionGenerator()
+        new ChosenActionGenerator(),
+        new BuildStampGenerator()
     };
   
     public SimpleGeneratorRecognizer(){

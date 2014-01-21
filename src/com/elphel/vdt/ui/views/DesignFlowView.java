@@ -243,7 +243,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     		}
     	}
    	
-    	System.out.println("fillContextMenu(), launchActions="+launchActions);
+//    	System.out.println("fillContextMenu(), launchActions="+launchActions);
         //      manager.add(new Separator());
 //      drillDownAdapter.addNavigationActions(manager);
       // Other plug-ins can contribute their actions here
@@ -623,6 +623,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         if (tool != null) {
         	tool.setChoice(0);
         	SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice); // Andrey
+        	SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
             LaunchCore.launch( tool
                              , selectedResource.getProject()
 //                             , selectedResource.getFullPath().toString() );
