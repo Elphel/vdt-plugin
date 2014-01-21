@@ -175,9 +175,9 @@
       </extensions-list>
 
 	<action-menu>
-		<action label="Simulate" resource="%SimulationTopFile" check-extension="false" check-existence="true" />
+		<action label="Simulate" resource="%SimulationTopFile" check-extension="false" check-existence="true"  icon="iverilog.ico"/>
 		<action label="Simulate for" resource="%%SelectedFile" check-extension="true" check-existence="true"/>
-		<action label="Empty" resource="" />
+		<action label="Empty" resource="" icon="sample.gif"/>
 		<action label="Just try for" resource="%%OS" />
 	</action-menu>
       

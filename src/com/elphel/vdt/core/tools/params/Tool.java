@@ -22,6 +22,7 @@ import java.io.*;
 
 import org.eclipse.core.resources.IProject;
 
+import com.elphel.vdt.VDT;
 import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.*;
 import com.elphel.vdt.core.tools.contexts.*;
@@ -29,9 +30,13 @@ import com.elphel.vdt.core.tools.config.*;
 import com.elphel.vdt.core.tools.params.conditions.ConditionUtils;
 import com.elphel.vdt.core.tools.params.recognizers.*;
 import com.elphel.vdt.core.tools.params.types.RunFor;
+import com.elphel.vdt.ui.VDTPluginImages;
 
 
 public class Tool extends Context implements Cloneable, Inheritable {
+    private static final String ICON_ID_PREFIX = VDT.ID_VDT + ".Tool.Image.";
+    private static final String ICON_ID_ACTION = ".action.";
+
     private String baseToolName;
     private String parentPackageName;
     private String parentProjectName;
@@ -56,6 +61,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private boolean isShell = false; /* Tool is a shell, preserve first argument, merge all others */
     private String projectPath=null;
     private boolean initialized = false;
+    private String [] imageKeysActions = null;
+
     public Tool(String name,
                 String controlInterfaceName,
                 String label,
@@ -97,6 +104,29 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.toolInfo     = toolInfo;
         this.choice=0;
     }
+    
+    public void initIcons(boolean force) {
+    	if (!force && (imageKeysActions!=null)) return;
+        if (runfor!=null){
+        	String image; 
+        	imageKeysActions=new String [runfor.size()];
+        	for (int i=0;i<imageKeysActions.length;i++){
+        		imageKeysActions[i]=null;
+        		image = runfor.get(i).getIconName();
+        		if (image != null) {
+        			imageKeysActions[i] = ICON_ID_PREFIX + (new File(getExeName())).getName()+ICON_ID_ACTION+i;
+        			VDTPluginImages.addImage(image, imageKeysActions[i], null/*tool.getLaunchType()*/);
+        		}
+        	}
+        }
+       
+    } // ToolUI()
+
+    public String getImageKey(int actionIndex) {
+    	if (imageKeysActions==null) return null;
+        return imageKeysActions[actionIndex];
+    }
+   
     
     public List<RunFor> getRunFor(){
     	return runfor;
@@ -277,7 +307,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
             		labels.get(0),
             		resource,
             		runfor.get(i).getCheckExtension(),
-            		runfor.get(i).getCheckExistence());
+            		runfor.get(i).getCheckExistence(),
+            		runfor.get(i).getIconName());
         }
         return actualActions;
     }

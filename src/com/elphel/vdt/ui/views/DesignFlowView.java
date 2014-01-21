@@ -483,10 +483,12 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
      // Selected item should be not null, but resource - may be        
      // RunFor[] getMenuActions()
         RunFor [] runFor=null;
+        Tool tool=null;
         if (selectedItem != null){
-        	Tool tool= selectedItem.getTool();
+        	tool= selectedItem.getTool();
         	if (tool!=null){
         		runFor=tool.getMenuActions(project);
+        		tool.initIcons(false); // if not done before - add icons list for actions
         		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
         			System.out.println("Got Runfor["+((runFor!=null)?runFor.length:"null")+"]");
         			if (runFor!=null){
@@ -559,7 +561,11 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 launchActions[i].setToolTipText(i+": "+runFor[i].getLabel()+" "+shortName);
                 launchActions[i].setText(runFor[i].getLabel()+" "+shortName);
                 launchActions[i].setEnabled(enabled);
-                launchActions[i].setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
+                String actionIconKey=tool.getImageKey(i);
+                if ((actionIconKey!=null) && (VDTPluginImages.getImageDescriptor(actionIconKey)!=null))
+                	launchActions[i].setImageDescriptor(VDTPluginImages.getImageDescriptor(actionIconKey));
+                else
+                	launchActions[i].setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
         	}
             IToolBarManager toolbarManager= getViewSite().getActionBars().getToolBarManager();
             toolbarManager.removeAll();

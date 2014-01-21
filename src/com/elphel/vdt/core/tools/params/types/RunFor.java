@@ -23,11 +23,13 @@ public class RunFor implements Cloneable{
 	public String resource;
 	public boolean checkExtension;
 	public boolean checkExistence;
-	public RunFor(String label, String resource, boolean checkExtension, boolean checkExistence){
+	public String iconName;
+	public RunFor(String label, String resource, boolean checkExtension, boolean checkExistence, String iconName){
 		this.label=label;
 		this.resource=resource;
 		this.checkExtension=checkExtension;
 		this.checkExistence=checkExistence;
+		this.iconName=iconName;
 	}
 
 	public RunFor(RunFor runFor){
@@ -35,7 +37,8 @@ public class RunFor implements Cloneable{
 				runFor.label,
 				runFor.resource,
 				runFor.checkExtension,
-				runFor.checkExistence);
+				runFor.checkExistence,
+				runFor.iconName);
 	}
 
 	public String getLabel(){
@@ -43,6 +46,9 @@ public class RunFor implements Cloneable{
 	}
 	public String getResource(){
 		return resource;
+	}
+	public String getIconName(){
+		return iconName;
 	}
 
 	public boolean getCheckExtension(){

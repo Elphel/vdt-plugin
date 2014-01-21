@@ -33,6 +33,7 @@ import com.elphel.vdt.core.tools.config.*;
 import com.elphel.vdt.core.tools.contexts.*;
 import com.elphel.vdt.core.tools.menu.*;
 import com.elphel.vdt.ui.MessageUI;
+import com.elphel.vdt.ui.VDTPluginImages;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
@@ -106,6 +107,8 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_ACTION_RESOURCE = "resource";
     static final String CONTEXT_TOOL_ACTION_CHECK_EXTENSION = "check-extension";
     static final String CONTEXT_TOOL_ACTION_CHECK_EXISTENCE = "check-existence";
+    static final String CONTEXT_TOOL_ACTION_ICON = "icon";
+    
     
     static final String CONTEXT_TOOL_DFLT_ACTION_LABEL = "Run for";
     static final String CONTEXT_TOOL_DFLT_ACTION_RESOURCE = "%%CurrentFile";
@@ -976,7 +979,8 @@ public class XMLConfig extends Config {
     				CONTEXT_TOOL_DFLT_ACTION_LABEL,
     				CONTEXT_TOOL_DFLT_ACTION_RESOURCE,
     				getBoolAttrValue(CONTEXT_TOOL_DFLT_ACTION_CHECK_EXTENSION),
-    				getBoolAttrValue(CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE)));
+    				getBoolAttrValue(CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE),
+    				null));
 
     	} else {            
     		if(runForNodesList.size() > 1)
@@ -995,6 +999,7 @@ public class XMLConfig extends Config {
     			String label = getAttributeValue(node, CONTEXT_TOOL_ACTION_LABEL);
     			if (label == null)
     				label=CONTEXT_TOOL_DFLT_ACTION_LABEL;
+    			String icon = getAttributeValue(node, CONTEXT_TOOL_ACTION_ICON);
     			String resource = getAttributeValue(node, CONTEXT_TOOL_ACTION_RESOURCE);
     			if ((resource == null) || (resource.length()==0)) {
     				//    				resource= CONTEXT_TOOL_DFLT_ACTION_RESOURCE;
@@ -1013,7 +1018,7 @@ public class XMLConfig extends Config {
     				checkBoolAttr(checkExistenceAttr, CONTEXT_TOOL_ACTION_CHECK_EXISTENCE);
     				checkExistence=getBoolAttrValue(checkExistenceAttr);
     			}
-    			runForList.add(new RunFor(label, resource, checkExtension, checkExistence));
+    			runForList.add(new RunFor(label, resource, checkExtension, checkExistence, icon));
     		}
     	}
     	return runForList;

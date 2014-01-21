@@ -28,6 +28,7 @@ import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.core.tools.config.Config;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.types.RunFor;
 import com.elphel.vdt.ui.VDTPluginImages;
 
 /**
@@ -40,11 +41,12 @@ import com.elphel.vdt.ui.VDTPluginImages;
 public class ToolUI {
 
     private static final String ICON_ID_PREFIX = VDT.ID_VDT + ".Tool.Image.";
+ //   private static final String ICON_ID_ACTION = ".action.";
         
     private Tool   tool;
     private Config config;
     private String imageKey = null;
-    
+//    private String [] imageKeysActions = null;
     public ToolUI(Config config, Tool tool) {
         this.tool = tool;
         this.config = config; 
@@ -53,6 +55,21 @@ public class ToolUI {
                 imageKey = ICON_ID_PREFIX + (new File(tool.getExeName())).getName();
                 VDTPluginImages.addImage(image, imageKey, null/*tool.getLaunchType()*/);
         }
+        /*
+        List<RunFor> runFor=tool.getRunFor();
+        if (runFor!=null){
+        	imageKeysActions=new String [runFor.size()];
+        	for (int i=0;i<imageKeysActions.length;i++){
+        		imageKeysActions[i]=null;
+        		image = runFor.get(i).getIconName();
+        		if (image != null) {
+        			imageKeysActions[i] = ICON_ID_PREFIX + (new File(tool.getExeName())).getName()+ICON_ID_ACTION+i;
+        			VDTPluginImages.addImage(image, imageKeysActions[i], null);
+        		}
+        	}
+        }
+        */
+       
     } // ToolUI()
     
     public ILaunchConfigurationTab[] getLaunchConfigurationTabs() {
@@ -111,4 +128,11 @@ public class ToolUI {
     public String getImageKey() {
         return imageKey;
     }
+    /*
+    public String getImageKey(int actionIndex) {
+    	if (imageKeysActions==null) return null;
+        return imageKeysActions[actionIndex];
+    }
+    */
+    
 } // class ToolUI
