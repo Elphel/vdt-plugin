@@ -44,6 +44,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
 
     private List<String> extensions;
     private List<RunFor> runfor;
+    private int choice; // selected variant for runfor
     
     
     private Tool baseTool;
@@ -94,10 +95,18 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.toolErrors   = toolErrors;
         this.toolWarnings = toolWarnings;
         this.toolInfo     = toolInfo;
+        this.choice=0;
     }
     
     public List<RunFor> getRunFor(){
     	return runfor;
+    }
+    
+    public int getChoice(){
+    	return choice;
+    }
+    public void setChoice(int choice){
+    	this.choice=choice;
     }
 
     public void init(Config config) throws ConfigException {
@@ -231,7 +240,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public RunFor[] getMenuActions(IProject project) {
         if(runfor == null)
             return null;
-        updateContextOptions (project); // Fill in parameters
+        updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
 // Can be two different processors for labels and resources 
         
 //SimpleGeneratorRecognizer(true) may be not needed, as current file is already set here
@@ -277,27 +286,46 @@ public class Tool extends Context implements Cloneable, Inheritable {
         PackageContext packageContext = getParentPackage();
         if (packageContext != null) {
             OptionsCore.doLoadContextOptions(packageContext);
+/*            
             try {
             	packageContext.buildParams();
             } catch (ToolException e) { // Do nothing here
             	System.out.println("updateContextOptions ToolException for Package Context="+e.getMessage());
+            } catch (NullPointerException e) { // Do nothing here Or make it "finally" to ignore all parameters parsing here?
+            	System.out.println("updateContextOptions NullPointerException for Package Context="+e.getMessage());
+            } finally {
+            	System.out.println("updateContextOptions for Package Context - other error");
             }
+*/            
         }
         Context context = getParentProject();
         if (context != null) {
             OptionsCore.doLoadContextOptions(context, project);
+/*            
             try {
             	context.buildParams();
-            } catch (ToolException e) { // Do nothing here
+            } catch (ToolException e) { // Do nothing here Or make it "finally" to ignore all parameters parsing here?
             	System.out.println("updateContextOptions ToolException for Project Context="+e.getMessage());
+            } catch (NullPointerException e) { // Do nothing here Or make it "finally" to ignore all parameters parsing here?
+            	System.out.println("updateContextOptions NullPointerException for Project Context="+e.getMessage());
+            } finally {
+            	System.out.println("updateContextOptions for Project Context - other error");
             }
+*/            
         }
+        //NullPointerException
         OptionsCore.doLoadContextOptions(this, project);
+/*        
         try {
         	buildParams();
         } catch (ToolException e) { // Do nothing here
         	System.out.println("updateContextOptions ToolException for Tool Context="+e.getMessage());
+        } catch (NullPointerException e) { // Do nothing here Or make it "finally" to ignore all parameters parsing here?
+        	System.out.println("updateContextOptions NullPointerException for Tool Context="+e.getMessage());
+        } finally {
+        	System.out.println("updateContextOptions for Tool Context - other error");
         }
+*/        
     }
     
     
@@ -321,10 +349,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
  * processing that inheritance is ignored
  */
 //        if(param != null) // Was before the change described above 
+/*        
         if ((param != null) &&(param.getID().equals("SimulationTopFile"))){ // Andrey
         	System.out.println("Initializing parameter SimulationTopFile, isChild="+param.getIsChild());
         }
-        
+ */       
         
         if ((param != null) && !param.getIsChild())  
             return param;

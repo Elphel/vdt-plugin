@@ -100,8 +100,8 @@ public class VerilogUtils {
      * Returns the top module(s) for given verilog file.
      */
 
-	public static String[] getTopModuleNames(IFile file) {
-    	OutlineElement[] outlineElements= getTopModulesVeditor(file);
+	public static String[] getTopModuleNames(IFile file) { //L/x353/data/vdt/workspace_11-runtime/x353/x353_1.tf
+    	OutlineElement[] outlineElements= getTopModulesVeditor(file); // empty inside
     	if (outlineElements==null) return null;
     	String [] list = new String[outlineElements.length];
     	for (int i=0;i<list.length;i++) {

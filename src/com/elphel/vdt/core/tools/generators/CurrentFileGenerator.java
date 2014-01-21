@@ -44,12 +44,13 @@ public class CurrentFileGenerator extends AbstractGenerator {
     */
     protected String[] getStringValues() {
     	IResource resource;
-    	if (getMenuMode()) resource = SelectedResourceManager.getDefault().getViewSelectedResource(IPageLayout.ID_RES_NAV);
-    	else          resource = SelectedResourceManager.getDefault().getSelectedResource();
-        
-        if((resource != null) && (resource.getType() == IResource.FILE))
-            return new String[] { ((IFile)resource).getLocation().toOSString() };
-       
+    	if (getMenuMode()) {
+    		resource = SelectedResourceManager.getDefault().getViewSelectedResource(IPageLayout.ID_RES_NAV);
+            if((resource != null) && (resource.getType() == IResource.FILE))
+                return new String[] { ((IFile)resource).getLocation().toOSString() };
+    	} 	else {
+    		return new String[] { SelectedResourceManager.getDefault().getChosenTarget()};
+    	}
         return new String[] { "" };
     }
 }

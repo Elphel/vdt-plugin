@@ -122,9 +122,11 @@ public class Parameter implements Cloneable, Updateable {
         this.relevant = relevant;
         this.hasDependentParameters = false;
         this.sourceXML=sourceXML;
+/*        
         if (id.equals("SimulationTopFile")){ // Andrey
         	System.out.println("Creating parameter SimulationTopFile, defaultValue="+defaultValue);
         }
+*/        
     }   
     protected Parameter(Parameter param) {
         this(param.id, 
@@ -167,10 +169,11 @@ public class Parameter implements Cloneable, Updateable {
           this.context = context;
     
              */
+/*    	
         if (id.equals("SimulationTopFile")){ // Andrey
         	System.out.println("Initializing parameter SimulationTopFile, defaultValue="+defaultValue);
         }
-
+*/
     	
 // Andrey: replacing with
         if(this.context == context) {
@@ -312,9 +315,9 @@ public class Parameter implements Cloneable, Updateable {
     //
     
     public void setCurrentValue(String value) throws ToolException {
-        if (id.equals("SimulationTopFile")){ // Andrey
-        	System.out.println("setCurrentValue() SimulationTopFile, value="+value);
-        }
+//        if (id.equals("SimulationTopFile")){ // Andrey
+//       	System.out.println("setCurrentValue() SimulationTopFile, value="+value);
+//      }
 
         if(type.isList())
             throw new ToolException("Assigning a non-list value to list parameter");
@@ -328,9 +331,9 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     public void setCurrentValue(List<String> value) throws ToolException {
-        if (id.equals("SimulationTopFile")){ // Andrey
-        	System.out.println("setCurrentValue() SimulationTopFile a list value");
-        }
+//        if (id.equals("SimulationTopFile")){ // Andrey
+//        	System.out.println("setCurrentValue() SimulationTopFile a list value");
+//        }
 
         if(!type.isList())
             throw new ToolException("Assigning a list value to non-list parameter");
@@ -352,8 +355,11 @@ public class Parameter implements Cloneable, Updateable {
         
         return currentValue;
     }
-
     public List<String> getDefaultValue() {
+    	return getDefaultValue(false);
+    }
+    
+    public List<String> getDefaultValue(boolean menuMode) {
         String resolvedDefaultValue = ConditionUtils.resolveContextCondition(context, defaultValue);
         String errmsg = "Parameter '" + id + 
                         "' of context '" + context.getName() + 
@@ -363,7 +369,7 @@ public class Parameter implements Cloneable, Updateable {
         
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             //new RepeaterRecognizer(),
-                                                            new SimpleGeneratorRecognizer(),
+                                                            new SimpleGeneratorRecognizer(menuMode),
                                                             new ContextParamRecognizer(context)
                                                         });
 
@@ -386,10 +392,11 @@ public class Parameter implements Cloneable, Updateable {
     // returns current value if it is set 
     // otherwise returns default value 
     public List<String> getValue() {
+/*    	
         if (id.equals("SimulationTopFile")){ // Andrey
         	System.out.println("getValue() SimulationTopFile");
         }
-    	
+ */   	
         if(!currentValue.isEmpty())
             return currentValue;
         
@@ -399,10 +406,11 @@ public class Parameter implements Cloneable, Updateable {
     // returns external form of the current value unless it equals null; 
     // otherwise returns external form of the default value 
     public List<String> getExternalValueForm() {
+/*    	
         if (id.equals("SimulationTopFile")){ // Andrey
         	System.out.println("getExternalValueForm() SimulationTopFile");
         }
-
+*/
         List<String> externalFormValue = new ArrayList<String>();
         
         for(Iterator<String> i = getValue().iterator(); i.hasNext();) {

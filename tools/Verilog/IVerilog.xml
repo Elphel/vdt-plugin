@@ -55,28 +55,21 @@
                 
                 
                 
- <!-- Actually used -->           
-        <syntax name   = "JustValueSyntax"
-                format = "%%ParamValue"></syntax>
-        <syntax name   = "TopModuleSyntax"
-                format = "-s%%TopModule"/>
-        <syntax name   = "TopModulesOtherSyntax"
-                format = "%(-s%%ParamValue%| %)"/>
-        <syntax name   = "ModuleLibrarySyntax"
-                format = "%(-y%%ParamValue%| %)"/>
-        <syntax name   = "SourceListSyntax"
-                format = "%(%%SourceList%| %)"/>
+ <!-- Actually used -->
+	<syntax name="JustValueSyntax" format="%%ParamValue"></syntax>
+	<syntax name="TopModuleSyntax" format="-s%%TopModule" />
+	<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
+	<syntax name="ModuleLibrarySyntax" format="%(-y%%ParamValue%| %)" />
+	<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
+	<syntax name="ExtraFilesSyntax" format="%(%%ParamValue%| %)" />
+	<syntax name="exeFileSyntax" format="%%ParamValue" />
+	<syntax name="SwitchSyntax" format="-%%ParamName" />
 
-        <syntax name   = "ExtraFilesSyntax"
-                format = "%(%%ParamValue%| %)"/>
-         <syntax name   = "exeFileSyntax"
-                format = "%%ParamValue"/>
-    <syntax name   = "SwitchSyntax"
-            format = "-%%ParamName"/>
-            
+	<syntax name="DbgCurrentFileSyntax" format="echo &quot;%%CurrentFile&quot; ;" />
+	<syntax name="DbgChosenActionIndexSyntax" format="echo &quot;index=%%ChosenActionIndex&quot; ;" />
                 
                 
-                
+  ChosenActionIndex              
                 
   <!-- typedef -->
 
@@ -178,7 +171,7 @@
 
 	<action-menu>
 		<action label="Simulate" resource="%SimulationTopFile" check-extension="false" check-existence="true" />
-		<action label="Simulate for" resource="%%CurrentFile" check-extension="true"/>
+		<action label="Simulate for" resource="%%SelectedFile" check-extension="true" check-existence="true"/>
 		<action label="Empty" resource="" />
 		<action label="Just try for" resource="%%OS" />
 	</action-menu>
@@ -293,6 +286,25 @@
                default  = "2&gt;&amp;1 | tee iverilog.log | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
                readonly = "false"
                visible  = "true"/>
+               
+               
+               
+    <parameter id       = "DbgCurrentFile"
+               label    = "DbgCurrentFile"
+               type     = "StringType"
+               format   = "DbgCurrentFileSyntax"
+               default  = ""
+               readonly = "false"
+               visible  = "true"/>
+
+    <parameter id       = "ChosenActionIndex"
+               label    = "ChosenActionIndex"
+               type     = "StringType"
+               format   = "DbgChosenActionIndexSyntax"
+               default  = ""
+               readonly = "false"
+               visible  = "true"/>
+               
 <!--  intentional error below - duplicate -->               
         <parameter id      = "BuildDir"
                    label   = "project build directory"
@@ -325,7 +337,10 @@
 	<output>
 		<line name="command_line" sep=" ">
 			"%Param_Shell_Options"
+			"%DbgCurrentFile"
+			"%ChosenActionIndex"
 			"echo BuildDir=%BuildDir ;"
+			"echo CurrentFile=%%CurrentFile ;"
 			"echo SimulationTopFile=%SimulationTopFile ;"
 			"echo SimulationTopModule=%SimulationTopModule ;"
 			"%Param_PreExe"

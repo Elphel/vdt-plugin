@@ -30,9 +30,10 @@ public class SimpleGeneratorRecognizer implements Recognizer {
         new ProjectNameGenerator(),
         new ProjectPathGenerator(),
         new TopModuleNameGenerator(),
+        new SelectedFileGenerator(),
         new CurrentFileGenerator(),
-//        new ViewSelectedFileGenerator(),
-        new CurrentFileBaseGenerator()
+        new CurrentFileBaseGenerator(),
+        new ChosenActionGenerator()
     };
   
     public SimpleGeneratorRecognizer(){

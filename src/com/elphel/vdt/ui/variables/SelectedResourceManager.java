@@ -21,10 +21,14 @@ import java.util.Stack;
 
 import com.elphel.vdt.VerilogUtils;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -58,6 +62,10 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     private ITextSelection fSelectedText = null;
     private Stack<IWorkbenchWindow> fWindowStack = new Stack<IWorkbenchWindow>();
 
+    //Andrey
+    private String fChosenTarget=null; // full path of the chosen (for action) resource or any string. Used to calculate CurrentFile, verilog file, ...
+    private IResource fChosenVerilogFile = null; // to keep fSelectedVerilogFile
+    private int fChosenAction=0; // Chosen variant of running the tool
     
     private SelectedResourceManager() {
         IWorkbench workbench = PlatformUI.getWorkbench();
@@ -204,6 +212,7 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
      * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
      */
     public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+//    	System.out.println("SelectedResourceManager.selectionChanged()");
         IWorkbenchWindow window = part.getSite().getWorkbenchWindow();
         if (fWindowStack.isEmpty() || !fWindowStack.peek().equals(window)) {
             // selection is not in the active window
@@ -212,15 +221,54 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
         IResource selectedResource = getSelectedResource(part, selection);
         if (selectedResource != null) {
             fSelectedResource = selectedResource;
-            if ((selectedResource.getType()==IResource.FILE) && (VerilogUtils.isHhdlFile((IFile)fSelectedResource)))
-//            if (selectedResource.getName().endsWith(".v"))
+//        	System.out.println("SelectedResourceManager.selectionChanged(): fSelectedResource changed to "+fSelectedResource.getName());
+            
+            if ((selectedResource.getType()==IResource.FILE) && (VerilogUtils.isHhdlFile((IFile)fSelectedResource))){
                 fSelectedVerilogFile = selectedResource; /* Maybe same will work for vhdl too? */
+//            	System.out.println("SelectedResourceManager.selectionChanged(): fSelectedVerilogFile changed to "+fSelectedVerilogFile.getName());
+            }
         }
         
         if (selection instanceof ITextSelection) {
             fSelectedText = (ITextSelection)selection;
         }
     } // selectionChanged()
+//TODO: Make them project-relative 
+    public String tryRelativePath(String path){
+    	if (path==null)
+    		return null;
+    	if (getSelectedProject()==null) return path;
+    	IProject project=getSelectedProject();
+    	if (path.startsWith(project.getLocation().toString()))
+    		return path.substring(project.getLocation().toString().length()+1);
+    	return path;
+    }
+    public void updateActionChoice(String chosenTarget, int choice){
+    	fChosenAction=choice;
+    	fChosenTarget=tryRelativePath(chosenTarget);
+    	IProject project=getSelectedProject();
+    	if (project==null) return;
+    	IPath path = new Path(fChosenTarget);
+    	IFile file = (path==null)?null:project.getFile(path);
+    	if ((file != null) &&  (VerilogUtils.isHhdlFile(file)))
+    		fChosenVerilogFile=file;
+    	else if (fChosenVerilogFile==null)
+    		fChosenVerilogFile=fSelectedVerilogFile;
+    }
+   
+    public String getChosenTarget() {
+        return fChosenTarget;
+    }
+
+    public IResource getChosenVerilogFile() {
+        return (fChosenVerilogFile!=null)?fChosenVerilogFile:fSelectedVerilogFile;
+    }
+    
+    public int getChosenAction() {
+        return fChosenAction;
+    }
+
+
     
     
     /**

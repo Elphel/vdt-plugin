@@ -52,9 +52,10 @@ public class SourceListGenerator extends AbstractGenerator {
 
     protected String[] getStringValues() {
         String[] file_names = null;
-        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
+//        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
+        IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
         if (resource != null && resource.getType() == IResource.FILE) {
-        	IFile[] files = VerilogUtils.getDependencies((IFile)resource);
+        	IFile[] files = VerilogUtils.getDependencies((IFile)resource); // returned just the same x353_1.tf
             file_names = new String[files.length];
             for (int i=0; i < files.length; i++)
                 file_names[i] = files[i].getProjectRelativePath().toOSString(); //.getName();

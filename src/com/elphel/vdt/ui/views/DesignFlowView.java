@@ -29,10 +29,12 @@ import org.eclipse.jface.action.*;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import com.elphel.vdt.core.Utils;
@@ -48,6 +50,7 @@ import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.VDTPluginImages;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
@@ -86,9 +89,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     private TreeViewer viewer;
     private DrillDownAdapter drillDownAdapter;
     private Action showLaunchConfigAction;
-    private Action launchAction;
+//    private Action launchAction;
     
-    private Action [] launchActions;
+    
 
     private Action showInstallationPropertiesAction;
     private ClearAction clearInstallationPropertiesAction;
@@ -116,6 +119,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     private IMemento memento;
     
+    IDoubleClickListener doubleClickListener=null;
+    private Action [] launchActions;
+
     /**
      * The constructor.
      */
@@ -162,7 +168,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
         makeActions();
         hookContextMenu();
-        hookDoubleClickAction();
+/**+       hookDoubleClickAction(); */
         contributeToActionBars();
 
         if (memento != null)
@@ -183,7 +189,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             viewer.setInput(designMenu);
             List<Context> packages = ToolsCore.getDesignMenuManager().getPackageContexts(designMenu);
             showPackagePropertiesToolbarAction.setContexts(packages);
-            clearPackagePropertiesAction.setContexts(packages);
+            clearPackagePropertiesAction.setContexts(packages); // toolBarSeparator already null here
             List<Context> projects = ToolsCore.getDesignMenuManager().getProjectContexts(designMenu);
             showProjectPropertiesToolbarAction.setContexts(projects);
             clearProjectPropertiesAction.setContexts(projects);
@@ -198,13 +204,12 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         }
     }
 
-        
     private void hookContextMenu() {
         MenuManager menuMgr = new MenuManager("#PopupMenu");
         menuMgr.setRemoveAllWhenShown(true);
         menuMgr.addMenuListener(new IMenuListener() {
             public void menuAboutToShow(IMenuManager manager) {
-                DesignFlowView.this.fillContextMenu(manager);
+                DesignFlowView.this.fillContextMenu(manager);  // context (right-click) menu
             }
         });
         Menu menu = menuMgr.createContextMenu(viewer.getControl());
@@ -212,13 +217,15 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         getSite().registerContextMenu(menuMgr, viewer);
     }
 
+    
+    //
     private void contributeToActionBars() {
         IActionBars bars = getViewSite().getActionBars();
-        fillLocalPullDown(bars.getMenuManager());
-        fillLocalToolBar(bars.getToolBarManager());
+        fillLocalPullDown(bars.getMenuManager());   // rightmost pull-down 
+        fillLocalToolBar(bars.getToolBarManager()); // horizontal bar
     }
 
-    private void fillLocalPullDown(IMenuManager manager) {
+    private void fillLocalPullDown(IMenuManager manager) { //rightmost pull-down
         manager.add(clearInstallationPropertiesAction);
         manager.add(clearPackagePropertiesAction);
         manager.add(clearProjectPropertiesAction);
@@ -226,19 +233,21 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(new Separator());
         manager.add(selectDesignMenuAction);
     }
-
-    private void fillContextMenu(IMenuManager manager) {
-    	
-    	
-        manager.add(launchAction);
-
-//        manager.add(new Separator()); // test
-//        manager.add(launchAction); // test
-        
+    
+    private void fillContextMenu(IMenuManager manager) { // context (right-click) menu
+    	// Always come here after setting launchActions, so just add all launchActions here
+    	/**+       manager.add(launchAction); */
+    	if (launchActions!=null) { 
+    		for (Action action:launchActions){
+    			manager.add(action); // No Separator??
+    		}
+    	}
+   	
+    	System.out.println("fillContextMenu(), launchActions="+launchActions);
         //      manager.add(new Separator());
 //      drillDownAdapter.addNavigationActions(manager);
       // Other plug-ins can contribute their actions here
-        manager.add(new Separator());
+        manager.add(new Separator()); 
         manager.add(showInstallationPropertiesAction);
         manager.add(showPackagePropertiesAction);
         manager.add(showProjectAction);
@@ -248,18 +257,26 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     }
         
     private void fillLocalToolBar(IToolBarManager manager) { // On Horizontal bar
-        manager.add(launchAction); 
+/**+               manager.add(launchAction); */
+     	if (launchActions!=null) { 
+    		for (Action action:launchActions){
+    			manager.add(action); // No Separator??
+    		}
+    	}
+//    	System.out.println("fillLocalToolBar(), launchActions="+launchActions);
+   	 
 //        manager.add(launchAction);  // test
 //      manager.add(new Separator());
 //      drillDownAdapter.addNavigationActions(manager);
-        manager.add(new Separator());
+        manager.add(new Separator("toolbar-separator"));
         manager.add(showInstallationPropertiesAction);
         manager.add(showPackagePropertiesToolbarAction);
         manager.add(showProjectPropertiesToolbarAction);
         manager.add(showPropertiesAction);
-//        manager.add(showLaunchConfigAction);
+        manager.update(false); // (force) - added new, but removed project, tool and clear/change menu for Icarus (kept the same number of items) Need to update higher menu
+        getViewSite().getActionBars().updateActionBars();
     }
-
+    
     private void makeActions() {
         showInstallationPropertiesAction = new Action() {
             public void run() {
@@ -360,13 +377,16 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             }
         };
         showLaunchConfigAction.setText("Launch configuration");
-        showLaunchConfigAction.setToolTipText("Open launch configuration dialog for this tool"+" ** DBG **");
+        showLaunchConfigAction.setToolTipText("Open launch configuration dialog for this tool");
         showLaunchConfigAction.setImageDescriptor(VDTPluginImages.DESC_LAUNCH_CONFIG);
-
+        launchActions=null;
+        doubleClickListener=null;
+        
+/**+       
         launchAction = new Action() {
             public void run() {
                 try {
-                    launchTool(selectedItem);
+                    launchTool(selectedItem,0);
                 } catch (Exception e) {
                     MessageUI.error( Txt.s("Action.ToolLaunch.Error", 
                                            new String[] {selectedItem.getLabel(), e.getMessage()})
@@ -374,22 +394,42 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 }    
             }
         };
+        
         launchAction.setText(Txt.s("Action.ToolLaunch.Caption.Default"));
         launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip.Default")+" **DEBUGGING**");
         launchAction.setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
         launchAction.setEnabled(false);
+*/        
 //        launchAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 //                                        getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
     } // makeActions()
 
-    private void hookDoubleClickAction() {
-        viewer.addDoubleClickListener(new IDoubleClickListener() {
-            public void doubleClick(DoubleClickEvent event) {
-                    launchAction.run();
-            }
-        });
+    private void removeDoubleClickAction() {
+    	if (doubleClickListener!=null){
+        	viewer.removeDoubleClickListener(doubleClickListener);
+        	doubleClickListener=null;
+    	}
     }
-
+    private void hookDoubleClickAction() {
+    	if ((launchActions==null) || (launchActions[0]==null)) return;
+    	doubleClickListener=new IDoubleClickListener() {
+    		public void doubleClick(DoubleClickEvent event) {
+    			launchActions[0].run();  // Andrey: will go to launchAction[0].run
+    		}
+    	};
+    	viewer.addDoubleClickListener(doubleClickListener);
+    }
+/**+     	
+    private void hookDoubleClickAction() {
+    	viewer.addDoubleClickListener(new IDoubleClickListener() {
+    		public void doubleClick(DoubleClickEvent event) {
+    			launchAction.run();  // Andrey: will go to launchAction[0].run
+    		}
+    	});
+    }
+*/     	
+    
+    
 //    private void showMessage(String message) {
 //        MessageDialog.openInformation( viewer.getControl().getShell()
 //                                     , "Design Flow"
@@ -415,6 +455,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     /* Method declared on ISelectionListener */
     public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+//    	System.out.println("DesignFlowView.selectionChanged()");
+
         IResource oldSelection = selectedResource; 
         selectedResource = SelectedResourceManager.getDefault().getSelectedResource(part, selection);
         IProject newProject = selectedResource == null 
@@ -430,6 +472,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     } // selectionChanged()
     
     private void updateLaunchAction() {
+//    	System.out.println("DesignFlowView.updateLaunchAction()");
+
         IProject project = selectedResource == null 
                          ? null
                          : selectedResource.getProject();
@@ -438,33 +482,97 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
      // Selected item should be not null, but resource - may be        
      // RunFor[] getMenuActions()
+        RunFor [] runFor=null;
         if (selectedItem != null){
         	Tool tool= selectedItem.getTool();
         	if (tool!=null){
-        		RunFor [] runFor=tool.getMenuActions(project);
-        		System.out.println("Got Runfor["+((runFor!=null)?runFor.length:"null")+"]");
-        		if (runFor!=null){
-        			for (int i=0;i<runFor.length;i++){
-                		System.out.println(
-                				"    label='"+runFor[i].getLabel()+
-                				"', resource='"+runFor[i].getResource()+
-                				"', checkExtension='"+runFor[i].getCheckExtension()+
-                				"', checkExistence='"+runFor[i].getCheckExistence()+
-                				"'");
+        		runFor=tool.getMenuActions(project);
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+        			System.out.println("Got Runfor["+((runFor!=null)?runFor.length:"null")+"]");
+        			if (runFor!=null){
+        				for (int i=0;i<runFor.length;i++){
+        					System.out.println(
+        							"    label='"+runFor[i].getLabel()+
+        							"', resource='"+runFor[i].getResource()+
+        							"', checkExtension='"+runFor[i].getCheckExtension()+
+        							"', checkExistence='"+runFor[i].getCheckExistence()+
+        							"'");
+        				}
         			}
         		}
         	}
         }
-        
         boolean enabled = (selectedItem != null) // At startup null (twice went through this); Right Click - "Icarus Ver..."
                        && (selectedResource != null) // at startup x353_1.tf;  Right Click - "L/x353/x353_1.tf
                        && (selectedItem.isEnabled(selectedResource));
+        
+ // Deal with new menus
+//        removeLaunchActions(); 
+        removeDoubleClickAction();
+        launchActions=null;
+        if ((runFor!=null) && (project!=null)){
+        	launchActions=new Action [runFor.length];
+        	for (int i=0;i<runFor.length;i++){
+//                String name=runFor[i].getResource();
+                String name=SelectedResourceManager.getDefault().tryRelativePath(runFor[i].getResource());
+                String shortName=name;
+                String fullPath=name;
+                enabled=(selectedItem != null);
+                if (enabled && runFor[i].getCheckExistence()){
+                	IPath path = new Path(name);
+                	IFile file = (path==null)?null:project.getFile(path);
+                	if (file==null){
+//                		System.out.println(name+" does not exist");
+                		enabled=false;
+                	} else {
+                		shortName=file.getName();
+//                		fullPath=file.getFullPath().toString(); // What is different?
+                		fullPath=file.getLocation().toOSString(); // that matches generators
+                		
+                	}
+                }
+                if (enabled && runFor[i].getCheckExtension()){
+                	enabled= selectedItem.isEnabled(name);
+                	if (enabled && !runFor[i].getCheckExistence()) { // try to get resource and full path name, but no error if it fails
+                    	IPath path = new Path(name);
+                    	IFile file = (path==null)?null:project.getFile(path);
+                    	if (file!=null){
+                    		shortName=file.getName();
+//                    		fullPath=file.getFullPath().toString(); // What is different?
+                    		fullPath=file.getLocation().toOSString(); // that matches generators
+                    	}
+                	}
+                }
+        		final int finalI=i;
+        		final String fFullPath=fullPath;
+                launchActions[i] = new Action() {
+                    public void run() {
+                        try {
+                            launchTool(selectedItem,finalI,fFullPath);
+                        } catch (Exception e) {
+                            MessageUI.error( Txt.s("Action.ToolLaunch.Error", 
+                                                   new String[] {selectedItem.getLabel(), e.getMessage()})
+                                            , e);
+                        }    
+                    }
+                };
+                launchActions[i].setToolTipText(i+": "+runFor[i].getLabel()+" "+shortName);
+                launchActions[i].setText(runFor[i].getLabel()+" "+shortName);
+                launchActions[i].setEnabled(enabled);
+                launchActions[i].setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
+        	}
+            IToolBarManager toolbarManager= getViewSite().getActionBars().getToolBarManager();
+            toolbarManager.removeAll();
+            fillLocalToolBar(toolbarManager);
+        	hookDoubleClickAction();
+        }
+/**+               
         launchAction.setEnabled(enabled);
         
         if (enabled){
-        	/* Andrey: Next apperas on right-click (context) menu for selected tool */
+        	// Andrey: Next appears on right-click (context) menu for selected tool
             launchAction.setText(Txt.s("Action.ToolLaunch.Caption", new String[]{selectedResource.getName()})+"<<<<<");
-            /* Andrey: below sets tooltip on the horizontal bar */
+            // Andrey: below sets tooltip on the horizontal bar
             launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip", new String[]{selectedItem.getLabel(), selectedResource.getName()}));
             Tool tool = selectedItem.getTool();
             if (tool!=null){
@@ -475,7 +583,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             launchAction.setText(Txt.s("Action.ToolLaunch.Caption.Default"));
             launchAction.setToolTipText(Txt.s("Action.ToolLaunch.ToolTip.Default"));
         }
-
+*/
         enabled = (selectedItem != null)
                && (selectedResource != null)
                && (selectedItem.getPackageContext() != null);
@@ -509,14 +617,17 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         showPropertiesAction.setEnabled(enabled);
         clearToolPropertiesAction.setEnabled(enabled);
     } // updateLaunchAction()
-    
 
-    private void launchTool(DesignMenuModel.Item item) throws CoreException {
-        Tool tool = selectedItem.getTool(); 
+    private void launchTool(DesignMenuModel.Item item, int choice, String fullPath) throws CoreException {
+        Tool tool = selectedItem.getTool();
         if (tool != null) {
+        	tool.setChoice(0);
+        	SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice); // Andrey
             LaunchCore.launch( tool
                              , selectedResource.getProject()
-                             , selectedResource.getFullPath().toString() ); 
+//                             , selectedResource.getFullPath().toString() );
+                             , fullPath); 
+
         } else if (selectedItem.hasChildren()) {
             if (viewer.getExpandedState(selectedItem))
                 viewer.collapseToLevel(selectedItem, AbstractTreeViewer.ALL_LEVELS);

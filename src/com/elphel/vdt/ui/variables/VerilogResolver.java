@@ -88,7 +88,8 @@ public class VerilogResolver implements IDynamicVariableResolver {
      * @throws CoreException if there is no selection
      */
     protected IResource getSelectedResource(IDynamicVariable variable) throws CoreException {
-        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
+//        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
+        IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
         if (resource == null) {
             abort(Txt.s("Error.Variable.Verilog.NoSelection", new String[]{getReferenceExpression(variable, null)}), null);
         }

@@ -31,7 +31,7 @@ public abstract class AbstractGenerator {
     protected final String prefix, suffix;
     protected String separator;
     private final boolean forcedMultiline;
-    private boolean menuMode=false; // managing menu items, not running tool
+    private boolean menuMode=false; // managing menu items, not running tool. Ignore Generator errors
 
     public AbstractGenerator() {
         this(false);
@@ -119,8 +119,11 @@ public abstract class AbstractGenerator {
         return output;
     }
     
-    protected void fault(String message) {
+    protected String fault(String message) {
+    	if (menuMode)
+    		return "";
         MessageUI.error("Generator '" + getName() + "' fault: " + message);
+        return null;
     }
     
     protected abstract String[] getStringValues();

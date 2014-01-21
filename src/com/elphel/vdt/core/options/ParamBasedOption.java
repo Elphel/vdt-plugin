@@ -73,7 +73,13 @@ public class ParamBasedOption extends Option {
     }
     
     public String doLoadDefault() {
-        String value = param.getDefaultValue().get(0);
+        String value = param.getDefaultValue(true).get(0); // Andrey: ignore faults in TopModuleName generator
+        doClear();
+        return value;
+    }
+
+    public String doLoadDefault(boolean menuMode) {
+        String value = param.getDefaultValue(menuMode).get(0);
         doClear();
         return value;
     }

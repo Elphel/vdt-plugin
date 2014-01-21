@@ -17,8 +17,9 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.generators;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
+//import org.eclipse.core.resources.IFile;
+//import org.eclipse.core.resources.IResource;
+//import org.eclipse.ui.IPageLayout;
 
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
@@ -31,13 +32,17 @@ public class CurrentFileBaseGenerator extends AbstractGenerator {
     }
     
     protected String[] getStringValues() {
-        IResource resource = SelectedResourceManager.getDefault().getSelectedResource();
-        
-        if((resource != null) && (resource.getType() == IResource.FILE)) {
-        	String fullName=((IFile)resource).getLocation().toOSString();
+//        IResource resource = SelectedResourceManager.getDefault().getSelectedResource();
+        String fullName=SelectedResourceManager.getDefault().getChosenTarget();
+//        if((resource != null) && (resource.getType() == IResource.FILE)) {
+//        	String fullName=((IFile)resource).getLocation().toOSString();
+        if (fullName!=null){
         	int dot = fullName.lastIndexOf('.');
             return new String[] { (dot <0) ? fullName : fullName.substring(0, dot) };
         }
         return new String[] { "" };
     }
 }
+
+
+

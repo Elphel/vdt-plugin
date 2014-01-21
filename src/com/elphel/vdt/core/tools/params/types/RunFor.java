@@ -44,6 +44,7 @@ public class RunFor implements Cloneable{
 	public String getResource(){
 		return resource;
 	}
+
 	public boolean getCheckExtension(){
 		return checkExtension;
 	}

@@ -990,28 +990,29 @@ public class XMLConfig extends Config {
 
     		for(Iterator<Node> n = runForNodes.iterator(); n.hasNext();) {
     			Node node = (Node)n.next();
+    			boolean checkExtension=false; // for empty resource field - do not check file or extensions
+    			boolean checkExistence=false;
     			String label = getAttributeValue(node, CONTEXT_TOOL_ACTION_LABEL);
     			if (label == null)
     				label=CONTEXT_TOOL_DFLT_ACTION_LABEL;
     			String resource = getAttributeValue(node, CONTEXT_TOOL_ACTION_RESOURCE);
-    			if (resource == null)
-    				resource= CONTEXT_TOOL_DFLT_ACTION_RESOURCE;
-
-    			String checkExtensionAttr=getAttributeValue(node, CONTEXT_TOOL_ACTION_CHECK_EXTENSION);
-    			if (checkExtensionAttr==null){
-    				checkExtensionAttr=CONTEXT_TOOL_DFLT_ACTION_CHECK_EXTENSION;
+    			if ((resource == null) || (resource.length()==0)) {
+    				//    				resource= CONTEXT_TOOL_DFLT_ACTION_RESOURCE;
+    				resource = "";
+    			} else {
+    				String checkExtensionAttr=getAttributeValue(node, CONTEXT_TOOL_ACTION_CHECK_EXTENSION);
+    				if (checkExtensionAttr==null){
+    					checkExtensionAttr=CONTEXT_TOOL_DFLT_ACTION_CHECK_EXTENSION;
+    				}
+    				checkBoolAttr(checkExtensionAttr, CONTEXT_TOOL_ACTION_CHECK_EXTENSION);
+    				checkExtension=getBoolAttrValue(checkExtensionAttr);
+    				String checkExistenceAttr=getAttributeValue(node, CONTEXT_TOOL_ACTION_CHECK_EXISTENCE);
+    				if (checkExistenceAttr==null){
+    					checkExistenceAttr=CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE;
+    				}
+    				checkBoolAttr(checkExistenceAttr, CONTEXT_TOOL_ACTION_CHECK_EXISTENCE);
+    				checkExistence=getBoolAttrValue(checkExistenceAttr);
     			}
-    			checkBoolAttr(checkExtensionAttr, CONTEXT_TOOL_ACTION_CHECK_EXTENSION);
-    			boolean checkExtension=getBoolAttrValue(checkExtensionAttr);
-    			
-
-    			String checkExistenceAttr=getAttributeValue(node, CONTEXT_TOOL_ACTION_CHECK_EXISTENCE);
-    			if (checkExistenceAttr==null){
-    				checkExistenceAttr=CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE;
-    			}
-    			checkBoolAttr(checkExistenceAttr, CONTEXT_TOOL_ACTION_CHECK_EXISTENCE);
-    			boolean checkExistence=getBoolAttrValue(checkExistenceAttr);
-
     			runForList.add(new RunFor(label, resource, checkExtension, checkExistence));
     		}
     	}

@@ -145,5 +145,6 @@ public class VDT {
     public static final String GENERATOR_ID_CURRENT_FILE  = "CurrentFile"; 
     public static final String GENERATOR_ID_SELECTED_FILE = "SelectedFile"; 
     public static final String GENERATOR_ID_CURRENT_BASE  = "CurrentFileBase"; 
+    public static final String GENERATOR_ID_CHOSEN_ACTION = "ChosenActionIndex"; 
     public static final String GENERATOR_ID_OS_NAME       = "OS";
 } // class VDT

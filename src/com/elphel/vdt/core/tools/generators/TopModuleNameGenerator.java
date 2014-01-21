@@ -37,7 +37,8 @@ public class TopModuleNameGenerator extends AbstractGenerator {
         return NAME;
     }
     protected String[] getStringValues() {
-        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
+//        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
+        IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
         if ((resource != null) && (resource.getType() == IResource.FILE)) {
         	String[] outlineElementsNames= VerilogUtils.getTopModuleNames((IFile)resource);
         	if ((outlineElementsNames!=null) && (outlineElementsNames.length>0)) return new String[] {outlineElementsNames[0]};

@@ -81,6 +81,9 @@ public class DesignMenuModel {
         public boolean isEnabled(IResource resource) {
             return false;
         }
+        public boolean isEnabled(String path) {
+            return false;
+        }
 
         public Object getParent() {
             return parent;
@@ -138,7 +141,6 @@ public class DesignMenuModel {
             String extensions[] = tool.getExtensions();
             if (extensions == null)
                 return true;
-            
             String resourceExt = resource.getFileExtension();
             if (resourceExt == null)
                 return false;
@@ -148,8 +150,25 @@ public class DesignMenuModel {
                     return true;    
             }
             return false;
-        } // isEnabled()
-        
+        } // isEnabled(IResource)
+
+        public boolean isEnabled(String path) {
+            if (path == null)
+                return false;
+
+            String extensions[] = tool.getExtensions();
+            if (extensions == null)
+                return true;
+            int index=path.indexOf(".");
+            if (index<0) return false;
+            String resourceExt = path.substring(index+1);
+            for (int i=0; i < extensions.length; i++) {
+                if (resourceExt.equalsIgnoreCase(extensions[i]))
+                    return true;    
+            }
+            return false;
+        } // isEnabled(String)
+
         public Tool getTool() {
             return tool;   
         }
