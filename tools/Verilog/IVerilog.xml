@@ -1,332 +1,236 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--iverilog -Dlegacy_model -gno-specify -v -o x353mjpeg_test -sglbl -stestbench353 -y./unisims -y. x353_1.tf glbl.v-->
+<!--iverilog -Dlegacy_model -gno-specify -v -o x353mjpeg_test -sglbl -stestbench353 
+	-y./unisims -y. x353_1.tf glbl.v -->
 <vdt-project>
 
-<interface name="IVerilog"
-     extends="project_interface">
-    <!-- Syntax definitions -->
-    <syntax name="BoolParamSyntax"     format="-%%ParamName"/>
-    <syntax name="InputPatternSyntax"  format= "’%%ParamValue’"/>
-            
-    <typedef name= "ModuleLibraryType" list="true">
-        <paramtype kind="string"
-                   default=""
-		           textkind="dir"
-                   maxlength="256"
-                   sensitivity="sensitive"/>
-    </typedef>
-            
-            
+	<interface name="IVerilog" extends="project_interface">
+		<!-- Syntax definitions -->
+		<syntax name="BoolParamSyntax" format="-%%ParamName" />
+		<syntax name="InputPatternSyntax" format="’%%ParamValue’" />
 
-            
-            
-
-    <syntax name   = "D_ParamSyntax"
-            format = "-D%%ParamName"/>
-    <syntax name   = "g_ParamSyntax"
-            format = "-g%%ParamName"/>
-
-    <typedef name="LegacyModelType">
-        <paramtype kind="bool"
-                   formatTrue="-Dlegacy_model"
-                   formatFalse=""/>
-    </typedef>
-    <typedef name="NoSpecifyType">
-        <paramtype kind="bool"
-                   formatTrue="-gno-specify"
-                   formatFalse=""/>
-    </typedef>
-                   
-            
-        <syntax name   = "QuotedFileListSyntax"
-                format = "--%%ParamName %(&quot;%%FileList&quot;%| %)"/>
-        <syntax name   = "QuotedTopModuleSyntax"
-                format = "--%%ParamName=%%TopModule"/>
-        <syntax name   = "QuotedTopModulesSyntax"
-                format = "--%%ParamName %(&quot;%%TopModules&quot;%| %)"/>
-        <syntax name   = "QuotedSourceListSyntax"
-                format = "--%%ParamName %(&quot;%%SourceList&quot;%| %)"/>
-        <syntax name   = "QuotedCurrentFileSyntax"
-                format = "--%%ParamName=&quot;%%CurrentFile&quot;"/>
-        <syntax name   = "QuotedCurrentFileBaseSyntax"
-                format = "--%%ParamName=&quot;%%CurrentFileBase&quot;"/>
-        <syntax name   = "QuotedProjectNameSyntax"
-                format = "--%%ParamName=&quot;%%ProjectName&quot;"/>
-                
-                
-                
- <!-- Actually used -->
-	<syntax name="JustValueSyntax" format="%%ParamValue"></syntax>
-	<syntax name="TopModuleSyntax" format="-s%%TopModule" />
-	<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
-	<syntax name="ModuleLibrarySyntax" format="%(-y%%ParamValue%| %)" />
-	<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
-	<syntax name="ExtraFilesSyntax" format="%(%%ParamValue%| %)" />
-	<syntax name="exeFileSyntax" format="%%ParamValue" />
-	<syntax name="SwitchSyntax" format="-%%ParamName" />
-
-	<syntax name="DbgCurrentFileSyntax" format="echo &quot;%%CurrentFile&quot; ;" />
-	<syntax name="DbgChosenActionIndexSyntax" format="echo &quot;index=%%ChosenActionIndex&quot; ;" />
-	<syntax name="BuildStampSyntax" format="%%BuildStamp" />
-	<syntax name="LogFileSyntax" format="%%BuildStamp.log" />
-	<syntax name="GrepSkipSyntax" format="| grep --line-buffered -v &quot;%%ParamValue&quot;" />
-
-                
-//
-                
-  ChosenActionIndex              
-                
-  <!-- typedef -->
-
-        <typedef name="MyTypeList" list="true">
-            <paramtype kind="string"
-                       maxlength="256"
-                       sensitivity="sensitive"/>
-        </typedef>
-
-    
-        <typedef name= "ExtraFilesType" list="true">
-            <paramtype kind="string"
-		           textkind="file"
-                   maxlength="256"
-                   sensitivity="sensitive"/>
-        </typedef>
-        
-        <typedef name="exeType">
-            <paramtype kind="string"
-                       maxlength="256"
-                       sensitivity="sensitive"
-                       textkind="file"/>
-        </typedef>
-        
-        <typedef name="SwitchType">
-            <paramtype kind="bool"
-                   formatTrue="-%%ParamName"
-                   formatFalse=""/>
-        </typedef>
-<!--        
-        <typedef name= "StringType" list="true">
-            <paramtype kind="string"
-		           textkind="text"
-                   maxlength="256"
-                   sensitivity="sensitive"/>
-        </typedef>
--->            
-
-</interface>
-<!-- 
-<project name="IVerilogProject"
-             label="iverilog project label"
-             interface="IVerilog">
-</project>
--->
-    <project name="project_settings"
-                  label="Project parameters for project_settings"
-                  interface="project_interface">
-
-        <parameter id      = "SimulationTopFile"
-                   label   = "Project top simulation file"
-                   type    = "FileType"
-                   default = "default_top (testing)"
-                   format  = "ValueSyntax"
-                   readonly= "false" />
-
-        <parameter id      = "SimulationTopModule"
-                   label   = "Project top simulation module"
-                   type    = "StringType"
-                   default = ""
-                   format  = "ValueSyntax"
-                   readonly= "false" />
-
-        <parameter id      = "BuildDir"
-                   label   = "project build directory"
-                   type    = "DirType"
-                   default = "build"
-                   format  = "ValueSyntax"
-                   readonly= "false" />
-
-        <input>
-          <group name="General" label="Project properties">
-            "SimulationTopFile"
-            "SimulationTopModule"
-            "BuildDir"
-          </group>
-        </input>
-        <output>
-        </output>
-    </project>
+		<typedef name="ModuleLibraryType" list="true">
+			<paramtype kind="string" default="" textkind="dir"
+				maxlength="256" sensitivity="sensitive" />
+		</typedef>
 
 
 
-<tool name        = "iverilog"
-      project     = "project_settings"
-      label       = "Icarus Verilog compiler"
-      exe         = "iverilog"
-      shell       = "?%%OS: Windows=shell:, Linux=/bin/bash"
-      
-      interface   = "IVerilog"
-      errors      = "(.*):([0-9]+): [a-z_\- ]*error: (.*)"
-      warnings    = "(.*):([0-9]+): [a-z_\- ]*warning: (.*)"
-      info        = "(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--does not actually exist -->
-      
-      <extensions-list>
-          <extension mask="v"/>
-          <extension mask="tf"/>
-      </extensions-list>
 
-	<action-menu>
-		<action label="Simulate" resource="%SimulationTopFile" check-extension="false" check-existence="true"  icon="iverilog.ico"/>
-		<action label="Simulate for" resource="%%SelectedFile" check-extension="true" check-existence="true"/>
-		<action label="Empty" resource="" icon="sample.gif"/>
-		<action label="Just try for" resource="%%OS" />
-	</action-menu>
-      
-      
-    <parameter id       = "Param_Shell_Options"
-               label    = "Param_Shell_Options"
-               type     = "StringType"
-               format   = "JustValueSyntax"
-               default  = "-c"
-               readonly = "false"
-               visible  = "true"/>
-<!-- Intentional error: No, does not detect duplicates yet-->
 
-    <parameter id       = "Param_PreExe"
-               label    = "Param_PreExe"
-               type     = "StringType"
-               format   = "JustValueSyntax"
-               default  = ""
-               readonly = "false"
-               visible  = "true"/>
 
-    <parameter id       = "Param_Exe"
-               label    = "Param_Exe"
-               type     = "exeType"
-               format   = "exeFileSyntax"
-               default  = "/usr/bin/iverilog"
-               readonly = "false"
-               visible  = "true"/>
-      
-    <parameter id       = "Param_TopModule"
-               label    = "Param_TopModule"
-               type     = "StringType"
-               format   = "TopModuleSyntax"
-               default  = "%%TopModule"
-               readonly = "true"
-               visible  = "true"/>
-      
-    <parameter id       = "TopModulesOther"
-               type     = "StringListType"
-               format   = "TopModulesOtherSyntax"
-               default  = ""
-               omit     = ""
-               label    = "Select top modules (not referenced by other modules)"
-               readonly = "false"
-               visible  = "true"/>
-               
-    <parameter id       = "ModuleLibrary"
-               type     = "ModuleLibraryType"
-               format   = "ModuleLibrarySyntax"
-               default  = ""
-               label    = "Select libraries to include"
-               omit     = ""
-               readonly = "false"
-               visible  = "true"/>
-               
-               
-    <parameter id       = "ExtraFiles"
-               type     = "ExtraFilesType"
-               format   = "ExtraFilesSyntax"
-               default  = ""
-               label    = "Select extra files to include"
-               readonly = "false"
-               visible  = "true"/>
-               
-               
-    <parameter id      = "LegacyModel"
-	       outid   = "legacy_model"
-               type    = "LegacyModelType"
-               format  = "D_ParamSyntax"
-               default = "true"
-               label   = "Use legacy model"/>
+		<syntax name="D_ParamSyntax" format="-D%%ParamName" />
+		<syntax name="g_ParamSyntax" format="-g%%ParamName" />
 
-    <parameter id      = "NoSpecify"
-	       outid   = "no-specify"
-               type    = "NoSpecifyType"
-               format  = "g_ParamSyntax"
-               default = "true"
-               label   = "Use no-specify"/>
-<!-- -->
-    <parameter id       = "SourceList"
-               type     = "MyTypeList"
-               format   = "SourceListSyntax"
-               default  = ""
-               readonly = "true"
-               visible  = "false"/>
-<!--    -->
-    <parameter id      = "v"
-               type    = "SwitchType"
-               format  = "SwitchSyntax"
-               default = "true"
-               label   = "Verbose"/>
-               
-    <parameter id       = "Param_SourceList"
-               label    = "Param_SourceList"
-               type     = "MyTypeList"
-               format   = "SourceListSyntax"
-               default  = ""
-               readonly = "true"
-               visible  = "true"/>
+		<typedef name="LegacyModelType">
+			<paramtype kind="bool" formatTrue="-Dlegacy_model"
+				formatFalse="" />
+		</typedef>
+		<typedef name="NoSpecifyType">
+			<paramtype kind="bool" formatTrue="-gno-specify"
+				formatFalse="" />
+		</typedef>
 
-    <parameter id      = "ErrorsOnly"
-               type    = "LegacyModelType"
-               format  = "D_ParamSyntax"
-               default = "false"
-               label   = "Only errors/warning to console"/>
-               
-    <parameter id       = "Filter_String"
-               label    = "Filter_String"
-               type     = "StringType"
-               format   = "JustValueSyntax"
-               default  = "2&gt;&amp;1 | tee %LogFile | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
-               readonly = "false"
-               visible  = "true"/>
-               
-               
-               
-    <parameter id       = "DbgCurrentFile"
-               label    = "DbgCurrentFile"
-               type     = "StringType"
-               format   = "DbgCurrentFileSyntax"
-               default  = ""
-               readonly = "false"
-               visible  = "true"/>
 
-    <parameter id       = "ChosenActionIndex"
-               label    = "ChosenActionIndex"
-               type     = "StringType"
-               format   = "DbgChosenActionIndexSyntax"
-               default  = ""
-               readonly = "false"
-               visible  = "true"/>
-               
-    <parameter id       = "GrepSkip1"
-               label    = "GrepSkip"
-               type     = "StringType"
-               format   = "GrepSkipSyntax"
-               default  = "(null)"
-               readonly = "false"
-               visible  = "true"/>
-               
-               
-               
-<!--  intentional error below - duplicate -->               
-        <parameter id      = "LogFile"
-                   label   = "Simulator Log Filie"
-                   type    = "StringType"
-                   default = "logfile.log"
-                   format  = "LogFileSyntax"
-                   readonly= "false" />
+		<syntax name="QuotedFileListSyntax" format="--%%ParamName %(&quot;%%FileList&quot;%| %)" />
+		<syntax name="QuotedTopModuleSyntax" format="--%%ParamName=%%TopModule" />
+		<syntax name="QuotedTopModulesSyntax" format="--%%ParamName %(&quot;%%TopModules&quot;%| %)" />
+		<syntax name="QuotedSourceListSyntax" format="--%%ParamName %(&quot;%%SourceList&quot;%| %)" />
+		<syntax name="QuotedCurrentFileSyntax" format="--%%ParamName=&quot;%%CurrentFile&quot;" />
+		<syntax name="QuotedCurrentFileBaseSyntax" format="--%%ParamName=&quot;%%CurrentFileBase&quot;" />
+		<syntax name="QuotedProjectNameSyntax" format="--%%ParamName=&quot;%%ProjectName&quot;" />
+
+
+
+		<!-- Actually used -->
+		<syntax name="JustValueSyntax" format="%%ParamValue"></syntax>
+		<syntax name="TopModuleSyntax" format="-s%%TopModule" />
+		<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
+		<syntax name="ModuleLibrarySyntax" format="%(-y%%ParamValue%| %)" />
+		<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
+		<syntax name="ExtraFilesSyntax" format="%(%%ParamValue%| %)" />
+		<syntax name="exeFileSyntax" format="%%ParamValue" />
+		<syntax name="SwitchSyntax" format="-%%ParamName" />
+
+		<syntax name="DbgCurrentFileSyntax" format="echo &quot;%%CurrentFile&quot; ;" />
+		<syntax name="DbgChosenActionIndexSyntax" format="echo &quot;index=%%ChosenActionIndex&quot; ;" />
+		<syntax name="BuildStampSyntax" format="%%BuildStamp" />
+
+		<syntax name="GrepFindSyntax"
+			format="| grep --line-buffered -E &quot;%%ParamValue&quot;" />
+		<syntax name="GrepSkipSyntax"
+			format="| grep --line-buffered -v &quot;%%ParamValue&quot;" />
+		<syntax name="LogFileSyntax" format="| tee %%ParamName%%BuildStamp.log" />
+
+		<!-- typedef -->
+
+		<typedef name="MyTypeList" list="true">
+			<paramtype kind="string" maxlength="256" sensitivity="sensitive" />
+		</typedef>
+
+
+		<typedef name="ExtraFilesType" list="true">
+			<paramtype kind="string" textkind="file" maxlength="256"
+				sensitivity="sensitive" />
+		</typedef>
+
+		<typedef name="exeType">
+			<paramtype kind="string" maxlength="256" sensitivity="sensitive"
+				textkind="file" />
+		</typedef>
+
+		<typedef name="SwitchType">
+			<paramtype kind="bool" formatTrue="-%%ParamName"
+				formatFalse="" />
+		</typedef>
+		<!-- <typedef name= "StringType" list="true"> <paramtype kind="string" 
+			textkind="text" maxlength="256" sensitivity="sensitive"/> </typedef> -->
+
+	</interface>
+	<!-- <project name="IVerilogProject" label="iverilog project label" interface="IVerilog"> 
+		</project> -->
+	<project name="project_settings" label="Project parameters for project_settings"
+		interface="project_interface">
+
+		<parameter id="SimulationTopFile" label="Project top simulation file"
+			type="FileType" default="default_top (testing)" format="ValueSyntax"
+			readonly="false" />
+
+		<parameter id="SimulationTopModule" label="Project top simulation module"
+			type="StringType" default="" format="ValueSyntax" readonly="false" />
+
+		<parameter id="BuildDir" label="project build directory"
+			type="DirType" default="build" format="ValueSyntax" readonly="false" />
+
+		<input>
+			<group name="General" label="Project properties">
+				"SimulationTopFile"
+				"SimulationTopModule"
+				"BuildDir"
+			</group>
+		</input>
+		<output>
+		</output>
+	</project>
+
+
+
+	<tool name="iverilog" project="project_settings" label="Icarus Verilog compiler"
+		exe="iverilog" shell="?%%OS: Windows=shell:, Linux=/bin/bash"
+
+		interface="IVerilog" errors="(.*):([0-9]+): [a-z_\- ]*error: (.*)"
+		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)" info="(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--does not actually exist -->
+
+		<extensions-list>
+			<extension mask="v" />
+			<extension mask="tf" />
+		</extensions-list>
+
+		<action-menu>
+			<action label="Simulate" resource="%SimulationTopFile"
+				check-extension="false" check-existence="true" icon="iverilog.ico" />
+			<action label="Simulate for" resource="%%SelectedFile"
+				check-extension="true" check-existence="true" />
+			<action label="Empty" resource="" icon="sample.gif" />
+			<action label="Just try for" resource="%%OS" />
+		</action-menu>
+
+
+		<parameter id="Param_Shell_Options" label="Param_Shell_Options"
+			type="StringType" format="JustValueSyntax" default="-c" readonly="false"
+			visible="true" />
+		<!-- Intentional error: No, does not detect duplicates yet -->
+
+		<parameter id="Param_PreExe" label="Param_PreExe" type="StringType"
+			format="JustValueSyntax" default="" readonly="false" visible="true" />
+
+		<parameter id="Param_Exe" label="Param_Exe" type="exeType"
+			format="exeFileSyntax" default="/usr/bin/iverilog" readonly="false"
+			visible="true" />
+
+		<parameter id="Param_TopModule" label="Param_TopModule"
+			type="StringType" format="TopModuleSyntax" default="%%TopModule"
+			readonly="true" visible="true" />
+
+		<parameter id="TopModulesOther" type="StringListType"
+			format="TopModulesOtherSyntax" default="" omit=""
+			label="Select top modules (not referenced by other modules)"
+			readonly="false" visible="true" />
+
+		<parameter id="ModuleLibrary" type="ModuleLibraryType"
+			format="ModuleLibrarySyntax" default="" label="Select libraries to include"
+			omit="" readonly="false" visible="true" />
+
+
+		<parameter id="ExtraFiles" type="ExtraFilesType" format="ExtraFilesSyntax"
+			default="" label="Select extra files to include" readonly="false"
+			visible="true" />
+
+
+		<parameter id="LegacyModel" outid="legacy_model" type="LegacyModelType"
+			format="D_ParamSyntax" default="true" label="Use legacy model" />
+
+		<parameter id="NoSpecify" outid="no-specify" type="NoSpecifyType"
+			format="g_ParamSyntax" default="true" label="Use no-specify" />
+		<!-- -->
+		<parameter id="SourceList" type="MyTypeList" format="SourceListSyntax"
+			default="" readonly="true" visible="false" />
+		<!-- -->
+		<parameter id="v" type="SwitchType" format="SwitchSyntax"
+			default="true" label="Verbose" />
+
+		<parameter id="Param_SourceList" label="Param_SourceList"
+			type="MyTypeList" format="SourceListSyntax" default="" readonly="true"
+			visible="true" />
+
+
+		<parameter id="Filter_String" label="Filter_String" type="StringType"
+			format="JustValueSyntax"
+			default="2&gt;&amp;1 | tee %LogFile | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
+			readonly="false" visible="true" />
+
+
+
+		<parameter id="DbgCurrentFile" label="DbgCurrentFile" type="StringType"
+			format="DbgCurrentFileSyntax" default="" readonly="false" visible="true" />
+
+		<parameter id="ChosenActionIndex" label="ChosenActionIndex"
+			type="StringType" format="DbgChosenActionIndexSyntax" default=""
+			readonly="false" visible="true" />
+
+
+
+		<!-- intentional error below - duplicate -->
+
+
+
+		<parameter id="ShowNoProblem" type="BoolYesNo" format="None"
+			default="false" label="Show output with no errors/warnings" />
+
+		<parameter id="ShowWarnings" type="BoolYesNo" format="None"
+			default="false" label="Show output warnings" />
+
+		<parameter id="RemoveBugs" type="BoolYesNo" format="None"
+			default="false" label="Remove buggy simulator output" />
+
+		<parameter id="SaveLogs" type="BoolYesNo" format="None"
+			default="false" label="Save simulator log output" />
+
+		<!-- Advanced Section -->
+		
+
+		<parameter id="LogFile" label="Simulator log file prefix"
+			type="StringType" default="iverilog" format="LogFileSyntax" readonly="false" />
+
+		<parameter id="GrepFindErr" label="Grep pattern for errors only"
+			type="StringType" format="GrepFindSyntax" default="error" readonly="false"
+			visible="true" />
+
+		<parameter id="GrepFindErrWarn" label="Grep pattern for both errors and warnings"
+			type="StringType" format="GrepFindSyntax" default="error|warning"
+			readonly="false" visible="true" />
+
+		<parameter id="GrepSkip1" label="Grep skip pattern" type="StringType"
+			format="GrepSkipSyntax" default="(null)" readonly="false" visible="true" />
 
 
 	<input>
@@ -341,25 +245,24 @@
 			"ExtraFiles"
 		</group>
 		<group name="options" label="Options">
-			"ErrorsOnly"
-			"Filter_String"
-			"GrepSkip1"
+			"ShowNoProblem"
+			"ShowWarnings"
+			"RemoveBugs"
+			"SaveLogs"
 			"v"
 			"LegacyModel"
 			"NoSpecify"
-			<!-- "SourceList" -->
+		</group>
+		<group name="Advanced" label="Advanced">
+			"LogFile"
+			"GrepFindErr"
+			"GrepFindErrWarn"
+			"GrepSkip1"
 		</group>
 	</input>
 	<output>
 		<line name="command_line" sep=" ">
 			"%Param_Shell_Options"
-			"%DbgCurrentFile"
-			"%ChosenActionIndex"
-			"echo BuildDir=%BuildDir ;"
-			"echo CurrentFile=%%CurrentFile ;"
-			"echo SimulationTopFile=%SimulationTopFile ;"
-			"echo SimulationTopModule=%SimulationTopModule ;"
-			"echo LogFile=%LogFile ;"
 			"%Param_PreExe"
 			"%Param_Exe"
 			"%Param_TopModule"
@@ -370,21 +273,29 @@
 			"%v"
 			"%SourceList"
 			"%ExtraFiles"
-			<if ErrorsOnly="true">
-               "2&gt;&amp;1"
-               "| tee %LogFile"
-               "| grep --line-buffered -E 'error|warning'"
-               "%GrepSkip1"
- <!--			"%Filter_String" -->
+			<if ShowNoProblem="false">
+				"2&gt;&amp;1"
+			</if>if>
+			<if SaveLogs="true">
+				"%LogFile"
+			</if>
+			<if ShowNoProblem="false">
+				<if ShowWarnings="true">
+					"%GrepFindErrWarn"
+				</if>
+				<if ShowWarnings="false">
+					"%GrepFindErr"
+				</if>
+				<if RemoveBugs="true">
+					"%GrepSkip1"
+				</if>
 			</if>
 		</line>
 	</output>
 
-</tool>
-<!-- 	"echo %SimulationTopFile %%CurrentFile ;" -->
-<!--
-		"-s counter_tb"
-		"%SourceList" -->
+	</tool>
+	<!-- "echo %SimulationTopFile %%CurrentFile ;" -->
+	<!-- "-s counter_tb" "%SourceList" -->
 
 
 

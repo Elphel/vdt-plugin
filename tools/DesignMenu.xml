@@ -11,27 +11,32 @@
               icon="newmod_wiz.gif">
 
             <menuitem name="cver"
-                      label="Run CVer simulator"
+                      label="CVer simulator"
                       icon="cver.gif"
                       call="cver"/>
 
             <menuitem name="modelsim"
-                      label="Run ModelSIM simulator"
+                      label="ModelSIM simulator"
                       icon="modelsim.gif"
                       call="ModelSIM"/>
 
             <menuitem name="xst"
-                      label="Run XST (Synthesis)"
+                      label="XST (Synthesis)"
                       icon="xst.gif"
                       call="XST"/>
 
             <menuitem name="IVerilog"
-                      label="Run Icarus Verilog (Simulation)"
+                      label="Icarus Verilog Simulator"
                       icon="iverilog.ico"
                       call="iverilog"/>
 
+            <menuitem name="IVerilog Debug"
+                      label="Icarus Verilog (Debugging TSL)"
+                      icon="iverilog.ico"
+                      call="iverilog_dbg"/>
+
             <menuitem name="GTKWave"
-                      label="Run GTKWave (Waves viewer)"
+                      label="GTKWave (Waves viewer)"
                       icon="gtkwave.ico"
                       call="iverilog"/>
         </menu>
