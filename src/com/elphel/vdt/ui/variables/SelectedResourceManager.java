@@ -64,6 +64,7 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
 
     //Andrey
     private String fChosenTarget=null; // full path of the chosen (for action) resource or any string. Used to calculate CurrentFile, verilog file, ...
+    private String fChosenShort=null; // last segment of the chosen resource name
     private IResource fChosenVerilogFile = null; // to keep fSelectedVerilogFile
     private int fChosenAction=0; // Chosen variant of running the tool
     private long timestamp=0;
@@ -255,6 +256,11 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     		fChosenVerilogFile=file;
     	else if (fChosenVerilogFile==null)
     		fChosenVerilogFile=fSelectedVerilogFile;
+    	if (file!=null){
+    		fChosenShort=file.getName(); // last segment
+    	} else {
+    		fChosenShort=fChosenTarget; // whatever
+    	}
     }
     
     public String setBuildStamp(){
@@ -269,6 +275,9 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     
     public String getChosenTarget() {
         return fChosenTarget;
+    }
+    public String getChosenShort() {
+        return fChosenShort;
     }
 
     public IResource getChosenVerilogFile() {

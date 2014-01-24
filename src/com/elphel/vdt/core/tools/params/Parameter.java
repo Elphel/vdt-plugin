@@ -346,9 +346,9 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     public List<String> getCurrentValue() {
-        if (id.equals("SimulationTopFile")){ // Andrey
-        	System.out.println("getCurrentValue() SimulationTopFile, value="+currentValue);
-        }
+ //       if (id.equals("SimulationTopFile")){ // Andrey
+ //       	System.out.println("getCurrentValue() SimulationTopFile, value="+currentValue);
+ //       }
 
         if(currentValue.isEmpty())
             return null;

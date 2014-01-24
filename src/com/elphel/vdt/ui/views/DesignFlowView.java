@@ -522,7 +522,15 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 enabled=(selectedItem != null);
                 if (enabled && runFor[i].getCheckExistence()){
                 	IPath path = new Path(name);
-                	IFile file = (path==null)?null:project.getFile(path);
+                	IFile file = null;
+                	if (path!=null) {
+                		try {
+                			file = project.getFile(path);
+                		} catch (IllegalArgumentException e) {
+
+                		}
+                	}
+                	
                 	if (file==null){
 //                		System.out.println(name+" does not exist");
                 		enabled=false;

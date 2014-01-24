@@ -31,16 +31,6 @@
 		</typedef>
 
 
-		<syntax name="QuotedFileListSyntax" format="--%%ParamName %(&quot;%%FileList&quot;%| %)" />
-		<syntax name="QuotedTopModuleSyntax" format="--%%ParamName=%%TopModule" />
-		<syntax name="QuotedTopModulesSyntax" format="--%%ParamName %(&quot;%%TopModules&quot;%| %)" />
-		<syntax name="QuotedSourceListSyntax" format="--%%ParamName %(&quot;%%SourceList&quot;%| %)" />
-		<syntax name="QuotedCurrentFileSyntax" format="--%%ParamName=&quot;%%CurrentFile&quot;" />
-		<syntax name="QuotedCurrentFileBaseSyntax" format="--%%ParamName=&quot;%%CurrentFileBase&quot;" />
-		<syntax name="QuotedProjectNameSyntax" format="--%%ParamName=&quot;%%ProjectName&quot;" />
-
-
-
 		<!-- Actually used -->
 		<syntax name="JustValueSyntax" format="%%ParamValue"></syntax>
 		<syntax name="TopModuleSyntax" format="-s%%TopModule" />
@@ -56,17 +46,21 @@
 		<syntax name="BuildStampSyntax" format="%%BuildStamp" />
 
 		<syntax name="GrepFindSyntax"
-			format="| grep --line-buffered -E &quot;%%ParamValue&quot;" />
+			format="| { grep --line-buffered -E &quot;%%ParamValue&quot; || true; }" />
 		<syntax name="GrepSkipSyntax"
-			format="| grep --line-buffered -v &quot;%%ParamValue&quot;" />
-		<syntax name="LogFileSyntax" format="| tee %%ParamName%%BuildStamp.log" />
+			format="| { grep --line-buffered -v &quot;%%ParamValue&quot; || true; }" />
+		<syntax name="LogFileSyntax" format="%%ParamValue-%%BuildStamp.log" />
+		<syntax name="OutputFileSyntax" format="%%ParamValue-%%BuildStamp.ivlg" />
+
+		<syntax name="LxtFileSyntax" format="%%ParamValue-%%BuildStamp.lxt" />
+		<syntax name="LxtParamFileSyntax"
+			format="parameter lxtname=&quot;%%ParamValue-%%BuildStamp.lxt&quot;;" />
+		<!-- <syntax name="LxtParamFileSyntax" format="parameter lxtname=%%ParamValue;" 
+			/> -->
+		<syntax name="IncludeParamSyntax" format="%(%%ParamValue%|\n%)" />
+
 
 		<!-- typedef -->
-
-		<typedef name="MyTypeList" list="true">
-			<paramtype kind="string" maxlength="256" sensitivity="sensitive" />
-		</typedef>
-
 
 		<typedef name="ExtraFilesType" list="true">
 			<paramtype kind="string" textkind="file" maxlength="256"
@@ -130,6 +124,8 @@
 				check-extension="false" check-existence="true" icon="iverilog.ico" />
 			<action label="Simulate for" resource="%%SelectedFile"
 				check-extension="true" check-existence="true" />
+			<action label="Verify" resource="%%SelectedFile"
+				check-extension="true" check-existence="true" icon="newmod_wiz.gif" />
 			<action label="Empty" resource="" icon="sample.gif" />
 			<action label="Just try for" resource="%%OS" />
 		</action-menu>
@@ -147,22 +143,22 @@
 			format="exeFileSyntax" default="/usr/bin/iverilog" readonly="false"
 			visible="true" />
 
-		<parameter id="Param_TopModule" label="Param_TopModule"
+		<parameter id="Param_TopModule" label="Top module extracted from the chosen target file"
 			type="StringType" format="TopModuleSyntax" default="%%TopModule"
 			readonly="true" visible="true" />
 
 		<parameter id="TopModulesOther" type="StringListType"
 			format="TopModulesOtherSyntax" default="" omit=""
-			label="Select top modules (not referenced by other modules)"
+			label="Select top modules not referenced by the chosen target"
 			readonly="false" visible="true" />
 
 		<parameter id="ModuleLibrary" type="ModuleLibraryType"
-			format="ModuleLibrarySyntax" default="" label="Select libraries to include"
+			format="ModuleLibrarySyntax" default="" label="Select additional libraries to include"
 			omit="" readonly="false" visible="true" />
 
 
 		<parameter id="ExtraFiles" type="ExtraFilesType" format="ExtraFilesSyntax"
-			default="" label="Select extra files to include" readonly="false"
+			default="" label="Select additional files to include" readonly="false"
 			visible="true" />
 
 
@@ -172,23 +168,13 @@
 		<parameter id="NoSpecify" outid="no-specify" type="NoSpecifyType"
 			format="g_ParamSyntax" default="true" label="Use no-specify" />
 		<!-- -->
-		<parameter id="SourceList" type="MyTypeList" format="SourceListSyntax"
-			default="" readonly="true" visible="false" />
 		<!-- -->
 		<parameter id="v" type="SwitchType" format="SwitchSyntax"
 			default="true" label="Verbose" />
 
 		<parameter id="Param_SourceList" label="Param_SourceList"
-			type="MyTypeList" format="SourceListSyntax" default="" readonly="true"
+			type="StringListType" format="SourceListSyntax" default="" readonly="true"
 			visible="true" />
-
-
-		<parameter id="Filter_String" label="Filter_String" type="StringType"
-			format="JustValueSyntax"
-			default="2&gt;&amp;1 | tee %LogFile | grep --line-buffered -E 'error|warning' | grep --line-buffered -v &quot;(null):0&quot;"
-			readonly="false" visible="true" />
-
-
 
 		<parameter id="DbgCurrentFile" label="DbgCurrentFile" type="StringType"
 			format="DbgCurrentFileSyntax" default="" readonly="false" visible="true" />
@@ -196,12 +182,6 @@
 		<parameter id="ChosenActionIndex" label="ChosenActionIndex"
 			type="StringType" format="DbgChosenActionIndexSyntax" default=""
 			readonly="false" visible="true" />
-
-
-
-		<!-- intentional error below - duplicate -->
-
-
 
 		<parameter id="ShowNoProblem" type="BoolYesNo" format="None"
 			default="false" label="Show output with no errors/warnings" />
@@ -212,14 +192,33 @@
 		<parameter id="RemoveBugs" type="BoolYesNo" format="None"
 			default="false" label="Remove buggy simulator output" />
 
-		<parameter id="SaveLogs" type="BoolYesNo" format="None"
+		<parameter id="SaveLogsPreprocessor" type="BoolYesNo"
+			format="None" default="false" label="Save simulator preprocessor log output" />
+
+		<parameter id="SaveLogsSimulator" type="BoolYesNo" format="None"
 			default="false" label="Save simulator log output" />
 
+		<parameter id="ShowWaves" type="BoolYesNo" format="None"
+			default="true" label="Show simulation result in waveform viewer" />
+
 		<!-- Advanced Section -->
-		
+
 
 		<parameter id="LogFile" label="Simulator log file prefix"
-			type="StringType" default="iverilog" format="LogFileSyntax" readonly="false" />
+			type="StringType" default="%%CurrentFileBase" format="LogFileSyntax"
+			readonly="false" />
+		<parameter id="OutFile" label="Simulator intermediate file prefix"
+			type="StringType" default="%%CurrentFileBase" format="OutputFileSyntax"
+			readonly="false" />
+		<parameter id="LxtDumpFile" label="Simulator LXT dump file prefix"
+			type="StringType" default="%%CurrentFileBase" format="LxtFileSyntax"
+			readonly="false" />
+
+		<parameter id="GTKWaveSavFile" label="GTKWave sav file"
+			type="FileType" default="%%CurrentFileBase.sav" format="ValueSyntax"
+			omit="" readonly="false" />
+
+
 
 		<parameter id="GrepFindErr" label="Grep pattern for errors only"
 			type="StringType" format="GrepFindSyntax" default="error" readonly="false"
@@ -232,71 +231,171 @@
 		<parameter id="GrepSkip1" label="Grep skip pattern" type="StringType"
 			format="GrepSkipSyntax" default="(null)" readonly="false" visible="true" />
 
+		<parameter id="Param_1" label="Param_1" type="StringType"
+			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
 
-	<input>
-		<group name="files" label="Files">
-			<!-- "SimulationTopFile" -->
-			"Param_PreExe"
-			"Param_Exe"
-			"Param_Shell_Options"
-			"Param_TopModule"
-			"TopModulesOther"
-			"ModuleLibrary"
-			"ExtraFiles"
-		</group>
-		<group name="options" label="Options">
-			"ShowNoProblem"
-			"ShowWarnings"
-			"RemoveBugs"
-			"SaveLogs"
-			"v"
-			"LegacyModel"
-			"NoSpecify"
-		</group>
-		<group name="Advanced" label="Advanced">
-			"LogFile"
-			"GrepFindErr"
-			"GrepFindErrWarn"
-			"GrepSkip1"
-		</group>
-	</input>
-	<output>
-		<line name="command_line" sep=" ">
-			"%Param_Shell_Options"
-			"%Param_PreExe"
-			"%Param_Exe"
-			"%Param_TopModule"
-			"%TopModulesOther"
-			"%ModuleLibrary"
-			"%LegacyModel"
-			"%NoSpecify"
-			"%v"
-			"%SourceList"
-			"%ExtraFiles"
-			<if ShowNoProblem="false">
-				"2&gt;&amp;1"
-			</if>if>
-			<if SaveLogs="true">
-				"%LogFile"
-			</if>
-			<if ShowNoProblem="false">
-				<if ShowWarnings="true">
-					"%GrepFindErrWarn"
+		<parameter id="Param_2" label="Param_2" type="StringType"
+			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
+
+		<parameter id="Param_3" label="Param_3" type="StringType"
+			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
+
+		<parameter id="Param_4" label="Param_4" type="StringType"
+			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
+
+		<parameter id="IVerilogOther" label="Other IVerilog options"
+			type="StringType" format="JustValueSyntax" default="" omit=""
+			readonly="false" visible="true" />
+
+		<parameter id="IncludeParametersList" type="StringListType"
+			format="IncludeParamSyntax" default="" omit=""
+			label="Verilog parameters definition to be included in the test fixture"
+			readonly="false" visible="true" />
+		<!-- Invisible parameters -->
+		<parameter id="IVerilogActionIndex" type="StringType"
+			format="JustValueSyntax" visible="false" default="%%ChosenActionIndex" />
+
+		<parameter id="SourceList" type="StringListType" format="SourceListSyntax"
+			default="" readonly="true" visible="false" />
+
+		<parameter id="iverilog_include_file" type="FileType"
+			default="IVERILOG_INCLUDE.v" format="JustValueSyntax" visible="false" />
+
+		<parameter id="LxtDumpFileParameter" type="StringType"
+			default="%LxtDumpFile" format="LxtParamFileSyntax" visible="false" />
+
+		<input>
+			<group name="files" label="Files">
+				<!-- "SimulationTopFile" -->
+				"Param_TopModule"
+				"TopModulesOther"
+				"ExtraFiles"
+				"ModuleLibrary"
+				"GTKWaveSavFile"
+				"IncludeParametersList"
+			</group>
+			<group name="options" label="Options">
+				"ShowWaves"
+				"ShowNoProblem"
+				"ShowWarnings"
+				"RemoveBugs"
+				"SaveLogsPreprocessor"
+				"SaveLogsSimulator"
+				"v"
+				"LegacyModel"
+				"NoSpecify"
+			</group>
+			<group name="Advanced" label="Advanced">
+				"Param_PreExe"
+				"Param_Exe"
+				"Param_Shell_Options"
+				"IVerilogOther"
+				"LogFile"
+				"OutFile"
+				"LxtDumpFile"
+				"GrepFindErr"
+				"GrepFindErrWarn"
+				"GrepSkip1"
+				"Param_1"
+				"Param_2"
+				"Param_3"
+				"Param_4"
+			</group>
+		</input>
+		<output>
+			<line name="command_line" sep=" ">
+				"%Param_Shell_Options"
+				"%Param_PreExe"
+				"trap 'killall iverilog; ' EXIT;"
+				"echo 'current PID='$$;"
+				"%Param_Exe"
+				"-o"
+				<if IVerilogActionIndex="2">
+					"/dev/null"
 				</if>
-				<if ShowWarnings="false">
-					"%GrepFindErr"
+				<if-not IVerilogActionIndex="2">
+					"%OutFile"
+				</if-not>
+				" -D IVERILOG"
+				"%IVerilogOther"
+				"%Param_TopModule"
+				"%TopModulesOther"
+				"%ModuleLibrary"
+				"%LegacyModel"
+				"%NoSpecify"
+				"%v"
+				"%SourceList"
+				"%ExtraFiles"
+				<if ShowNoProblem="false">
+					"2&gt;&amp;1"
 				</if>
-				<if RemoveBugs="true">
-					"%GrepSkip1"
+				<if SaveLogsPreprocessor="true">
+					"| tee"
+					"%LogFile"
 				</if>
-			</if>
-		</line>
-	</output>
+				<if ShowNoProblem="false">
+					<if ShowWarnings="true">
+						"%GrepFindErrWarn"
+					</if>
+					<if ShowWarnings="false">
+						"%GrepFindErr"
+					</if>
+					<if RemoveBugs="true">
+						"%GrepSkip1"
+					</if>
+				</if>
+				"|| { echo '*** iverilog failed ***'; exit 1; } ;"
+				"trap '' EXIT;"
+				<if-not IVerilogActionIndex="2">
+					<!-- "time vvp -v" -->
+					"%Param_1"
+					"trap 'killall vvp; ' EXIT;"
+					"vvp -v"
+					"%Param_2"
+					"%OutFile"
+					"-lxt2 "
+					<if SaveLogsSimulator="true">
+						<if SaveLogsPreprocessor="true">
+							"| tee -a"
+							"%LogFile"
+						</if>
+						<if-not SaveLogsPreprocessor="true">
+							"| tee"
+							"%LogFile"
+						</if-not>
+					</if>
+
+
+					"|| { echo '*** vvp failed ***'; exit 1; } ;"
+					"trap '' EXIT;" <!-- no 
+						trap for GTKWave -->
+					<!-- "%Param_2" -->
+					"%Param_3"
+					<if ShowWaves="true">
+						"gtkwave"
+						"%LxtDumpFile"
+						"%GTKWaveSavFile"
+						"&amp;"
+					</if>
+					"%Param_4"
+				</if-not>
+			</line>
+			<line name="IverilogIncludeFile" dest="iverilog_include_file"
+				sep="\n">
+				"%LxtDumpFileParameter"
+				"%IncludeParametersList"
+			</line>
+		</output>
+
 
 	</tool>
 	<!-- "echo %SimulationTopFile %%CurrentFile ;" -->
 	<!-- "-s counter_tb" "%SourceList" -->
-
+	<!-- <parameter id = "xc_config_file" type = "Filename" default = "xc.cfg" 
+		format = "Option" visible = "false" /> || { echo "iverilog failed"; exit 
+		1; } ; time vvp -v x353mjpeg_test -lxt2 || { echo "vvp failed"; exit 1; } 
+		; || { echo "iverilog failed"; exit 1; } time vvp -v x353mjpeg_test -lxt2 
+		|| { echo "vvp failed"; exit 1; } gtkwave x353.lxt x353_1.sav & exit 0 -->
 
 
 </vdt-project>
