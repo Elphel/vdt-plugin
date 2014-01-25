@@ -1,100 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--iverilog -Dlegacy_model -gno-specify -v -o x353mjpeg_test -sglbl -stestbench353 
-	-y./unisims -y. x353_1.tf glbl.v -->
 <vdt-project>
 
 	<interface name="IVerilog" extends="project_interface">
 		<!-- Syntax definitions -->
-		<syntax name="BoolParamSyntax" format="-%%ParamName" />
-		<syntax name="InputPatternSyntax" format="’%%ParamValue’" />
-
-		<typedef name="ModuleLibraryType" list="true">
-			<paramtype kind="string" default="" textkind="dir"
-				maxlength="256" sensitivity="sensitive" />
-		</typedef>
-
-
-
-
-
 
 		<syntax name="D_ParamSyntax" format="-D%%ParamName" />
 		<syntax name="g_ParamSyntax" format="-g%%ParamName" />
-
-		<typedef name="LegacyModelType">
-			<paramtype kind="bool" formatTrue="-Dlegacy_model"
-				formatFalse="" />
-		</typedef>
-		<typedef name="NoSpecifyType">
-			<paramtype kind="bool" formatTrue="-gno-specify"
-				formatFalse="" />
-		</typedef>
-
-
-		<!-- Actually used -->
-		<syntax name="JustValueSyntax" format="%%ParamValue"></syntax>
+		<syntax name="NospecifySyntax" format="-gno-specify" />
 		<syntax name="TopModuleSyntax" format="-s%%TopModule" />
 		<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
 		<syntax name="ModuleLibrarySyntax" format="%(-y%%ParamValue%| %)" />
 		<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
 		<syntax name="ExtraFilesSyntax" format="%(%%ParamValue%| %)" />
-		<syntax name="exeFileSyntax" format="%%ParamValue" />
 		<syntax name="SwitchSyntax" format="-%%ParamName" />
-
-		<syntax name="DbgCurrentFileSyntax" format="echo &quot;%%CurrentFile&quot; ;" />
-		<syntax name="DbgChosenActionIndexSyntax" format="echo &quot;index=%%ChosenActionIndex&quot; ;" />
-		<syntax name="BuildStampSyntax" format="%%BuildStamp" />
-
 		<syntax name="GrepFindSyntax"
 			format="| { grep --line-buffered -E &quot;%%ParamValue&quot; || true; }" />
 		<syntax name="GrepSkipSyntax"
 			format="| { grep --line-buffered -v &quot;%%ParamValue&quot; || true; }" />
+			
+<!-- 	<syntax name="LogFileSyntax" format="%BuildDirSlash%%ParamValue-%%BuildStamp.log" />
+		<syntax name="OutFileSyntax" format="%BuildDirSlash%%ParamValue-%%BuildStamp.ivlg" />
+		<syntax name="LxtFileSyntax" format="%BuildDirSlash%%ParamValue-%%BuildStamp.lxt" />
+ -->
 		<syntax name="LogFileSyntax" format="%%ParamValue-%%BuildStamp.log" />
-		<syntax name="OutputFileSyntax" format="%%ParamValue-%%BuildStamp.ivlg" />
-
+		<syntax name="OutFileSyntax" format="%%ParamValue-%%BuildStamp.ivlg" />
 		<syntax name="LxtFileSyntax" format="%%ParamValue-%%BuildStamp.lxt" />
-		<syntax name="LxtParamFileSyntax"
+
+<!-- 		
+		<syntax name="LogFileLatestSyntax"
+		    format="ln -sf %BuildDirSlash%%ParamValue-%%BuildStamp.log %BuildDirSlash%%ParamValue-latest.log;" />
+		<syntax name="OutputFileLatestSyntax"
+			format="ln -sf %BuildDirSlash%%ParamValue-%%BuildStamp.ivlg %BuildDirSlash%%ParamValue-latest.ivlg;" />
+		<syntax name="LxtFileLatestSyntax"
+		    format="ln -sf %BuildDirSlash%%ParamValue-%%BuildStamp.lxt %BuildDirSlash%%ParamValue-latest.lxt;" />
+-->
+		<syntax name="LogFileLatestSyntax"
+		    format="ln -sf %%ParamValue-%%BuildStamp.log %BuildDir/%%ParamValue-latest.log;" />
+		<syntax name="OutputFileLatestSyntax"
+			format="ln -sf %%ParamValue-%%BuildStamp.ivlg %BuildDir/%%ParamValue-latest.ivlg;" />
+		<syntax name="LxtFileLatestSyntax"
+		    format="ln -sf %%ParamValue-%%BuildStamp.lxt %BuildDir/%%ParamValue-latest.lxt;" />
+
+		<!-- include file has target, not link value -->
+		
+ 		<syntax name="LxtParamFileSyntax"
 			format="parameter lxtname=&quot;%%ParamValue-%%BuildStamp.lxt&quot;;" />
-		<!-- <syntax name="LxtParamFileSyntax" format="parameter lxtname=%%ParamValue;" 
-			/> -->
 		<syntax name="IncludeParamSyntax" format="%(%%ParamValue%|\n%)" />
+		
+		
+		<!-- Types definitions -->
 
-
-		<!-- typedef -->
-
-		<typedef name="ExtraFilesType" list="true">
-			<paramtype kind="string" textkind="file" maxlength="256"
-				sensitivity="sensitive" />
+		<typedef name="ModuleLibraryType" list="true">
+			<paramtype kind="string" default="" textkind="dir"
+				maxlength="256" sensitivity="sensitive" />
 		</typedef>
-
-		<typedef name="exeType">
-			<paramtype kind="string" maxlength="256" sensitivity="sensitive"
-				textkind="file" />
-		</typedef>
-
 		<typedef name="SwitchType">
 			<paramtype kind="bool" formatTrue="-%%ParamName"
 				formatFalse="" />
 		</typedef>
-		<!-- <typedef name= "StringType" list="true"> <paramtype kind="string" 
-			textkind="text" maxlength="256" sensitivity="sensitive"/> </typedef> -->
+		<typedef name="D_ParamType">
+			<paramtype kind="bool" formatTrue="-D%%ParamName"
+				formatFalse="" />
+		</typedef>
+		<typedef name="g_ParamType">
+			<paramtype kind="bool" formatTrue="-g%%ParamName"
+				formatFalse="" />
+		</typedef>
 
 	</interface>
-	<!-- <project name="IVerilogProject" label="iverilog project label" interface="IVerilog"> 
-		</project> -->
-	<project name="project_settings" label="Project parameters for project_settings"
+	
+	<project name="FPGA_project" label="Project parameters for FPGA_project"
 		interface="project_interface">
-
 		<parameter id="SimulationTopFile" label="Project top simulation file"
-			type="FileType" default="default_top (testing)" format="ValueSyntax"
+			type="Filename" default="default_top (testing)" format="CopyValue"
 			readonly="false" />
-
 		<parameter id="SimulationTopModule" label="Project top simulation module"
-			type="StringType" default="" format="ValueSyntax" readonly="false" />
-
+			type="String" default="" format="CopyValue" readonly="false" />
 		<parameter id="BuildDir" label="project build directory"
-			type="DirType" default="build" format="ValueSyntax" readonly="false" />
-
+			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
+<!-- Invisible (calculated) project-wide parameters -->			
+		<parameter id="BuildDirSlash" type="Pathname" visible="false"
+		 default="?%BuildDir=:,%BuildDir/" format="CopyValue"/>
+			
 		<input>
 			<group name="General" label="Project properties">
 				"SimulationTopFile"
@@ -108,11 +95,11 @@
 
 
 
-	<tool name="iverilog" project="project_settings" label="Icarus Verilog compiler"
+	<tool name="iverilog" project="FPGA_project" label="Icarus Verilog compiler"
 		exe="iverilog" shell="?%%OS: Windows=shell:, Linux=/bin/bash"
 
 		interface="IVerilog" errors="(.*):([0-9]+): [a-z_\- ]*error: (.*)"
-		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)" info="(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--does not actually exist -->
+		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)" info="(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--do not actually exist -->
 
 		<extensions-list>
 			<extension mask="v" />
@@ -120,34 +107,32 @@
 		</extensions-list>
 
 		<action-menu>
-			<action label="Simulate" resource="%SimulationTopFile"
+			<action label="Simulate project " resource="%SimulationTopFile"
 				check-extension="false" check-existence="true" icon="iverilog.ico" />
-			<action label="Simulate for" resource="%%SelectedFile"
-				check-extension="true" check-existence="true" />
+			<action label="Simulate selected" resource="%%SelectedFile"
+				check-extension="true" check-existence="true" icon="iverilog_pointer.png" />
 			<action label="Verify" resource="%%SelectedFile"
-				check-extension="true" check-existence="true" icon="newmod_wiz.gif" />
-			<action label="Empty" resource="" icon="sample.gif" />
-			<action label="Just try for" resource="%%OS" />
+				check-extension="true" check-existence="true" icon="iverilog_check.png" />
+<!-- 		<action label="Empty" resource="" icon="sample.gif" />
+			<action label="Just try for" resource="%%OS" />  -->	
 		</action-menu>
 
-
 		<parameter id="Param_Shell_Options" label="Param_Shell_Options"
-			type="StringType" format="JustValueSyntax" default="-c" readonly="false"
+			type="String" format="CopyValue" default="-c" readonly="false"
 			visible="true" />
-		<!-- Intentional error: No, does not detect duplicates yet -->
 
-		<parameter id="Param_PreExe" label="Param_PreExe" type="StringType"
-			format="JustValueSyntax" default="" readonly="false" visible="true" />
+		<parameter id="Param_PreExe" label="Param_PreExe" type="String"
+			format="CopyValue" default="" readonly="false" visible="true" />
 
-		<parameter id="Param_Exe" label="Param_Exe" type="exeType"
-			format="exeFileSyntax" default="/usr/bin/iverilog" readonly="false"
+		<parameter id="Param_Exe" label="Param_Exe" type="Filename"
+			format="CopyValue" default="/usr/bin/iverilog" readonly="false"
 			visible="true" />
 
 		<parameter id="Param_TopModule" label="Top module extracted from the chosen target file"
-			type="StringType" format="TopModuleSyntax" default="%%TopModule"
+			type="String" format="TopModuleSyntax" default="%%TopModule"
 			readonly="true" visible="true" />
 
-		<parameter id="TopModulesOther" type="StringListType"
+		<parameter id="TopModulesOther" type="Stringlist"
 			format="TopModulesOtherSyntax" default="" omit=""
 			label="Select top modules not referenced by the chosen target"
 			readonly="false" visible="true" />
@@ -157,31 +142,26 @@
 			omit="" readonly="false" visible="true" />
 
 
-		<parameter id="ExtraFiles" type="ExtraFilesType" format="ExtraFilesSyntax"
+		<parameter id="ExtraFiles" type="Filelist" format="ExtraFilesSyntax"
 			default="" label="Select additional files to include" readonly="false"
 			visible="true" />
 
 
-		<parameter id="LegacyModel" outid="legacy_model" type="LegacyModelType"
+		<parameter id="legacy_model" outid="legacy_model" type="D_ParamType"
 			format="D_ParamSyntax" default="true" label="Use legacy model" />
 
-		<parameter id="NoSpecify" outid="no-specify" type="NoSpecifyType"
-			format="g_ParamSyntax" default="true" label="Use no-specify" />
+		<parameter id="no_specify" outid="no-specify" type="g_ParamType"
+			format="NospecifySyntax" default="true" label="Use no-specify" />
+			
 		<!-- -->
-		<!-- -->
+		
 		<parameter id="v" type="SwitchType" format="SwitchSyntax"
 			default="true" label="Verbose" />
 
 		<parameter id="Param_SourceList" label="Param_SourceList"
-			type="StringListType" format="SourceListSyntax" default="" readonly="true"
+			type="Stringlist" format="SourceListSyntax" default="" readonly="true"
 			visible="true" />
 
-		<parameter id="DbgCurrentFile" label="DbgCurrentFile" type="StringType"
-			format="DbgCurrentFileSyntax" default="" readonly="false" visible="true" />
-
-		<parameter id="ChosenActionIndex" label="ChosenActionIndex"
-			type="StringType" format="DbgChosenActionIndexSyntax" default=""
-			readonly="false" visible="true" />
 
 		<parameter id="ShowNoProblem" type="BoolYesNo" format="None"
 			default="false" label="Show output with no errors/warnings" />
@@ -205,64 +185,99 @@
 
 
 		<parameter id="LogFile" label="Simulator log file prefix"
-			type="StringType" default="%%CurrentFileBase" format="LogFileSyntax"
+			type="String" default="%%CurrentFileBase" format="LogFileSyntax"
 			readonly="false" />
 		<parameter id="OutFile" label="Simulator intermediate file prefix"
-			type="StringType" default="%%CurrentFileBase" format="OutputFileSyntax"
+			type="String" default="%%CurrentFileBase" format="OutFileSyntax"
 			readonly="false" />
 		<parameter id="LxtDumpFile" label="Simulator LXT dump file prefix"
-			type="StringType" default="%%CurrentFileBase" format="LxtFileSyntax"
+			type="String" default="%%CurrentFileBase" format="LxtFileSyntax"
 			readonly="false" />
 
 		<parameter id="GTKWaveSavFile" label="GTKWave sav file"
-			type="FileType" default="%%CurrentFileBase.sav" format="ValueSyntax"
+			type="Filename" default="%%CurrentFileBase.sav" format="CopyValue"
 			omit="" readonly="false" />
 
-
-
 		<parameter id="GrepFindErr" label="Grep pattern for errors only"
-			type="StringType" format="GrepFindSyntax" default="error" readonly="false"
+			type="String" format="GrepFindSyntax" default="error" readonly="false"
 			visible="true" />
 
 		<parameter id="GrepFindErrWarn" label="Grep pattern for both errors and warnings"
-			type="StringType" format="GrepFindSyntax" default="error|warning"
+			type="String" format="GrepFindSyntax" default="error|warning"
 			readonly="false" visible="true" />
 
-		<parameter id="GrepSkip1" label="Grep skip pattern" type="StringType"
+		<parameter id="GrepSkip1" label="Grep skip pattern" type="String"
 			format="GrepSkipSyntax" default="(null)" readonly="false" visible="true" />
-
-		<parameter id="Param_1" label="Param_1" type="StringType"
-			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
-
-		<parameter id="Param_2" label="Param_2" type="StringType"
-			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
-
-		<parameter id="Param_3" label="Param_3" type="StringType"
-			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
-
-		<parameter id="Param_4" label="Param_4" type="StringType"
-			format="JustValueSyntax" default="" omit="" readonly="false" visible="true" />
-
+			
 		<parameter id="IVerilogOther" label="Other IVerilog options"
-			type="StringType" format="JustValueSyntax" default="" omit=""
+			type="String" format="CopyValue" default="" omit=""
 			readonly="false" visible="true" />
 
-		<parameter id="IncludeParametersList" type="StringListType"
+		<parameter id="IncludeParametersList" type="Stringlist"
 			format="IncludeParamSyntax" default="" omit=""
 			label="Verilog parameters definition to be included in the test fixture"
 			readonly="false" visible="true" />
-		<!-- Invisible parameters -->
-		<parameter id="IVerilogActionIndex" type="StringType"
-			format="JustValueSyntax" visible="false" default="%%ChosenActionIndex" />
+			
+<!-- Temporary inserted into the command line, will be removed -->
 
-		<parameter id="SourceList" type="StringListType" format="SourceListSyntax"
-			default="" readonly="true" visible="false" />
+		<parameter id="Param_1" label="Param_1" type="String"
+			format="CopyValue" default="" omit="" readonly="false" visible="true" />
 
-		<parameter id="iverilog_include_file" type="FileType"
-			default="IVERILOG_INCLUDE.v" format="JustValueSyntax" visible="false" />
+		<parameter id="Param_2" label="Param_2" type="String"
+			format="CopyValue" default="" omit="" readonly="false" visible="true" />
 
-		<parameter id="LxtDumpFileParameter" type="StringType"
-			default="%LxtDumpFile" format="LxtParamFileSyntax" visible="false" />
+		<parameter id="Param_3" label="Param_3" type="String"
+			format="CopyValue" default="" omit="" readonly="false" visible="true" />
+
+		<parameter id="Param_4" label="Param_4" type="String"
+			format="CopyValue" default="" omit="" readonly="false" visible="true" />
+			
+			
+		<!-- Invisible parameters, just pass calculated default values -->
+		
+		<parameter id="IVerilogActionIndex" default="%%ChosenActionIndex"
+		 type="String" format="CopyValue" visible="false"  />
+
+		<parameter id="SourceList" format="SourceListSyntax"
+			type="Stringlist" default="" readonly="true" visible="false" />
+
+		<parameter id="iverilog_include_file" default="IVERILOG_INCLUDE.v"
+			type="Filename" format="CopyValue" visible="false" />
+
+		<parameter id="LxtDumpFileParameter" default="%LxtDumpFileFull" 
+			type="String" format="LxtParamFileSyntax" visible="false" />
+			
+		<parameter id="LogFileLatest" default="%LogFile" 
+			type="String" format="LogFileLatestSyntax" visible="false" />
+			
+		<parameter id="OutFileLatest" type="String" default="%OutFile" 
+			format="OutputFileLatestSyntax" visible="false" />
+			
+		<parameter id="LxtDumpFileLatest" default="%LxtDumpFile" 
+			type="String" format="LxtFileLatestSyntax" visible="false" />
+<!-- 
+		<parameter id="LogFileFull" default="%BuildDirSlash%LogFile" 
+			visible="false" type="String" format="CopyValue"/>
+			
+		<parameter id="OutFileFull" default="%BuildDirSlash%OutFile" 
+		    visible="false"	type="String" format="CopyValue"/>
+		    
+		<parameter id="LxtDumpFileFull" default="%BuildDirSlash%LxtDumpFile" 
+			visible="false"	type="String" format="CopyValue"/>
+ -->
+
+
+		<parameter id="LogFileFull" default="%BuildDir/%LogFile" 
+			visible="false" type="String" format="LogFileSyntax"/>
+			
+		<parameter id="OutFileFull" default="%BuildDir/%OutFile" 
+		    visible="false"	type="String" format="OutFileSyntax"/>
+		    
+		<parameter id="LxtDumpFileFull" default="%BuildDir/%LxtDumpFile" 
+			visible="false"	type="String" format="LxtFileSyntax"/>
+			
+			
+			
 
 		<input>
 			<group name="files" label="Files">
@@ -282,8 +297,8 @@
 				"SaveLogsPreprocessor"
 				"SaveLogsSimulator"
 				"v"
-				"LegacyModel"
-				"NoSpecify"
+				"legacy_model"
+				"no_specify"
 			</group>
 			<group name="Advanced" label="Advanced">
 				"Param_PreExe"
@@ -303,9 +318,23 @@
 			</group>
 		</input>
 		<output>
+		<!-- TODO: watch for new lines inserted inside quoted tokens during autoformat - they break output
+		Maybe add filter to the code to transform white spaces -->
 			<line name="command_line" sep=" ">
 				"%Param_Shell_Options"
 				"%Param_PreExe"
+<!--  MKDIR - ALWAYS -->				
+			    "mkdir -p"
+			    "%BuildDir"
+			    ";"
+				<if SaveLogsPreprocessor="true"
+				    SaveLogsSimulator="true">
+					"touch"
+					"%LogFileFull"
+					";"
+					"%LogFileLatest"
+				</if>
+				
 				"trap 'killall iverilog; ' EXIT;"
 				"echo 'current PID='$$;"
 				"%Param_Exe"
@@ -314,15 +343,15 @@
 					"/dev/null"
 				</if>
 				<if-not IVerilogActionIndex="2">
-					"%OutFile"
+					"%OutFileFull"
 				</if-not>
 				" -D IVERILOG"
 				"%IVerilogOther"
 				"%Param_TopModule"
 				"%TopModulesOther"
 				"%ModuleLibrary"
-				"%LegacyModel"
-				"%NoSpecify"
+				"%legacy_model"
+				"%no_specify"
 				"%v"
 				"%SourceList"
 				"%ExtraFiles"
@@ -330,8 +359,8 @@
 					"2&gt;&amp;1"
 				</if>
 				<if SaveLogsPreprocessor="true">
-					"| tee"
-					"%LogFile"
+					"| tee -a"
+					"%LogFileFull"
 				</if>
 				<if ShowNoProblem="false">
 					<if ShowWarnings="true">
@@ -347,35 +376,29 @@
 				"|| { echo '*** iverilog failed ***'; exit 1; } ;"
 				"trap '' EXIT;"
 				<if-not IVerilogActionIndex="2">
+				    "%OutFileLatest" 
 					<!-- "time vvp -v" -->
 					"%Param_1"
 					"trap 'killall vvp; ' EXIT;"
 					"vvp -v"
 					"%Param_2"
-					"%OutFile"
+					"%OutFileFull"
 					"-lxt2 "
 					<if SaveLogsSimulator="true">
-						<if SaveLogsPreprocessor="true">
-							"| tee -a"
-							"%LogFile"
-						</if>
-						<if-not SaveLogsPreprocessor="true">
-							"| tee"
-							"%LogFile"
-						</if-not>
+						"| tee -a"
+						"%LogFileFull"
 					</if>
-
-
 					"|| { echo '*** vvp failed ***'; exit 1; } ;"
-					"trap '' EXIT;" <!-- no 
-						trap for GTKWave -->
+					"%LxtDumpFileLatest"
+					 <!-- no trap for GTKWave -->
+					"trap '' EXIT;"
 					<!-- "%Param_2" -->
 					"%Param_3"
 					<if ShowWaves="true">
 						"gtkwave"
-						"%LxtDumpFile"
+						"%LxtDumpFileFull"
 						"%GTKWaveSavFile"
-						"&amp;"
+						"&amp; "
 					</if>
 					"%Param_4"
 				</if-not>
@@ -389,13 +412,5 @@
 
 
 	</tool>
-	<!-- "echo %SimulationTopFile %%CurrentFile ;" -->
-	<!-- "-s counter_tb" "%SourceList" -->
-	<!-- <parameter id = "xc_config_file" type = "Filename" default = "xc.cfg" 
-		format = "Option" visible = "false" /> || { echo "iverilog failed"; exit 
-		1; } ; time vvp -v x353mjpeg_test -lxt2 || { echo "vvp failed"; exit 1; } 
-		; || { echo "iverilog failed"; exit 1; } time vvp -v x353mjpeg_test -lxt2 
-		|| { echo "vvp failed"; exit 1; } gtkwave x353.lxt x353_1.sav & exit 0 -->
-
 
 </vdt-project>

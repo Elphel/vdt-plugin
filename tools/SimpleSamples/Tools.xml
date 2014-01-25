@@ -146,7 +146,7 @@
                 format = '--%%ParamName="%%ProjectPath"'/>
 
                
-        <syntax name   = "JustValueSyntax"
+        <syntax name   = "JustCopyValue"
                 format = "%%ParamValue"></syntax>
                 
     </interface>
@@ -165,7 +165,7 @@
     -->
 <!--          exe         = "?%%OS: Windows=mytest.bat, Linux=mytest.sh" -->
     <tool name        = "MyTool"
-          project     = "project_settings"
+          project     = "FPGA_project"
           label       = "My Tool"
           shell       = "?%%OS: Windows=, Linux=/bin/bash"
           interface   = "MyControlInterface"
@@ -182,7 +182,7 @@
         <parameter id       = "Param_Shell_Options"
                    label    = "Param_Shell_Options"
                    type     = "MyString"
-                   format   = "JustValueSyntax"
+                   format   = "JustCopyValue"
                    default  = "-c"
                    readonly = "false"
                    visible  = "true"/>
@@ -274,7 +274,7 @@
 
         <parameter id       = "Param_parser"
                    type     = "MyType1"
-                   format   = "JustValueSyntax"
+                   format   = "JustCopyValue"
                    default  = "| python -u /data/vdt/workspace_01/veditor/parsers/parser01.py; ls -all"
                    readonly = "false"
                    visible  = "true"

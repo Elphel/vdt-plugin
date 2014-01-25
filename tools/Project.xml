@@ -2,67 +2,35 @@
 
 <vdt-project>
     <interface name = "project_interface">
-        <typedef name="StringType">
+<!-- All renamed to match Basicinterface.xml 
+        <typedef name="String">
             <paramtype kind="string"
                        maxlength="256"
                        sensitivity="sensitive"/>
         </typedef>
 
-        <typedef name="StringListType"  list="true">
+        <typedef name="Stringlist"  list="true">
             <paramtype kind="string"
                        maxlength="256"
                        sensitivity="sensitive"/>
+
         </typedef>
-        <typedef name="DirType">
+        <typedef name="Pathname">
             <paramtype kind="string"
                        maxlength="256"
                        sensitivity="sensitive"
                        textkind="dir"/>
         </typedef>
-        <typedef name="FileType">
+     
+        <typedef name="Filename">
             <paramtype kind="string"
                        maxlength="256"
                        sensitivity="sensitive"
                        textkind="file"/>
         </typedef>
-
-        <syntax name="ValueSyntax" format="%%ParamValue"  />
+  
+        <syntax name="CopyValue" format="%%ParamValue"  />
+--> 
     </interface>
-<!-- 
-    <project name="project_settings"
-                  label="Project parameters for project_settings"
-                  interface="project_interface">
-
-        <parameter id      = "SimulationTopFile"
-                   label   = "Project top simulation file"
-                   type    = "FileType"
-                   default = "default_top (testing)"
-                   format  = "ValueSyntax"
-                   readonly= "false" />
-
-        <parameter id      = "SimulationTopModule"
-                   label   = "Project top simulation module"
-                   type    = "StringType"
-                   default = ""
-                   format  = "ValueSyntax"
-                   readonly= "false" />
-
-        <parameter id      = "BuildDir"
-                   label   = "project build directory"
-                   type    = "DirType"
-                   default = "build"
-                   format  = "ValueSyntax"
-                   readonly= "false" />
-
-        <input>
-          <group name="General" label="Project properties">
-            "SimulationTopFile"
-            "SimulationTopModule"
-            "BuildDir"
-          </group>
-        </input>
-        <output>
-        </output>
-    </project>
-     -->
+    
 </vdt-project>

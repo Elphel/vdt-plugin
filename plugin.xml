@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>   
+
+    <extension point="org.eclipse.ui.editors"> 
+      <editor 
+         id="net.sourceforge.GTKWave" 
+         name="GTKWave Waveform Viewer" 
+         extensions="sav,lxt" 
+         command="gtkwave"
+         icon="gtkwave.ico" 
+         default="false"> 
+      </editor> 
+   </extension> 
+   
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -24,6 +36,8 @@
             <contentTypeBinding contentTypeId="com.elphel.vdt.veditor.vhdlSource"/>
       </editor>
    </extension>
+
+
    
    <extension
          point="org.eclipse.ui.editors">

@@ -26,23 +26,50 @@
       <paramtype kind="number" lo="0" hi="2147483647" format="%d" />
     </typedef>
 
+<!-- All below changed case sensitivity (was "insensitive" ) -->
     <typedef name="String">
-      <paramtype kind="string" sensitivity="insensitive" textkind="text" />
+      <paramtype kind="string" sensitivity="sensitive" textkind="text" />
+    </typedef>
+
+    <typedef name="Stringlist" list="true">
+      <paramtype kind="string" sensitivity="sensitive" textkind="text" />
     </typedef>
 
     <typedef name="Filename">
-      <paramtype kind="string" sensitivity="insensitive" textkind="file" />
+      <paramtype kind="string" sensitivity="sensitive" textkind="file" />
     </typedef>
 
     <typedef name="Filelist" list="true">
-      <paramtype kind="string" sensitivity="insensitive" textkind="file" />
+      <paramtype kind="string" sensitivity="sensitive" textkind="file" />
     </typedef>
 
     <typedef name="Pathname">
-      <paramtype kind="string" sensitivity="insensitive" textkind="dir" />
+      <paramtype kind="string" sensitivity="sensitive" textkind="dir" />
     </typedef>
 
     <typedef name="Pathlist" list="true">
+      <paramtype kind="string" sensitivity="sensitive" textkind="dir" />
+    </typedef>
+    
+<!-- Case-insensitive variants -->
+
+    <typedef name="StringInsensitive">
+      <paramtype kind="string" sensitivity="insensitive" textkind="text" />
+    </typedef>
+
+    <typedef name="FilenameInsensitive">
+      <paramtype kind="string" sensitivity="insensitive" textkind="file" />
+    </typedef>
+
+    <typedef name="FilelistInsensitive" list="true">
+      <paramtype kind="string" sensitivity="insensitive" textkind="file" />
+    </typedef>
+
+    <typedef name="PathnameInsensitive">
+      <paramtype kind="string" sensitivity="insensitive" textkind="dir" />
+    </typedef>
+
+    <typedef name="PathlistInsensitive" list="true">
       <paramtype kind="string" sensitivity="insensitive" textkind="dir" />
     </typedef>
 
