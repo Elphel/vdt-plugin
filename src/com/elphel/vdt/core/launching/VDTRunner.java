@@ -19,6 +19,7 @@ package com.elphel.vdt.core.launching;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,19 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 //import org.eclipse.core.resources.IProject;
 //import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -58,6 +47,7 @@ import org.eclipse.debug.core.model.IProcess;
 //import org.eclipse.ui.console.IPatternMatchListener;
 //import org.eclipse.ui.console.MessageConsole;
 
+import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -66,6 +56,8 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
+import org.eclipse.ui.console.IOConsoleInputStream;
+import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
@@ -73,6 +65,10 @@ import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
+
+
+
+
 
 
 
@@ -164,11 +160,11 @@ public class VDTRunner {
 				toolArguments.addAll(arguments);
 			//        if (resources != null)
 			//            toolArguments.addAll(resources);
+			runConfig.setToolArguments((String[])toolArguments.toArray(new String[toolArguments.size()]));
 			if (argumentsItemsArray[numItem].getConsoleName()!=null){
-				System.out.println("VDTLaunchConfigurationDelegate.doLaunch: console commands not yet implemented for runner #"+numItem);
+				runConsole(argumentsItemsArray[numItem].getConsoleName(),runConfig, launch, monitor);
 				continue;
 			}
-			runConfig.setToolArguments((String[])toolArguments.toArray(new String[toolArguments.size()]));
 
 			// Launch the configuration - 1 unit of work
 			//        	VDTRunner runner = VDTLaunchUtil.getRunner();
@@ -180,7 +176,7 @@ public class VDTRunner {
 
 			// check for cancellation
 			if (monitor.isCanceled() || (process==null)) {
-				removeConfiguration(consoleName);
+				removeConfiguration(consoleName); 
 				return;
 			}
 			if (numItem<(argumentsItemsArray.length-1)){ // Not for the last
@@ -231,6 +227,50 @@ public class VDTRunner {
 			}
 		}
 		monitor.done();
+	}
+	
+	
+	public IOConsole runConsole(String consolePrefix
+			, VDTRunnerConfiguration configuration
+			, ILaunch launch
+			, IProgressMonitor monitor 
+			) throws CoreException{
+		//TODO: Handle monitor
+		System.out.println("VDTLaunchConfigurationDelegate.doLaunch: console ("+consolePrefix+") commands not yet implemented");
+		// Find console with name starting with consolePrefix
+		IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
+		IConsole[] consoles=(IConsole[]) man.getConsoles();
+		IOConsole iCons=null;
+		for (int i=0;i<consoles.length;i++){
+			if (consoles[i].getName().startsWith(consolePrefix)){
+				iCons=(IOConsole) consoles[i];
+				break;
+			}
+		}
+		if (iCons==null) {
+			MessageUI.error("Specified console: "+consolePrefix+" is not found");
+			return null;
+		}
+		// try to send 
+        String[] arguments = configuration.getToolArguments();
+        if (arguments == null) arguments=new String[0];
+//        IOConsoleInputStream inStream= iCons.getInputStream();
+        IOConsoleOutputStream 	outStream= iCons.newOutputStream();
+        IProcess process=((ProcessConsole)iCons).getProcess();
+        IStreamsProxy iStreamProxy= process.getStreamsProxy();
+        
+        try {
+        	for (int i=0;i<arguments.length;i++){
+//        		outStream.write(arguments[i]); // writes to console itself
+        		iStreamProxy.write(arguments[i]+"\n");
+        	}
+        } catch (IOException e) {
+        	System.out.println("Can not write to outStream of console "+iCons.getName());
+        }
+        
+
+		return iCons;
+		
 	}
         		
  /*       		process.getStreamsProxy().getOutputStreamMonitor().addListener(new IStreamListener(){
