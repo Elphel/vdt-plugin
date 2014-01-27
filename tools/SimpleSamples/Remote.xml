@@ -2,6 +2,7 @@
 
 <vdt-project>
     <interface name="RemoteInterface" extends="project_interface">
+    		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
     </interface>
     <tool name        = "RemotePython"
           project     = "FPGA_project"
@@ -127,9 +128,9 @@
 
         <parameter id       = "RemoteCommand"
                    label    = "Remote Command to send"
-                   type     = "String"
-                   format   = "CopyValue"
-                   default  = "print &quot;Hello, World!&quot;"
+                   type     = "Stringlist"
+                   format   = "ProgramSyntax"
+                   default  = "print &quot;Hello, World!, 2*2=&quot;,2*2"
                    readonly = "false"
                    visible  = "true"/>
                    
@@ -145,8 +146,8 @@
         <output>
             <line name="command_line">
                 "-c"
-                "echo 'Nothing to do, sleepiing 15' ;"
-                "sleep 15 ;"
+                "echo 'Nothing to do, sleeping 5' ;"
+                "sleep 5 ;"
                 "echo 'Nothing to do, awakening' ;"
             </line>
 			<line name="console_line" dest="python_console_name" sep="\n">
@@ -154,9 +155,9 @@
             </line>
             <line name="command_line">
                 "-c"
-                "echo 'Nothing to do second time, sleeping 25' ;"
-                "sleep 25 ;"
-                "echo 'Nothing to do again, awakening after sleep 25' ;"
+                "echo 'Nothing to do second time, sleeping 10' ;"
+                "sleep 10 ;"
+                "echo 'Nothing to do again, awakening after sleep 10' ;"
             </line>
         </output>
 

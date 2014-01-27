@@ -236,7 +236,6 @@ public class VDTRunner {
 			, IProgressMonitor monitor 
 			) throws CoreException{
 		//TODO: Handle monitor
-		System.out.println("VDTLaunchConfigurationDelegate.doLaunch: console ("+consolePrefix+") commands not yet implemented");
 		// Find console with name starting with consolePrefix
 		IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
 		IConsole[] consoles=(IConsole[]) man.getConsoles();
@@ -254,6 +253,9 @@ public class VDTRunner {
 		// try to send 
         String[] arguments = configuration.getToolArguments();
         if (arguments == null) arguments=new String[0];
+        log("Writing to console "+iCons.getName()+":", arguments, null, false, true); /* Appears in the console of the target Eclipse (immediately erased) */
+        log("Writing to console "+iCons.getName()+":", arguments, null, false, false); /* Appears in the console of the parent Eclipse */
+
 //        IOConsoleInputStream inStream= iCons.getInputStream();
         IOConsoleOutputStream 	outStream= iCons.newOutputStream();
         IProcess process=((ProcessConsole)iCons).getProcess();
@@ -261,7 +263,9 @@ public class VDTRunner {
         
         try {
         	for (int i=0;i<arguments.length;i++){
-//        		outStream.write(arguments[i]); // writes to console itself
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
+					outStream.write(arguments[i]+"\n"); // writes to console itself
+				}
         		iStreamProxy.write(arguments[i]+"\n");
         	}
         } catch (IOException e) {
@@ -273,27 +277,7 @@ public class VDTRunner {
 		
 	}
         		
- /*       		process.getStreamsProxy().getOutputStreamMonitor().addListener(new IStreamListener(){
-        		    public void streamAppended (String text, IStreamMonitor monitor){
-        		       //TODO: As per user requirement. 
-        		    }
-        		});
-*/
-
- /*
- 
-  	public void parserSetup(
-			VDTRunnerConfiguration configuration,
-			IProcess process
-			){
-	    iCons=           (IOConsole) DebugUITools.getConsole(process); // had non-null fPatternMatcher , fType="org.eclipse.debug.ui.ProcessConsoleType"
-		if (iCons==null){
-			System.out.println("Could not get a console for the specified process");
-		}
-    	
-    }
-*/    
-    
+     
     public void resumeLaunch( String consoleName ) throws CoreException 
     {
     	try {
@@ -400,8 +384,8 @@ public class VDTRunner {
         	}
         }
         String[] controlFiles = configuration.getControlFiles();
-        log(cmdLine, controlFiles, false, true); /* Appears in the console of the target Eclipse (immediately erased) */
-        log(cmdLine, controlFiles, false, false); /* Appears in the console of the parent Eclipse */
+        log(null,cmdLine, controlFiles, false, true); /* Appears in the console of the target Eclipse (immediately erased) */
+        log(null,cmdLine, controlFiles, false, false); /* Appears in the console of the parent Eclipse */
 
         String[] envp = configuration.getEnvironment();
         
@@ -458,22 +442,26 @@ public class VDTRunner {
 
     } // run()
         
-    private void log(String[] strings, 
+    private void log(String header,
+    		         String[] strings, 
                      String[] controlFiles, 
                      boolean formatColumn, 
                      boolean printToUser) 
     {
-        println("Control files created:", printToUser);
-        
-        if(controlFiles.length == 0) {
-            println("(none)", printToUser);
-        } else {
-            for(int i = 0; i < controlFiles.length; i++)
-                println(controlFiles[i], printToUser);
+        if(controlFiles!=null) {
+        	println("Control files created:", printToUser);
+        	if(controlFiles.length == 0) {
+        		println("(none)", printToUser);
+        	} else {
+        		for(int i = 0; i < controlFiles.length; i++)
+        			println(controlFiles[i], printToUser);
+        	}
         }
-        
         println(printToUser);
-        println("Launching:", printToUser);
+        if (header==null) {
+        	header="Launching:";
+        }
+        println(header, printToUser);
         
         if(formatColumn)
             println(printToUser);
