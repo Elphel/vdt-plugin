@@ -40,6 +40,15 @@
                       icon="gtkwave.ico"
                       call="iverilog"/>
         </menu>
+                <menuitem name="RemotePython"
+                          label="Run remote Python session"
+                          icon="python.png"
+                          call="RemotePython"/>
+                <menuitem name="RemotePythonCommand"
+                          label="Send a command to the remote Python session"
+                          icon="my_tool.gif"
+                          call="RemotePythonCommand"/>
+                          
 
         <menu name="XDS" 
               label="Demo XDS Tools"

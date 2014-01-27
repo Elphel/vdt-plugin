@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+    <interface name="RemoteInterface" extends="project_interface">
+    </interface>
+    <tool name        = "RemotePython"
+          project     = "FPGA_project"
+          label       = "RemotePython"
+          shell       = "/bin/bash"
+          interface   = "RemoteInterface"
+          description = "Launching remote Python in console"
+          errors      = "(.*):([0-9]+): [a-z ]*error: (.*)"
+          warnings    = "(.*):([0-9]+): warning: (.*)"
+          info        = "(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->
+        <extensions-list>
+            <extension mask="v"/>
+            <extension mask="tf"/>
+        </extensions-list>
+
+		<action-menu>
+ 			<action label="Remote Python" resource="" icon="python.png" />	
+		</action-menu>
+
+        <parameter id       = "RemoteHost"
+                   label    = "Remote Host IP"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = "192.168.0.66"
+                   readonly = "false"
+                   visible  = "true"/>
+
+
+        <parameter id       = "RemoteUser"
+                   label    = "Remote user name"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = ""
+                   readonly = "false"
+                   visible  = "true"/>
+
+        <parameter id       = "PreSSH"
+                   label    = "pre-ssh shell parameters"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = ""
+                   readonly = "false"
+                   visible  = "true"/>
+
+        <parameter id       = "ShellSwitches"
+                   label    = "Shell switches"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = "-c"
+                   readonly = "false"
+                   visible  = "true"/>
+                   
+        <parameter id       = "SSHSwitches"
+                   label    = "Remote ssh switches"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = ""
+                   readonly = "false"
+                   visible  = "true"/>
+
+                   
+        <parameter id       = "RemoteCommand"
+                   label    = "Remote ssh command"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = "python -i -u"
+                   readonly = "false"
+                   visible  = "true"/>
+
+        <parameter id       = "SSHExtra"
+                   label    = "ssh extra parameters"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = ""
+                   readonly = "false"
+                   visible  = "true"/>
+
+        <input>
+            <group name="General">
+                "RemoteHost"
+                "RemoteUser"
+                "ShellSwitches"
+                "PreSSH"
+                "SSHSwitches"
+                "RemoteCommand"
+                "SSHExtra"
+            </group>
+        </input>
+
+        <output>
+            <line name="command_line">
+                "%ShellSwitches"
+                "%PreSSH"
+                "ssh"
+                "-l"
+                "%RemoteUser"
+                "%RemoteHost"
+                "%SSHSwitches"
+                "'"
+                "%RemoteCommand"
+                "'"
+                "%SSHExtra"
+            </line>
+        </output>
+    </tool>
+        <tool name        = "RemotePythonCommand"
+          project     = "FPGA_project"
+          label       = "RemotePythonCommand"
+          shell       = "/bin/bash"
+          interface   = "RemoteInterface"
+          description = "Sending command to a ermote Python session"
+          errors      = "(.*):([0-9]+): [a-z ]*error: (.*)"
+          warnings    = "(.*):([0-9]+): warning: (.*)"
+          info        = "(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->
+        <extensions-list>
+            <extension mask="v"/>
+            <extension mask="tf"/>
+        </extensions-list>
+
+		<action-menu>
+ 			<action label="Remote Python Command" resource="" icon="python.png" />	
+		</action-menu>
+
+        <parameter id       = "RemoteCommand"
+                   label    = "Remote Command to send"
+                   type     = "String"
+                   format   = "CopyValue"
+                   default  = "print &quot;Hello, World!&quot;"
+                   readonly = "false"
+                   visible  = "true"/>
+                   
+		<parameter id="python_console_name" default="RemotePython"
+			type="String" format="CopyValue" visible="false" />
+                   
+        <input>
+            <group name="General">
+                "RemoteCommand"
+            </group>
+        </input>
+
+        <output>
+            <line name="command_line">
+                "-c"
+                "echo 'Nothing to do, sleepiing 15' ;"
+                "sleep 15 ;"
+                "echo 'Nothing to do, awakening' ;"
+            </line>
+			<line name="console_line" dest="python_console_name" sep="\n">
+			    "%RemoteCommand"
+            </line>
+            <line name="command_line">
+                "-c"
+                "echo 'Nothing to do second time, sleeping 25' ;"
+                "sleep 25 ;"
+                "echo 'Nothing to do again, awakening after sleep 25' ;"
+            </line>
+        </output>
+
+    </tool>
+</vdt-project>

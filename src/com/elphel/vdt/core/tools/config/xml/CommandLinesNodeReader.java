@@ -27,6 +27,7 @@ import com.elphel.vdt.core.tools.params.CommandLinesBlock;
 import com.elphel.vdt.core.tools.params.conditions.Condition;
 import com.elphel.vdt.core.tools.params.conditions.ConditionalStringsList;
 import com.elphel.vdt.core.tools.params.conditions.NamedConditionalStringsList;
+import com.elphel.vdt.core.tools.params.types.ParamTypeString;
 
 public class CommandLinesNodeReader extends AbstractConditionNodeReader {
     List<CommandLinesBlock> commandLinesBlocks = new ArrayList<CommandLinesBlock>();
@@ -69,7 +70,8 @@ public class CommandLinesNodeReader extends AbstractConditionNodeReader {
         
         return new CommandLinesBlock(context.getName(), 
                                      name, 
-                                     dest, 
+                                     dest,
+                                     ParamTypeString.KIND.FILE, //Andrey - doesn't know "kind" here yet - TODO: change to attr
                                      sep,
                                      lines,
                                      deleteLines,

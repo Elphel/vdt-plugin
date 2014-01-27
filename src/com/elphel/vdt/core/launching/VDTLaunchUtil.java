@@ -43,6 +43,7 @@ import com.elphel.vdt.VerilogUtils;
 // import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.core.tools.ToolsCore;
+import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.core.tools.params.ToolException;
@@ -63,8 +64,12 @@ public class VDTLaunchUtil {
      * Returns the VDT runner.
      */
     public static VDTRunner getRunner() {
-        if (toolRunner == null)
+        if (toolRunner == null) {
+        	System.out.println ("Created new VDTRunner()");
             toolRunner = new VDTRunner();
+        } else {
+        	System.out.println ("Reused old VDTRunner()");
+        }
         return toolRunner;
     }
         
@@ -122,7 +127,8 @@ public class VDTLaunchUtil {
      * @throws CoreException if unable to retrieve the associated launch
      * configuration attribute, or if unable to resolve any variables
      */
-     public static List<String> getArguments(ILaunchConfiguration configuration) throws CoreException {
+//     public static List<String> getArguments(ILaunchConfiguration configuration) throws CoreException {
+       public static BuildParamsItem[] getArguments(ILaunchConfiguration configuration) throws CoreException {
         Tool tool = obtainTool(configuration);
         
         for (Iterator i = tool.getParams().iterator(); i.hasNext(); ) {
@@ -147,13 +153,19 @@ public class VDTLaunchUtil {
         try {
             String location = getWorkingDirectory(configuration);
             tool.setWorkingDirectory(location);
-            
+/*            
             String[] paramArray = tool.buildParams();
+    		System.out.println("Andrey: called tool.buildParams() here (from VDTLaunchUtils.java");
             List<String> arguments = new ArrayList<String>(paramArray.length);
             for(int i = 0; i < paramArray.length; i++) {
                 arguments.add(paramArray[i]);
             }
             return arguments;
+*/
+            BuildParamsItem[] paramItemsArray = tool.buildParams();
+    		System.out.println("Andrey: called tool.buildParams() here (from VDTLaunchUtils.java");
+    		return paramItemsArray;
+
         } catch(ToolException e) {
             MessageUI.error("Error occured during tool launch: " + e.getMessage(), e);
         }

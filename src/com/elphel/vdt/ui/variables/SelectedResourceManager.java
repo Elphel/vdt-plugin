@@ -251,7 +251,12 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     	IProject project=getSelectedProject();
     	if (project==null) return;
     	IPath path = new Path(fChosenTarget);
-    	IFile file = (path==null)?null:project.getFile(path);
+    	IFile file=null;
+    	try {
+    		file = (path==null)?null:project.getFile(path);
+    	} catch (IllegalArgumentException e) {
+    		// Path must include project and resource name: /x353
+    	}
     	if ((file != null) &&  (VerilogUtils.isHhdlFile(file)))
     		fChosenVerilogFile=file;
     	else if (fChosenVerilogFile==null)

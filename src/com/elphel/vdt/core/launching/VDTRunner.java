@@ -20,12 +20,27 @@ package com.elphel.vdt.core.launching;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
+
+
+
+
+
+
+
+
+
+
+
+
+
+//import org.eclipse.core.resources.IProject;
+//import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -35,19 +50,39 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+//import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
+//import org.eclipse.debug.ui.DebugUITools;
+//import org.eclipse.ui.console.ConsolePlugin;
+//import org.eclipse.ui.console.IConsoleManager;
+//import org.eclipse.ui.console.IPatternMatchListener;
+//import org.eclipse.ui.console.MessageConsole;
+
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.console.IConsole;
+//import org.eclipse.debug.ui.console.IConsole;
+import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IPatternMatchListener;
-import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.IOConsole;
 
 import com.elphel.vdt.Txt;
+import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
+import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
-import com.elphel.vdt.core.Utils;
+
+
+
+
+
+
+
+
+//import com.elphel.vdt.core.Utils;
+import org.eclipse.ui.console.IConsoleListener;
 
 /**
  * Verilog development tool runner.
@@ -58,6 +93,181 @@ import com.elphel.vdt.core.Utils;
 
 public class VDTRunner {
 
+	// TODO:Remove
+	VDTRunnerConfiguration runningConfiguration; // multi-step configuration currently active
+	int nextBuildStep=0;
+	
+	private Map<String, VDTRunnerConfiguration> unfinishedBuilds;
+	
+	public VDTRunner(){
+		unfinishedBuilds = new HashMap<String, VDTRunnerConfiguration>();
+		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+// This is not used, just for testing		
+		System.out.println("***Addded console listeners");
+		manager.addConsoleListener(new IConsoleListener(){
+			public void consolesAdded(IConsole[] consoles){
+				VDTRunner runner = VDTLaunchUtil.getRunner();
+				for (int i=0;i<consoles.length;i++){
+					System.out.println("+++ Added: "+consoles[i].getName());
+					// Only shows added consoles
+				}
+			}
+			public void consolesRemoved(IConsole[] consoles){
+				VDTRunner runner = VDTLaunchUtil.getRunner();
+				for (int i=0;i<consoles.length;i++){
+					System.out.println("--- Removed: "+consoles[i].getName());
+					
+				}
+			}
+		});
+	}
+	
+	
+	
+	public boolean isUnfinished(String consoleName){
+		return unfinishedBuilds.containsKey(consoleName);
+	}
+	
+	public VDTRunnerConfiguration resumeConfiguration(String consoleName){
+		VDTRunnerConfiguration conf=unfinishedBuilds.get(consoleName);
+		unfinishedBuilds.remove(consoleName);
+		return conf;
+	}
+
+	public void removeConfiguration(String consoleName){
+		unfinishedBuilds.remove(consoleName);
+	}
+
+	public void saveUnfinished(String consoleName, VDTRunnerConfiguration configuration ){
+		unfinishedBuilds.put(consoleName, configuration);
+	}
+
+	    // make call it when console is closed
+	private void doResumeLaunch( String consoleName ) throws CoreException {
+//		System.out.println("--------- resuming "+ consoleName+" ------------");
+		VDTRunnerConfiguration runConfig=resumeConfiguration(consoleName);
+		if (runConfig==null){
+			System.out.println("Turned out nothing to do. Probably a bug");
+			return;
+		}
+		ILaunchConfiguration configuration=runConfig.getConfiguration();
+		BuildParamsItem[] argumentsItemsArray = VDTLaunchUtil.getArguments(configuration);
+		int numItem=runConfig.getBuildStep();
+		System.out.println("--------- resuming "+ consoleName+", numItem="+numItem+" ------------");
+		ILaunch launch=runConfig.getLaunch();
+		IProgressMonitor monitor=runConfig.getMonitor();
+
+		for (;numItem<argumentsItemsArray.length;numItem++){
+			List<String> toolArguments = new ArrayList<String>();
+			List<String> arguments=argumentsItemsArray[numItem].getParamsAsList();
+			if (arguments != null)
+				toolArguments.addAll(arguments);
+			//        if (resources != null)
+			//            toolArguments.addAll(resources);
+			if (argumentsItemsArray[numItem].getConsoleName()!=null){
+				System.out.println("VDTLaunchConfigurationDelegate.doLaunch: console commands not yet implemented for runner #"+numItem);
+				continue;
+			}
+			runConfig.setToolArguments((String[])toolArguments.toArray(new String[toolArguments.size()]));
+
+			// Launch the configuration - 1 unit of work
+			//        	VDTRunner runner = VDTLaunchUtil.getRunner();
+			IProcess process=run(runConfig, launch, monitor);
+
+			//Andrey: if there is a single item - launch asynchronously, if more - verify queue is empty
+			// will not change
+			//            String consoleName=renderProcessLabel(runConfig.getToolName());
+
+			// check for cancellation
+			if (monitor.isCanceled() || (process==null)) {
+				removeConfiguration(consoleName);
+				return;
+			}
+			if (numItem<(argumentsItemsArray.length-1)){ // Not for the last
+				//                IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
+				//                IConsole[] consoles=(IConsole[]) man.getConsoles();
+
+				IOConsole iCons=  (IOConsole) DebugUITools.getConsole(process); // had non-null fPatternMatcher , fType="org.eclipse.debug.ui.ProcessConsoleType"
+				if (iCons==null){
+					System.out.println("Could not get a console for the specified process");
+					continue;
+				}
+				System.out.println("consoleName="+consoleName+
+						"\nprocessConsole name="+iCons.getName());
+				final IOConsole fiCons=iCons;
+//				final String    fConsoleName=fiCons.getName(); // actual console name - may be already "<terminated> ... "
+				final String    fConsoleName=consoleName; // calculated console name - used for launching external program
+//				if (!fConsoleName.equals(consoleName)){ // terminated before we added listeners
+				if (!fConsoleName.equals(fiCons.getName())){ // terminated before we added listeners
+					System.out.println("Already terminated, proceed to the next item");
+					continue; // proceed with the next item without pausing
+				}
+				/* Prepare to postpone next commands to be resumed by event*/
+				runConfig.setBuildStep(numItem+1);
+				saveUnfinished(consoleName, runConfig );
+
+				iCons.addPropertyChangeListener( new IPropertyChangeListener() {
+					public void propertyChange(PropertyChangeEvent event) {
+						if (!fConsoleName.equals(fiCons.getName())){
+							fiCons.removePropertyChangeListener(this);
+							System.out.println(">>> "+fConsoleName+" -> "+fiCons.getName());
+					    	VDTRunner runner = VDTLaunchUtil.getRunner();
+					    	try {
+								runner.resumeLaunch(fConsoleName);
+							} catch (CoreException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				});
+				if (!fConsoleName.equals(consoleName)){ // terminated before we added listeners
+					System.out.println("Fire!");
+					iCons.firePropertyChange(fiCons,"org.eclipse.jface.text", consoleName, fConsoleName); 
+				}
+				System.out.println("return - waiting to be awaken");
+				return;
+				
+			}
+		}
+		monitor.done();
+	}
+        		
+ /*       		process.getStreamsProxy().getOutputStreamMonitor().addListener(new IStreamListener(){
+        		    public void streamAppended (String text, IStreamMonitor monitor){
+        		       //TODO: As per user requirement. 
+        		    }
+        		});
+*/
+
+ /*
+ 
+  	public void parserSetup(
+			VDTRunnerConfiguration configuration,
+			IProcess process
+			){
+	    iCons=           (IOConsole) DebugUITools.getConsole(process); // had non-null fPatternMatcher , fType="org.eclipse.debug.ui.ProcessConsoleType"
+		if (iCons==null){
+			System.out.println("Could not get a console for the specified process");
+		}
+    	
+    }
+*/    
+    
+    public void resumeLaunch( String consoleName ) throws CoreException 
+    {
+    	try {
+    		doResumeLaunch(consoleName);
+    	} catch(Exception e) {
+    		MessageUI.error(e);
+
+    		if(e instanceof CoreException)
+    			throw (CoreException)e;
+    	}
+    }
+
+	
+	
     /**
      * Returns a new process aborting if the process could not be created.
      * @param launch the launch the process is contained in
@@ -78,6 +288,7 @@ public class VDTRunner {
 
     
     /** @see DebugPlugin#exec(String[], File, String[]) */
+    // before actual launching?
     protected Process exec(String[] cmdLine, File workingDirectory, String[] envp) throws CoreException {
         return DebugPlugin.exec(cmdLine, workingDirectory, envp);
     }   
@@ -92,7 +303,7 @@ public class VDTRunner {
      * @param monitor progress monitor or <code>null</code>
      * @exception CoreException if an exception occurs while launching
      */
-    public void run( VDTRunnerConfiguration configuration
+    public IProcess run( VDTRunnerConfiguration configuration
                , ILaunch launch
                , IProgressMonitor monitor 
                ) throws CoreException
@@ -158,29 +369,34 @@ public class VDTRunner {
 
         // check for cancellation
         if (monitor.isCanceled()) {
-            return;
+            return null;
         }
 
         subMonitor.subTask(Txt.s("Launch.Message.Starting"));
         File workingDir = getWorkingDir(configuration); /* /data/vdt/runtime-EclipseApplication/x353 */
         Process p = exec(cmdLine, workingDir, envp);
         if (p == null) {
-            return;
+            return null;
         }
 
         // check for cancellation
         if (monitor.isCanceled()) {
             p.destroy();
-            return;
+            return null;
         }       
- /* next actually launches the process */
-/* IProcess may set/get client parameters */
     		
         VDTErrorParser parser= VerilogPlugin.getVDTErrorParser();
 
+        IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
+        IConsole[] consoles=(IConsole[]) man.getConsoles();
+//[Lorg.eclipse.ui.console.IConsole; cannot be cast to [Lorg.eclipse.debug.ui.console.IConsole;
+        
+		 /* next actually launches the process */
+		/* IProcess may set/get client parameters */
         IProcess process= newProcess( launch
         		, p
-        		, renderProcessLabel(cmdLine)
+//        		, renderProcessLabel(cmdLine)
+        		, renderProcessLabel(configuration.getToolName())
         		, getDefaultProcessAttrMap(configuration));
         parser.parserSetup(
         		configuration,
@@ -189,6 +405,17 @@ public class VDTRunner {
         
         subMonitor.worked(1);
         subMonitor.done();
+        man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
+        consoles=(IConsole[]) man.getConsoles();
+        if (consoles.length>1){
+//        	((IConsole) consoles[1]).setName("Python Consloe");
+        }
+        System.out.println(consoles.length+" consoles, processes="+launch.getChildren().length);
+        return process;
+        //= consoles
+//setImageDescriptor
+// 	getImageDescriptor()         
+
     } // run()
         
     private void log(String[] strings, 
@@ -247,7 +474,8 @@ public class VDTRunner {
      */
     protected Map getDefaultProcessAttrMap(VDTRunnerConfiguration config) {
         Map<String, String> map = new HashMap<String, String>();
-        map.put(IProcess.ATTR_PROCESS_TYPE, Utils.getPureFileName(config.getToolToLaunch()));
+//        map.put(IProcess.ATTR_PROCESS_TYPE, Utils.getPureFileName(config.getToolToLaunch()));
+        map.put(IProcess.ATTR_PROCESS_TYPE,config.getToolName());
         return map;
     }
     
@@ -289,6 +517,10 @@ public class VDTRunner {
     public static String renderProcessLabel(String[] commandLine) {
         String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(new Date(System.currentTimeMillis()));
         return Txt.s("Launch.Process.LabelFormat", new String[] {commandLine[0], timestamp});
+    }
+    public static String renderProcessLabel(String toolName) {
+        String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(new Date(System.currentTimeMillis()));
+        return Txt.s("Launch.Process.LabelFormat", new String[] {toolName, timestamp});
     }
 
     protected static String renderCommandLine(String[] commandLine) {

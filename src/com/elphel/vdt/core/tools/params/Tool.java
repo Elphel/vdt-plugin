@@ -374,6 +374,12 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     
     public Parameter findParam(String paramID) {
+//    	System.out.println("findParam("+paramID+")");
+//    	if (paramID==null){
+//    		System.out.println("findParam(null!!!)");
+//    		return null;
+//    	}
+    	
         Parameter param = super.findParam(paramID); //Andrey: happily finds ProjectContext parameter, thinks it is tool context
 /*
  * Andrey: Added isChild property to the Property, and still left static inheritance at XML parsing time. Then, during parameter
@@ -411,7 +417,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
         return baseTool;
     }
     
-    public String[] buildParams() throws ToolException {
+//    public String[] buildParams() throws ToolException {
+    public BuildParamsItem[] buildParams() throws ToolException {
         if(parentPackage != null)
             parentPackage.buildParams();
 

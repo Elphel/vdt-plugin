@@ -266,7 +266,7 @@ public class LaunchCore {
         if (!saveAllEditors(true)) {
             return;
         }
-        
+    System.out.println("launchInBackground, JOB_NAME="+JOB_NAME);    
         Job job = new Job(JOB_NAME) {
             public IStatus run(final IProgressMonitor monitor) {
                 try {
@@ -293,6 +293,7 @@ public class LaunchCore {
         if (!saveAllEditors(true)) {
             return;
         }
+        System.out.println("launchInForeground, JOB_NAME="+JOB_NAME);    
 
         IRunnableWithProgress runnable = new IRunnableWithProgress() {
             public void run(IProgressMonitor monitor) throws InvocationTargetException {

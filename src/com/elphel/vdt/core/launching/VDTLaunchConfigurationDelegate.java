@@ -18,7 +18,6 @@
 package com.elphel.vdt.core.launching;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -49,6 +48,8 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
                          ) throws CoreException
                          
     {
+    	VDTRunner runner = VDTLaunchUtil.getRunner();
+
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
@@ -71,20 +72,13 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         // resolve working directory
         runConfig.setWorkingDirectory(VDTLaunchUtil.getWorkingDirectory(configuration));
         runConfig.setProjectPath(VDTLaunchUtil.getProjectPath(configuration));
+        runConfig.setConfiguration(configuration); // to be resumed
+        
+        runConfig.setLaunch(launch); // to be resumed
+        runConfig.setMonitor(monitor); // to be resumed
         
         // done the half of creating arguments phase
         monitor.worked(1);  
-
-        // resolve arguments
-        List<String> arguments = VDTLaunchUtil.getArguments(configuration);
-        
-        // get tool is a shell 
-        boolean isShell=VDTLaunchUtil.getIsShell(configuration);
-        
-        // get patterns for Error parser
-        String patternErrors=  VDTLaunchUtil.getPatternErrors(configuration);
-        String patternWarnings=VDTLaunchUtil.getPatternWarnings(configuration);
-        String patternInfo=    VDTLaunchUtil.getPatternInfo(configuration);
 
         // check for cancellation
         if (monitor.isCanceled()) {
@@ -93,8 +87,6 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         // done the creating arguments phase
         monitor.worked(2);  
                 
-        // resolve resources
-//        List<String> resources = VDTLaunchUtil.getResources(configuration);
         
         // check for cancellation
         if (monitor.isCanceled()) {
@@ -104,33 +96,21 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         monitor.worked(3);  
 
         // resolve arguments
-        List<String> toolArguments = new ArrayList<String>();
-        if (arguments != null)
-            toolArguments.addAll(arguments);
-//        if (resources != null)
-//            toolArguments.addAll(resources);
         
-        runConfig.setToolArguments((String[])toolArguments.toArray(new String[toolArguments.size()]));
-        runConfig.setIsShell(isShell);
-        runConfig.setPatternErrors(patternErrors);
-        runConfig.setToolName(VDTLaunchUtil.getToolName(configuration));
-        runConfig.setPatternWarnings(patternWarnings);
-        runConfig.setPatternInfo(patternInfo);
-        runConfig.setToolProjectPath(VDTLaunchUtil.getToolProjectPath(configuration));
-        
-        List<String> controlFiles = VDTLaunchUtil.getControlFiles(configuration);
-        
-        runConfig.setControlFiles((String[])controlFiles.toArray(new String[controlFiles.size()]));
-        
-        // Launch the configuration - 1 unit of work
-        VDTRunner runner = VDTLaunchUtil.getRunner();
-        runner.run(runConfig, launch, monitor);
-        
-        // check for cancellation
-        if (monitor.isCanceled()) {
-            return;
-        }       
-        monitor.done();
+    	runConfig.setIsShell(VDTLaunchUtil.getIsShell(configuration));
+    	runConfig.setPatternErrors(VDTLaunchUtil.getPatternErrors(configuration));
+    	runConfig.setToolName(VDTLaunchUtil.getToolName(configuration));
+    	runConfig.setPatternWarnings(VDTLaunchUtil.getPatternWarnings(configuration));
+    	runConfig.setPatternInfo(VDTLaunchUtil.getPatternInfo(configuration));
+    	runConfig.setToolProjectPath(VDTLaunchUtil.getToolProjectPath(configuration));
+    	runConfig.setBuildStep(0);
+    	List<String> controlFiles = VDTLaunchUtil.getControlFiles(configuration);
+    	runConfig.setControlFiles((String[])controlFiles.toArray(new String[controlFiles.size()]));
+   	
+        String consoleName=VDTRunner.renderProcessLabel(runConfig.getToolName());
+        runner.saveUnfinished(consoleName, runConfig );
+        runner.resumeLaunch(consoleName);
+        return;
     }
 
     public void launch( ILaunchConfiguration configuration
@@ -149,4 +129,5 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         }
     }
 
+ 
 } // class VDTLaunchConfigurationDelegate

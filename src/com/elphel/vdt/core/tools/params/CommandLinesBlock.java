@@ -25,6 +25,7 @@ import com.elphel.vdt.core.tools.config.Config;
 import com.elphel.vdt.core.tools.config.ConfigException;
 import com.elphel.vdt.core.tools.params.conditions.*;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString;
+import com.elphel.vdt.core.tools.params.types.ParamTypeString.KIND;
    
 public class CommandLinesBlock extends UpdateableStringsContainer 
                                implements Cloneable 
@@ -33,10 +34,12 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     private String name;
     private String destination;
     private String separator;
+    private KIND kind; //command file name or console name
         
     public CommandLinesBlock(String contextName,
                              String name,
                              String destination,
+                             KIND kind,
                              String sep,
                              ConditionalStringsList lines,
                              ConditionalStringsList deleteLines,
@@ -47,6 +50,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         this.contextName = contextName;
         this.name = name;
         this.destination = destination;
+        this.kind=kind;
         this.separator = sep;
         
         if(separator != null) {
@@ -59,6 +63,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         this(block.contextName,
              block.name,
              block.destination,
+             block.kind,
              block.separator,
              block.strings != null?
                      (ConditionalStringsList)block.strings.clone() : null,
@@ -89,12 +94,19 @@ public class CommandLinesBlock extends UpdateableStringsContainer
                                           "' used for command line of context '" + context.getName() +
                                           "' must be of type '" + ParamTypeString.NAME + 
                                           "'");                    
-            } else if(((ParamTypeString)param.getType()).getKind() != ParamTypeString.KIND.FILE) {
-                throw new ConfigException("Destination parameter '" + destination + 
-                                          "' of type '" + ParamTypeString.NAME +
-                                          "' used for command line of context '" + context.getName() +
-                                          "' must be of kind '" + ParamTypeString.KIND_FILE_ID +
-                                          "'");                    
+            } else {
+            	kind=((ParamTypeString)param.getType()).getKind();
+            	if(kind != ParamTypeString.KIND.FILE) {
+            		if(((ParamTypeString)param.getType()).getKind() != ParamTypeString.KIND.TEXT) { // Andrey - adding console name option
+            			throw new ConfigException("Destination parameter '" + destination + 
+            					"' of type '" + ParamTypeString.NAME +
+            					"' used for command line of context '" + context.getName() +
+            					"' must be of kind '" + ParamTypeString.KIND_FILE_ID +
+            					"' or '" + ParamTypeString.KIND_TEXT_ID +
+            					"'");                    
+            		}
+            		System.out.println("Got string text kind for command block (for console name)");
+            	}
             }
         }
     }
@@ -110,7 +122,19 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     public String getDestination() {
         return destination;
     }
-    
+
+    public KIND getKind() {
+        return kind;
+    }
+
+    public boolean isFileKind() {
+        return kind ==  ParamTypeString.KIND.FILE;
+    }
+
+    public boolean isConsoleKind() {
+        return kind ==  ParamTypeString.KIND.TEXT;
+    }
+
     public List<String> getLines() {
         return ConditionUtils.resolveConditionStrings(strings);
     }

@@ -65,6 +65,10 @@ public abstract class ContextWithoutCommandLine extends Context {
                                               "' cannot contain command line, but destination of its '" +
                                               block.getName() + 
                                               "' command block is not specified");
+                if(!block.isFileKind())
+                    throw new ConfigException("Context '" + name + 
+                                              "' cannot contain commands for console "+
+                    		                  destination);
             }
         }
     }

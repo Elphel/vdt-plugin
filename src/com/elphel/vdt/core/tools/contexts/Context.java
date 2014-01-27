@@ -190,8 +190,11 @@ public abstract class Context {
     // which need to be put into a control file, and puts them to that file
     // all other needed params are built into command line array
     // that array is then returned
-    public String[] buildParams() throws ToolException {
-        List<String> commandLineParams = new ArrayList<String>();
+//    public String[] buildParams() throws ToolException {
+      public BuildParamsItem[] buildParams() throws ToolException {
+    	List<BuildParamsItem> buildParamItems = new ArrayList<BuildParamsItem>();
+    	
+ //       List<String> commandLineParams = new ArrayList<String>();
         Iterator<CommandLinesBlock> commandLinesBlockIter = commandLinesBlocks.iterator(); // command lines block is empty (yes, there is nothing in project output)
         
         createdControlFiles.clear();
@@ -202,44 +205,62 @@ public abstract class Context {
             if(!commandLinesBlock.isEnabled())
                 continue;
             
-            String paramName = commandLinesBlock.getDestination();
+            String paramName = commandLinesBlock.getDestination(); // Andrey debugging: null?
+            boolean isConsoleName=commandLinesBlock.isConsoleKind();
             String sep = commandLinesBlock.getSeparator();
             List<String> lines = commandLinesBlock.getLines();  // [%Param_Shell_Options, echo BuildDir=%BuildDir ;, echo SimulationTopFile=%SimulationTopFile ;, echo SimulationTopModule=%SimulationTopModule ;, echo BuildDir=%BuildDir;, %Param_PreExe, %Param_Exe, %Param_TopModule, %TopModulesOther, %ModuleLibrary, %LegacyModel, %NoSpecify, %v, %SourceList, %ExtraFiles, %Filter_String]          
             List<List<String>> commandSequence = new ArrayList<List<String>>();
-            
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
-                String line = (String)lineIter.next();
-                
-                commandSequence.add(buildCommandString(line));                
+            	String line = (String)lineIter.next();
+
+            	commandSequence.add(buildCommandString(line));                
             }
- // Here - already resolved to empty            
+            // Here - already resolved to empty            
+            List<String> commandLineParams = new ArrayList<String>();		
             if(paramName != null) {
                 Parameter commandFileParam = findParam(paramName);
                 String controlFileName = commandFileParam != null? 
-                        commandFileParam.getValue().get(0).trim() : null;
-                
-                if(workingDirectory != null)
-                    controlFileName = workingDirectory + File.separator + controlFileName;
-                
-                // check param type first
-                if(!(commandFileParam.getType() instanceof ParamTypeString))
-                    throw new ToolException("Parameter '" + commandFileParam.getID() + 
-                                            "' specified in the description of context '" + name +
-                                            "' must be of type '" + ParamTypeString.NAME + "'");
+                		commandFileParam.getValue().get(0).trim() : null;
+            	if (isConsoleName) {
+ //           		System.out.println("TODO: Enable console command generation here");
+            		printStringsToConsoleLine(commandLineParams, commandSequence);
+            		buildParamItems.add(
+            				new BuildParamsItem (
+            						(String[])commandLineParams.toArray(new String[commandLineParams.size()]),
+            						controlFileName) // find console beginning with this name, send commands there
+            				);
+            	} else {
+            		if(workingDirectory != null)
+            			controlFileName = workingDirectory + File.separator + controlFileName;
 
-                // write strings to control file
-                boolean controlFileExists = controlFileExists(controlFileName);
-                
-                printStringsToFile(controlFileName, controlFileExists, commandSequence, sep);
-                
-                if(!controlFileExists)
-                    createdControlFiles.add(controlFileName);
+            		// check param type first
+            		if(!(commandFileParam.getType() instanceof ParamTypeString))
+            			throw new ToolException("Parameter '" + commandFileParam.getID() + 
+            					"' specified in the description of context '" + name +
+            					"' must be of type '" + ParamTypeString.NAME + "'");
+
+            		// write strings to control file
+            		boolean controlFileExists = controlFileExists(controlFileName);
+
+            		printStringsToFile(controlFileName, controlFileExists, commandSequence, sep);
+
+            		if(!controlFileExists)
+            			createdControlFiles.add(controlFileName);
+
+            	}
             } else {
-                printStringsToCommandLine(commandLineParams, commandSequence);
+            	// TODO: will need multiple command lines // Andrey
+            	printStringsToCommandLine(commandLineParams, commandSequence);
+        		buildParamItems.add(
+        				new BuildParamsItem (
+        						(String[])commandLineParams.toArray(new String[commandLineParams.size()]),
+        						null) // external tool in a new console
+        				);
+            	
             }
         }
-        
-        return (String[])commandLineParams.toArray(new String[commandLineParams.size()]);
+//        return (String[])commandLineParams.toArray(new String[commandLineParams.size()]);
+        return (BuildParamsItem[])buildParamItems.toArray(new BuildParamsItem[buildParamItems.size()]);
     }
     
     protected List<String> buildCommandString(String paramStringTemplate)
@@ -416,6 +437,25 @@ public abstract class Context {
             }
         }
     }
+// Andrey: now is the same as command line, but will change to allow last element be prompt
+    
+    private void printStringsToConsoleLine(List<String> commandLineParams, 
+    		List<List<String>> commandSequence) 
+    				throws ToolException
+    				{
+    	for(Iterator<List<String>> li = commandSequence.iterator(); li.hasNext();) {
+    		List<String> strList = (List<String>)li.next();
+
+    		if(strList.size() > 0) {
+    			for(Iterator<String> si = strList.iterator(); si.hasNext();) {
+    				String s = ((String)si.next()).trim();
+
+    				if(!s.equals(""))
+    					commandLineParams.add(s);
+    			}
+    		}
+    	}
+	}
     
     private void checkNotInitialized() throws ConfigException {
         if(initialized)

@@ -17,6 +17,10 @@
  *******************************************************************************/
 package com.elphel.vdt.core.launching;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+
 import com.elphel.vdt.Txt;
 
 
@@ -45,6 +49,10 @@ public class VDTRunnerConfiguration {
     private String toolErrors;
     private String toolWarnings;
     private String toolInfo;
+    private int    buildStep;
+    private ILaunchConfiguration configuration;
+    private  ILaunch launch;
+    private  IProgressMonitor monitor;
 
 	
 	private static final String[] empty= new String[0];
@@ -63,6 +71,26 @@ public class VDTRunnerConfiguration {
 		this.toolToLaunch = toolToLaunch;
 	}
 
+	public void setConfiguration(ILaunchConfiguration configuration){
+		this.configuration=configuration;
+	}
+	public ILaunchConfiguration getConfiguration(){
+		 return configuration;
+	}
+	public void setLaunch(ILaunch launch){
+		this.launch=launch;
+	}
+	public ILaunch getLaunch(){
+		 return launch;
+	}
+	public void setMonitor(IProgressMonitor monitor){
+		this.monitor=monitor;
+	}
+	public IProgressMonitor getMonitor(){
+		 return monitor;
+	}
+	
+	
 	/**
 	 * Returns the name of the class to launch.
 	 *
@@ -87,10 +115,22 @@ public class VDTRunnerConfiguration {
 	 *
 	 * @param args the list of arguments	
 	 */
+	
+	
+	
 	public void setToolArguments(String[] args) {
 		toolArgs= args;
 	}
+	
+	public void setBuildStep(int buildStep){
+		this.buildStep=buildStep;
+	}
 
+	public int getBuildStep(){
+		return buildStep;
+	}
+
+	
 	public void setIsShell(boolean isShell) {
 		this.isShell= isShell;
 	}
