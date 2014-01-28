@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.IStreamListener;
 //import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 //import org.eclipse.debug.ui.DebugUITools;
@@ -47,10 +48,12 @@ import org.eclipse.debug.core.model.IProcess;
 //import org.eclipse.ui.console.IPatternMatchListener;
 //import org.eclipse.ui.console.MessageConsole;
 
+import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.console.IConsole;
 //import org.eclipse.debug.ui.console.IConsole;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -65,12 +68,6 @@ import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
-
-
-
-
-
-
 
 
 
@@ -102,14 +99,12 @@ public class VDTRunner {
 		System.out.println("***Addded console listeners");
 		manager.addConsoleListener(new IConsoleListener(){
 			public void consolesAdded(IConsole[] consoles){
-				VDTRunner runner = VDTLaunchUtil.getRunner();
 				for (int i=0;i<consoles.length;i++){
 					System.out.println("+++ Added: "+consoles[i].getName());
 					// Only shows added consoles
 				}
 			}
 			public void consolesRemoved(IConsole[] consoles){
-				VDTRunner runner = VDTLaunchUtil.getRunner();
 				for (int i=0;i<consoles.length;i++){
 					System.out.println("--- Removed: "+consoles[i].getName());
 					
@@ -146,14 +141,16 @@ public class VDTRunner {
 			System.out.println("Turned out nothing to do. Probably a bug");
 			return;
 		}
-		ILaunchConfiguration configuration=runConfig.getConfiguration();
-		BuildParamsItem[] argumentsItemsArray = VDTLaunchUtil.getArguments(configuration);
+//		ILaunchConfiguration configuration=runConfig.getConfiguration();
+//		BuildParamsItem[] argumentsItemsArray = VDTLaunchUtil.getArguments(configuration); // calculates all parameters
+		BuildParamsItem[] argumentsItemsArray = runConfig.getArgumentsItemsArray(); // uses already calculated
 		int numItem=runConfig.getBuildStep();
 		System.out.println("--------- resuming "+ consoleName+", numItem="+numItem+" ------------");
 		ILaunch launch=runConfig.getLaunch();
 		IProgressMonitor monitor=runConfig.getMonitor();
 
 		for (;numItem<argumentsItemsArray.length;numItem++){
+			runConfig.setBuildStep(numItem); // was not updated if was not sleeping
 			List<String> toolArguments = new ArrayList<String>();
 			List<String> arguments=argumentsItemsArray[numItem].getParamsAsList();
 			if (arguments != null)
@@ -165,10 +162,19 @@ public class VDTRunner {
 				runConsole(argumentsItemsArray[numItem].getConsoleName(),runConfig, launch, monitor);
 				continue;
 			}
+			if (argumentsItemsArray[numItem].getNameAsParser()!=null){
+				// parsers should be launched by the console scripts, in parallel to them
+				System.out.println("Skipping parser "+argumentsItemsArray[numItem].getNameAsParser());
+				continue;
+			}
 
 			// Launch the configuration - 1 unit of work
 			//        	VDTRunner runner = VDTLaunchUtil.getRunner();
-			IProcess process=run(runConfig, launch, monitor);
+			IProcess process=run(
+					runConfig,
+					renderProcessLabel(runConfig.getToolName()), // toolname + (date)
+					launch,
+					monitor);
 
 			//Andrey: if there is a single item - launch asynchronously, if more - verify queue is empty
 			// will not change
@@ -229,12 +235,25 @@ public class VDTRunner {
 		monitor.done();
 	}
 	
+	private BuildParamsItem getParser(VDTRunnerConfiguration configuration, String parserName){
+		if (parserName==null) return null;
+		BuildParamsItem[] buildParamsItems = configuration.getArgumentsItemsArray(); // uses already calculated
+		if (buildParamsItems==null) return null;
+		for (int i=0;i<buildParamsItems.length;i++){
+			if (parserName.equals(buildParamsItems[i].getNameAsParser()))
+				return buildParamsItems[i];
+		}
+		return null;
+	}
 	
 	public IOConsole runConsole(String consolePrefix
 			, VDTRunnerConfiguration configuration
 			, ILaunch launch
 			, IProgressMonitor monitor 
 			) throws CoreException{
+		int numItem=configuration.getBuildStep();
+//        BuildParamsItem buildParamsItem= VDTLaunchUtil.getArguments(configuration.getConfiguration())[numItem];
+		BuildParamsItem buildParamsItem = configuration.getArgumentsItemsArray()[numItem]; // uses already calculated
 		//TODO: Handle monitor
 		// Find console with name starting with consolePrefix
 		IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
@@ -253,26 +272,114 @@ public class VDTRunner {
 		// try to send 
         String[] arguments = configuration.getToolArguments();
         if (arguments == null) arguments=new String[0];
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+//        	System.out.println("patternErrors= \""+  configuration.getPatternErrors()+"\"");
+//        	System.out.println("patternWarnings= \""+configuration.getPatternWarnings()+"\"");
+//        	System.out.println("patternInfo= \""    +configuration.getPatternInfo()+"\"");
+        	if (arguments!=null){
+        		for (int i=0;i<arguments.length;i++){
+        			System.out.println("Console line "+i+" = \""+arguments[i]+"\"");
+        		}
+
+        	}
+        }
         log("Writing to console "+iCons.getName()+":", arguments, null, false, true); /* Appears in the console of the target Eclipse (immediately erased) */
         log("Writing to console "+iCons.getName()+":", arguments, null, false, false); /* Appears in the console of the parent Eclipse */
 
 //        IOConsoleInputStream inStream= iCons.getInputStream();
         IOConsoleOutputStream 	outStream= iCons.newOutputStream();
         IProcess process=((ProcessConsole)iCons).getProcess();
-        IStreamsProxy iStreamProxy= process.getStreamsProxy();
+        IStreamsProxy consoleInStreamProxy= process.getStreamsProxy();
+        
+        BuildParamsItem stderrParser=getParser(configuration, buildParamsItem.getStderr()); // re-parses all - why?
+        BuildParamsItem stdoutParser=getParser(configuration, buildParamsItem.getStdout());
+        
+        System.out.println("Using parser for stderr: "+((stderrParser!=null)?stderrParser.getNameAsParser():"none")); // actually may be the same as stdout
+        System.out.println("Using parser for stdout: "+((stdoutParser!=null)?stdoutParser.getNameAsParser():"none"));
+        
+        
+  // basically use 
+  // 			IProcess process=run(configuration, launch, monitor);
+// renderProcessLabel(configuration.getToolName()+":out") 
+        IProcess processErr=null;
+        IProcess processOut=null;
+        IStreamsProxy stdoutStreamProxy=null;
+        IStreamsProxy stderrStreamProxy=null;
+        
+        if (stdoutParser!=null){
+			List<String> toolArgumentsStdout = new ArrayList<String>();
+			List<String> stdoutArguments=stdoutParser.getParamsAsList();
+			if (stdoutArguments != null)
+				toolArgumentsStdout.addAll(stdoutArguments);
+			// overwriting configuration, but this is done sequentially, so OK
+			configuration.setToolArguments((String[])toolArgumentsStdout.toArray(new String[toolArgumentsStdout.size()]));
+        	processOut=run(configuration,
+        			renderProcessLabel(configuration.getToolName()+":out"),
+        			launch,
+        			null); //monitor);
+            stdoutStreamProxy= processOut.getStreamsProxy();
+//TODO: Add error parsers            
+        }
+        
+        if (stderrParser!=null){
+			List<String> toolArgumentsStderr = new ArrayList<String>();
+			List<String> stderrArguments=stderrParser.getParamsAsList();
+			if (stderrArguments != null)
+				toolArgumentsStderr.addAll(stderrArguments);
+			// overwriting configuration, but this is done sequentially, so OK
+			configuration.setToolArguments((String[])toolArgumentsStderr.toArray(new String[toolArgumentsStderr.size()]));
+        	processErr=run(configuration,
+        			renderProcessLabel(configuration.getToolName()+":err"),
+        			launch,
+        			null); //monitor);
+            stderrStreamProxy= processErr.getStreamsProxy();
+          //TODO: Add error parsers            
+        }
+        final IStreamsProxy fSendErrorsToStreamProxy=(stderrStreamProxy!=null)?stderrStreamProxy:stdoutStreamProxy;
+        final IStreamsProxy fSendOutputToStreamProxy= stdoutStreamProxy;
+// connect input streams of the parsers to the out from the console process         
+        IStreamMonitor consoleOutStreamMonitor=null;
+        IStreamMonitor consoleErrStreamMonitor=null;
+        if (fSendErrorsToStreamProxy!=null){
+        	consoleErrStreamMonitor=consoleInStreamProxy.getErrorStreamMonitor();
+        	consoleErrStreamMonitor.addListener(new IStreamListener(){
+        		public void streamAppended(String text, IStreamMonitor monitor){
+        			System.out.println("Err:'"+text+"'");
+        			try {
+        				fSendErrorsToStreamProxy.write(text);
+
+        			} catch (IOException e) {
+        				System.out.println("Can not write errors");
+        			}
+        		}
+       		});
+       	}
+        if (fSendOutputToStreamProxy!=null){
+        	consoleOutStreamMonitor=consoleInStreamProxy.getOutputStreamMonitor();
+        	consoleOutStreamMonitor.addListener(new IStreamListener(){
+        		public void streamAppended(String text, IStreamMonitor monitor){
+        			System.out.println("Out:'"+text+"'");
+        			try {
+        				fSendOutputToStreamProxy.write(text);
+        			} catch (IOException e) {
+        				System.out.println("Can not write output");
+        			}
+        		}
+       		});
+        }
         
         try {
         	for (int i=0;i<arguments.length;i++){
 				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
+					outStream.setColor(new Color(null, 128, 128, 255));
 					outStream.write(arguments[i]+"\n"); // writes to console itself
+					outStream.setColor(null);
 				}
-        		iStreamProxy.write(arguments[i]+"\n");
+				consoleInStreamProxy.write(arguments[i]+"\n");
         	}
         } catch (IOException e) {
         	System.out.println("Can not write to outStream of console "+iCons.getName());
         }
-        
-
 		return iCons;
 		
 	}
@@ -317,6 +424,12 @@ public class VDTRunner {
         return DebugPlugin.exec(cmdLine, workingDirectory, envp);
     }   
     
+    private String combinePatterns (String thisPattern, String toolPattern){
+    	String pattern=thisPattern;
+    	if (pattern==null) pattern=toolPattern;
+    	if ((pattern!=null) && (pattern.length()==0)) pattern=null;
+    	return pattern;
+    }
     /**
      * Launches a Verilog development tool as specified in the given 
      * configuration, contributing results (processes), to the given 
@@ -328,6 +441,7 @@ public class VDTRunner {
      * @exception CoreException if an exception occurs while launching
      */
     public IProcess run( VDTRunnerConfiguration configuration
+    		   , String consoleLabel
                , ILaunch launch
                , IProgressMonitor monitor 
                ) throws CoreException
@@ -335,7 +449,13 @@ public class VDTRunner {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
-            
+		int numItem=configuration.getBuildStep();
+//        BuildParamsItem buildParamsItem= VDTLaunchUtil.getArguments(configuration.getConfiguration())[numItem];
+		BuildParamsItem buildParamsItem = configuration.getArgumentsItemsArray()[numItem]; // uses already calculated
+        String patternErrors=  combinePatterns(buildParamsItem.getErrors(),  configuration.getPatternErrors()) ;
+        String patternWarnings=combinePatterns(buildParamsItem.getWarnings(),configuration.getPatternWarnings()) ;
+        String patternInfo=    combinePatterns(buildParamsItem.getInfo(),    configuration.getPatternInfo()) ;
+        
         IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
         subMonitor.beginTask(Txt.s("Launch.Message.Launching"), 2);
         subMonitor.subTask(Txt.s("Launch.Message.ConstructingCommandLine"));
@@ -344,9 +464,9 @@ public class VDTRunner {
         String[] arguments = configuration.getToolArguments();
     	boolean isShell= configuration.getIsShell();
         if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
-        	System.out.println("patternErrors= \""+  configuration.getPatternErrors()+"\"");
-        	System.out.println("patternWarnings= \""+configuration.getPatternWarnings()+"\"");
-        	System.out.println("patternInfo= \""    +configuration.getPatternInfo()+"\"");
+        	System.out.println("patternErrors= \""+  patternErrors+"\"");
+        	System.out.println("patternWarnings= \""+patternWarnings+"\"");
+        	System.out.println("patternInfo= \""    +patternInfo+"\"");
         	System.out.println((isShell?"Shell":"Tool")+" to launch=\""+toolTolaunch+"\"");
         	if (arguments!=null){
         		for (int i=0;i<arguments.length;i++){
@@ -420,11 +540,14 @@ public class VDTRunner {
         IProcess process= newProcess( launch
         		, p
 //        		, renderProcessLabel(cmdLine)
-        		, renderProcessLabel(configuration.getToolName())
+        		, consoleLabel // renderProcessLabel(configuration.getToolName())
         		, getDefaultProcessAttrMap(configuration));
         parser.parserSetup(
         		configuration,
-        		process
+        		process,
+        		patternErrors,
+        		patternWarnings,
+        		patternInfo
         		);
         
         subMonitor.worked(1);
@@ -500,7 +623,7 @@ public class VDTRunner {
      * 
      * @return default process attribute map for Java processes
      */
-    protected Map getDefaultProcessAttrMap(VDTRunnerConfiguration config) {
+    protected Map<String, String> getDefaultProcessAttrMap(VDTRunnerConfiguration config) {
         Map<String, String> map = new HashMap<String, String>();
 //        map.put(IProcess.ATTR_PROCESS_TYPE, Utils.getPureFileName(config.getToolToLaunch()));
         map.put(IProcess.ATTR_PROCESS_TYPE,config.getToolName());

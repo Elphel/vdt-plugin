@@ -328,7 +328,10 @@ public class LaunchCore {
         launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, null);
         DebugPlugin.getDefault().getLaunchManager().addLaunch(launch);                                       
         VDTRunner runner = VDTLaunchUtil.getRunner();
-        runner.run(configuration, launch, null);
+        runner.run(configuration,
+        		VDTRunner.renderProcessLabel(configuration.getToolName()), // toolname + (date)
+        		launch,
+        		null);
     } // launch()
         
         

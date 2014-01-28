@@ -122,11 +122,19 @@ public class XMLConfig extends Config {
     
     
 
-    static final String CONTEXT_LINEBLOCK_TAG = "line";
-    static final String CONTEXT_LINEBLOCK_NAME_ATTR = "name";
-    static final String CONTEXT_LINEBLOCK_DEST_ATTR = "dest";
-    static final String CONTEXT_LINEBLOCK_SEP_ATTR = "sep";
-
+    static final String CONTEXT_LINEBLOCK_TAG =           "line";
+    static final String CONTEXT_LINEBLOCK_NAME_ATTR =     "name";
+    static final String CONTEXT_LINEBLOCK_DEST_ATTR =     "dest";
+    static final String CONTEXT_LINEBLOCK_SEP_ATTR =      "sep";
+    
+    static final String CONTEXT_LINEBLOCK_MARK_ATTR =     "mark";
+    static final String CONTEXT_LINEBLOCK_ERRORS_ATTR =   "errors";
+    static final String CONTEXT_LINEBLOCK_WARNINGS_ATTR = "warnings";
+    static final String CONTEXT_LINEBLOCK_INFO_ATTR =     "info";
+    static final String CONTEXT_LINEBLOCK_PROMPT_ATTR =   "prompt";
+    static final String CONTEXT_LINEBLOCK_STDERR_ATTR =   "stderr";
+    static final String CONTEXT_LINEBLOCK_STDOUT_ATTR =   "stdout";
+ 
     static final String CONTEXT_STRINGS_DELETE_TAG = "delete";
     static final String CONTEXT_STRINGS_INSERT_TAG = "insert";
     static final String CONTEXT_STRINGS_INSERT_AFTER_ATTR = "after";

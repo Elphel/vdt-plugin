@@ -29,6 +29,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 
 import com.elphel.vdt.Txt;
+import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.ui.MessageUI;
 
 
@@ -95,8 +96,8 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         // done the creating arguments phase
         monitor.worked(3);  
 
-        // resolve arguments
-        
+        // resolve arguments, save them
+		runConfig.setArgumentsItemsArray(VDTLaunchUtil.getArguments(configuration));  // calculates all parameters
     	runConfig.setIsShell(VDTLaunchUtil.getIsShell(configuration));
     	runConfig.setPatternErrors(VDTLaunchUtil.getPatternErrors(configuration));
     	runConfig.setToolName(VDTLaunchUtil.getToolName(configuration));

@@ -80,7 +80,7 @@ public class FormatProcessor {
             if(template.startsWith(CONTROL_SEQ, pos)) {
                 pos += CONTROL_SEQ_LEN;
                 
-                RecognizerResult result = recognize(template, pos);
+                RecognizerResult result = recognize(template, pos); // Already skipped blank lines (and spaces in each line, added separators - no, on deifferent level
                 
                 if(result != null && result.getGenerator() != null) {
                     assert result.getNewPos() > pos;
@@ -167,7 +167,7 @@ public class FormatProcessor {
         // we need to check if 'firstLineToAdd' ends with a blank space
         // in such a case we just add all the generated lines in the list
         // otherwise, we glue the line with first of additional ones
-        if(!Utils.stringEndsWithSpace(firstLineToAdd)) {
+        if(!Utils.stringEndsWithSpace(firstLineToAdd)) { //last character is space or \n
             glueToLastLine(lines, processedLines.get(0));
             addFrom = 1;            
         }
@@ -175,7 +175,7 @@ public class FormatProcessor {
         for(int i = addFrom; i < processedLines.size(); i++) {
             String line = processedLines.get(i);
             
-            if(!line.equals(""))
+            if(!line.equals(""))  // Why drop blank lines?
                 lines.add(line);        
         }
     }

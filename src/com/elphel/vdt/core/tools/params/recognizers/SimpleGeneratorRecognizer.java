@@ -34,7 +34,9 @@ public class SimpleGeneratorRecognizer implements Recognizer {
         new CurrentFileGenerator(),
         new CurrentFileBaseGenerator(),
         new ChosenActionGenerator(),
-        new BuildStampGenerator()
+        new BuildStampGenerator(),
+        new BlankGenerator(),
+        new NewLineGenerator()
     };
   
     public SimpleGeneratorRecognizer(){

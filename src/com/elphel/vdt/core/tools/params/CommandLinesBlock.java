@@ -32,15 +32,36 @@ public class CommandLinesBlock extends UpdateableStringsContainer
 {
     private String contextName;
     private String name;
-    private String destination;
+    private String destination;  // now references either file for command file, or console name prefix to send data to
     private String separator;
     private KIND kind; //command file name or console name
+    
+    private String mark;         // remove this sequence on the output only (to preserve white spaces)
+    private String toolErrors;   // Eclipse pattern for pattern recognizer
+    private String toolWarnings; // Eclipse pattern for pattern recognizer
+    private String toolInfo;     // Eclipse pattern for pattern recognizer
+    // for commands being sent to opened remote console:
+    private String prompt;       // relevant for commands sent to remote console - double prompt means "done" (extra separator on input) 
+    private String stderr;       // name of the command to (command line block) to launch in a separate process/console
+                                 // and connect to stderr of the terminakl session 
+    private String stdout;       // name of the command to (command line block) to launch in a separate process/console
+                                 // and connect to stderr of the terminal session
+    // If both are specified and pointing to the same command block - two instances/consoles will be launched.
+    // if only stdout - both stdout and stdin of a session will go to the same process/console
+
         
     public CommandLinesBlock(String contextName,
                              String name,
                              String destination,
                              KIND kind,
                              String sep,
+                             String mark,
+                             String toolErrors,
+                             String toolWarnings,
+                             String toolInfo,
+                             String prompt, 
+                             String stderr,
+                             String stdout,
                              ConditionalStringsList lines,
                              ConditionalStringsList deleteLines,
                              List<NamedConditionalStringsList> insertLines)
@@ -52,6 +73,13 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         this.destination = destination;
         this.kind=kind;
         this.separator = sep;
+        this.mark=mark;
+        this.toolErrors=toolErrors;
+        this.toolWarnings=toolWarnings;
+        this.toolInfo=toolInfo;
+        this.prompt=prompt; 
+        this.stderr=stderr;
+        this.stdout=stdout;
         
         if(separator != null) {
             separator = separator.replace("\\n", "\n");
@@ -65,6 +93,13 @@ public class CommandLinesBlock extends UpdateableStringsContainer
              block.destination,
              block.kind,
              block.separator,
+             block.mark,
+             block.toolErrors,
+             block.toolWarnings,
+             block.toolInfo,
+             block.prompt, 
+             block.stderr,
+             block.stdout,
              block.strings != null?
                      (ConditionalStringsList)block.strings.clone() : null,
              block.deleteStrings != null?
@@ -105,7 +140,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
             					"' or '" + ParamTypeString.KIND_TEXT_ID +
             					"'");                    
             		}
-            		System.out.println("Got string text kind for command block (for console name)");
+//            		System.out.println("Got string text kind for command block (for console name)");
             	}
             }
         }
@@ -119,38 +154,25 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         return name.equals(((CommandLinesBlock)other).name);
     }
 
-    public String getDestination() {
-        return destination;
-    }
-
-    public KIND getKind() {
-        return kind;
-    }
-
-    public boolean isFileKind() {
-        return kind ==  ParamTypeString.KIND.FILE;
-    }
-
-    public boolean isConsoleKind() {
-        return kind ==  ParamTypeString.KIND.TEXT;
-    }
-
-    public List<String> getLines() {
-        return ConditionUtils.resolveConditionStrings(strings);
-    }
+    public String getDestination() { return destination; }
+    public KIND getKind() { return kind;}
+    public boolean isFileKind() {return kind ==  ParamTypeString.KIND.FILE; }
+    public boolean isConsoleKind() { return kind ==  ParamTypeString.KIND.TEXT; }
+    public List<String> getLines() { return ConditionUtils.resolveConditionStrings(strings);  }
+    public String getName()        { return name; }    
+    public String getSeparator()   { return separator; }    
+	public String getMark()        { return mark; }
+	public String getErrors()      { return toolErrors; }
+	public String getWarnings()    { return toolWarnings; }
+	public String getInfo()        { return toolInfo; }
+	public String getPrompt()      { return prompt; }
+	public String getStderr()      { return stderr; }
+	public String getStdout()      { return stdout; }
     
-    public String getName() {
-        return name;
-    }    
-    
-    public String getSeparator() {
-        return separator;
-    }    
     
     public boolean isEnabled() {
         if(destination == null) // command line
             return true;
-        
         return !destination.equals("");
     }
     

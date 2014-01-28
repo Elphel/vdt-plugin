@@ -204,62 +204,94 @@ public abstract class Context {
             
             if(!commandLinesBlock.isEnabled())
                 continue;
-            
-            String paramName = commandLinesBlock.getDestination(); // Andrey debugging: null?
+            String destName = commandLinesBlock.getDestination(); 
             boolean isConsoleName=commandLinesBlock.isConsoleKind();
             String sep = commandLinesBlock.getSeparator();
+            
+            String name=commandLinesBlock.getName();    
+        	String mark=commandLinesBlock.getMark();
+        	String toolErrors=commandLinesBlock.getErrors();
+        	String toolWarnings=commandLinesBlock.getWarnings();
+        	String toolInfo=commandLinesBlock.getInfo();
+        	String stderr=commandLinesBlock.getStderr();
+        	String stdout=commandLinesBlock.getStdout();
+        	String prompt=buildSimpleString(commandLinesBlock.getPrompt());
+        	if ((prompt !=null ) && (mark!=null)) prompt=prompt.replace(mark, "");
             List<String> lines = commandLinesBlock.getLines();  // [%Param_Shell_Options, echo BuildDir=%BuildDir ;, echo SimulationTopFile=%SimulationTopFile ;, echo SimulationTopModule=%SimulationTopModule ;, echo BuildDir=%BuildDir;, %Param_PreExe, %Param_Exe, %Param_TopModule, %TopModulesOther, %ModuleLibrary, %LegacyModel, %NoSpecify, %v, %SourceList, %ExtraFiles, %Filter_String]          
             List<List<String>> commandSequence = new ArrayList<List<String>>();
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
             	String line = (String)lineIter.next();
-
-            	commandSequence.add(buildCommandString(line));                
+            	commandSequence.add(buildCommandString(line));  // TODO: parses them here? VERIFY               
             }
+            
+//            parse prompt?
+            
             // Here - already resolved to empty            
             List<String> commandLineParams = new ArrayList<String>();		
-            if(paramName != null) {
-                Parameter commandFileParam = findParam(paramName);
-                String controlFileName = commandFileParam != null? 
-                		commandFileParam.getValue().get(0).trim() : null;
+            if(destName != null) {
+                Parameter parName = findParam(destName);  // command file or console name
+                String controlFileName = parName != null? 
+                		parName.getValue().get(0).trim() : null;
             	if (isConsoleName) {
  //           		System.out.println("TODO: Enable console command generation here");
-            		printStringsToConsoleLine(commandLineParams, commandSequence);
+            		printStringsToConsoleLine(commandLineParams, commandSequence,mark);
             		buildParamItems.add(
             				new BuildParamsItem (
             						(String[])commandLineParams.toArray(new String[commandLineParams.size()]),
-            						controlFileName) // find console beginning with this name, send commands there
+            						controlFileName, // find console beginning with this name, send commands there
+            					    name, //nameAsParser
+//            					    mark,
+            					    toolErrors,
+            					    toolWarnings,
+            					    toolInfo,
+            					    prompt, 
+            					    stderr,
+            					    stdout)
             				);
-            	} else {
+            	} else { // processing command file
             		if(workingDirectory != null)
             			controlFileName = workingDirectory + File.separator + controlFileName;
 
             		// check param type first
-            		if(!(commandFileParam.getType() instanceof ParamTypeString))
-            			throw new ToolException("Parameter '" + commandFileParam.getID() + 
-            					"' specified in the description of context '" + name +
+            		if(!(parName.getType() instanceof ParamTypeString))
+            			throw new ToolException("Parameter '" + parName.getID() + 
+            					"' specified in the description of context '" + parName +
             					"' must be of type '" + ParamTypeString.NAME + "'");
 
             		// write strings to control file
             		boolean controlFileExists = controlFileExists(controlFileName);
 
-            		printStringsToFile(controlFileName, controlFileExists, commandSequence, sep);
+            		printStringsToFile(controlFileName, controlFileExists, commandSequence, sep, mark);
 
             		if(!controlFileExists)
             			createdControlFiles.add(controlFileName);
 
             	}
-            } else {
-            	// TODO: will need multiple command lines // Andrey
-            	printStringsToCommandLine(commandLineParams, commandSequence);
+            } else { // processing command line
+            	printStringsToCommandLine(commandLineParams, commandSequence, mark);
         		buildParamItems.add(
         				new BuildParamsItem (
         						(String[])commandLineParams.toArray(new String[commandLineParams.size()]),
-        						null) // external tool in a new console
+        						null, // external tool in a new console
+        					    name, //nameAsParser
+//        					    mark,
+        					    toolErrors,
+        					    toolWarnings,
+        					    toolInfo,
+        					    prompt, 
+        					    stderr,
+        					    stdout)
         				);
             	
             }
         }
-//        return (String[])commandLineParams.toArray(new String[commandLineParams.size()]);
+        
+        // keep names only for commands that are referenced in console scripts, others make null
+        Iterator<BuildParamsItem> buildParamItemsIter = buildParamItems.iterator(); // command lines block is empty (yes, there is nothing in project output)
+        while(buildParamItemsIter.hasNext()) {
+        	BuildParamsItem buildParamsItem = (BuildParamsItem)buildParamItemsIter.next();
+        	buildParamsItem.removeNonParser(buildParamItems);
+        }
         return (BuildParamsItem[])buildParamItems.toArray(new BuildParamsItem[buildParamItems.size()]);
     }
     
@@ -275,6 +307,24 @@ public abstract class Context {
                             
         return processor.process(paramStringTemplate);
     }
+    
+    protected String buildSimpleString(String stringTemplate)
+            throws ToolException
+        {
+    	    if (stringTemplate==null) return null;
+            FormatProcessor processor = new FormatProcessor(new Recognizer[] {
+                                                                new SimpleGeneratorRecognizer(),
+                                                                // new RepeaterRecognizer()
+                                                                // new ContextParamRecognizer(this),
+                                                                // new ContextParamRepeaterRecognizer(this)
+                                                            });
+            
+            List<String> result= processor.process(stringTemplate);                    
+            if (result.size()==0) return "";
+            return result.get(0);
+        }
+        
+    
 
     protected void initControlInterface() throws ConfigException {
         if(controlInterfaceName != null) {
@@ -364,9 +414,11 @@ public abstract class Context {
     private void printStringsToFile(String controlFileName, 
                                     boolean append, 
                                     List<List<String>> commandString,
-                                    String separator)
+                                    String separator,
+                                    String mark)
         throws ToolException
     {
+    	boolean useMark=(mark!=null) && (mark.length()>0);
         FileOutputStream outputStream = null;
         
         try {
@@ -391,8 +443,7 @@ public abstract class Context {
 
                     if(s.length() == 0)
                         continue;
-                    
-                    out.print(s);
+                    out.print(useMark?(s.replace(mark,"")):s);
                     
                     written += s.length();
                     writtenNow += s.length();
@@ -421,28 +472,31 @@ public abstract class Context {
     }
 
     private void printStringsToCommandLine(List<String> commandLineParams, 
-                                           List<List<String>> commandSequence) 
+                                           List<List<String>> commandSequence,
+                                           String mark) 
         throws ToolException
     {
+    	boolean useMark=(mark!=null) && (mark.length()>0);
         for(Iterator<List<String>> li = commandSequence.iterator(); li.hasNext();) {
             List<String> strList = (List<String>)li.next();
 
             if(strList.size() > 0) {
                 for(Iterator<String> si = strList.iterator(); si.hasNext();) {
                     String s = ((String)si.next()).trim();
-
                     if(!s.equals(""))
-                        commandLineParams.add(s);
+                        commandLineParams.add(useMark?(s.replace(mark,"")):s);
                 }
             }
         }
     }
 // Andrey: now is the same as command line, but will change to allow last element be prompt
     
-    private void printStringsToConsoleLine(List<String> commandLineParams, 
-    		List<List<String>> commandSequence) 
-    				throws ToolException
-    				{
+    private void printStringsToConsoleLine(
+    		List<String> commandLineParams, 
+    		List<List<String>> commandSequence,
+    		String mark) throws ToolException
+    		{
+    	boolean useMark=(mark!=null) && (mark.length()>0);
     	for(Iterator<List<String>> li = commandSequence.iterator(); li.hasNext();) {
     		List<String> strList = (List<String>)li.next();
 
@@ -451,7 +505,7 @@ public abstract class Context {
     				String s = ((String)si.next()).trim();
 
     				if(!s.equals(""))
-    					commandLineParams.add(s);
+    					commandLineParams.add(useMark?(s.replace(mark,"")):s);
     			}
     		}
     	}

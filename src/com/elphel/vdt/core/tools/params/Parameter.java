@@ -52,51 +52,6 @@ public class Parameter implements Cloneable, Updateable {
     
     private boolean isChild; // Andrey: trying to resolve double inheritance  - at configuration time and when generating output
     private String sourceXML; // Andrey: For error reporting - individual to parameter
-/*    
-    public Parameter(String id,
-    		String outid, 
-    		String typeName, 
-    		String syntaxName, 
-    		String defaultValue,
-    		String label,
-    		String omitValue,
-    		String readonly, 
-    		String visible,
-    		Condition relevant){
-    	this(id,
-    			outid,
-    			typeName,
-    			syntaxName,
-    			defaultValue,
-    			label,
-    			omitValue,
-    			readonly,
-    			visible,
-    			relevant,
-    			null);
-    }
-    public Parameter(String id,
-                     String outid, 
-                     String typeName, 
-                     String syntaxName, 
-                     String defaultValue,
-                     String label,
-                     String omitValue,
-                     String readonly, 
-                     String visible) 
-    {
-        this(id,
-             outid,
-             typeName,
-             syntaxName,
-             defaultValue,
-             label,
-             omitValue,
-             readonly,
-             visible,
-             null);
-    }
-  */  
     public Parameter(String id,
                      String outid, 
                      String typeName, 

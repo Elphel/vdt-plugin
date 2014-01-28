@@ -22,6 +22,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
 import com.elphel.vdt.Txt;
+import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 
 
 /**
@@ -53,8 +54,16 @@ public class VDTRunnerConfiguration {
     private ILaunchConfiguration configuration;
     private  ILaunch launch;
     private  IProgressMonitor monitor;
+    private BuildParamsItem[] argumentsItemsArray; // calculate once for the launch of the sequence
 
 	
+    public BuildParamsItem[] getArgumentsItemsArray(){
+    	return argumentsItemsArray;
+    }
+    public void setArgumentsItemsArray(BuildParamsItem[] argumentsItemsArray){
+    	this.argumentsItemsArray=argumentsItemsArray;
+    }
+    
 	private static final String[] empty= new String[0];
 	
 	
