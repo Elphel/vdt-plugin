@@ -17,9 +17,14 @@
  *******************************************************************************/
 package com.elphel.vdt.core.launching;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+//import org.eclipse.debug.ui.console.IConsole;
+import org.eclipse.ui.console.IConsole;
 
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
@@ -55,8 +60,15 @@ public class VDTRunnerConfiguration {
     private  ILaunch launch;
     private  IProgressMonitor monitor;
     private BuildParamsItem[] argumentsItemsArray; // calculate once for the launch of the sequence
+    
+    private String consoleFinish; // double prompt? - string to look for in consoleBuffer to finish
+    private String consoleBuffer; // accumulates stdout & stderr, looking for consoleFinish (endsWith() )
+    private int extraChars=100; // Allow these chars to appear in the output after consoleFinish (user pressed smth.?)
+    private String originalConsoleName=null;
+    private Set<IConsole> consoles=null;  // parser consoles opened for this console
+	private VDTConsoleRunner consoleRunner=null;
 
-	
+    
     public BuildParamsItem[] getArgumentsItemsArray(){
     	return argumentsItemsArray;
     }
@@ -78,8 +90,52 @@ public class VDTRunnerConfiguration {
 			throw new IllegalArgumentException(Txt.s("Launch.Error.ToolNotNull"));
 		}	
 		this.toolToLaunch = toolToLaunch;
+		this.consoleFinish=null;
+		this.consoleBuffer="";
+		this.consoles= new HashSet<IConsole>();
+		this.consoleRunner= new VDTConsoleRunner(this); // arguments here?
+	}
+	
+	public VDTConsoleRunner getConsoleRunner(){
+		return this.consoleRunner;
+	}
+	
+	public void addConsole(IConsole console){
+		consoles.add(console);
+	}
+	public void removeConsole(IConsole console){
+		consoles.remove(console);
+	}
+	public boolean noConsoles(){
+		return consoles.isEmpty();
+	}
+	public boolean hasConsole(IConsole console){
+		return consoles.contains(console);
 	}
 
+	public void setConsoleFinish(String consoleFinish){
+		this.consoleFinish=consoleFinish;
+	}
+	public boolean addConsoleText(String text){
+		if (consoleFinish==null){
+			System.out.println("Dinish console sequence is not defined");
+			return false;
+		}
+		consoleBuffer=consoleBuffer+text;
+		int maxLength=consoleFinish.length()+extraChars;
+		if (consoleBuffer.length()>(maxLength)){
+			consoleBuffer=consoleBuffer.substring(consoleBuffer.length()-maxLength);
+		}
+		if (consoleBuffer.indexOf(consoleFinish)>=0){
+			resetConsoleText();
+			return true;
+		}
+		return false;
+	}
+	
+	public void resetConsoleText(){
+		consoleBuffer="";
+	}
 	public void setConfiguration(ILaunchConfiguration configuration){
 		this.configuration=configuration;
 	}
@@ -160,7 +216,12 @@ public class VDTRunnerConfiguration {
     }
     public void setToolName(String str) {
     	this.toolName=str;
+    	this.originalConsoleName=VDTRunner.renderProcessLabel(this.toolName); //
     }
+    public String getOriginalConsoleName() {
+    	return originalConsoleName;
+    }
+    
     public String getToolName() {
     	return toolName;
     }

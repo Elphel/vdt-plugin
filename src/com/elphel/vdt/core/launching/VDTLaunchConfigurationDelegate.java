@@ -107,9 +107,11 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
     	runConfig.setBuildStep(0);
     	List<String> controlFiles = VDTLaunchUtil.getControlFiles(configuration);
     	runConfig.setControlFiles((String[])controlFiles.toArray(new String[controlFiles.size()]));
-   	
-        String consoleName=VDTRunner.renderProcessLabel(runConfig.getToolName());
-        runner.saveUnfinished(consoleName, runConfig );
+//        String consoleName=VDTRunner.renderProcessLabel(runConfig.getToolName());
+    	
+        String consoleName=runConfig.getOriginalConsoleName();
+        
+        runner.getRunningBuilds().saveUnfinished(consoleName, runConfig );
         runner.resumeLaunch(consoleName);
         return;
     }

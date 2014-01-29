@@ -132,6 +132,7 @@ public class XMLConfig extends Config {
     static final String CONTEXT_LINEBLOCK_WARNINGS_ATTR = "warnings";
     static final String CONTEXT_LINEBLOCK_INFO_ATTR =     "info";
     static final String CONTEXT_LINEBLOCK_PROMPT_ATTR =   "prompt";
+    static final String CONTEXT_LINEBLOCK_INTERRUPT_ATTR ="interrupt";
     static final String CONTEXT_LINEBLOCK_STDERR_ATTR =   "stderr";
     static final String CONTEXT_LINEBLOCK_STDOUT_ATTR =   "stdout";
  

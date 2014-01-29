@@ -30,6 +30,7 @@ public class BuildParamsItem implements Cloneable{
     private String toolInfo;     // Eclipse pattern for pattern recognizer
     // for commands being sent to opened remote console:
     private String prompt;       // relevant for commands sent to remote console - double prompt means "done" (extra separator on input) 
+    private String interrupt;    // control character(s) to interrupt console command 
     private String stderr;       // name of the command to (command line block) to launch in a separate process/console
                                  // and connect to stderr of the terminal session 
     private String stdout;       // name of the command to (command line block) to launch in a separate process/console
@@ -46,6 +47,7 @@ public class BuildParamsItem implements Cloneable{
 		    String toolWarnings,
 		    String toolInfo,
 		    String prompt, 
+		    String interrupt, 
 		    String stderr,
 		    String stdout
 			) {
@@ -57,6 +59,7 @@ public class BuildParamsItem implements Cloneable{
 		this.toolWarnings=toolWarnings;
 		this.toolInfo=toolInfo;
 		this.prompt=prompt; 
+		this.interrupt=interrupt; 
 		this.stderr=stderr;
 		this.stdout=stdout;
 		
@@ -70,7 +73,8 @@ public class BuildParamsItem implements Cloneable{
 				item.toolErrors,
 				item.toolWarnings,
 				item.toolInfo,
-				item.prompt, 
+				item.prompt,
+				item.interrupt,
 				item.stderr,
 				item.stdout
 				);
@@ -128,6 +132,7 @@ public class BuildParamsItem implements Cloneable{
 	public String getWarnings()    { return toolWarnings; }
 	public String getInfo()        { return toolInfo; }
 	public String getPrompt()      { return prompt; }
+	public String getInterrupt()   { return interrupt; }
 	public String getStderr()      { return stderr; }
 	public String getStdout()      { return stdout; }
 }

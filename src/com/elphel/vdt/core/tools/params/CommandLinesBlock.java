@@ -17,6 +17,7 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.params;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import com.elphel.vdt.core.tools.Updateable;
@@ -48,6 +49,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
                                  // and connect to stderr of the terminal session
     // If both are specified and pointing to the same command block - two instances/consoles will be launched.
     // if only stdout - both stdout and stdin of a session will go to the same process/console
+    private String interrupt;    // send this to remote terminal to interrupt execution (parses use \xNN)
 
         
     public CommandLinesBlock(String contextName,
@@ -60,6 +62,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
                              String toolWarnings,
                              String toolInfo,
                              String prompt, 
+                             String interrupt, 
                              String stderr,
                              String stdout,
                              ConditionalStringsList lines,
@@ -78,15 +81,47 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         this.toolWarnings=toolWarnings;
         this.toolInfo=toolInfo;
         this.prompt=prompt; 
+        this.interrupt=interrupt;
         this.stderr=stderr;
         this.stdout=stdout;
         
-        if(separator != null) {
-            separator = separator.replace("\\n", "\n");
-            separator = separator.replace("\\t", "\t");
+        if(this.separator != null) {
+//            separator = separator.replace("\\n", "\n");
+//            separator = separator.replace("\\t", "\t");
+        	this.separator = parseCntrl(this.separator);
         }
+        /*
+        if (this.prompt!=null){
+        	this.prompt=parseCntrl(this.prompt);
+        	if (this.mark!=null){
+        		this.prompt=this.prompt.replace(this.mark,"");
+        	}
+        }
+        */
+        if(this.interrupt != null) {
+        	this.interrupt = parseCntrl(this.interrupt);
+        }
+        
     }
 
+    public String parseCntrl(String str){
+    	if (str==null) return null;
+    	str=str.replace("\\n" ,"\n");
+    	str=str.replace("\\t", "\t");
+    	while (true){
+    		int start=str.indexOf("\\x");
+    		if (start<0) break;
+    		String s= new String(new byte[]{ Byte.parseByte(str.substring(start+2,start+4),16) }, StandardCharsets.US_ASCII);
+    		str=str.replace(str.subSequence(start,start+4),s);
+    	}
+    	return str;
+    }
+    public String applyMark(String str){
+    	if ((mark!=null) && (str!=null)){
+    		str=str.replace(mark, "");
+    	}
+    	return str;
+    }
     public CommandLinesBlock(CommandLinesBlock block) {
         this(block.contextName,
              block.name,
@@ -98,6 +133,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
              block.toolWarnings,
              block.toolInfo,
              block.prompt, 
+             block.interrupt, 
              block.stderr,
              block.stdout,
              block.strings != null?
@@ -166,6 +202,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
 	public String getWarnings()    { return toolWarnings; }
 	public String getInfo()        { return toolInfo; }
 	public String getPrompt()      { return prompt; }
+	public String getInterrupt()   { return prompt; }
 	public String getStderr()      { return stderr; }
 	public String getStdout()      { return stdout; }
     

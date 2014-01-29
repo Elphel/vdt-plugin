@@ -74,6 +74,10 @@ import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 
+
+
+
+
 //import com.elphel.vdt.core.Utils;
 import org.eclipse.ui.console.IConsoleListener;
 
@@ -85,70 +89,27 @@ import org.eclipse.ui.console.IConsoleListener;
  */
 
 public class VDTRunner {
-
-	// TODO:Remove
-	VDTRunnerConfiguration runningConfiguration; // multi-step configuration currently active
-	int nextBuildStep=0;
-	
-	private Map<String, VDTRunnerConfiguration> unfinishedBuilds;
-	
+	private RunningBuilds runningBuilds;
 	public VDTRunner(){
-		unfinishedBuilds = new HashMap<String, VDTRunnerConfiguration>();
-		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-// This is not used, just for testing		
-		System.out.println("***Addded console listeners");
-		manager.addConsoleListener(new IConsoleListener(){
-			public void consolesAdded(IConsole[] consoles){
-				for (int i=0;i<consoles.length;i++){
-					System.out.println("+++ Added: "+consoles[i].getName());
-					// Only shows added consoles
-				}
-			}
-			public void consolesRemoved(IConsole[] consoles){
-				for (int i=0;i<consoles.length;i++){
-					System.out.println("--- Removed: "+consoles[i].getName());
-					
-				}
-			}
-		});
+		runningBuilds = new RunningBuilds();
 	}
 	
-	
-	
-	public boolean isUnfinished(String consoleName){
-		return unfinishedBuilds.containsKey(consoleName);
-	}
-	
-	public VDTRunnerConfiguration resumeConfiguration(String consoleName){
-		VDTRunnerConfiguration conf=unfinishedBuilds.get(consoleName);
-		unfinishedBuilds.remove(consoleName);
-		return conf;
-	}
-
-	public void removeConfiguration(String consoleName){
-		unfinishedBuilds.remove(consoleName);
-	}
-
-	public void saveUnfinished(String consoleName, VDTRunnerConfiguration configuration ){
-		unfinishedBuilds.put(consoleName, configuration);
+	public RunningBuilds getRunningBuilds(){
+		return runningBuilds;
 	}
 
 	    // make call it when console is closed
-	private void doResumeLaunch( String consoleName ) throws CoreException {
-//		System.out.println("--------- resuming "+ consoleName+" ------------");
-		VDTRunnerConfiguration runConfig=resumeConfiguration(consoleName);
+	private void doResumeLaunch(String consoleName ) throws CoreException {
+		final VDTRunnerConfiguration runConfig=runningBuilds.resumeConfiguration(consoleName);
 		if (runConfig==null){
 			System.out.println("Turned out nothing to do. Probably a bug");
 			return;
 		}
-//		ILaunchConfiguration configuration=runConfig.getConfiguration();
-//		BuildParamsItem[] argumentsItemsArray = VDTLaunchUtil.getArguments(configuration); // calculates all parameters
 		BuildParamsItem[] argumentsItemsArray = runConfig.getArgumentsItemsArray(); // uses already calculated
 		int numItem=runConfig.getBuildStep();
 		System.out.println("--------- resuming "+ consoleName+", numItem="+numItem+" ------------");
 		ILaunch launch=runConfig.getLaunch();
 		IProgressMonitor monitor=runConfig.getMonitor();
-
 		for (;numItem<argumentsItemsArray.length;numItem++){
 			runConfig.setBuildStep(numItem); // was not updated if was not sleeping
 			List<String> toolArguments = new ArrayList<String>();
@@ -159,20 +120,22 @@ public class VDTRunner {
 			//            toolArguments.addAll(resources);
 			runConfig.setToolArguments((String[])toolArguments.toArray(new String[toolArguments.size()]));
 			if (argumentsItemsArray[numItem].getConsoleName()!=null){
-				runConsole(argumentsItemsArray[numItem].getConsoleName(),runConfig, launch, monitor);
-				continue;
+				VDTConsoleRunner consoleRunner= runConfig.getConsoleRunner();
+				consoleRunner.runConsole(argumentsItemsArray[numItem].getConsoleName(), launch, monitor);
+				return; // Should be awaken by listener when the finish sequence will be output to console
+				//continue;
 			}
 			if (argumentsItemsArray[numItem].getNameAsParser()!=null){
 				// parsers should be launched by the console scripts, in parallel to them
 				System.out.println("Skipping parser "+argumentsItemsArray[numItem].getNameAsParser());
 				continue;
 			}
-
 			// Launch the configuration - 1 unit of work
 			//        	VDTRunner runner = VDTLaunchUtil.getRunner();
 			IProcess process=run(
 					runConfig,
-					renderProcessLabel(runConfig.getToolName()), // toolname + (date)
+//					renderProcessLabel(runConfig.getToolName()), // toolname + (date)
+			        runConfig.getOriginalConsoleName(),
 					launch,
 					monitor);
 
@@ -182,7 +145,7 @@ public class VDTRunner {
 
 			// check for cancellation
 			if (monitor.isCanceled() || (process==null)) {
-				removeConfiguration(consoleName); 
+				runningBuilds.removeConfiguration(consoleName); 
 				return;
 			}
 			if (numItem<(argumentsItemsArray.length-1)){ // Not for the last
@@ -194,7 +157,7 @@ public class VDTRunner {
 					System.out.println("Could not get a console for the specified process");
 					continue;
 				}
-				System.out.println("consoleName="+consoleName+
+				System.out.println("originalConsoleName="+consoleName+
 						"\nprocessConsole name="+iCons.getName());
 				final IOConsole fiCons=iCons;
 //				final String    fConsoleName=fiCons.getName(); // actual console name - may be already "<terminated> ... "
@@ -206,16 +169,16 @@ public class VDTRunner {
 				}
 				/* Prepare to postpone next commands to be resumed by event*/
 				runConfig.setBuildStep(numItem+1);
-				saveUnfinished(consoleName, runConfig );
+				runningBuilds.saveUnfinished(consoleName, runConfig );
 
 				iCons.addPropertyChangeListener( new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
 						if (!fConsoleName.equals(fiCons.getName())){
 							fiCons.removePropertyChangeListener(this);
 							System.out.println(">>> "+fConsoleName+" -> "+fiCons.getName());
-					    	VDTRunner runner = VDTLaunchUtil.getRunner();
+//					    	VDTRunner runner = VDTLaunchUtil.getRunner();
 					    	try {
-								runner.resumeLaunch(fConsoleName);
+					    		resumeLaunch(fConsoleName); // replace with console
 							} catch (CoreException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -234,158 +197,8 @@ public class VDTRunner {
 		}
 		monitor.done();
 	}
-	
-	private BuildParamsItem getParser(VDTRunnerConfiguration configuration, String parserName){
-		if (parserName==null) return null;
-		BuildParamsItem[] buildParamsItems = configuration.getArgumentsItemsArray(); // uses already calculated
-		if (buildParamsItems==null) return null;
-		for (int i=0;i<buildParamsItems.length;i++){
-			if (parserName.equals(buildParamsItems[i].getNameAsParser()))
-				return buildParamsItems[i];
-		}
-		return null;
-	}
-	
-	public IOConsole runConsole(String consolePrefix
-			, VDTRunnerConfiguration configuration
-			, ILaunch launch
-			, IProgressMonitor monitor 
-			) throws CoreException{
-		int numItem=configuration.getBuildStep();
-//        BuildParamsItem buildParamsItem= VDTLaunchUtil.getArguments(configuration.getConfiguration())[numItem];
-		BuildParamsItem buildParamsItem = configuration.getArgumentsItemsArray()[numItem]; // uses already calculated
-		//TODO: Handle monitor
-		// Find console with name starting with consolePrefix
-		IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
-		IConsole[] consoles=(IConsole[]) man.getConsoles();
-		IOConsole iCons=null;
-		for (int i=0;i<consoles.length;i++){
-			if (consoles[i].getName().startsWith(consolePrefix)){
-				iCons=(IOConsole) consoles[i];
-				break;
-			}
-		}
-		if (iCons==null) {
-			MessageUI.error("Specified console: "+consolePrefix+" is not found");
-			return null;
-		}
-		// try to send 
-        String[] arguments = configuration.getToolArguments();
-        if (arguments == null) arguments=new String[0];
-        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
-//        	System.out.println("patternErrors= \""+  configuration.getPatternErrors()+"\"");
-//        	System.out.println("patternWarnings= \""+configuration.getPatternWarnings()+"\"");
-//        	System.out.println("patternInfo= \""    +configuration.getPatternInfo()+"\"");
-        	if (arguments!=null){
-        		for (int i=0;i<arguments.length;i++){
-        			System.out.println("Console line "+i+" = \""+arguments[i]+"\"");
-        		}
-
-        	}
-        }
-        log("Writing to console "+iCons.getName()+":", arguments, null, false, true); /* Appears in the console of the target Eclipse (immediately erased) */
-        log("Writing to console "+iCons.getName()+":", arguments, null, false, false); /* Appears in the console of the parent Eclipse */
-
-//        IOConsoleInputStream inStream= iCons.getInputStream();
-        IOConsoleOutputStream 	outStream= iCons.newOutputStream();
-        IProcess process=((ProcessConsole)iCons).getProcess();
-        IStreamsProxy consoleInStreamProxy= process.getStreamsProxy();
-        
-        BuildParamsItem stderrParser=getParser(configuration, buildParamsItem.getStderr()); // re-parses all - why?
-        BuildParamsItem stdoutParser=getParser(configuration, buildParamsItem.getStdout());
-        
-        System.out.println("Using parser for stderr: "+((stderrParser!=null)?stderrParser.getNameAsParser():"none")); // actually may be the same as stdout
-        System.out.println("Using parser for stdout: "+((stdoutParser!=null)?stdoutParser.getNameAsParser():"none"));
-        
-        
-  // basically use 
-  // 			IProcess process=run(configuration, launch, monitor);
-// renderProcessLabel(configuration.getToolName()+":out") 
-        IProcess processErr=null;
-        IProcess processOut=null;
-        IStreamsProxy stdoutStreamProxy=null;
-        IStreamsProxy stderrStreamProxy=null;
-        
-        if (stdoutParser!=null){
-			List<String> toolArgumentsStdout = new ArrayList<String>();
-			List<String> stdoutArguments=stdoutParser.getParamsAsList();
-			if (stdoutArguments != null)
-				toolArgumentsStdout.addAll(stdoutArguments);
-			// overwriting configuration, but this is done sequentially, so OK
-			configuration.setToolArguments((String[])toolArgumentsStdout.toArray(new String[toolArgumentsStdout.size()]));
-        	processOut=run(configuration,
-        			renderProcessLabel(configuration.getToolName()+":out"),
-        			launch,
-        			null); //monitor);
-            stdoutStreamProxy= processOut.getStreamsProxy();
-//TODO: Add error parsers            
-        }
-        
-        if (stderrParser!=null){
-			List<String> toolArgumentsStderr = new ArrayList<String>();
-			List<String> stderrArguments=stderrParser.getParamsAsList();
-			if (stderrArguments != null)
-				toolArgumentsStderr.addAll(stderrArguments);
-			// overwriting configuration, but this is done sequentially, so OK
-			configuration.setToolArguments((String[])toolArgumentsStderr.toArray(new String[toolArgumentsStderr.size()]));
-        	processErr=run(configuration,
-        			renderProcessLabel(configuration.getToolName()+":err"),
-        			launch,
-        			null); //monitor);
-            stderrStreamProxy= processErr.getStreamsProxy();
-          //TODO: Add error parsers            
-        }
-        final IStreamsProxy fSendErrorsToStreamProxy=(stderrStreamProxy!=null)?stderrStreamProxy:stdoutStreamProxy;
-        final IStreamsProxy fSendOutputToStreamProxy= stdoutStreamProxy;
-// connect input streams of the parsers to the out from the console process         
-        IStreamMonitor consoleOutStreamMonitor=null;
-        IStreamMonitor consoleErrStreamMonitor=null;
-        if (fSendErrorsToStreamProxy!=null){
-        	consoleErrStreamMonitor=consoleInStreamProxy.getErrorStreamMonitor();
-        	consoleErrStreamMonitor.addListener(new IStreamListener(){
-        		public void streamAppended(String text, IStreamMonitor monitor){
-        			System.out.println("Err:'"+text+"'");
-        			try {
-        				fSendErrorsToStreamProxy.write(text);
-
-        			} catch (IOException e) {
-        				System.out.println("Can not write errors");
-        			}
-        		}
-       		});
-       	}
-        if (fSendOutputToStreamProxy!=null){
-        	consoleOutStreamMonitor=consoleInStreamProxy.getOutputStreamMonitor();
-        	consoleOutStreamMonitor.addListener(new IStreamListener(){
-        		public void streamAppended(String text, IStreamMonitor monitor){
-        			System.out.println("Out:'"+text+"'");
-        			try {
-        				fSendOutputToStreamProxy.write(text);
-        			} catch (IOException e) {
-        				System.out.println("Can not write output");
-        			}
-        		}
-       		});
-        }
-        
-        try {
-        	for (int i=0;i<arguments.length;i++){
-				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
-					outStream.setColor(new Color(null, 128, 128, 255));
-					outStream.write(arguments[i]+"\n"); // writes to console itself
-					outStream.setColor(null);
-				}
-				consoleInStreamProxy.write(arguments[i]+"\n");
-        	}
-        } catch (IOException e) {
-        	System.out.println("Can not write to outStream of console "+iCons.getName());
-        }
-		return iCons;
-		
-	}
-        		
      
-    public void resumeLaunch( String consoleName ) throws CoreException 
+    public void resumeLaunch(String consoleName) throws CoreException 
     {
     	try {
     		doResumeLaunch(consoleName);
@@ -565,7 +378,7 @@ public class VDTRunner {
 
     } // run()
         
-    private void log(String header,
+    public void log(String header,
     		         String[] strings, 
                      String[] controlFiles, 
                      boolean formatColumn, 

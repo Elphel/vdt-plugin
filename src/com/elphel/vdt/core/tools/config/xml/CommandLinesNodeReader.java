@@ -55,16 +55,18 @@ public class CommandLinesNodeReader extends AbstractConditionNodeReader {
     private CommandLinesBlock readCommandLinesBlock(Node node, Condition condition)
         throws ConfigException 
     {
-        String name =      XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_NAME_ATTR);
-        String dest =      XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_DEST_ATTR);
-        String sep  =      XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_SEP_ATTR);        
-        String mark  =     XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_MARK_ATTR);
-        String errors  =   XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_ERRORS_ATTR);
-        String warnings  = XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_WARNINGS_ATTR);
-        String info  =     XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_INFO_ATTR);
-        String prompt  =   XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_PROMPT_ATTR);
-        String stderr  =   XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_STDERR_ATTR);
-        String stdout  =   XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_STDOUT_ATTR);
+        String name =       XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_NAME_ATTR);
+        String dest =       XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_DEST_ATTR);
+        String sep  =       XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_SEP_ATTR);        
+        String mark  =      XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_MARK_ATTR);
+        String errors  =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_ERRORS_ATTR);
+        String warnings  =  XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_WARNINGS_ATTR);
+        String info  =      XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_INFO_ATTR);
+        String prompt  =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_PROMPT_ATTR);
+        String interrupt  = XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_INTERRUPT_ATTR);
+        
+        String stderr  =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_STDERR_ATTR);
+        String stdout  =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_STDOUT_ATTR);
         
         if(name == null)
             throw new ConfigException("Unnamed lines block definition in context '" +
@@ -86,7 +88,8 @@ public class CommandLinesNodeReader extends AbstractConditionNodeReader {
                                      errors,
                                      warnings,
                                      info,
-                                     prompt, 
+                                     prompt,
+                                     interrupt,
                                      stderr,
                                      stdout,
                                      lines,

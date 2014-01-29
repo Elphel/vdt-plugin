@@ -215,16 +215,16 @@ public abstract class Context {
         	String toolInfo=commandLinesBlock.getInfo();
         	String stderr=commandLinesBlock.getStderr();
         	String stdout=commandLinesBlock.getStdout();
-        	String prompt=buildSimpleString(commandLinesBlock.getPrompt());
-        	if ((prompt !=null ) && (mark!=null)) prompt=prompt.replace(mark, "");
+        	String prompt=buildSimpleString(commandLinesBlock.getPrompt()); // evaluate string
+        	prompt=commandLinesBlock.parseCntrl(prompt); // replace control character codes (\n,\t,\x)
+        	prompt=commandLinesBlock.applyMark(prompt); // remove mark sequence
+        	String interrupt=commandLinesBlock.getInterrupt();
             List<String> lines = commandLinesBlock.getLines();  // [%Param_Shell_Options, echo BuildDir=%BuildDir ;, echo SimulationTopFile=%SimulationTopFile ;, echo SimulationTopModule=%SimulationTopModule ;, echo BuildDir=%BuildDir;, %Param_PreExe, %Param_Exe, %Param_TopModule, %TopModulesOther, %ModuleLibrary, %LegacyModel, %NoSpecify, %v, %SourceList, %ExtraFiles, %Filter_String]          
             List<List<String>> commandSequence = new ArrayList<List<String>>();
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
             	String line = (String)lineIter.next();
             	commandSequence.add(buildCommandString(line));  // TODO: parses them here? VERIFY               
             }
-            
-//            parse prompt?
             
             // Here - already resolved to empty            
             List<String> commandLineParams = new ArrayList<String>();		
@@ -244,7 +244,8 @@ public abstract class Context {
             					    toolErrors,
             					    toolWarnings,
             					    toolInfo,
-            					    prompt, 
+            					    prompt,
+            					    interrupt,
             					    stderr,
             					    stdout)
             				);
@@ -278,7 +279,8 @@ public abstract class Context {
         					    toolErrors,
         					    toolWarnings,
         					    toolInfo,
-        					    prompt, 
+        					    prompt,
+        					    interrupt,
         					    stderr,
         					    stdout)
         				);

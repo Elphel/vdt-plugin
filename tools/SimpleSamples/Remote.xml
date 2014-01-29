@@ -54,10 +54,12 @@
 		</input>
 
 		<output>
-			<line name="command_line">
+			<line name="command_line"
+			      interrupt="\x03">
 				"%ShellSwitches"
 				"%PreSSH"
 				"ssh"
+				"-t"
 				"-l"
 				"%RemoteUser"
 				"%RemoteHost"
@@ -108,10 +110,11 @@
 			      dest="python_console_name"
 			      mark="``" 
 			      sep="\n"
-			      prompt=">>>" 
+			      prompt="@@FINISH@@" 
 			      stdout="parser_001">
 				"%RemoteCommand"
-				"``" <!-- two new lines should generate a pair of prompts from the remote -->
+				"print  '@@FINISH@@'"
+				"``"`" <!-- two new lines should generate a pair of prompts from the remote -->
 			</line>
 			<line name="command_line_02">
 				"-c"
@@ -132,3 +135,4 @@
 
 	</tool>
 </vdt-project>
+<!--   /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
