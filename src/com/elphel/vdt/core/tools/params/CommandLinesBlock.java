@@ -50,6 +50,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     // If both are specified and pointing to the same command block - two instances/consoles will be launched.
     // if only stdout - both stdout and stdin of a session will go to the same process/console
     private String interrupt;    // send this to remote terminal to interrupt execution (parses use \xNN)
+	private String timeout;      // timeout for console tasks, in seconds
 
         
     public CommandLinesBlock(String contextName,
@@ -65,6 +66,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
                              String interrupt, 
                              String stderr,
                              String stdout,
+                             String timeout,
                              ConditionalStringsList lines,
                              ConditionalStringsList deleteLines,
                              List<NamedConditionalStringsList> insertLines)
@@ -84,6 +86,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         this.interrupt=interrupt;
         this.stderr=stderr;
         this.stdout=stdout;
+        this.timeout=timeout;
         
         if(this.separator != null) {
 //            separator = separator.replace("\\n", "\n");
@@ -136,6 +139,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
              block.interrupt, 
              block.stderr,
              block.stdout,
+             block.timeout,
              block.strings != null?
                      (ConditionalStringsList)block.strings.clone() : null,
              block.deleteStrings != null?
@@ -205,6 +209,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
 	public String getInterrupt()   { return prompt; }
 	public String getStderr()      { return stderr; }
 	public String getStdout()      { return stdout; }
+	public String getTimeout()     { return timeout; }
     
     
     public boolean isEnabled() {

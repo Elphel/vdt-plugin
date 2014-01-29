@@ -36,7 +36,7 @@ public class BuildParamsItem implements Cloneable{
     private String stdout;       // name of the command to (command line block) to launch in a separate process/console
                                  // and connect to stderr of the terminal session
 
-	
+	private int timeout;         // timeout for console tasks, in seconds
 	
 	public BuildParamsItem (
 			String [] params,
@@ -49,7 +49,8 @@ public class BuildParamsItem implements Cloneable{
 		    String prompt, 
 		    String interrupt, 
 		    String stderr,
-		    String stdout
+		    String stdout,
+		    int timeout
 			) {
 		this.consoleName=consoleName;
 		this.params=params; // no need to clone?
@@ -62,6 +63,7 @@ public class BuildParamsItem implements Cloneable{
 		this.interrupt=interrupt; 
 		this.stderr=stderr;
 		this.stdout=stdout;
+		this.timeout=timeout;
 		
 	}
 	public BuildParamsItem (BuildParamsItem item){
@@ -76,7 +78,8 @@ public class BuildParamsItem implements Cloneable{
 				item.prompt,
 				item.interrupt,
 				item.stderr,
-				item.stdout
+				item.stdout,
+				item.timeout
 				);
 	}
 
@@ -135,4 +138,5 @@ public class BuildParamsItem implements Cloneable{
 	public String getInterrupt()   { return interrupt; }
 	public String getStderr()      { return stderr; }
 	public String getStdout()      { return stdout; }
+	public int    getTimeout()     { return timeout; }
 }

@@ -135,6 +135,7 @@ public class XMLConfig extends Config {
     static final String CONTEXT_LINEBLOCK_INTERRUPT_ATTR ="interrupt";
     static final String CONTEXT_LINEBLOCK_STDERR_ATTR =   "stderr";
     static final String CONTEXT_LINEBLOCK_STDOUT_ATTR =   "stdout";
+    static final String CONTEXT_LINEBLOCK_TIMEOUT_ATTR =  "timeout";
  
     static final String CONTEXT_STRINGS_DELETE_TAG = "delete";
     static final String CONTEXT_STRINGS_INSERT_TAG = "insert";

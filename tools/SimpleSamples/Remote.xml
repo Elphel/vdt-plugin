@@ -90,10 +90,16 @@
 
 		<parameter id="python_console_name" default="RemotePython"
 			type="String" format="CopyValue" visible="false" />
+			
+			
+	   <parameter id="Timeout" label="Script timeout(sec)" type="Cardinal"
+			format="CopyValue" default="10" readonly="false" visible="true" />
+			
 
 		<input>
 			<group name="General">
 				"RemoteCommand"
+				"Timeout"
 			</group>
 		</input>
 
@@ -111,7 +117,8 @@
 			      mark="``" 
 			      sep="\n"
 			      prompt="@@FINISH@@" 
-			      stdout="parser_001">
+			      stdout="parser_001"
+			      timeout="Timeout">
 				"%RemoteCommand"
 				"print  '@@FINISH@@'"
 				"``"`" <!-- two new lines should generate a pair of prompts from the remote -->

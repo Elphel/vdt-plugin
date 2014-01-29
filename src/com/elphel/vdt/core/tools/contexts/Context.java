@@ -216,6 +216,12 @@ public abstract class Context {
         	String stderr=commandLinesBlock.getStderr();
         	String stdout=commandLinesBlock.getStdout();
         	String prompt=buildSimpleString(commandLinesBlock.getPrompt()); // evaluate string
+        	String sTimeout=buildSimpleString(commandLinesBlock.getTimeout());
+        	int timeout=0;
+        	try{
+        		timeout=Integer.parseInt(sTimeout);
+        	} catch(Exception e){
+        	}
         	prompt=commandLinesBlock.parseCntrl(prompt); // replace control character codes (\n,\t,\x)
         	prompt=commandLinesBlock.applyMark(prompt); // remove mark sequence
         	String interrupt=commandLinesBlock.getInterrupt();
@@ -247,7 +253,9 @@ public abstract class Context {
             					    prompt,
             					    interrupt,
             					    stderr,
-            					    stdout)
+            					    stdout,
+            					    timeout
+            					    )
             				);
             	} else { // processing command file
             		if(workingDirectory != null)
@@ -282,7 +290,9 @@ public abstract class Context {
         					    prompt,
         					    interrupt,
         					    stderr,
-        					    stdout)
+        					    stdout,
+        					    timeout
+        					    )
         				);
             	
             }
@@ -310,13 +320,18 @@ public abstract class Context {
         return processor.process(paramStringTemplate);
     }
     
+    // recognizes parameter name (just %name), or simple generators
     protected String buildSimpleString(String stringTemplate)
             throws ToolException
         {
     	    if (stringTemplate==null) return null;
+    	    Parameter parName=findParam(stringTemplate);
+    	    if (parName!=null){
+    	    	return parName.getValue().get(0).trim(); // get parameter
+    	    }
             FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                                 new SimpleGeneratorRecognizer(),
-                                                                // new RepeaterRecognizer()
+                                                                new RepeaterRecognizer()
                                                                 // new ContextParamRecognizer(this),
                                                                 // new ContextParamRepeaterRecognizer(this)
                                                             });
@@ -325,9 +340,7 @@ public abstract class Context {
             if (result.size()==0) return "";
             return result.get(0);
         }
-        
     
-
     protected void initControlInterface() throws ConfigException {
         if(controlInterfaceName != null) {
             controlInterface = config.findControlInterface(controlInterfaceName);

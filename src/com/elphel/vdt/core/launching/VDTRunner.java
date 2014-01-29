@@ -26,6 +26,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 //import org.eclipse.core.resources.IProject;
@@ -36,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -68,6 +71,8 @@ import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
+
+
 
 
 
@@ -137,7 +142,9 @@ public class VDTRunner {
 //					renderProcessLabel(runConfig.getToolName()), // toolname + (date)
 			        runConfig.getOriginalConsoleName(),
 					launch,
-					monitor);
+					monitor,
+					numItem
+              );
 
 			//Andrey: if there is a single item - launch asynchronously, if more - verify queue is empty
 			// will not change
@@ -148,6 +155,8 @@ public class VDTRunner {
 				runningBuilds.removeConfiguration(consoleName); 
 				return;
 			}
+			
+			
 			if (numItem<(argumentsItemsArray.length-1)){ // Not for the last
 				//                IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
 				//                IConsole[] consoles=(IConsole[]) man.getConsoles();
@@ -191,6 +200,23 @@ public class VDTRunner {
 					iCons.firePropertyChange(fiCons,"org.eclipse.jface.text", consoleName, fConsoleName); 
 				}
 				System.out.println("return - waiting to be awaken");
+		        int timeout=argumentsItemsArray[numItem].getTimeout();
+		        if (timeout>0){
+		        	final int fTimeout = timeout;
+		        	final IProcess fProcess=process;
+		        	new Timer().schedule(new TimerTask() {          
+		        		@Override
+		        		public void run() {
+		        			System.out.println(">>Timeout<<");
+		        			try {
+								fProcess.terminate();
+							} catch (DebugException e) {
+								System.out.println("Failed to terminate preocess on "+fConsoleName);
+							}
+		        		}
+		        	}, fTimeout*1000);
+		        }
+
 				return;
 				
 			}
@@ -256,15 +282,16 @@ public class VDTRunner {
     public IProcess run( VDTRunnerConfiguration configuration
     		   , String consoleLabel
                , ILaunch launch
-               , IProgressMonitor monitor 
+               , IProgressMonitor monitor
+               , int numItem
                ) throws CoreException
     {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
-		int numItem=configuration.getBuildStep();
-//        BuildParamsItem buildParamsItem= VDTLaunchUtil.getArguments(configuration.getConfiguration())[numItem];
-		BuildParamsItem buildParamsItem = configuration.getArgumentsItemsArray()[numItem]; // uses already calculated
+//		int numItem=configuration.getBuildStep();
+
+        BuildParamsItem buildParamsItem = configuration.getArgumentsItemsArray()[numItem]; // uses already calculated
         String patternErrors=  combinePatterns(buildParamsItem.getErrors(),  configuration.getPatternErrors()) ;
         String patternWarnings=combinePatterns(buildParamsItem.getWarnings(),configuration.getPatternWarnings()) ;
         String patternInfo=    combinePatterns(buildParamsItem.getInfo(),    configuration.getPatternInfo()) ;

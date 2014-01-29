@@ -67,6 +67,7 @@ public class CommandLinesNodeReader extends AbstractConditionNodeReader {
         
         String stderr  =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_STDERR_ATTR);
         String stdout  =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_STDOUT_ATTR);
+        String timeout =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_TIMEOUT_ATTR);
         
         if(name == null)
             throw new ConfigException("Unnamed lines block definition in context '" +
@@ -92,6 +93,7 @@ public class CommandLinesNodeReader extends AbstractConditionNodeReader {
                                      interrupt,
                                      stderr,
                                      stdout,
+                                     timeout,
                                      lines,
                                      deleteLines,
                                      insertLines);

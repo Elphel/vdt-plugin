@@ -19,6 +19,8 @@ package com.elphel.vdt.core.launching;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import org.eclipse.core.runtime.CoreException;
@@ -49,6 +51,7 @@ import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
+import com.sun.net.ssl.internal.www.protocol.https.Handler;
 
 public class VDTConsoleRunner{
 	private final VDTRunnerConfiguration runConfig;
@@ -67,7 +70,8 @@ public class VDTConsoleRunner{
 	public VDTConsoleRunner (VDTRunnerConfiguration runConfig){
 		this.runConfig=runConfig;
 	}
-	private BuildParamsItem getParser( String parserName){
+/*
+ * 	private BuildParamsItem getParser( String parserName){
 		if (parserName==null) return null;
 		BuildParamsItem[] buildParamsItems = runConfig.getArgumentsItemsArray(); // uses already calculated
 		if (buildParamsItems==null) return null;
@@ -77,6 +81,19 @@ public class VDTConsoleRunner{
 		}
 		return null;
 	}
+
+ */
+	private int getParserIndex( String parserName){
+		if (parserName==null) return -1;
+		BuildParamsItem[] buildParamsItems = runConfig.getArgumentsItemsArray(); // uses already calculated
+		if (buildParamsItems==null) return -1;
+		for (int i=0;i<buildParamsItems.length;i++){
+			if (parserName.equals(buildParamsItems[i].getNameAsParser()))
+				return i;
+		}
+		return -1;
+	}
+
 	
 	public IOConsole runConsole(String consolePrefix
 			, ILaunch launch
@@ -124,9 +141,12 @@ public class VDTConsoleRunner{
         process=((ProcessConsole)iCons).getProcess();
 //        IStreamsProxy consoleInStreamProxy= process.getStreamsProxy();
         consoleInStreamProxy= process.getStreamsProxy();
-        
-        BuildParamsItem stderrParser=getParser(buildParamsItem.getStderr()); // re-parses all - why?
-        BuildParamsItem stdoutParser=getParser(buildParamsItem.getStdout());
+        int stderrParserIndex=getParserIndex(buildParamsItem.getStderr());
+        int stdoutParserIndex=getParserIndex(buildParamsItem.getStdout());
+        BuildParamsItem stderrParser=(stderrParserIndex>=0)?runConfig.getArgumentsItemsArray()[stderrParserIndex]:null;
+        BuildParamsItem stdoutParser=(stdoutParserIndex>=0)?runConfig.getArgumentsItemsArray()[stdoutParserIndex]:null;
+//        BuildParamsItem stderrParser=getParser(buildParamsItem.getStderr()); // re-parses all - why?
+//        BuildParamsItem stdoutParser=getParser(buildParamsItem.getStdout());
         
         System.out.println("Using parser for stderr: "+((stderrParser!=null)?stderrParser.getNameAsParser():"none")); // actually may be the same as stdout
         System.out.println("Using parser for stdout: "+((stdoutParser!=null)?stdoutParser.getNameAsParser():"none"));
@@ -145,7 +165,8 @@ public class VDTConsoleRunner{
         	processOut=runner.run(runConfig,
         			"OUT for "+iCons.getName(),
         			launch,
-        			null); //monitor);
+        			null, //monitor
+        			stdoutParserIndex);
             stdoutStreamProxy= processOut.getStreamsProxy();
 //TODO: Add error parsers            
         }
@@ -160,7 +181,8 @@ public class VDTConsoleRunner{
         	processErr=runner.run(runConfig,
         			"ERR for "+iCons.getName(),
         			launch,
-        			null); //monitor);
+        			null, //monitor);
+        			stderrParserIndex);
             stderrStreamProxy= processErr.getStreamsProxy();
           //TODO: Add error parsers            
         }
@@ -218,21 +240,33 @@ public class VDTConsoleRunner{
        		};
         	consoleOutStreamMonitor.addListener((IStreamListener) outputListener );
         }
-		outStream.setColor(new Color(null, 128, 128, 255));
+        outStream.setColor(new Color(null, 128, 128, 255));
         try {
         	for (int i=0;i<arguments.length;i++){
-				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
-					outStream.write(arguments[i]+"\n"); // writes to console itself
-				}
-				consoleInStreamProxy.write(arguments[i]+"\n");
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
+        			outStream.write(arguments[i]+"\n"); // writes to console itself
+        		}
+        		consoleInStreamProxy.write(arguments[i]+"\n");
         	}
         } catch (IOException e) {
         	System.out.println("Can not write to outStream of console "+iCons.getName());
         }
-		return iCons;
-		
+        int timeout=buildParamsItem.getTimeout();
+        if ((timeout==0) && (buildParamsItem.getPrompt()==null)) timeout=1;// should specify at least one of timeout or prompt
+        if (timeout>0){
+        	System.out.println("Setting timeout "+timeout);
+        	final int fTimeout = timeout;
+        	new Timer().schedule(new TimerTask() {          
+        		@Override
+        		public void run() {
+        			System.out.println(">>Timeout<<");
+        			finishConsolescript();
+        		}
+        	}, fTimeout*1000);
+        }
+        return iCons;
 	}
-	
+
 	
 	// TODO: remove unneeded global vars
 	
