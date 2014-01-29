@@ -106,13 +106,15 @@ public class VDTRunner {
 	    // make call it when console is closed
 	private void doResumeLaunch(String consoleName ) throws CoreException {
 		final VDTRunnerConfiguration runConfig=runningBuilds.resumeConfiguration(consoleName);
+        final boolean debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
+
 		if (runConfig==null){
 			System.out.println("Turned out nothing to do. Probably a bug");
 			return;
 		}
 		BuildParamsItem[] argumentsItemsArray = runConfig.getArgumentsItemsArray(); // uses already calculated
 		int numItem=runConfig.getBuildStep();
-		System.out.println("--------- resuming "+ consoleName+", numItem="+numItem+" ------------");
+		if (debugPrint) System.out.println("--------- resuming "+ consoleName+", numItem="+numItem+" ------------");
 		ILaunch launch=runConfig.getLaunch();
 		IProgressMonitor monitor=runConfig.getMonitor();
 		for (;numItem<argumentsItemsArray.length;numItem++){
@@ -132,7 +134,7 @@ public class VDTRunner {
 			}
 			if (argumentsItemsArray[numItem].getNameAsParser()!=null){
 				// parsers should be launched by the console scripts, in parallel to them
-				System.out.println("Skipping parser "+argumentsItemsArray[numItem].getNameAsParser());
+				if (debugPrint) System.out.println("Skipping parser "+argumentsItemsArray[numItem].getNameAsParser());
 				continue;
 			}
 			// Launch the configuration - 1 unit of work
@@ -147,8 +149,6 @@ public class VDTRunner {
               );
 
 			//Andrey: if there is a single item - launch asynchronously, if more - verify queue is empty
-			// will not change
-			//            String consoleName=renderProcessLabel(runConfig.getToolName());
 
 			// check for cancellation
 			if (monitor.isCanceled() || (process==null)) {
@@ -163,17 +163,17 @@ public class VDTRunner {
 
 				IOConsole iCons=  (IOConsole) DebugUITools.getConsole(process); // had non-null fPatternMatcher , fType="org.eclipse.debug.ui.ProcessConsoleType"
 				if (iCons==null){
-					System.out.println("Could not get a console for the specified process");
+					System.out.println("Could not get console for the specified process");
 					continue;
 				}
-				System.out.println("originalConsoleName="+consoleName+
+				if (debugPrint) System.out.println("originalConsoleName="+consoleName+
 						"\nprocessConsole name="+iCons.getName());
 				final IOConsole fiCons=iCons;
 //				final String    fConsoleName=fiCons.getName(); // actual console name - may be already "<terminated> ... "
 				final String    fConsoleName=consoleName; // calculated console name - used for launching external program
 //				if (!fConsoleName.equals(consoleName)){ // terminated before we added listeners
 				if (!fConsoleName.equals(fiCons.getName())){ // terminated before we added listeners
-					System.out.println("Already terminated, proceed to the next item");
+					if (debugPrint) System.out.println("Already terminated, proceed to the next item");
 					continue; // proceed with the next item without pausing
 				}
 				/* Prepare to postpone next commands to be resumed by event*/
@@ -184,37 +184,41 @@ public class VDTRunner {
 					public void propertyChange(PropertyChangeEvent event) {
 						if (!fConsoleName.equals(fiCons.getName())){
 							fiCons.removePropertyChangeListener(this);
-							System.out.println(">>> "+fConsoleName+" -> "+fiCons.getName());
-//					    	VDTRunner runner = VDTLaunchUtil.getRunner();
+							if (debugPrint) System.out.println(">>> "+fConsoleName+" -> "+fiCons.getName());
 					    	try {
 					    		resumeLaunch(fConsoleName); // replace with console
 							} catch (CoreException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								System.out.println ("Failed to resume launch sequence");
 							}
 						}
 					}
 				});
 				if (!fConsoleName.equals(consoleName)){ // terminated before we added listeners
-					System.out.println("Fire!");
+					if (debugPrint)  System.out.println("Fire!");
 					iCons.firePropertyChange(fiCons,"org.eclipse.jface.text", consoleName, fConsoleName); 
 				}
-				System.out.println("return - waiting to be awaken");
+					if (debugPrint)  System.out.println("return - waiting to be awaken");
 		        int timeout=argumentsItemsArray[numItem].getTimeout();
+		        
 		        if (timeout>0){
-		        	final int fTimeout = timeout;
-		        	final IProcess fProcess=process;
-		        	new Timer().schedule(new TimerTask() {          
-		        		@Override
-		        		public void run() {
-		        			System.out.println(">>Timeout<<");
-		        			try {
-								fProcess.terminate();
-							} catch (DebugException e) {
-								System.out.println("Failed to terminate preocess on "+fConsoleName);
-							}
-		        		}
-		        	}, fTimeout*1000);
+		        	System.out.println ("timeout is only implemented for console scripts");
+		        	// implementation will require keeping track of it and canceling if program terminated earlier.
+		        	// And for the programs it is easy to kill them manually with a red square button
+		        	if (timeout>100000) { //never with no warnings 
+		        		final int fTimeout = timeout;
+		        		final IProcess fProcess=process;
+		        		new Timer().schedule(new TimerTask() {          
+		        			@Override
+		        			public void run() {
+		        				System.out.println(">>Timeout<<");
+		        				try {
+		        					fProcess.terminate();
+		        				} catch (DebugException e) {
+		        					System.out.println("Failed to terminate process on "+fConsoleName);
+		        				}
+		        			}
+		        		}, fTimeout*1000);
+		        	}
 		        }
 
 				return;
@@ -397,7 +401,9 @@ public class VDTRunner {
         if (consoles.length>1){
 //        	((IConsole) consoles[1]).setName("Python Consloe");
         }
-        System.out.println(consoles.length+" consoles, processes="+launch.getChildren().length);
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)){
+        	System.out.println(consoles.length+" consoles, processes="+launch.getChildren().length);
+        }
         return process;
         //= consoles
 //setImageDescriptor

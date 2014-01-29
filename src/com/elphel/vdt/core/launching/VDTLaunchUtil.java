@@ -42,6 +42,7 @@ import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
 // import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.core.tools.params.Parameter;
@@ -64,13 +65,17 @@ public class VDTLaunchUtil {
      * Returns the VDT runner.
      */
     public static VDTRunner getRunner() {
-        if (toolRunner == null) {
-        	System.out.println ("Created new VDTRunner()");
-            toolRunner = new VDTRunner();
-        } else {
-        	System.out.println ("Reused old VDTRunner()");
-        }
-        return toolRunner;
+    	if (toolRunner == null) {
+    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+    			System.out.println ("Created new VDTRunner()");
+    		}
+    		toolRunner = new VDTRunner();
+    	} else {
+    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+    			System.out.println ("Reused old VDTRunner()");
+    		}
+    	}
+    	return toolRunner;
     }
     //runningBuilds
     /**

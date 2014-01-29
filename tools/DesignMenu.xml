@@ -49,6 +49,14 @@
                           icon="my_tool.gif"
                           call="RemotePythonCommand"/>
                           
+                <menuitem name="Vivado"
+                          label="Run remote Vivado session"
+                          icon="xilinx.png"
+                          call="Vivado"/>
+                <menuitem name="Vivado Test"
+                          label="Send a command to the remote Vivado session"
+                          icon="my_tool.gif"
+                          call="VivadoTest"/>
 
         <menu name="XDS" 
               label="Demo XDS Tools"
