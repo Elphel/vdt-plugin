@@ -57,6 +57,10 @@
                           label="Send a command to the remote Vivado session"
                           icon="my_tool.gif"
                           call="VivadoTest"/>
+                <menuitem name="VivadoLoadSource"
+                          label="Load source files to Vivado"
+                          icon="xilinx.png"
+                          call="VivadoLoadSource"/>
 
         <menu name="XDS" 
               label="Demo XDS Tools"

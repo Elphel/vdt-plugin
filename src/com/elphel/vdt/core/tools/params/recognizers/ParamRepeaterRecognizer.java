@@ -19,6 +19,7 @@ package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.generators.FileListGenerator;
+import com.elphel.vdt.core.tools.generators.FilteredSourceListGenerator;
 import com.elphel.vdt.core.tools.generators.SourceListGenerator;
 import com.elphel.vdt.core.tools.generators.TopModulesNameGenerator;
 import com.elphel.vdt.core.tools.generators.ValueGenerator;
@@ -40,7 +41,9 @@ public class ParamRepeaterRecognizer extends RepeaterRecognizer {
         if(genName.equals(ParamFormatRecognizer.FORMAT_PARAM_VALUE_MARK))
             return new ValueGenerator(param, repPrefix, repSuffix, separator);
 /* Trying to put these here */        
-        if(genName.equals(SourceListGenerator.NAME))
+        if(genName.equals(FilteredSourceListGenerator.NAME))
+            return new FilteredSourceListGenerator(repPrefix, repSuffix, separator);
+        else if(genName.equals(SourceListGenerator.NAME))
             return new SourceListGenerator(repPrefix, repSuffix, separator);
         else if(genName.equals(FileListGenerator.NAME))
             return new FileListGenerator(repPrefix, repSuffix, separator);

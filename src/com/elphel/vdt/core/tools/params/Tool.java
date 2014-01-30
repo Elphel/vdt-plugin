@@ -46,10 +46,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private String toolWarnings;
     private String toolInfo;
 
-
     private List<String> extensions;
     private List<RunFor> runfor;
     private int choice; // selected variant for runfor
+    private String ignoreFilter;
     
     
     private Tool baseTool;
@@ -78,6 +78,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 String toolWarnings,
                 String toolInfo,
                 List<RunFor> runfor,
+                String ignoreFilter,
                 /* never used ??? */
                 List<Parameter> params,
                 List<ParamGroup> paramGroups,
@@ -92,6 +93,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
               paramGroups, 
               commandLinesBlocks);
         this.runfor=runfor; // should it be cloned?
+        this.ignoreFilter= ignoreFilter;
         this.baseToolName = baseToolName;
         this.label = label;
         this.parentPackageName = parentPackageName;
@@ -135,7 +137,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public int getChoice(){
     	return choice;
     }
-    public void setChoice(int choice){
+    
+     public void setChoice(int choice){
     	this.choice=choice;
     }
 
@@ -311,6 +314,24 @@ public class Tool extends Context implements Cloneable, Inheritable {
             		runfor.get(i).getIconName());
         }
         return actualActions;
+    }
+    // Should be called after getMenuActions to have updateContextOptions() already ran
+    public String getIgnoreFilter(){ // calculate and get
+    	if (ignoreFilter==null) return null;
+        FormatProcessor processor = new FormatProcessor(
+                new Recognizer[] {
+                		new ContextParamRecognizer(this),
+                        new SimpleGeneratorRecognizer(true) // in menuMode
+//                        new SimpleGeneratorRecognizer(false) // in menuMode
+                		});
+        List<String> results=null;
+        try {
+			results=processor.process(ignoreFilter);
+        } catch (ToolException e) {
+        	return null;
+        }
+    	if ((results == null) || (results.size()==0)) return null;
+    	return results.get(0);
     }
     
     private void updateContextOptions (IProject project){

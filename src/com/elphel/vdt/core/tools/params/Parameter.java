@@ -181,6 +181,9 @@ public class Parameter implements Cloneable, Updateable {
         }
         
 //        this.type = context.getControlInterface().findParamType(typeName);
+        if (this.context.getControlInterface()==null){
+            throw new ConfigException(contextInfo + ": Interface of the context is absent in "+sourceXML);
+        }
         this.type = this.context.getControlInterface().findParamType(typeName);
         
         if(this.type == null)

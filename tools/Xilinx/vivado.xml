@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <vdt-project>
-	<interface name="VivadoInterface" extends="project_interface">
+	<interface name="VivadoInterface" extends="FPGAPprojectInterface">
 		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
 	</interface>
-	<tool name="Vivado" project="FPGA_project" label="Launch Vivado"
+	<!--  name shold be the same as VivadoConsole parameter -->
+	<tool name="Vivado"
+		label="Launch Vivado" 
+	    project="FPGA_project"
+	    package="FPGA_package"
 		shell="/bin/bash" interface="VivadoInterface" description="Launching remote Xilinx Vivado in console"
 		errors="(.*):([0-9]+): [a-z ]*error: (.*)" warnings="(.*):([0-9]+): warning: (.*)"
 		info="(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->
+
+		<!-- 
 		<extensions-list>
 			<extension mask="v" />
 			<extension mask="tf" />
 		</extensions-list>
-
+-->
 		<action-menu>
 			<action label="Launch Vivado" resource="" icon="xilinx.png" />
 		</action-menu>
-
+<!-- 
 		<parameter id="RemoteHost" label="Remote Host IP" type="String"
 			format="CopyValue" default="192.168.0.122" readonly="false" visible="true" />
 
@@ -42,10 +48,10 @@
 
 		<parameter id="SSHExtra" label="ssh extra parameters" type="String"
 			format="CopyValue" default="" readonly="false" visible="true" />
-
+-->
 		<input>
 			<group name="General">
-				"RemoteHost"
+<!-- 			"RemoteHost"
 				"RemoteUser"
 				"TerminalMode"
 				"ShellSwitches"
@@ -53,6 +59,7 @@
 				"SSHSwitches"
 				"RemoteCommand"
 				"SSHExtra"
+			 -->
 			</group>
 		</input>
 
@@ -76,8 +83,12 @@
 			</line>
 		</output>
 	</tool>
-	<tool name="VivadoTest" project="FPGA_project" label="VivadoCommand"
-		shell="/bin/bash" interface="VivadoInterface"
+	<tool name="VivadoTest" label="VivadoCommand"
+	    project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%VivadoIgnoreSource"
 		description="Sending command to a remote Vivado session" errors="(.*):([0-9]+): [a-z ]*error: (.*)"
 		warnings="(.*):([0-9]+): warning: (.*)" info="(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->
 		<extensions-list>
@@ -89,19 +100,19 @@
 			<action label="Vivado Command" resource="" icon="xilinx.png" />
 		</action-menu>
 
-		<parameter id="RemoteCommand" label="Remote Command to send"
+		<parameter id="TCLCommand" label="Remote TCL Command to send"
 			type="Stringlist" format="ProgramSyntax" default="puts &quot;Hello, World!&quot;"
 			readonly="false" visible="true" />
-
-		<parameter id="vivado_console" default="Vivado"
-			type="String" format="CopyValue" visible="false" />
-			
 			
 	   <parameter id="Timeout" label="Script timeout(sec)" type="Cardinal"
 			format="CopyValue" default="10" readonly="false" visible="true" />
+<!-- hidden (calculated) parameters -->			
+	   <parameter id="FilteredSourceList" type="Stringlist"
+			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
+			
 		<input>
 			<group name="General">
-				"RemoteCommand"
+				"TCLCommand"
 				"Timeout"
 			</group>
 		</input>
@@ -110,17 +121,20 @@
 			<line name="pre_tcl">
 				"-c"
 				"echo 'scp files here' ;"
+				"echo '"
+				"%FilteredSourceList"
+				"' ;"
 				"sleep 2 ;"
 			</line>
 <!-- TODO: Make it OK to ose just strings, not parameters in dest (for console names) -->			
 			<line name="vivado_line_01"
-			      dest="vivado_console"
+			      dest="VivadoConsole"
 			      mark="``" 
 			      sep="\n"
 			      prompt="@@FINISH@@" 
 			      stdout="parser_001"
 			      timeout="Timeout">
-				"%RemoteCommand"
+				"%TCLCommand"
 				"puts '@@FINISH@@'"
 				"``"`" <!-- two new lines should generate a pair of prompts from the remote -->
 			</line>
@@ -139,5 +153,97 @@
 			</line>
 		</output>
 	</tool>
+
+	<tool name="VivadoLoadSource" label="Load Source files to Vivado"
+	    project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%VivadoIgnoreSource"
+		description="Load source files to Vivado">
+		<extensions-list>
+			<extension mask="v" />
+			<extension mask="tf" />
+		</extensions-list>
+
+		<action-menu>
+			<action label="Vivado Command" resource="" icon="xilinx.png" />
+		</action-menu>
+		<parameter id="ExtraFiles" type="Filelist" format="ParamListSyntax"
+			default="" label="Select additional files to include" readonly="false"
+			visible="true" />
+	   <parameter id="Timeout" label="Script timeout(sec)" type="Cardinal"
+			format="CopyValue" default="10" readonly="false" visible="true" />
+
+		<parameter id="TCLCommand" label="Remote TCL Command to send"
+			type="Stringlist" format="ProgramSyntax" default="puts &quot;Hello, World!&quot;"
+			readonly="false" visible="true" />
+			
+			
+<!-- hidden (calculated) parameters -->			
+	   <parameter id="FilteredSourceList" type="Stringlist"
+			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
+<!-- 
+		<parameter id="RsyncRemoteHost" default="%RemoteUser@%RemoteHost:" 
+			visible="false" type="String" format="CopyValue"/>
+			-->
+		<input>
+			<group name="General">
+				"ExtraFiles"
+				"TCLCommand"
+				"Timeout"
+			</group>
+		</input>
+
+		<output>
+		<!-- mkdir -p vdt/npmtest -->
+			<line name="pre_tcl">
+				"-c"
+				"echo"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				";"
+				"ssh -l"
+				"%RemoteUser"
+				"%RemoteHost"
+				"'"
+				"mkdir -p"
+				"%VivadoProjectRoot"
+				"' ;"
+				"rsync -avrR -e ssh"
+				"%FilteredSourceList"
+				"%ExtraFiles"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+			</line>
+<!-- TODO: Make it OK to ose just strings, not parameters in dest (for console names) -->			
+			<line name="vivado_line_01"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep="\n"
+			      prompt="@@FINISH@@" 
+			      stdout="parser_001"
+			      timeout="Timeout">
+				"%TCLCommand"
+				"puts '@@FINISH@@'"
+				"``"`" <!-- two new lines should generate a pair of prompts from the remote -->
+			</line>
+			<line name="command_line_02">
+				"-c"
+				"echo 'Will scp result files back here' ;"
+				"sleep 2 ;"
+			</line>
+<!-- parser_01 being referenced should be launched in an asynchronous process/console, removed from the launch sequence -->
+			<line name="parser_001"
+			    errors="(.*):([0-9]+): [a-z ]*error: (.*)"
+				warnings="(.*):([0-9]+): warning: (.*)"
+				info="(.*):([0-9]+): info: (.*)">
+				"-c"
+				"cat"
+			</line>
+		</output>
+	</tool>
+
 </vdt-project>
 <!--   /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
+<!-- 
+mkdir -p vdt/npmtest
+rsync -avrR -e ssh npmtest_tb.v npmtest.v unisims/IBUFG.v xilinx@192.168.0.122:vdt/npmtest -->

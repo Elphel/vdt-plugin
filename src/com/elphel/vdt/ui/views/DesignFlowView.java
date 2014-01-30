@@ -484,10 +484,12 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
      // RunFor[] getMenuActions()
         RunFor [] runFor=null;
         Tool tool=null;
+        String ignoreFilter=null;
         if (selectedItem != null){
         	tool= selectedItem.getTool();
         	if (tool!=null){
         		runFor=tool.getMenuActions(project);
+        		ignoreFilter=tool.getIgnoreFilter(); // should be after getMenuActions(project) that recalculates parameters
         		tool.initIcons(false); // if not done before - add icons list for actions
         		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
         			System.out.println("Got Runfor["+((runFor!=null)?runFor.length:"null")+"]");
@@ -555,10 +557,12 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 }
         		final int finalI=i;
         		final String fFullPath=fullPath;
+                final String fIgnoreFilter=ignoreFilter;
+
                 launchActions[i] = new Action() {
                     public void run() {
                         try {
-                            launchTool(selectedItem,finalI,fFullPath);
+                            launchTool(selectedItem,finalI,fFullPath,fIgnoreFilter);
                         } catch (Exception e) {
                             MessageUI.error( Txt.s("Action.ToolLaunch.Error", 
                                                    new String[] {selectedItem.getLabel(), e.getMessage()})
@@ -632,11 +636,11 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         clearToolPropertiesAction.setEnabled(enabled);
     } // updateLaunchAction()
 
-    private void launchTool(DesignMenuModel.Item item, int choice, String fullPath) throws CoreException {
+    private void launchTool(DesignMenuModel.Item item, int choice, String fullPath, String ignoreFilter) throws CoreException {
         Tool tool = selectedItem.getTool();
         if (tool != null) {
         	tool.setChoice(0);
-        	SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice); // Andrey
+        	SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
         	SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
             LaunchCore.launch( tool
                              , selectedResource.getProject()

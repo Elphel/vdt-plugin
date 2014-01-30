@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <vdt-project>
-	<interface name="RemoteInterface" extends="project_interface">
+	<interface name="RemoteInterface" extends="FPGAPprojectInterface">
 		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
 	</interface>
 	<tool name="RemotePython" project="FPGA_project" label="RemotePython"
+	    package="FPGA_package"
 		shell="/bin/bash" interface="RemoteInterface" description="Launching remote Python in console"
 		errors="(.*):([0-9]+): [a-z ]*error: (.*)" warnings="(.*):([0-9]+): warning: (.*)"
 		info="(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->
@@ -77,6 +78,7 @@
 		</output>
 	</tool>
 	<tool name="RemotePythonCommand" project="FPGA_project" label="RemotePythonCommand"
+	    package="FPGA_package"
 		shell="/bin/bash" interface="RemoteInterface"
 		description="Sending command to a ermote Python session" errors="(.*):([0-9]+): [a-z ]*error: (.*)"
 		warnings="(.*):([0-9]+): warning: (.*)" info="(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->

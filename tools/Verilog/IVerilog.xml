@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vdt-project>
 
-	<interface name="IVerilog" extends="project_interface">
+	<interface name="IVerilog" extends="FPGAPprojectInterface">
 		<!-- Syntax definitions -->
 
 		<syntax name="D_ParamSyntax" format="-D%%ParamName" />
@@ -10,7 +10,6 @@
 		<syntax name="TopModuleSyntax" format="-s%%TopModule" />
 		<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
 		<syntax name="ModuleLibrarySyntax" format="%(-y%%ParamValue%| %)" />
-		<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
 		<syntax name="ExtraFilesSyntax" format="%(%%ParamValue%| %)" />
 		<syntax name="SwitchSyntax" format="-%%ParamName" />
 		<syntax name="GrepFindSyntax"
@@ -68,36 +67,10 @@
 		</typedef>
 
 	</interface>
-	
-	<project name="FPGA_project" label="Project parameters for FPGA_project"
-		interface="project_interface">
-		<parameter id="SimulationTopFile" label="Project top simulation file"
-			type="Filename" default="default_top (testing)" format="CopyValue"
-			readonly="false" />
-		<parameter id="SimulationTopModule" label="Project top simulation module"
-			type="String" default="" format="CopyValue" readonly="false" />
-		<parameter id="BuildDir" label="project build directory"
-			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
-<!-- Invisible (calculated) project-wide parameters -->			
-		<parameter id="BuildDirSlash" type="Pathname" visible="false"
-		 default="?%BuildDir=:,%BuildDir/" format="CopyValue"/>
-			
-		<input>
-			<group name="General" label="Project properties">
-				"SimulationTopFile"
-				"SimulationTopModule"
-				"BuildDir"
-			</group>
-		</input>
-		<output>
-		</output>
-	</project>
-
-
 
 	<tool name="iverilog" project="FPGA_project" label="Icarus Verilog compiler"
 		exe="iverilog" shell="?%%OS: Windows=shell:, Linux=/bin/bash"
-
+		package="FPGA_package"
 		interface="IVerilog" errors="(.*):([0-9]+): [a-z_\- ]*error: (.*)"
 		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)" info="(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--do not actually exist -->
 

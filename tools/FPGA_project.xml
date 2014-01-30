@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vdt-project>
+	<interface name="FPGAPprojectInterface" extends="project_interface">
+		<syntax name="RemoteRootSyntax" format="%%ParamValue/%%ProjectName" />
+		<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
+		<syntax name="FilteredSourceListSyntax" format="%(%%FilteredSourceList%| %)" />
+		
+	</interface>
+	<package name="FPGA_package"
+	              label="Common parameters for all FPGA projects"
+	              interface="FPGAPprojectInterface">
+	     <parameter id="RemoteHost" label="Remote Host IP" type="String"
+			format="CopyValue" default="192.168.0.122" readonly="false" visible="true" />
+
+
+		<parameter id="RemoteUser" label="Remote user name" type="String"
+			format="CopyValue" default="xilinx" readonly="false" visible="true" />
+
+		<parameter id="PreSSH" label="pre-ssh shell parameters"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="ShellSwitches" label="Shell switches" type="String"
+			format="CopyValue" default="-c" readonly="false" visible="true" />
+
+		<parameter id="TerminalMode" type="BoolYesNo" format="None"
+			default="false" label="Force terminal mode for the remote program" />
+
+		<parameter id="SSHSwitches" label="Other ssh switches"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="RemoteCommand" label="Remote ssh command"
+			type="String" format="CopyValue" default="/opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl" readonly="false"
+			visible="true" />
+
+		<parameter id="SSHExtra" label="ssh extra parameters" type="String"
+			format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="VivadoConsole" default="Vivado" label="Vivado console name"
+			type="String" format="CopyValue" visible="true" readonly="false"/>
+			
+			
+			
+	     <input>
+			<group name="VivadoServer" label="Vivado server setup">
+				"RemoteHost"
+				"RemoteUser"
+				"TerminalMode"
+				"ShellSwitches"
+				"PreSSH"
+				"SSHSwitches"
+				"RemoteCommand"
+				"SSHExtra"
+				"VivadoConsole"
+			</group>
+		</input>
+	              
+	
+	</package>
+
+	<project name="FPGA_project" label="Project parameters for FPGA_project"
+	    package="FPGA_package"
+		interface="FPGAPprojectInterface">
+		<!--  Simulation parameters  -->
+		<parameter id="SimulationTopFile" label="Project top simulation file"
+			type="Filename" default="default_top (testing)" format="CopyValue"
+			readonly="false" />
+		<parameter id="SimulationTopModule" label="Project top simulation module"
+			type="String" default="" format="CopyValue" readonly="false" />
+		<parameter id="BuildDir" label="project build directory"
+			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
+		<!--  Vivado parameters  -->
+			
+		<parameter id="VivadoProjectRoot" label="Relative (to user home directory) path of the workspace on Vivado server"
+			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
+
+		<parameter id="VivadoIgnoreSource" label="Ignore source files that match this regular expression"
+			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
+<!-- Calculated -->
+		<parameter id="VivadoProjectRoot" label="Relative (to user home directory) path of the project on Vivado server"
+			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
+			
+
+<!-- Invisible (calculated) project-wide parameters -->			
+		<parameter id="BuildDirSlash" type="Pathname" visible="false"
+		 default="?%BuildDir=:,%BuildDir/" format="CopyValue"/>
+		 
+			
+		<input>
+			<group name="Simulation" label="Simulation properties">
+				"SimulationTopFile"
+				"SimulationTopModule"
+				"BuildDir"
+			</group>
+			<group name="Vivado" label="Vivado general properties">
+				"VivadoProjectRoot"
+				"VivadoIgnoreSource"
+			</group>
+		</input>
+		<output>
+		</output>
+	</project>
+</vdt-project>

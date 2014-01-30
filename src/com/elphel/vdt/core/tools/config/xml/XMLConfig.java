@@ -119,8 +119,7 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_SYNTAX_ERRORS =  "errors";
     static final String CONTEXT_TOOL_SYNTAX_WARNINGS= "warnings";
     static final String CONTEXT_TOOL_SYNTAX_INFO =    "info";
-    
-    
+    static final String CONTEXT_TOOL_IGNORE_FILTER =  "ignore"; // file path regular expression to remove libraries from source list
 
     static final String CONTEXT_LINEBLOCK_TAG =           "line";
     static final String CONTEXT_LINEBLOCK_NAME_ATTR =     "name";
@@ -585,6 +584,7 @@ public class XMLConfig extends Config {
                 String toolErrors   = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_ERRORS);
                 String toolWarnings = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_WARNINGS);
                 String toolInfo     = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_INFO);
+                String ignoreFilter = getAttributeValue(contextNode, CONTEXT_TOOL_IGNORE_FILTER);
                 
                 boolean isShell=false;
                 if (toolShell != null){
@@ -625,6 +625,7 @@ public class XMLConfig extends Config {
                                    toolWarnings,
                                    toolInfo,
                                    toolRunfor,
+                                   ignoreFilter,
                                    null,
                                    null,
                                    null);

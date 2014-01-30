@@ -20,6 +20,7 @@ package com.elphel.vdt.ui.variables;
 import java.util.Stack;
 
 import com.elphel.vdt.VerilogUtils;
+import com.elphel.vdt.core.tools.params.Tool;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -68,6 +69,8 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     private IResource fChosenVerilogFile = null; // to keep fSelectedVerilogFile
     private int fChosenAction=0; // Chosen variant of running the tool
     private long timestamp=0;
+    private String ignoreFilter=null;
+//    private Tool selectedTool=null; // last selected tool
  //   
     private SelectedResourceManager() {
         IWorkbench workbench = PlatformUI.getWorkbench();
@@ -245,9 +248,10 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     		return path.substring(project.getLocation().toString().length()+1);
     	return path;
     }
-    public void updateActionChoice(String chosenTarget, int choice){
+    public void updateActionChoice(String chosenTarget, int choice, String ignoreFilter){
     	fChosenAction=choice;
     	fChosenTarget=tryRelativePath(chosenTarget);
+    	this.ignoreFilter=ignoreFilter;
     	IProject project=getSelectedProject();
     	if (project==null) return;
     	IPath path = new Path(fChosenTarget);
@@ -291,6 +295,14 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     
     public int getChosenAction() {
         return fChosenAction;
+    }
+    
+ //   public Tool getSelectedTool(){
+ //   	return selectedTool;
+ //   }
+    
+    public String getFilter(){
+    	return ignoreFilter;
     }
 
 

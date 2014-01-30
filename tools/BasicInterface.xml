@@ -76,6 +76,7 @@
 <!-- Syntax definitions -->
     <syntax name="None"      format="" />
     <syntax name="CopyValue" format="%%ParamValue" />
+	<syntax name="ParamListSyntax" format="%(%%ParamValue%| %)" />
 
   </interface>
 

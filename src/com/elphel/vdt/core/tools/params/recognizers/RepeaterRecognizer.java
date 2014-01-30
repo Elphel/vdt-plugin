@@ -21,6 +21,7 @@ import com.elphel.vdt.core.Utils;
 import com.elphel.vdt.core.tools.params.ToolException;
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.generators.FileListGenerator;
+import com.elphel.vdt.core.tools.generators.FilteredSourceListGenerator;
 import com.elphel.vdt.core.tools.generators.TopModulesNameGenerator;
 import com.elphel.vdt.core.tools.generators.SourceListGenerator;
 
@@ -102,7 +103,9 @@ public class RepeaterRecognizer implements Recognizer {
                                               String separator) 
     {
     	System.out.println("Ever get here? RepeaterRecognizer.java:findGenerator()");
-    	AbstractGenerator gen=new SourceListGenerator(repPrefix, repSuffix, separator);
+    	AbstractGenerator gen=new FilteredSourceListGenerator(repPrefix, repSuffix, separator);
+    	if (genName.equals(gen.getName())) return gen;
+    	gen=new SourceListGenerator(repPrefix, repSuffix, separator);
     	if (genName.equals(gen.getName())) return gen;
     	gen=new FileListGenerator(repPrefix, repSuffix, separator);
     	if (genName.equals(gen.getName())) return gen;

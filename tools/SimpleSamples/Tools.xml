@@ -165,7 +165,7 @@
     -->
 <!--          exe         = "?%%OS: Windows=mytest.bat, Linux=mytest.sh" -->
     <tool name        = "MyTool"
-          project     = "FPGA_project"
+          project     = "SampleProject"
           label       = "My Tool"
           shell       = "?%%OS: Windows=, Linux=/bin/bash"
           interface   = "MyControlInterface"
