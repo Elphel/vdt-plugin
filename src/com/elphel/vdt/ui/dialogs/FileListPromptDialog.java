@@ -17,8 +17,12 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.dialogs;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
+
 
 /**
  * Dialog to promt list of files. 
@@ -27,27 +31,46 @@ import org.eclipse.swt.widgets.Shell;
  * @author  Lvov Konstantin
  */
 public class FileListPromptDialog extends ListPromptDialog {
-
+/*
 	public FileListPromptDialog( final Shell parentShell, String title) {
-		this(parentShell, title, null);
+		this(parentShell, title, null,null);
 	}
+	public FileListPromptDialog( final Shell parentShell,
+			String title,
+			final String[] extensions
+			)
+	{
+		this(parentShell, title, extensions,null);
 
-	
-	public FileListPromptDialog( final Shell parentShell
-			                   , String title
-			                   , final String[] extensions)
+	}
+*/
+	public FileListPromptDialog( final Shell parentShell,
+			String title,
+			final String[] extensions,
+			final String projectPath
+			)
 	{
 		super( parentShell
-		     , title
-		     , new IAddAction() {
-		    	public String getNewValue() {
-		            FileDialog dialog = new FileDialog(parentShell);
-		            dialog.setFilterExtensions(extensions);
-		            String selectedFile = dialog.open();
-		            return selectedFile;
+				, title
+				, new IAddAction() {
+			public String getNewValue() {
+				FileDialog dialog = new FileDialog(parentShell);
+				dialog.setFilterExtensions(extensions);
+				if (projectPath!=null){
+					dialog.setFileName(projectPath);
+				}
+				String selectedFile = dialog.open();
+// try to convert to project-relative
+		    	if ((selectedFile!=null) && selectedFile.startsWith(projectPath)) {
+		        	if (selectedFile.equals(projectPath)){
+		        		System.out.println("FileListPromptDialog(): Path equals to project path = \""+selectedFile+"\", returning \".\"");
+		        		return ".";
+		        	}
+		    		return selectedFile.substring(projectPath.length()+1);
 		    	}
-		    }
-		);
+		    	return selectedFile;
+			}
+		}
+				);
 	}
-	
 } // class FileListPromptDialog

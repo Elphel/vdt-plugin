@@ -433,9 +433,9 @@ public class Parameter implements Cloneable, Updateable {
         
         if(defaultValue == null) {
             defaultValue = param.defaultValue;
-            if (id.equals("SimulationTopFile")){ // Andrey
-            	System.out.println("Updating parameter SimulationTopFile, defaultValue="+defaultValue);
-            }
+//            if (id.equals("SimulationTopFile")){ // Andrey
+//            	System.out.println("Updating parameter SimulationTopFile, defaultValue="+defaultValue);
+//            }
         }            
         
         if(label == null)

@@ -50,7 +50,11 @@ public class ContextOptionsDialog extends Dialog {
             , context
             , OptionsCore.getPreferenceStore(context, project)
             );
-        location = project.getLocation().toOSString();
+        location = project.getLocation().toOSString(); // project location
+//        System.out.println("ContextOptionsDialog: location was "+location);
+//        location = project.getProjectRelativePath().toOSString();
+//        System.out.println("ContextOptionsDialog: location changed to "+location);
+        		
     }
 
     public ContextOptionsDialog(Shell parent, Context context) {

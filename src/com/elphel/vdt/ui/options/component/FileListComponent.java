@@ -17,10 +17,13 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.options.component;
 
+import org.eclipse.core.resources.IProject;
+
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString;
 import com.elphel.vdt.ui.dialogs.FileListPromptDialog;
 import com.elphel.vdt.ui.dialogs.ListPromptDialog;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 public class FileListComponent extends ListComponent {
 
@@ -29,12 +32,21 @@ public class FileListComponent extends ListComponent {
     }
     
     protected ListPromptDialog createDialog() {
-        String filemask = ((ParamTypeString)param.getType()).getFilemask();
-        final String[] extensions = (filemask != null? new String[] { filemask } : null);
+    	String filemask = ((ParamTypeString)param.getType()).getFilemask();
+    	final String[] extensions = (filemask != null? new String[] { filemask } : null);
+    	IProject project = SelectedResourceManager.getDefault().getSelectedProject();
+    	String projectPath=null;
+    	if (project!=null) {
+    		projectPath=project.getLocation().toString();
+    	}
+    	final String fProjectPath=projectPath;
 
-        return new FileListPromptDialog( promptField.getVisibleNameField().getShell()
-                                       , "File list prompt"
-                                       , extensions );
+
+    	return new FileListPromptDialog( promptField.getVisibleNameField().getShell(),
+    			"File list prompt",
+    			extensions,
+    			fProjectPath);
     }
+    
 
 }

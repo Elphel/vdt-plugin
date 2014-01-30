@@ -17,8 +17,13 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.params.types;
 
+import org.eclipse.core.resources.IProject;
+
 import com.elphel.vdt.core.tools.config.ConfigException;
 import com.elphel.vdt.core.tools.params.ControlInterface;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 public class ParamTypeString extends ParamType {
@@ -137,7 +142,30 @@ public class ParamTypeString extends ParamType {
         }
     }
     
+    public String tryProjectRelativePath(String path){
+    	if (path==null)
+    		return null;
+        IProject project = SelectedResourceManager.getDefault().getSelectedProject();
+    	if (project==null) return path;
+        String projectPath=project.getLocation().toString();
+    	if (path.startsWith(projectPath)) {
+        	if (path.equals(projectPath)){
+        		System.out.println("Path equals to project path = \""+path+"\", returning \".\"");
+        		return ".";
+        	}
+    		return path.substring(projectPath.length()+1);
+    	}
+    	return path;
+    }
+
     public String canonicalizeValue(String value) {
+// Try to convert file/dir parameters to project-relative
+    	if ((kind == KIND.FILE) || (kind == KIND.FILE)) {
+    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.print("Converting \""+value+"\"to ");
+    		value=tryProjectRelativePath(value);
+    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.println("\""+value+"\"");
+    	}
+    	
         switch(caseSensitive) {
             case UPPERCASE: 
                 return value.toUpperCase();

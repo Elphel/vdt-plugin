@@ -150,9 +150,9 @@ public abstract class ListComponent extends Component {
             if (promptField.getPromptDialog() == null)
                 promptField.setPromptDialog(createDialog());
             
-            ListPromptDialog dialog = promptField.getPromptDialog();
-            List<String> list = dialog.open(current);
-            returnCode = dialog.getReturnCode();
+            ListPromptDialog dialog = promptField.getPromptDialog(); // clicked on edit list button
+            List<String> list = dialog.open(current); // opened list dialog, running
+            returnCode = dialog.getReturnCode();   // canceled list
             return list;
         }
         public void slectionChanged() {
