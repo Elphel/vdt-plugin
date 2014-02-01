@@ -9,37 +9,20 @@
         <menu name="Verilog" 
               label="Verilog Development Tools"
               icon="newmod_wiz.gif">
-
-            <menuitem name="cver"
-                      label="CVer simulator"
-                      icon="cver.gif"
-                      call="cver"/>
-
-            <menuitem name="modelsim"
-                      label="ModelSIM simulator"
-                      icon="modelsim.gif"
-                      call="ModelSIM"/>
-
-            <menuitem name="xst"
-                      label="XST (Synthesis)"
-                      icon="xst.gif"
-                      call="XST"/>
-
             <menuitem name="IVerilog"
                       label="Icarus Verilog Simulator"
                       icon="iverilog.ico"
                       call="iverilog"/>
-
-            <menuitem name="IVerilog Debug"
-                      label="Icarus Verilog (Debugging TSL)"
-                      icon="iverilog.ico"
-                      call="iverilog_dbg"/>
 
             <menuitem name="GTKWave"
                       label="GTKWave (Waves viewer)"
                       icon="gtkwave.ico"
                       call="iverilog"/>
         </menu>
+        <menu name="Python tests" 
+              label="Tests with remote Python console"
+              icon="python.png">
+        
                 <menuitem name="RemotePython"
                           label="Run remote Python session"
                           icon="python.png"
@@ -48,8 +31,11 @@
                           label="Send a command to the remote Python session"
                           icon="my_tool.gif"
                           call="RemotePythonCommand"/>
-                          
-                <menuitem name="Vivado"
+        </menu>                  
+        <menu name="Vivado" 
+              label="Vivado Tools"
+              icon="xilinx.png">
+                <menuitem name="Vivado Server"
                           label="Run remote Vivado session"
                           icon="xilinx.png"
                           call="Vivado"/>
@@ -57,42 +43,19 @@
                           label="Send a command to the remote Vivado session"
                           icon="my_tool.gif"
                           call="VivadoTest"/>
-                <menuitem name="VivadoLoadSource"
-                          label="Load source files to Vivado"
+                <menuitem name="VivadoSynthesis"
+                          label="Run Vivado synthesis"
                           icon="xilinx.png"
-                          call="VivadoLoadSource"/>
-
-        <menu name="XDS" 
-              label="Demo XDS Tools"
-              icon="xds.gif">
-
-            <menu name="menuXC" 
-                  label="Native Complilation"
-                  icon="xds.gif">
-
-                <menuitem name="toolXDS-XC"
-                          label="Run XDS Native Compiler"
-                          icon="xds.gif"
-                          call="toolXDS-XC"/>
-            </menu>
-
-            <menu name="menuXM"
-                  label="Via C Complilation"
-                  icon="xds.gif">
-
-                <menuitem name="toolXDS-XM"
-                          label="Run XDS Convertor"
-                  visible="false"
-                          icon="xds.gif"
-                          call="toolXDS-XM"/>
-            </menu>
-
-            <menuitem name="toolXDS-XD"
-                      label="Run XDS Debugger"
-                      icon="xds.gif"
-                      call="toolXDS-XD"/>
-        </menu>
-
+                          call="VivadoSynthesis"/>
+        </menu>                  
+    </menu>
+    
+    <menu name="MainDesignMenu2"
+          label="Design Menu 2"
+          icon="sample.gif"
+          tip="This is an user menu"
+          inherits="MainDesignMenu">
+                              
         <menu name="OtherStuff" 
               label="Various Sample Tools">
 
@@ -113,21 +76,6 @@
         </menu>
 
     </menu>
-    
-    <menu name="MainDesignMenu2"
-          label="Design Menu 2"
-          icon="sample.gif"
-          tip="This is an user menu"
-          inherits="MainDesignMenu">
-                              
-        <menu name="OtherStuff">
-            <menuitem name="tool4"
-                      label="Run My Tool (4)"
-                      icon="my_tool.gif"
-                      call="MyTool"/>
-        </menu>
-
-    </menu>
 
     <menu name="MainDesignMenu3"
           label="Design Menu 3"
@@ -139,11 +87,24 @@
               label="Just Another Stuff"
               icon="sample.gif"
               inherits="MainDesignMenu2"
-              after="XDS"/>
+              after="Python tests"/>
 
         <menuitem name="GREP"
                   label="Run GREP"
                   call="grep"/>
+        <menu name="Python tests" 
+              label="Tests with remote Python console"
+              icon="python.png">
+        
+                <menuitem name="RemotePython"
+                          label="Run remote Python session"
+                          icon="python.png"
+                          call="RemotePython"/>
+                <menuitem name="RemotePythonCommand"
+                          label="Send a command to the remote Python session"
+                          icon="my_tool.gif"
+                          call="RemotePythonCommand"/>
+        </menu>                  
 
     </menu>
 

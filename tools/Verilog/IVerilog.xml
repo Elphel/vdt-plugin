@@ -69,7 +69,7 @@
 	</interface>
 
 	<tool name="iverilog" project="FPGA_project" label="Icarus Verilog compiler"
-		exe="iverilog" shell="?%%OS: Windows=shell:, Linux=/bin/bash"
+		shell="bash"
 		package="FPGA_package"
 		interface="IVerilog" errors="(.*):([0-9]+): [a-z_\- ]*error: (.*)"
 		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)" info="(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--do not actually exist -->
@@ -140,7 +140,7 @@
 			default="false" label="Show output with no errors/warnings" />
 
 		<parameter id="ShowWarnings" type="BoolYesNo" format="None"
-			default="false" label="Show output warnings" />
+			default="true" label="Show output warnings" />
 
 		<parameter id="RemoveBugs" type="BoolYesNo" format="None"
 			default="false" label="Remove buggy simulator output" />

@@ -79,7 +79,7 @@
 	</tool>
 	<tool name="RemotePythonCommand" project="FPGA_project" label="RemotePythonCommand"
 	    package="FPGA_package"
-		shell="/bin/bash" interface="RemoteInterface"
+		shell="bash" interface="RemoteInterface"
 		description="Sending command to a ermote Python session" errors="(.*):([0-9]+): [a-z ]*error: (.*)"
 		warnings="(.*):([0-9]+): warning: (.*)" info="(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->
 		<extensions-list>

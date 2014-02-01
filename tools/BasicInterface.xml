@@ -6,6 +6,10 @@
   <interface name = "BasicInterface">
 
    <!-- Basic types -->
+    <typedef name = "Boolean">
+      <paramtype kind="bool" formatTrue="true" formatFalse="false" />
+    </typedef>
+
     <typedef name = "BoolYesNo">
       <paramtype kind="bool" formatTrue="YES" formatFalse="NO" />
     </typedef>
