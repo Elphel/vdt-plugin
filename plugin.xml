@@ -4,6 +4,16 @@
 
     <extension point="org.eclipse.ui.editors"> 
       <editor 
+         id="com.elphel.vdt.ConstraintsEditor" 
+         name="Text Editor" 
+         extensions="xdc,sdc" 
+         class="org.eclipse.ui.editors.text.TextEditor"
+         default="true"> 
+      </editor> 
+   </extension> 
+
+    <extension point="org.eclipse.ui.editors"> 
+      <editor 
          id="net.sourceforge.GTKWave" 
          name="GTKWave Waveform Viewer" 
          extensions="sav,lxt" 
