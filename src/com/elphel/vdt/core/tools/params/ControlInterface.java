@@ -77,13 +77,44 @@ public class ControlInterface implements Inheritable {
             // we don't check base interface absence, because in
             // such a case a cyclic inheritance error would happen
         }
-
+/*
         for(Iterator ti = typedefList.iterator(); ti.hasNext();)
             ((TypeDef)ti.next()).init(this);           
+*/        
         
         initialized = true;
     }
-    
+
+    public void initTypes() throws ConfigException {
+ /*       if(initialized)
+            throw new ConfigException("Control interface cannot be re-initialized");
+        
+        if(!name.equals(BASIC_INTERFACE_NAME)) {
+            if(baseInterfaceName == null)
+                baseInterfaceName = BASIC_INTERFACE_NAME;        
+            
+            baseInterface = config.findControlInterface(baseInterfaceName);
+                
+            if(baseInterface == null) {
+                if(!baseInterfaceName.equals(BASIC_INTERFACE_NAME))
+                    throw new ConfigException("Base interface '" + baseInterfaceName +
+                                              "' of control interface '" + name + 
+                                              "' is absent");
+                else
+                    throw new ConfigException("The basic interface '" + BASIC_INTERFACE_NAME +
+                                              "' is absent");
+            }   
+        } else {
+            // we don't check base interface absence, because in
+            // such a case a cyclic inheritance error would happen
+        }
+*/
+        for(Iterator ti = typedefList.iterator(); ti.hasNext();)
+            ((TypeDef)ti.next()).init(this);           
+        
+//        initialized = true;
+    }
+
     public void check() throws ConfigException {
         Checks.checkCyclicInheritance(this, "control interface");
         

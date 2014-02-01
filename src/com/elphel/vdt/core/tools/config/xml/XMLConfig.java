@@ -385,6 +385,14 @@ public class XMLConfig extends Config {
     private void initControlInterfaces() throws ConfigException {
         for(Iterator ci = controlInterfaceList.iterator(); ci.hasNext();)
             ((ControlInterface)ci.next()).init();
+//Andrey: had to split in two separate passes, otherwise failed to initialize types
+//when parent control interface was not yet set up (only name was known)
+//Alternatively it was possible to check baseInterfaceName if baseInterface was null,
+//Replace null name with BasicInterface, ...        
+        for(Iterator ci = controlInterfaceList.iterator(); ci.hasNext();)
+            ((ControlInterface)ci.next()).initTypes();
+        
+        
     }
     
     private void checkConfig() throws ConfigException {
