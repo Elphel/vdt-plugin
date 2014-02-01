@@ -57,9 +57,10 @@ public abstract class AbstractGenerator {
         this.suffix = suffix;
         this.forcedMultiline = forcedMultiline;
         this.separator = sep;
-
-        separator = separator.replace("\\n", "\n");
-        separator = separator.replace("\\t", "\t");
+        if (separator!=null) {
+        	separator = separator.replace("\\n", "\n");
+        	separator = separator.replace("\\t", "\t");
+        }
     }
     public void setMenuMode(boolean menuMode){
     	this.menuMode=menuMode;
@@ -72,6 +73,9 @@ public abstract class AbstractGenerator {
     public abstract String getName();
     
     public String[] generate() {
+    	// Andrey: added separator==null option to enable copying list parameter to another list parameter as default
+    	// TODO: Make sure nothing else is broken because of that
+    	if (separator==null) return getStringValues();
         boolean multiline = Utils.stringContainsSpace(separator);
         String[] output;
         

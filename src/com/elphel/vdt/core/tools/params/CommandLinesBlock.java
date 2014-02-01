@@ -107,7 +107,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         
     }
 
-    public String parseCntrl(String str){
+    public static String parseCntrl(String str){
     	if (str==null) return null;
     	str=str.replace("\\n" ,"\n");
     	str=str.replace("\\t", "\t");

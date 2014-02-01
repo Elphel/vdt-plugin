@@ -240,7 +240,7 @@ public abstract class Context {
                 		parName.getValue().get(0).trim() : null;
             	if (isConsoleName) {
  //           		System.out.println("TODO: Enable console command generation here");
-            		printStringsToConsoleLine(commandLineParams, commandSequence,mark);
+            		printStringsToConsoleLine(commandLineParams, commandSequence,sep,mark);
             		buildParamItems.add(
             				new BuildParamsItem (
             						(String[])commandLineParams.toArray(new String[commandLineParams.size()]),
@@ -458,7 +458,7 @@ public abstract class Context {
 
                     if(s.length() == 0)
                         continue;
-                    out.print(useMark?(s.replace(mark,"")):s);
+                    out.print(useMark?(CommandLinesBlock.parseCntrl(s).replace(mark,"")):CommandLinesBlock.parseCntrl(s));
                     
                     written += s.length();
                     writtenNow += s.length();
@@ -486,6 +486,73 @@ public abstract class Context {
         out.close();
     }
 
+    private void printStringsToConsoleLine(
+    		List<String> commandLineParams, 
+    		List<List<String>> commandSequence,
+    		String separator,
+    		String mark) throws ToolException
+    		{
+        String sep = (separator != null? separator : " ");
+    	boolean useMark=(mark!=null) && (mark.length()>0);
+        int written = 0;
+		StringBuilder builder = new StringBuilder();
+    	for(Iterator<List<String>> li = commandSequence.iterator(); li.hasNext();) {
+    		List<String> strList = (List<String>)li.next();
+    		if(strList.size() > 0) {
+                int writtenNow = 0;
+                for(Iterator<String> si = strList.iterator(); si.hasNext();) { // "words" in each line
+                    String s = (String)si.next();
+                    if(s.length() == 0)
+                        continue;
+                    builder.append(useMark?(CommandLinesBlock.parseCntrl(s).replace(mark,"")):CommandLinesBlock.parseCntrl(s));
+                    written += s.length();
+                    writtenNow += s.length();
+                    // try to avoid needless spaces  
+                    if(writtenNow > 0 && si.hasNext()) { // adding spaces between generator "words" ?
+                        String stripped = s.
+                                          replace('\n', ' ').
+                                          replace('\t', ' ').
+                                          trim();
+                        
+                        if(stripped.length() > 0)
+                        	builder.append(" ");
+                    }
+                }
+                if(writtenNow > 0 && li.hasNext())
+                	builder.append(sep);
+    		}
+    	}
+        if(written > 0)
+        	builder.append("\n");
+        commandLineParams.add(builder.toString()); // just a single line
+	}
+/*
+ *  previous version
+    private void printStringsToConsoleLine(
+    		List<String> commandLineParams, 
+    		List<List<String>> commandSequence,
+    		String separator,
+    		String mark) throws ToolException
+    		{
+        String sep = (separator != null? separator : " ");
+    	boolean useMark=(mark!=null) && (mark.length()>0);
+    	for(Iterator<List<String>> li = commandSequence.iterator(); li.hasNext();) {
+    		List<String> strList = (List<String>)li.next();
+
+    		if(strList.size() > 0) {
+    			for(Iterator<String> si = strList.iterator(); si.hasNext();) {
+    				String s = ((String)si.next()).trim();
+
+    				if(!s.equals(""))
+    					commandLineParams.add(useMark?
+    							(CommandLinesBlock.parseCntrl(s).replace(mark,"")):
+    								CommandLinesBlock.parseCntrl(s));
+    			}
+    		}
+    	}
+	}
+
+ */
     private void printStringsToCommandLine(List<String> commandLineParams, 
                                            List<List<String>> commandSequence,
                                            String mark) 
@@ -499,32 +566,15 @@ public abstract class Context {
                 for(Iterator<String> si = strList.iterator(); si.hasNext();) {
                     String s = ((String)si.next()).trim();
                     if(!s.equals(""))
-                        commandLineParams.add(useMark?(s.replace(mark,"")):s);
+                        commandLineParams.add(useMark?
+                        		(CommandLinesBlock.parseCntrl(s).replace(mark,"")):
+                        			CommandLinesBlock.parseCntrl(s));
                 }
             }
         }
     }
 // Andrey: now is the same as command line, but will change to allow last element be prompt
     
-    private void printStringsToConsoleLine(
-    		List<String> commandLineParams, 
-    		List<List<String>> commandSequence,
-    		String mark) throws ToolException
-    		{
-    	boolean useMark=(mark!=null) && (mark.length()>0);
-    	for(Iterator<List<String>> li = commandSequence.iterator(); li.hasNext();) {
-    		List<String> strList = (List<String>)li.next();
-
-    		if(strList.size() > 0) {
-    			for(Iterator<String> si = strList.iterator(); si.hasNext();) {
-    				String s = ((String)si.next()).trim();
-
-    				if(!s.equals(""))
-    					commandLineParams.add(useMark?(s.replace(mark,"")):s);
-    			}
-    		}
-    	}
-	}
     
     private void checkNotInitialized() throws ConfigException {
         if(initialized)

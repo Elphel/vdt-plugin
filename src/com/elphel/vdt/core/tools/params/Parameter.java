@@ -328,7 +328,8 @@ public class Parameter implements Cloneable, Updateable {
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             //new RepeaterRecognizer(),
                                                             new SimpleGeneratorRecognizer(menuMode),
-                                                            new ContextParamRecognizer(context)
+                                                            new ContextParamListRecognizer(context) // Andrey: returning list as the source parameter 
+//                                                            new ContextParamRecognizer(context)
                                                         });
 
         try {

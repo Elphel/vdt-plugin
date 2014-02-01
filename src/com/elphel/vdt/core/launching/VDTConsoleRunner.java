@@ -39,6 +39,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 //import org.eclipse.debug.core.model.IStreamListener;
 import org.eclipse.debug.core.model.IStreamsProxy;
+import org.eclipse.debug.core.model.IStreamsProxy2;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.console.IConsole;
 //import org.eclipse.debug.ui.console.IConsole;
@@ -57,11 +58,13 @@ public class VDTConsoleRunner{
 	private final VDTRunnerConfiguration runConfig; //*
 	private IProcess processErr=null; //*
 	private IProcess processOut=null; //*
-	private IStreamsProxy sendErrorsToStreamProxy=null;
+	private IStreamsProxy2 sendErrorsToStreamProxy=null;
 	private Object errorListener=null; //+
 	private Object outputListener=null; //+
-    private IStreamsProxy consoleInStreamProxy= null; //+
+    private IStreamsProxy2 consoleInStreamProxy= null; //+
     private Timer timer;
+    private IStreamsProxy2 stdoutStreamProxy=null;
+    private IStreamsProxy2 stderrStreamProxy=null;
 
     
 	public VDTConsoleRunner (VDTRunnerConfiguration runConfig){
@@ -122,7 +125,7 @@ public class VDTConsoleRunner{
         runner.log("Writing to console "+iCons.getName()+":", arguments, null, false, false); /* Appears in the console of the parent Eclipse */
         IOConsoleOutputStream 	outStream= iCons.newOutputStream();
         IProcess process=((ProcessConsole)iCons).getProcess();
-        consoleInStreamProxy= process.getStreamsProxy();
+        consoleInStreamProxy= (IStreamsProxy2)process.getStreamsProxy();
         int stderrParserIndex=getParserIndex(buildParamsItem.getStderr());
         int stdoutParserIndex=getParserIndex(buildParamsItem.getStdout());
         BuildParamsItem stderrParser=(stderrParserIndex>=0)?runConfig.getArgumentsItemsArray()[stderrParserIndex]:null;
@@ -133,8 +136,10 @@ public class VDTConsoleRunner{
         }        
         processErr=null;
         processOut=null;
-        IStreamsProxy stdoutStreamProxy=null;
-        IStreamsProxy stderrStreamProxy=null;
+//        IStreamsProxy2 stdoutStreamProxy=null;
+//        IStreamsProxy2 stderrStreamProxy=null;
+        stdoutStreamProxy=null;
+        stderrStreamProxy=null;
         if (stdoutParser!=null){
 			List<String> toolArgumentsStdout = new ArrayList<String>();
 			List<String> stdoutArguments=stdoutParser.getParamsAsList();
@@ -147,7 +152,7 @@ public class VDTConsoleRunner{
         			launch,
         			null, //monitor
         			stdoutParserIndex);
-            stdoutStreamProxy= processOut.getStreamsProxy();
+            stdoutStreamProxy= (IStreamsProxy2) processOut.getStreamsProxy();
         }
         
         if (stderrParser!=null){
@@ -162,13 +167,13 @@ public class VDTConsoleRunner{
         			launch,
         			null, //monitor);
         			stderrParserIndex);
-            stderrStreamProxy= processErr.getStreamsProxy();
+            stderrStreamProxy= (IStreamsProxy2) processErr.getStreamsProxy();
           //TODO: Add error parsers            
         }
         
         sendErrorsToStreamProxy=(stderrStreamProxy!=null)?stderrStreamProxy:stdoutStreamProxy;
-        final IStreamsProxy fSendErrorsToStreamProxy=sendErrorsToStreamProxy;
-        final IStreamsProxy fSendOutputToStreamProxy= stdoutStreamProxy;
+        final IStreamsProxy2 fSendErrorsToStreamProxy=sendErrorsToStreamProxy;
+        final IStreamsProxy2 fSendOutputToStreamProxy= stdoutStreamProxy;
 
 // connect input streams of the parsers to the out from the console process         
         IStreamMonitor consoleOutStreamMonitor=null;
@@ -270,9 +275,45 @@ public class VDTConsoleRunner{
     		consoleOutStreamMonitor.removeListener((IStreamListener) outputListener);
     	}
     	// terminate parser(s). Do those console listeners (parsers) have to be removed too?
+    	// TODO: Maybe wait for the process (small time) to terminate by disconnecting it's stdin
+    	// Now end of the parsing may be lost if it did not have enough time to finish.
+    	//IStreamsProxy2.closeInputStream()
+    	// Disconnection worked !!
+    	
+    	if (stderrStreamProxy!=null){
+    		try {
+    			stderrStreamProxy.closeInputStream();
+			} catch (IOException e) {
+				System.out.println("Failed to disconnect stdin of the processErr parser process");
+		    	if (processErr!=null){
+		    		try {
+						processErr.terminate();
+					} catch (DebugException te) {
+						System.out.println("Failed to terminate processErr parser process");
+					}
+		    	}
+			}
+    	}
+    	if (stdoutStreamProxy!=null){
+    		try {
+    			stdoutStreamProxy.closeInputStream();
+			} catch (IOException e) {
+				System.out.println("Failed to disconnect stdin of the processOut parser process");
+		    	if (processOut!=null){
+		    		try {
+						processOut.terminate();
+					} catch (DebugException te) {
+						System.out.println("Failed to terminate processOut parser process");
+					}
+		    	}
+			}
+    	}
+
+/*    	
     	if (processErr!=null){
     		try {
 				processErr.terminate();
+				
 			} catch (DebugException e) {
 				System.out.println("Failed to terminate processErr parser process");
 			}
@@ -284,6 +325,7 @@ public class VDTConsoleRunner{
 				System.out.println("Failed to terminate processOut parser process");
 			}
     	}
+*/    	
     	int thisStep=runConfig.getBuildStep();
     	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
     		System.out.println("Finished console task, step was "+thisStep);
