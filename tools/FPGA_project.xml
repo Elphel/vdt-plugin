@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vdt-project>
-	<interface name="FPGAPprojectInterface" extends="project_interface">
+	<interface name="FPGAPprojectInterface">
 		<syntax name="RemoteRootSyntax" format="%%ParamValue/%%ProjectName" />
 		<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
 		<syntax name="FilteredSourceListSyntax" format="%(%%FilteredSourceList%| %)" />
+		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
 		<!-- typedef -->
 	</interface>
 	<package name="FPGA_package"

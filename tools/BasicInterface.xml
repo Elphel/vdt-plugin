@@ -26,6 +26,10 @@
       <paramtype kind="number" lo="0" hi="65535" format="%d" />
     </typedef>
 
+    <typedef name = "Cardinal_1">
+      <paramtype kind="number" lo="1" hi="65535" format="%d" />
+    </typedef>
+
     <typedef name = "LongCardinal">
       <paramtype kind="number" lo="0" hi="2147483647" format="%d" />
     </typedef>
@@ -81,6 +85,9 @@
     <syntax name="None"      format="" />
     <syntax name="CopyValue" format="%%ParamValue" />
 	<syntax name="ParamListSyntax" format="%(%%ParamValue%| %)" />
+	<syntax name="Dash"      format=" -%%ParamName %%ParamValue" />
+	<syntax name="DashList"  format=" -%%ParamName %(-s%%ParamValue%| %)" />
+	<syntax name="DashName"  format=" -%%ParamName" />
 
   </interface>
 

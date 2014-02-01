@@ -40,7 +40,7 @@
                           icon="xilinx.png"
                           call="Vivado"/>
                 <menuitem name="Vivado Test"
-                          label="Send a command to the remote Vivado session"
+                          label="Send a 'Hello World' command to the remote Vivado session"
                           icon="my_tool.gif"
                           call="VivadoTest"/>
                 <menuitem name="VivadoSynthesis"

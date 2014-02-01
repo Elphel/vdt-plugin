@@ -10,8 +10,7 @@
 
     ============================================================
     -->
-    <interface name="MyControlInterface"
-        extends="project_interface">
+    <interface name="MyControlInterface">
         <typedef name="MyType1">
             <paramtype kind="number"
                        lo="1"

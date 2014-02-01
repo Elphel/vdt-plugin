@@ -2,8 +2,9 @@
 
 <vdt-project>
 	<interface name="VivadoInterface" extends="FPGAPprojectInterface">
+	<!-- 
 		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
-		<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" />
+		<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" /> -->
 		
 	</interface>
 </vdt-project>

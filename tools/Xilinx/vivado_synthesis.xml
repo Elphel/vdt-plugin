@@ -1,10 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <vdt-project>
+	<interface name="VivadoSynthesisInterface" extends="VivadoInterface">
+			<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" />
+	    <typedef name="FlattenHierarchyType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="rebuilt" label="rebuilt: Attempt to rebuild hierarchy after synthesis is completed"/>
+      			<item value="full"    label="full: Flatten hierarchy of the design"/>
+      			<item value="none"    label="none: Preserve hierarchy (prevents optimization)"/>
+      		</paramtype>
+    	</typedef>
+
+	    <typedef name="GatedClockConversionType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="off"    label="off: No conversion of the gated FF clocks"/>
+      			<item value="on"     label="on: Convert gated clocks to use FF enables where possible"/>
+      			<item value="auto"   label="auto: Convert gated clocks to use FF enables where beneficial"/>
+      		</paramtype>
+    	</typedef>
+	    <typedef name="DirectiveType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="default"           label="default: Full optimization"/>
+      			<item value="runtimeoptimized"  label="runtimeoptimized: Some optimization skipped"/>
+      		</paramtype>
+    	</typedef>
+	    <typedef name="ModeType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="default"           label="default: Insert buffers around imaginary property modules"/>
+      			<item value="out_of_context"    label="out_of_context: Mark Imaginary Property as OOC, do not insert buffers"/>
+      		</paramtype>
+    	</typedef>
+	    <typedef name="FSMType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="off"       label="off: No FSM extraction"/>
+      			<item value="one_hot"   label="one_hot: Extract one-hot FSM"/>
+      			<item value="sequntial" label="sequntial:Extract Sequential FSM"/>
+      			<item value="johnson"   label="johnson: Extract Johnson FSM"/>
+      			<item value="gray"      label="gray: Extract Gray FSM"/>
+      			<item value="auto"      label="auto: Automatically decide on the FSM type to extract"/>
+      		</paramtype>
+    	</typedef>
+	    <typedef name="ResourceSharingType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="off"    label="off: No sharing of adders and such between different signals"/>
+      			<item value="on"     label="on: Enable sharing of adders and such between different signals"/>
+      			<item value="auto"   label="auto: Automaticxally enable sharing of adders and such between different signals where beneficial"/>
+      		</paramtype>
+    	</typedef>
+	</interface>
 
 	<tool name="VivadoSynthesis" label="Load Source files to Vivado"
 	    project="FPGA_project"
-		interface="VivadoInterface"
+		interface="VivadoSynthesisInterface"
 		package="FPGA_package"
 		shell="/bin/bash"
 		ignore="%VivadoIgnoreSource"
@@ -38,8 +85,53 @@
         <parameter id="GrepEWI" label="Grep filter"
                    default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
-                   visible="true" readonly="true"/>		           
-			
+                   visible="true" readonly="true"/>
+  
+<!-- synth_design arguments -->  
+
+        <parameter 	id="name"             label= "Design to open after synth"
+         			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="part"             label= "Xilinx device to use"
+         			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="constrset"        label= "Constraints set to use"
+       				 default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="top"              label= "Top module of the design"
+        			default="%%TopModule" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="include_dirs"     label= "Include directories for Verilog `include"
+        			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
+        <parameter	id="generic"          label= "name=value list of VHDL generic entity or Verilog parameter"
+        			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
+        <parameter	id="verilog_define"   label= "Verilog macro=text definitions"
+        			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
+        <parameter	id="flatten_hierarchy" label= "Flatten Hierarchy during LUT mapping"
+        			default="rebuilt" visible="true" omit="rebuilt" type="FlattenHierarchyType" format="Dash"/>
+        <parameter	id="gated_clock_conversion" label= "Conversion of gated clocks to FF CE where possible"
+        			default="off" visible="true" omit="off" type="GatedClockConversionType" format="Dash"/>
+        <parameter	id="directive"    label= "Skip some of the optimization algorithms"
+        			default="default" visible="true" omit="default" type="DirectiveType" format="Dash"/>
+        <parameter	id="rtl"          label= "Elaborate HDL source files and open RTL design"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="bufg"         label= "Maximum number of global buffers to use"
+        			default="12"  visible="true" omit="12" type="Cardinal" format="Dash"/>
+        <parameter	id="no_lc"        label= "Disable LUT combining feature"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="fanout_limit" label= "Maximum fanout applied during synthesis"
+        			default="10000"  visible="true" omit="10000" type="Cardinal_1" format="Dash"/>
+        <parameter	id="mode"       label= "Imaginary property synthesis type"
+        			default="default" visible="true" omit="default" type="ModeType" format="Dash"/>
+        <parameter	id="fsm_extraction" label= "Finite State Machine encoding"
+        			default="off" visible="true" omit="off" type="FSMType" format="Dash"/>
+        <parameter	id="keep_equivalent_registers" label= "Prevent merging of equivalent registers"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="resource_sharing" label= "Share resources (adders and such) between different signals"
+        			default="auto" visible="true" omit="auto" type="ResourceSharingType" format="Dash"/>
+        <parameter	id="control_set_opt_thershold" label= "Use dedicated FF control input if fanout exceeds this value"
+        			default="4"  visible="true" omit="4" type="Cardinal_1" format="Dash"/>
+        <parameter	id="quiet"    label= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="verbose"   label= "Temporarily override mesage limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+                   	           
 <!-- hidden (calculated) parameters -->			
 	   <parameter id="FilteredSourceList" type="Stringlist"
 			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
@@ -56,15 +148,35 @@
 				"ShowInfo"
 				"GrepEWI"
 			</group>
+			<group name="Synthesis">
+		        "name"
+		        "part"
+		        "constrset"
+		        "top"
+		        "include_dirs"
+		        "generic"
+		        "verilog_define"
+		        "flatten_hierarchy"
+		        "gated_clock_conversion"
+		        "directive"
+		        "rtl"
+		        "bufg"
+		        "no_lc"
+		        "fanout_limit"
+		        "mode"
+		        "fsm_extraction"
+		        "keep_equivalent_registers"
+		        "resource_sharing"
+		        "control_set_opt_thershold"
+		        "quiet"
+		        "verbose"
+			</group>
 		</input>
 
 		<output>
 		<!-- mkdir -p vdt/npmtest -->
 			<line name="vivado_copy_pre_synth">
 				"-c"
-<!-- 				"echo"
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
-				";" -->
 				"ssh -l"
 				"%RemoteUser"
 				"%RemoteHost"
@@ -87,7 +199,7 @@
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      <if ResetProject="true"> 
-			          "reset_project\n""
+			          "reset_project -quiet\n"
 			      </if>
 			      "file mkdir $outputDir\n"
 			      "read_verilog %FilteredSourceList\n"
@@ -97,10 +209,33 @@
 			      <if-not ConstraintsFiles="">
                           "%read_xdc\n"
 			      </if-not>
-			      "synth_design -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"
+			      "synth_design"
+	 		      "%name"
+		          "%part"
+		          "%constrset"
+		          "%top"
+		          "%include_dirs"
+		          "%generic"
+		          "%verilog_define"
+		          "%flatten_hierarchy"
+		          "%gated_clock_conversion"
+		          "%directive"
+		          "%rtl"
+		          "%bufg"
+		          "%no_lc"
+		          "%fanout_limit"
+		          "%mode"
+		          "%fsm_extraction"
+		          "%keep_equivalent_registers"
+		          "%resource_sharing"
+		          "%control_set_opt_thershold"
+		          "%quiet"
+		          "%verbose"
+			      "\n"
 			      "write_checkpoint -force %SnapshotSynth\n"
 				"puts '@@FINISH@@'\n"
 			</line>
+<!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
 			<line name="vivado_copy_after_synth">
 				"-c"
 				"mkdir -p %VivadoLocalDir ;"

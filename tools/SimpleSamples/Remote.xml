@@ -2,7 +2,7 @@
 
 <vdt-project>
 	<interface name="RemoteInterface" extends="FPGAPprojectInterface">
-		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
+<!-- 		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />  -->
 	</interface>
 	<tool name="RemotePython" project="FPGA_project" label="RemotePython"
 	    package="FPGA_package"
