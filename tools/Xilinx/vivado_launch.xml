@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vdt-project>
+	<!--  name shold be the same as VivadoConsole parameter -->
+	<tool name="Vivado"
+		label="Launch Vivado" 
+	    project="FPGA_project"
+	    package="FPGA_package"
+		shell="/bin/bash" interface="VivadoInterface" description="Launching remote Xilinx Vivado in console"> 
+		<action-menu>
+			<action label="Launch Vivado" resource="" icon="xilinx.png" />
+		</action-menu>
+		<input>
+			<group name="General">
+			</group>
+		</input>
+
+		<output>
+			<line name="vivado_launch"
+			      interrupt="\x03">
+				"%ShellSwitches"
+				"%PreSSH"
+				"ssh"
+				<if TerminalMode = "true">
+				  "-t -t"
+				</if>
+				"%SSHSwitches"
+				"-l"
+				"%RemoteUser"
+				"%RemoteHost"
+				"'"
+				"%RemoteCommand"
+				"'"
+				"%SSHExtra"
+			</line>
+		</output>
+	</tool>
+</vdt-project>

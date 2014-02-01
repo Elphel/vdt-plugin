@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+
+	<tool name="VivadoSynthesis" label="Load Source files to Vivado"
+	    project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%VivadoIgnoreSource"
+		description="Vivado Synthesis">
+		<extensions-list>
+			<extension mask="v" />
+			<extension mask="tf" />
+		</extensions-list>
+
+		<action-menu>
+			<action label="Vivado Synthesis" resource="" icon="xilinx.png" />
+		</action-menu>
+		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
+			default="" label="Select constraint files to load to Vivado" readonly="false"
+			visible="true" />
+		<parameter id="ResetProject" label="Reset project before loading source files"
+		           default="true"
+		           type= "Boolean" format="None"/>
+		<parameter id="ShowWarnings" label="Parse warning messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+		<parameter id="ShowInfo" label="Parse info messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+        <parameter id="PreGrepW" visible="false"
+                   type="String" format="None"
+                   default="?%ShowWarnings=true: |WARNING, "/>
+        <parameter id="PreGrepI" visible="false"
+                   type="String" format="None"
+                   default="?%ShowInfo=true: |INFO, "/>
+        <parameter id="GrepEWI" label="Grep filter"
+                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
+                   type="String" format="CopyValue"
+                   visible="true" readonly="true"/>		           
+			
+<!-- hidden (calculated) parameters -->			
+	   <parameter id="FilteredSourceList" type="Stringlist"
+			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
+	  <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="read_xdc"
+			default="%ConstraintsFiles" visible="true" readonly="false" />
+			
+		<input>
+			<group name="General">
+				"ConstraintsFiles"
+ 				"SnapshotSynth" <!--  same as in project -->
+				"read_xdc"
+				"ResetProject"
+				"ShowWarnings"
+				"ShowInfo"
+				"GrepEWI"
+			</group>
+		</input>
+
+		<output>
+		<!-- mkdir -p vdt/npmtest -->
+			<line name="vivado_copy_pre_synth">
+				"-c"
+<!-- 				"echo"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				";" -->
+				"ssh -l"
+				"%RemoteUser"
+				"%RemoteHost"
+				"'"
+				"mkdir -p"
+				"%VivadoProjectRoot"
+				"' ;"
+				"rsync -avrR -e ssh"
+				"%FilteredSourceList"
+				"%ConstraintsFiles"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+			</line>
+<!-- TODO: Make it OK to use just strings, not parameters in dest (for console names) -->			
+			<line name="vivado_run_synth"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep=""
+			      prompt="@@FINISH@@" 
+			      stdout="parser_VivadoSynth">
+			      "cd ~/%VivadoProjectRoot\n"
+			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      <if ResetProject="true"> 
+			          "reset_project\n""
+			      </if>
+			      "file mkdir $outputDir\n"
+			      "read_verilog %FilteredSourceList\n"
+			      <if ConstraintsFiles="">
+			          "puts 'No constraints files specified, skipping read_xdc command'\n"
+			      </if>
+			      <if-not ConstraintsFiles="">
+                          "%read_xdc\n"
+			      </if-not>
+			      "synth_design -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"
+			      "write_checkpoint -force %SnapshotSynth\n"
+				"puts '@@FINISH@@'\n"
+			</line>
+			<line name="vivado_copy_after_synth">
+				"-c"
+				"mkdir -p %VivadoLocalDir ;"
+				"rsync -avr -e ssh"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
+				"%VivadoLocalDir/"
+			</line>
+			<line name="parser_VivadoSynth"
+			    errors=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+				warnings=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+				info=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]">
+				"-c"
+     			"%GrepEWI"
+     			"| %SedPaths"
+			</line>
+		</output>
+	</tool>
+
+</vdt-project>

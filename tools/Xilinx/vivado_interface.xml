@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="VivadoInterface" extends="FPGAPprojectInterface">
+		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
+		<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" />
+		
+	</interface>
+</vdt-project>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<tool name="VivadoTest" label="VivadoCommand"
+	    project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%VivadoIgnoreSource"
+		description="Sending command to a remote Vivado session" errors="(.*):([0-9]+): [a-z ]*error: (.*)"
+		warnings="(.*):([0-9]+): warning: (.*)" info="(.*):([0-9]+): info: (.*)"> <!--does not actually exist -->
+		<extensions-list>
+			<extension mask="v" />
+			<extension mask="tf" />
+		</extensions-list>
+
+		<action-menu>
+			<action label="Vivado Command" resource="" icon="xilinx.png" />
+		</action-menu>
+
+		<parameter id="TCLCommand" label="Remote TCL Command to send"
+			type="Stringlist" format="ProgramSyntax" default="puts &quot;Hello, World!&quot;"
+			readonly="false" visible="true" />
+			
+	   <parameter id="Timeout" label="Script timeout(sec)" type="Cardinal"
+			format="CopyValue" default="10" readonly="false" visible="true" />
+<!-- hidden (calculated) parameters -->			
+	   <parameter id="FilteredSourceList" type="Stringlist"
+			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
+			
+		<input>
+			<group name="General">
+				"TCLCommand"
+				"Timeout"
+			</group>
+		</input>
+
+		<output>
+			<line name="pre_tcl">
+				"-c"
+				"echo 'scp files here' ;"
+				"echo '"
+				"%FilteredSourceList"
+				"' ;"
+				"sleep 2 ;"
+			</line>
+<!-- TODO: Make it OK to ose just strings, not parameters in dest (for console names) -->			
+			<line name="vivado_line_01"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep="\n"
+			      prompt="@@FINISH@@" 
+			      stdout="parser_001"
+			      timeout="Timeout">
+				"%TCLCommand"
+				"puts '@@FINISH@@'"
+				"``"`" <!-- two new lines should generate a pair of prompts from the remote -->
+			</line>
+			<line name="command_line_02">
+				"-c"
+				"echo 'Will scp result files back here' ;"
+				"sleep 2 ;"
+			</line>
+<!-- parser_01 being referenced should be launched in an asynchronous process/console, removed from the launch sequence -->
+			<line name="parser_001"
+			    errors="(.*):([0-9]+): [a-z ]*error: (.*)"
+				warnings="(.*):([0-9]+): warning: (.*)"
+				info="(.*):([0-9]+): info: (.*)">
+				"-c"
+				"cat"
+			</line>
+		</output>
+	</tool>
+</vdt-project>
