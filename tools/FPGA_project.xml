@@ -29,9 +29,34 @@
 		<parameter id="SSHSwitches" label="Other ssh switches"
 			type="String" format="CopyValue" default="" readonly="false" visible="true" />
 
-		<parameter id="RemoteCommand" label="Remote ssh command"
-			type="String" format="CopyValue" default="/opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl" readonly="false"
+
+		<parameter id="VivadoRelease" label="Vivado release number (part of the path)"
+			type="String" format="CopyValue" default="2013.4" readonly="false"
 			visible="true" />
+
+		<parameter id="VivadoInstallationRoot" label="Vivado Installation Root"
+			type="String" format="CopyValue" default="/opt/Xilinx/Vivado" readonly="false"
+			visible="true" />
+			
+		<parameter id="VivadoRelativeExeOptions" label="Vivado relative executable path and options"
+			type="String" format="CopyValue" default="bin/vivado -mode tcl" readonly="false"
+			visible="true" />
+
+		<parameter id="VivadoUnisimsPath" label="Relative location of Xilinx unisims library"
+			type="String" format="CopyValue" default="data/verilog/src" readonly="false"
+			visible="true" />
+<!-- /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
+		<parameter id="RemoteCommand" label="Remote ssh command"
+			type="String" format="CopyValue"
+			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoRelativeExeOptions"
+			readonly="true"
+			visible="true" />
+		<parameter id="VivadoUnisimsAbsolutePath" label="Full path of Xilinx unisims primitives library"
+			type="String" format="CopyValue"
+			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoUnisimsPath"
+			readonly="true"
+			visible="true" />
+			
 
 		<parameter id="SSHExtra" label="ssh extra parameters" type="String"
 			format="CopyValue" default="" readonly="false" visible="true" />
@@ -51,9 +76,14 @@
 				"ShellSwitches"
 				"PreSSH"
 				"SSHSwitches"
-				"RemoteCommand"
 				"SSHExtra"
 				"VivadoConsole"
+				"VivadoRelease"
+				"VivadoInstallationRoot"
+				"VivadoRelativeExeOptions"
+				"VivadoUnisimsPath"
+				"RemoteCommand"
+				"VivadoUnisimsAbsolutePath"
 			</group>
 		</input>
 	              
@@ -65,14 +95,17 @@
 		interface="FPGAPprojectInterface">
 		<!--  Simulation parameters  -->
 		<parameter id="SimulationTopFile" label="Project top simulation file"
-			type="Filename" default="default_top (testing)" format="CopyValue"
+			type="Filename" default="" format="CopyValue"
 			readonly="false" />
 		<parameter id="SimulationTopModule" label="Project top simulation module"
 			type="String" default="" format="CopyValue" readonly="false" />
+		<parameter id="ImplementationTopFile" label="Project file with top implementation module"
+			type="Filename" default="" format="CopyValue" readonly="false" />
 		<parameter id="SimulDir" label="project simulation directory"
 			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
 		<!--  Vivado parameters  -->
-			
+		<parameter	id="part"             label= "Xilinx device to use"
+        		default="" visible="true" omit="" type="String" format="Dash"/>
 		<parameter id="VivadoProjectRoot" label="Relative (to user home directory) path of the workspace on Vivado server"
 			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
 
@@ -102,9 +135,11 @@
 			<group name="Simulation" label="Simulation properties">
 				"SimulationTopFile"
 				"SimulationTopModule"
+				"ImplementationTopFile"
 				"SimulDir"
 			</group>
 			<group name="Vivado" label="Vivado general properties">
+			    "part"
 				"VivadoProjectRoot"
 				"VivadoLocalDir"
 				"VivadoIgnoreSource"

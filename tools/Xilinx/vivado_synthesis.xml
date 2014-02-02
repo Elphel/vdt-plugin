@@ -5,46 +5,46 @@
 			<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" />
 	    <typedef name="FlattenHierarchyType">
       		<paramtype kind= "enum" base="String">
-      			<item value="rebuilt" label="rebuilt: Attempt to rebuild hierarchy after synthesis is completed"/>
-      			<item value="full"    label="full: Flatten hierarchy of the design"/>
-      			<item value="none"    label="none: Preserve hierarchy (prevents optimization)"/>
+      			<item value="rebuilt" label="Attempt to rebuild hierarchy after synthesis is completed"/>
+      			<item value="full"    label="Flatten hierarchy of the design"/>
+      			<item value="none"    label="Preserve hierarchy (prevents optimization)"/>
       		</paramtype>
     	</typedef>
 
 	    <typedef name="GatedClockConversionType">
       		<paramtype kind= "enum" base="String">
-      			<item value="off"    label="off: No conversion of the gated FF clocks"/>
-      			<item value="on"     label="on: Convert gated clocks to use FF enables where possible"/>
-      			<item value="auto"   label="auto: Convert gated clocks to use FF enables where beneficial"/>
+      			<item value="off"    label="No conversion of the gated FF clocks"/>
+      			<item value="on"     label="Convert gated clocks to use FF enables where possible"/>
+      			<item value="auto"   label="Convert gated clocks to use FF enables where beneficial"/>
       		</paramtype>
     	</typedef>
 	    <typedef name="DirectiveType">
       		<paramtype kind= "enum" base="String">
-      			<item value="default"           label="default: Full optimization"/>
-      			<item value="runtimeoptimized"  label="runtimeoptimized: Some optimization skipped"/>
+      			<item value="default"           label="Full optimization"/>
+      			<item value="runtimeoptimized"  label="Some optimization skipped"/>
       		</paramtype>
     	</typedef>
 	    <typedef name="ModeType">
       		<paramtype kind= "enum" base="String">
-      			<item value="default"           label="default: Insert buffers around imaginary property modules"/>
-      			<item value="out_of_context"    label="out_of_context: Mark Imaginary Property as OOC, do not insert buffers"/>
+      			<item value="default"           label="Insert buffers around ImgP (imaginary property) modules"/>
+      			<item value="out_of_context"    label="Mark ImgP (imaginary property) as OOC, do not insert buffers"/>
       		</paramtype>
     	</typedef>
 	    <typedef name="FSMType">
       		<paramtype kind= "enum" base="String">
-      			<item value="off"       label="off: No FSM extraction"/>
-      			<item value="one_hot"   label="one_hot: Extract one-hot FSM"/>
-      			<item value="sequntial" label="sequntial:Extract Sequential FSM"/>
-      			<item value="johnson"   label="johnson: Extract Johnson FSM"/>
-      			<item value="gray"      label="gray: Extract Gray FSM"/>
-      			<item value="auto"      label="auto: Automatically decide on the FSM type to extract"/>
+      			<item value="off"       label="No FSM extraction"/>
+      			<item value="one_hot"   label="Extract one-hot FSM"/>
+      			<item value="sequntial" label="Extract Sequential FSM"/>
+      			<item value="johnson"   label="Extract Johnson FSM"/>
+      			<item value="gray"      label="Extract Gray FSM"/>
+      			<item value="auto"      label="Automatically decide on the FSM type to extract"/>
       		</paramtype>
     	</typedef>
 	    <typedef name="ResourceSharingType">
       		<paramtype kind= "enum" base="String">
-      			<item value="off"    label="off: No sharing of adders and such between different signals"/>
-      			<item value="on"     label="on: Enable sharing of adders and such between different signals"/>
-      			<item value="auto"   label="auto: Automaticxally enable sharing of adders and such between different signals where beneficial"/>
+      			<item value="off"    label="No sharing of adders and such between different signals"/>
+      			<item value="on"     label="Enable sharing of adders and such between different signals"/>
+      			<item value="auto"   label="Automatically enable sharing of adders and such between different signals where beneficial"/>
       		</paramtype>
     	</typedef>
 	</interface>
@@ -62,11 +62,18 @@
 		</extensions-list>
 
 		<action-menu>
-			<action label="Vivado Synthesis" resource="" icon="xilinx.png" />
+			<action label="Synthesise with Vivado:" resource="%ImplementationTopFile"
+			        check-extension="false" check-existence="true"  icon="xilinx.png" />
+			<action label="Check by Vivado Synthesis:" resource="%%SelectedFile"
+			        check-extension="true" check-existence="true" icon="sample.gif" />
 		</action-menu>
+		
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
 			default="" label="Select constraint files to load to Vivado" readonly="false"
 			visible="true" />
+		<parameter id="SkipSnapshotSynth" label="Do not create snapshot after synthesis"
+		           default="false"
+		           type= "Boolean" format="None"/>
 		<parameter id="ResetProject" label="Reset project before loading source files"
 		           default="true"
 		           type= "Boolean" format="None"/>
@@ -91,17 +98,21 @@
 
         <parameter 	id="name"             label= "Design to open after synth"
          			default="" visible="true" omit="" type="String" format="Dash"/>
-        <parameter	id="part"             label= "Xilinx device to use"
-         			default="" visible="true" omit="" type="String" format="Dash"/>
+<!-- part is defined in "FPGA_project" -->         			
+<!--         <parameter	id="part"             label= "Xilinx device to use"
+         			default="" visible="true" omit="" type="String" format="Dash"/>  -->
         <parameter	id="constrset"        label= "Constraints set to use"
        				 default="" visible="true" omit="" type="String" format="Dash"/>
-        <parameter	id="top"              label= "Top module of the design"
-        			default="%%TopModule" visible="true" omit="" type="String" format="Dash"/>
+       				 
+        			
+<!--    <parameter	id="top"              label= "Top module of the design (you may set in in project properties)"
+        			default="%ImplementationTopModule" visible="true" omit="" type="String" format="Dash"/> -->
+        			
         <parameter	id="include_dirs"     label= "Include directories for Verilog `include"
         			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
-        <parameter	id="generic"          label= "name=value list of VHDL generic entity or Verilog parameter"
+        <parameter	id="generic"          label= '"name=value" list of VHDL generic entity or Verilog parameter'
         			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
-        <parameter	id="verilog_define"   label= "Verilog macro=text definitions"
+        <parameter	id="verilog_define"   label= 'Verilog "macro=text" definitions'
         			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
         <parameter	id="flatten_hierarchy" label= "Flatten Hierarchy during LUT mapping"
         			default="rebuilt" visible="true" omit="rebuilt" type="FlattenHierarchyType" format="Dash"/>
@@ -129,30 +140,37 @@
         			default="4"  visible="true" omit="4" type="Cardinal_1" format="Dash"/>
         <parameter	id="quiet"    label= "Ignore errors, return TCL_OK in any case"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="verbose"   label= "Temporarily override mesage limits set with set_msg_config"
+        <parameter	id="verbose"   label= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
                    	           
 <!-- hidden (calculated) parameters -->			
 	   <parameter id="FilteredSourceList" type="Stringlist"
 			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
-	  <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="read_xdc"
-			default="%ConstraintsFiles" visible="true" readonly="false" />
+			
+	<!-- Parameter read_xdc just copies parameter ConstraintsFiles, but they have different syntax (output representation) -->		
+	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="read_xdc"
+			default="%ConstraintsFiles" visible="false" />
+       <parameter	id="top"              label= "Top module of the design"
+        			default="%%TopModule" visible="false" omit="" type="String" format="Dash"/>
+   	   <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+        			
 			
 		<input>
 			<group name="General">
 				"ConstraintsFiles"
+				"SkipSnapshotSynth"
  				"SnapshotSynth" <!--  same as in project -->
-				"read_xdc"
 				"ResetProject"
 				"ShowWarnings"
 				"ShowInfo"
 				"GrepEWI"
 			</group>
 			<group name="Synthesis">
+	 	        "top"
 		        "name"
 		        "part"
 		        "constrset"
-		        "top"
 		        "include_dirs"
 		        "generic"
 		        "verilog_define"
@@ -186,7 +204,9 @@
 				"' ;"
 				"rsync -avrR -e ssh"
 				"%FilteredSourceList"
-				"%ConstraintsFiles"
+			    <if VivadoSynthActionIndex="0">
+					"%ConstraintsFiles"
+				</if>
 				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
 			</line>
 <!-- TODO: Make it OK to use just strings, not parameters in dest (for console names) -->			
@@ -203,46 +223,56 @@
 			      </if>
 			      "file mkdir $outputDir\n"
 			      "read_verilog %FilteredSourceList\n"
-			      <if ConstraintsFiles="">
-			          "puts 'No constraints files specified, skipping read_xdc command'\n"
+			      <if VivadoSynthActionIndex="0">
+				      <if ConstraintsFiles="">
+				          'puts "No constraints files specified, skipping read_xdc command"\n'
+				      </if>
+				      <if-not ConstraintsFiles="">
+	                          "%read_xdc\n"
+				      </if-not>
 			      </if>
-			      <if-not ConstraintsFiles="">
-                          "%read_xdc\n"
-			      </if-not>
 			      "synth_design"
-	 		      "%name"
-		          "%part"
-		          "%constrset"
 		          "%top"
-		          "%include_dirs"
-		          "%generic"
-		          "%verilog_define"
-		          "%flatten_hierarchy"
-		          "%gated_clock_conversion"
-		          "%directive"
-		          "%rtl"
-		          "%bufg"
-		          "%no_lc"
-		          "%fanout_limit"
-		          "%mode"
-		          "%fsm_extraction"
-		          "%keep_equivalent_registers"
-		          "%resource_sharing"
-		          "%control_set_opt_thershold"
+			      <if VivadoSynthActionIndex="0">
+		 		      "%name"
+			          "%part"
+			          "%constrset"
+			          "%include_dirs"
+			          "%generic"
+			          "%verilog_define"
+			          "%flatten_hierarchy"
+			          "%gated_clock_conversion"
+			          "%directive"
+			          "%rtl"
+			          "%bufg"
+			          "%no_lc"
+			          "%fanout_limit"
+			          "%mode"
+			          "%fsm_extraction"
+			          "%keep_equivalent_registers"
+			          "%resource_sharing"
+			          "%control_set_opt_thershold"
+		          </if>
 		          "%quiet"
 		          "%verbose"
 			      "\n"
-			      "write_checkpoint -force %SnapshotSynth\n"
+			      <if-and SkipSnapshotSynth="false"
+			              VivadoSynthActionIndex="0">
+				      		"write_checkpoint -force %SnapshotSynth\n"
+			      </if-and>
 				"puts '@@FINISH@@'\n"
 			</line>
 <!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
-			<line name="vivado_copy_after_synth">
-				"-c"
-				"mkdir -p %VivadoLocalDir ;"
-				"rsync -avr -e ssh"
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
-				"%VivadoLocalDir/"
-			</line>
+			<if-and SkipSnapshotSynth="false"
+			        VivadoSynthActionIndex="0">
+				<line name="vivado_copy_after_synth">
+					"-c"
+					"mkdir -p %VivadoLocalDir ;"
+					"rsync -avr -e ssh"
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
+					"%VivadoLocalDir/"
+				</line>
+	        </if-and>
 			<line name="parser_VivadoSynth"
 			    errors=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
 				warnings=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"

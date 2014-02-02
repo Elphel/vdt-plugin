@@ -15,7 +15,7 @@
 		</input>
 
 		<output>
-			<line name="vivado_launch"
+			<line name="Vivado"
 			      interrupt="\x03">
 				"%ShellSwitches"
 				"%PreSSH"

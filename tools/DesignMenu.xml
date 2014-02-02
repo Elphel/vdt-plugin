@@ -35,6 +35,11 @@
         <menu name="Vivado" 
               label="Vivado Tools"
               icon="xilinx.png">
+              
+                <menuitem name="CopyUnisims"
+                          label="Copy Xilinx primitives library to the local project"
+                          icon="xilinx.png"
+                          call="VivadoUnisims"/>
                 <menuitem name="Vivado Server"
                           label="Run remote Vivado session"
                           icon="xilinx.png"
