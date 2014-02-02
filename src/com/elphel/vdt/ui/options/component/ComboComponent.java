@@ -43,7 +43,22 @@ public class ComboComponent extends GeneralComponent {
 
         comboField = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
         comboField.setLayoutData(gridData);
-        comboField.setItems(type.getLabels());
+//        comboField.setItems(type.getLabels());
+        comboField.setItems(type.getValues());
+        StringBuilder sb= new StringBuilder();
+        String [] values=type.getValues();
+        String [] labels=type.getLabels();
+        
+        for (int i=0;i<type.getValues().length;i++){
+        	sb.append("\"");
+        	sb.append(values[i]);
+        	sb.append("\" - ");
+        	sb.append(labels[i]);
+        	if (i<(values.length-1)){
+        		sb.append("\n\n");
+        	}
+        }
+        comboField.setToolTipText(sb.toString());
         
         comboField.setMenu(createPopupMenu(comboField.getShell()));        
         endCreateControl();

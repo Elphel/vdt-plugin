@@ -43,7 +43,7 @@ public class ListOption implements IOption {
     }
     
     /**
-     * Return core option (optiuon without UI elements)
+     * Return core option (option without UI elements)
      */
     public Option getOption() {
         return option;

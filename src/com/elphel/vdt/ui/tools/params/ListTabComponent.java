@@ -35,10 +35,12 @@ public class ListTabComponent extends AbstractTabComponent {
                            , Parameter toolParameter ) 
     {
         super(tab, new ComboComponent(toolParameter));
+        System.out.println("Created ListTabComponent, label= "+toolParameter.getLabel());
     }
     
     public void createControl(Composite parent) {
         super.createControl(parent);
+        System.out.println("createControl(), parent= "+parent);
         WidgetListener listener = new WidgetListener();
         getComboField().addSelectionListener(listener);
         getComboField().addModifyListener(listener);
