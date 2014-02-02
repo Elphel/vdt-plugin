@@ -17,28 +17,16 @@
 		<syntax name="GrepSkipSyntax"
 			format="| { grep --line-buffered -v &quot;%%ParamValue&quot; || true; }" />
 			
-<!-- 	<syntax name="LogFileSyntax" format="%BuildDirSlash%%ParamValue-%%BuildStamp.log" />
-		<syntax name="OutFileSyntax" format="%BuildDirSlash%%ParamValue-%%BuildStamp.ivlg" />
-		<syntax name="LxtFileSyntax" format="%BuildDirSlash%%ParamValue-%%BuildStamp.lxt" />
- -->
 		<syntax name="LogFileSyntax" format="%%ParamValue-%%BuildStamp.log" />
 		<syntax name="OutFileSyntax" format="%%ParamValue-%%BuildStamp.ivlg" />
 		<syntax name="LxtFileSyntax" format="%%ParamValue-%%BuildStamp.lxt" />
 
-<!-- 		
 		<syntax name="LogFileLatestSyntax"
-		    format="ln -sf %BuildDirSlash%%ParamValue-%%BuildStamp.log %BuildDirSlash%%ParamValue-latest.log;" />
+		    format="ln -sf %%ParamValue-%%BuildStamp.log %SimulDir/%%ParamValue-latest.log;" />
 		<syntax name="OutputFileLatestSyntax"
-			format="ln -sf %BuildDirSlash%%ParamValue-%%BuildStamp.ivlg %BuildDirSlash%%ParamValue-latest.ivlg;" />
+			format="ln -sf %%ParamValue-%%BuildStamp.ivlg %SimulDir/%%ParamValue-latest.ivlg;" />
 		<syntax name="LxtFileLatestSyntax"
-		    format="ln -sf %BuildDirSlash%%ParamValue-%%BuildStamp.lxt %BuildDirSlash%%ParamValue-latest.lxt;" />
--->
-		<syntax name="LogFileLatestSyntax"
-		    format="ln -sf %%ParamValue-%%BuildStamp.log %BuildDir/%%ParamValue-latest.log;" />
-		<syntax name="OutputFileLatestSyntax"
-			format="ln -sf %%ParamValue-%%BuildStamp.ivlg %BuildDir/%%ParamValue-latest.ivlg;" />
-		<syntax name="LxtFileLatestSyntax"
-		    format="ln -sf %%ParamValue-%%BuildStamp.lxt %BuildDir/%%ParamValue-latest.lxt;" />
+		    format="ln -sf %%ParamValue-%%BuildStamp.lxt %SimulDir/%%ParamValue-latest.lxt;" />
 
 		<!-- include file has target, not link value -->
 		
@@ -228,29 +216,15 @@
 			
 		<parameter id="LxtDumpFileLatest" default="%LxtDumpFile" 
 			type="String" format="LxtFileLatestSyntax" visible="false" />
-<!-- 
-		<parameter id="LogFileFull" default="%BuildDirSlash%LogFile" 
-			visible="false" type="String" format="CopyValue"/>
-			
-		<parameter id="OutFileFull" default="%BuildDirSlash%OutFile" 
-		    visible="false"	type="String" format="CopyValue"/>
-		    
-		<parameter id="LxtDumpFileFull" default="%BuildDirSlash%LxtDumpFile" 
-			visible="false"	type="String" format="CopyValue"/>
- -->
 
-
-		<parameter id="LogFileFull" default="%BuildDir/%LogFile" 
+		<parameter id="LogFileFull" default="%SimulDir/%LogFile" 
 			visible="false" type="String" format="LogFileSyntax"/>
 			
-		<parameter id="OutFileFull" default="%BuildDir/%OutFile" 
+		<parameter id="OutFileFull" default="%SimulDir/%OutFile" 
 		    visible="false"	type="String" format="OutFileSyntax"/>
 		    
-		<parameter id="LxtDumpFileFull" default="%BuildDir/%LxtDumpFile" 
+		<parameter id="LxtDumpFileFull" default="%SimulDir/%LxtDumpFile" 
 			visible="false"	type="String" format="LxtFileSyntax"/>
-			
-			
-			
 
 		<input>
 			<group name="files" label="Files">
@@ -298,7 +272,7 @@
 				"%Param_PreExe"
 <!--  MKDIR - ALWAYS -->				
 			    "mkdir -p"
-			    "%BuildDir"
+			    "%SimulDir"
 			    ";"
 				<if SaveLogsPreprocessor="true"
 				    SaveLogsSimulator="true">
