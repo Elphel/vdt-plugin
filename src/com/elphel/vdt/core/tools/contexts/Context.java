@@ -34,6 +34,8 @@ import com.elphel.vdt.core.tools.params.types.ParamTypeString;
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.conditions.StringConditionParser;
 import com.elphel.vdt.util.StringPair;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 public abstract class Context {
@@ -225,7 +227,12 @@ public abstract class Context {
         	prompt=commandLinesBlock.parseCntrl(prompt); // replace control character codes (\n,\t,\x)
         	prompt=commandLinesBlock.applyMark(prompt); // remove mark sequence
         	String interrupt=commandLinesBlock.getInterrupt();
-            List<String> lines = commandLinesBlock.getLines();  // [%Param_Shell_Options, echo BuildDir=%BuildDir ;, echo SimulationTopFile=%SimulationTopFile ;, echo SimulationTopModule=%SimulationTopModule ;, echo BuildDir=%BuildDir;, %Param_PreExe, %Param_Exe, %Param_TopModule, %TopModulesOther, %ModuleLibrary, %LegacyModel, %NoSpecify, %v, %SourceList, %ExtraFiles, %Filter_String]          
+            List<String> lines = commandLinesBlock.getLines();  // [%Param_Shell_Options, echo BuildDir=%BuildDir ;, echo SimulationTopFile=%SimulationTopFile ;, echo SimulationTopModule=%SimulationTopModule ;, echo BuildDir=%BuildDir;, %Param_PreExe, %Param_Exe, %Param_TopModule, %TopModulesOther, %ModuleLibrary, %LegacyModel, %NoSpecify, %v, %SourceList, %ExtraFiles, %Filter_String]
+            if ((lines.size()==0) && commandLinesBlock.hadStrings()){
+                if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+                	System.out.println("Removing command lines block by false condition");
+            	continue; // to enable conditionals for the command line blocks, still making possible to use emty blocks for no-arguments programs
+            }
             List<List<String>> commandSequence = new ArrayList<List<String>>();
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
             	String line = (String)lineIter.next();

@@ -199,6 +199,8 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     public boolean isFileKind() {return kind ==  ParamTypeString.KIND.FILE; }
     public boolean isConsoleKind() { return kind ==  ParamTypeString.KIND.TEXT; }
     public List<String> getLines() { return ConditionUtils.resolveConditionStrings(strings);  }
+    // to distinguish between empty command block (program w/o any parameters) and conditionally removed one
+    public boolean hadStrings() {return (strings!=null) && (strings.getEntries().size()>0); }
     public String getName()        { return name; }    
     public String getSeparator()   { return separator; }    
 	public String getMark()        { return mark; }
@@ -206,7 +208,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
 	public String getWarnings()    { return toolWarnings; }
 	public String getInfo()        { return toolInfo; }
 	public String getPrompt()      { return prompt; }
-	public String getInterrupt()   { return prompt; }
+	public String getInterrupt()   { return interrupt; }
 	public String getStderr()      { return stderr; }
 	public String getStdout()      { return stdout; }
 	public String getTimeout()     { return timeout; }

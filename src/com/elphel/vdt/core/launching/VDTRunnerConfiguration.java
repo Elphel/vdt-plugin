@@ -64,7 +64,9 @@ public class VDTRunnerConfiguration {
     private String consoleFinish; // double prompt? - string to look for in consoleBuffer to finish
     private String consoleBuffer; // accumulates stdout & stderr, looking for consoleFinish (endsWith() )
     private int extraChars=100; // Allow these chars to appear in the output after consoleFinish (user pressed smth.?)
-    private String originalConsoleName=null;
+    private String originalConsoleName=null; // will replace
+    private String buildDateTime=null;
+    
     private Set<IConsole> consoles=null;  // parser consoles opened for this console
 	private VDTConsoleRunner consoleRunner=null;
 
@@ -216,12 +218,17 @@ public class VDTRunnerConfiguration {
     }
     public void setToolName(String str) {
     	this.toolName=str;
+    	this.buildDateTime=VDTRunner.renderProcessLabel("");
     	this.originalConsoleName=VDTRunner.renderProcessLabel(this.toolName); //
     }
     public String getOriginalConsoleName() {
     	return originalConsoleName;
     }
-    
+
+    public String getBuildDateTime() {
+    	return this.buildDateTime;
+    }
+
     public String getToolName() {
     	return toolName;
     }

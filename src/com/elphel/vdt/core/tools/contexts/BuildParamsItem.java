@@ -23,8 +23,10 @@ import java.util.List;
 public class BuildParamsItem implements Cloneable{
 	private String [] params;
 	private String consoleName;  // null for external tools running in a new console
-    private String nameAsParser; // name as a parser, null if not used as a parser
-//    private String mark;         // remove this sequence on the output only (to preserve white spaces) Already applied
+//    private String nameAsParser; // name as a parser, null if not used as a parser
+    private String name;         // name of a block
+    private boolean is_parser;
+    
     private String toolErrors;   // Eclipse pattern for pattern recognizer
     private String toolWarnings; // Eclipse pattern for pattern recognizer
     private String toolInfo;     // Eclipse pattern for pattern recognizer
@@ -41,8 +43,9 @@ public class BuildParamsItem implements Cloneable{
 	public BuildParamsItem (
 			String [] params,
 			String consoleName,
-		    String nameAsParser,
-//		    String mark,
+//		    String nameAsParser,
+		    String name,
+//		    boolean is_parser,
 		    String toolErrors,
 		    String toolWarnings,
 		    String toolInfo,
@@ -54,8 +57,9 @@ public class BuildParamsItem implements Cloneable{
 			) {
 		this.consoleName=consoleName;
 		this.params=params; // no need to clone?
-		this.nameAsParser=nameAsParser;
-//		this.mark=mark;
+//		this.nameAsParser=nameAsParser;
+		this.name=name;
+		this.is_parser=(name!=null); // true
 		this.toolErrors=toolErrors;
 		this.toolWarnings=toolWarnings;
 		this.toolInfo=toolInfo;
@@ -70,8 +74,9 @@ public class BuildParamsItem implements Cloneable{
 		this (
 				item.params,
 				item.consoleName,
-				item.nameAsParser,
-//				item.mark,
+//				item.nameAsParser,
+				item.name,
+//				item.is_parser,
 				item.toolErrors,
 				item.toolWarnings,
 				item.toolInfo,
@@ -81,6 +86,7 @@ public class BuildParamsItem implements Cloneable{
 				item.stdout,
 				item.timeout
 				);
+		this.is_parser=item.is_parser;
 	}
 
 	public BuildParamsItem clone () {
@@ -113,23 +119,27 @@ public class BuildParamsItem implements Cloneable{
 	}
 */	
 	public void removeNonParser(List<BuildParamsItem> items){
-		//		if (items==null) return; should never happen as the list includes itself
-		if (nameAsParser==null) return;
+//		if (nameAsParser==null) return;
+		if (!is_parser) return;
 		if (consoleName==null) {  // console script can not be a parser
 	        Iterator<BuildParamsItem> itemsIter = items.iterator(); // command lines block is empty (yes, there is nothing in project output)
 	        while(itemsIter.hasNext()) {
 	        	BuildParamsItem item = (BuildParamsItem)itemsIter.next();
 				if(	
-						nameAsParser.equals(item.stderr) ||
-						nameAsParser.equals(item.stdout)){
+//						nameAsParser.equals(item.stderr) ||
+//						nameAsParser.equals(item.stdout)){
+					name.equals(item.stderr) ||
+					name.equals(item.stdout)){
 					return; // do nothing - keep nameAsParser
 				}
 			}
 		}
-		nameAsParser=null;
+		is_parser=false;
 	}
 
-	public String getNameAsParser(){ return nameAsParser; }
+//	public String getNameAsParser(){ return nameAsParser; }
+	public String getNameAsParser(){ return is_parser?name:null; }
+	public String getName()        { return name; }
 //	public String getMark()        { return mark; }
 	public String getErrors()      { return toolErrors; }
 	public String getWarnings()    { return toolWarnings; }

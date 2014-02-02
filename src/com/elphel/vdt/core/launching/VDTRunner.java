@@ -155,12 +155,15 @@ public class VDTRunner {
 				runningBuilds.removeConfiguration(consoleName); 
 				return;
 			}
-			
-			
-			if (numItem<(argumentsItemsArray.length-1)){ // Not for the last
-				//                IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
-				//                IConsole[] consoles=(IConsole[]) man.getConsoles();
-
+//			if (numItem<(argumentsItemsArray.length-1)){ // Not for the last
+			// find out if there are any non-parsers left
+			boolean moreToProcess=false;
+			for (int i=numItem+1;i<argumentsItemsArray.length;numItem++)
+				if (argumentsItemsArray[numItem].getNameAsParser()==null) {
+					moreToProcess=true;
+					break;
+			}
+			if (moreToProcess){	
 				IOConsole iCons=  (IOConsole) DebugUITools.getConsole(process); // had non-null fPatternMatcher , fType="org.eclipse.debug.ui.ProcessConsoleType"
 				if (iCons==null){
 					System.out.println("Could not get console for the specified process");
