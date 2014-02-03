@@ -53,7 +53,7 @@
 			      stdout="parser_001"
 			      timeout="Timeout">
 				"%TCLCommand"
-				"puts '@@FINISH@@'"
+				"puts \"@@FINISH@@\"\n"
 				"``"`" <!-- two new lines should generate a pair of prompts from the remote -->
 			</line>
 			<line name="command_line_02">

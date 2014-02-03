@@ -11,6 +11,7 @@
 		</action-menu>
 		<input>
 			<group name="General">
+			"RemoteCommand"
 			</group>
 		</input>
 

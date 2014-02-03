@@ -41,7 +41,7 @@
                           icon="xilinx.png"
                           call="VivadoUnisims"/>
                 <menuitem name="Vivado Server"
-                          label="Run remote Vivado session"
+                          label="Start remote Vivado session"
                           icon="xilinx.png"
                           call="Vivado"/>
                 <menuitem name="Vivado Test"
@@ -49,7 +49,7 @@
                           icon="my_tool.gif"
                           call="VivadoTest"/>
                 <menuitem name="VivadoSynthesis"
-                          label="Run Vivado synthesis"
+                          label="Synthesise design"
                           icon="xilinx.png"
                           call="VivadoSynthesis"/>
                 <menuitem name="VivadoOptPlace"

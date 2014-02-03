@@ -69,18 +69,18 @@
 		</action-menu>
 		
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
-			default="" label="Select constraint files to load to Vivado" readonly="false"
+			default="" label="Constraints files" tooltip="Select constraint files to load to Vivado" readonly="false"
 			visible="true" />
-		<parameter id="SkipSnapshotSynth" label="Do not create snapshot after synthesis"
+		<parameter id="SkipSnapshotSynth" label="Skip snapshot" tooltip="Do not create snapshot after synthesis"
 		           default="false"
 		           type= "Boolean" format="None"/>
-		<parameter id="ResetProject" label="Reset project before loading source files"
+		<parameter id="ResetProject" label="Reset project" tooltip="Reset project before loading source files"
 		           default="true"
 		           type= "Boolean" format="None"/>
-		<parameter id="ShowWarnings" label="Parse warning messages"
+		<parameter id="ShowWarnings" label="Show Warnings" tooltip="Parse warning messages"
 		           default="true"
 		           type= "Boolean" format="None"/>
-		<parameter id="ShowInfo" label="Parse info messages"
+		<parameter id="ShowInfo" label="Show info" tooltip="Parse info messages"
 		           default="true"
 		           type= "Boolean" format="None"/>
         <parameter id="PreGrepW" visible="false"
@@ -89,58 +89,55 @@
         <parameter id="PreGrepI" visible="false"
                    type="String" format="None"
                    default="?%ShowInfo=true: |INFO, "/>
-        <parameter id="GrepEWI" label="Grep filter"
+        <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
                    default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
   
 <!-- synth_design arguments -->  
 
-        <parameter 	id="name"             label= "Design to open after synth"
+        <parameter	id="directive"    label="Directive" tooltip= "Skip some of the optimization algorithms"
+        			default="default" visible="true" omit="default" type="DirectiveType" format="Dash"/>
+        <parameter 	id="name"   label="Design name" tooltip= "Design to open after synth"
          			default="" visible="true" omit="" type="String" format="Dash"/>
 <!-- part is defined in "FPGA_project" -->         			
-<!--         <parameter	id="part"             label= "Xilinx device to use"
+<!--         <parameter	id="part"             label="Part" tooltip= "Xilinx device to use"
          			default="" visible="true" omit="" type="String" format="Dash"/>  -->
-        <parameter	id="constrset"        label= "Constraints set to use"
+        <parameter	id="constrset"        label="Constraints set" tooltip= "Constraints set to use"
        				 default="" visible="true" omit="" type="String" format="Dash"/>
-       				 
-        			
-<!--    <parameter	id="top"              label= "Top module of the design (you may set in in project properties)"
+<!--    <parameter	id="top"              label="" tooltip= "Top module of the design (you may set in in project properties)"
         			default="%ImplementationTopModule" visible="true" omit="" type="String" format="Dash"/> -->
-        			
-        <parameter	id="include_dirs"     label= "Include directories for Verilog `include"
+        <parameter	id="include_dirs"     label="Include directory" tooltip= "Include directories for Verilog `include"
         			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
-        <parameter	id="generic"          label= '"name=value" list of VHDL generic entity or Verilog parameter'
+        <parameter	id="generic"          label="VHDL/Verilog parameters" tooltip= '"name=value" list of VHDL generic entity or Verilog parameter'
         			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
-        <parameter	id="verilog_define"   label= 'Verilog "macro=text" definitions'
+        <parameter	id="verilog_define"   label="Verilog defines" tooltip= 'Verilog "macro=text" definitions'
         			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
-        <parameter	id="flatten_hierarchy" label= "Flatten Hierarchy during LUT mapping"
+        <parameter	id="flatten_hierarchy" label="Flatten hierarchy" tooltip= "Flatten Hierarchy during LUT mapping"
         			default="rebuilt" visible="true" omit="rebuilt" type="FlattenHierarchyType" format="Dash"/>
-        <parameter	id="gated_clock_conversion" label= "Conversion of gated clocks to FF CE where possible"
+        <parameter	id="gated_clock_conversion" label="Gated clock conversion" tooltip= "Conversion of gated clocks to FF CE where possible"
         			default="off" visible="true" omit="off" type="GatedClockConversionType" format="Dash"/>
-        <parameter	id="directive"    label= "Skip some of the optimization algorithms"
-        			default="default" visible="true" omit="default" type="DirectiveType" format="Dash"/>
-        <parameter	id="rtl"          label= "Elaborate HDL source files and open RTL design"
+        <parameter	id="rtl"          label="open RTL" tooltip= "Elaborate HDL source files and open RTL design"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="bufg"         label= "Maximum number of global buffers to use"
+        <parameter	id="bufg"         label="BUFG maximal number" tooltip= "Maximum number of global buffers to use"
         			default="12"  visible="true" omit="12" type="Cardinal" format="Dash"/>
-        <parameter	id="no_lc"        label= "Disable LUT combining feature"
+        <parameter	id="no_lc"        label="Disable LUT combining" tooltip= "Disable LUT combining feature"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="fanout_limit" label= "Maximum fanout applied during synthesis"
+        <parameter	id="fanout_limit" label="Fanout limit" tooltip= "Maximum fanout applied during synthesis"
         			default="10000"  visible="true" omit="10000" type="Cardinal_1" format="Dash"/>
-        <parameter	id="mode"       label= "Imaginary property synthesis type"
+        <parameter	id="mode"       label="ImgP synthesis type" tooltip= "Imaginary property synthesis type"
         			default="default" visible="true" omit="default" type="ModeType" format="Dash"/>
-        <parameter	id="fsm_extraction" label= "Finite State Machine encoding"
+        <parameter	id="fsm_extraction" label="FSM encoding" tooltip= "Finite State Machine encoding"
         			default="off" visible="true" omit="off" type="FSMType" format="Dash"/>
-        <parameter	id="keep_equivalent_registers" label= "Prevent merging of equivalent registers"
+        <parameter	id="keep_equivalent_registers" label="Keep equivalent registers" tooltip= "Prevent merging of equivalent registers"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="resource_sharing" label= "Share resources (adders and such) between different signals"
+        <parameter	id="resource_sharing" label="Resource sharing" tooltip= "Share resources (adders and such) between different signals"
         			default="auto" visible="true" omit="auto" type="ResourceSharingType" format="Dash"/>
-        <parameter	id="control_set_opt_thershold" label= "Use dedicated FF control input if fanout exceeds this value"
+        <parameter	id="control_set_opt_thershold" label="Control input threshold" tooltip= "Use dedicated FF control input if fanout exceeds this value"
         			default="4"  visible="true" omit="4" type="Cardinal_1" format="Dash"/>
-        <parameter	id="quiet"    label= "Ignore errors, return TCL_OK in any case"
+        <parameter	id="quiet"    label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="verbose"   label= "Temporarily override message limits set with set_msg_config"
+        <parameter	id="verbose"   label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
                    	           
 <!-- hidden (calculated) parameters -->			
@@ -148,9 +145,9 @@
 			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
 			
 	<!-- Parameter read_xdc just copies parameter ConstraintsFiles, but they have different syntax (output representation) -->		
-	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="read_xdc"
+	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="" tooltip="read_xdc"
 			default="%ConstraintsFiles" visible="false" />
-       <parameter	id="top"              label= "Top module of the design"
+       <parameter	id="top"              label="" tooltip= "Top module of the design"
         			default="%%TopModule" visible="false" omit="" type="String" format="Dash"/>
    	   <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
@@ -167,6 +164,8 @@
 				"GrepEWI"
 			</group>
 			<group name="Synthesis">
+		        "directive"
+		        "---"
 	 	        "top"
 		        "name"
 		        "part"
@@ -176,7 +175,6 @@
 		        "verilog_define"
 		        "flatten_hierarchy"
 		        "gated_clock_conversion"
-		        "directive"
 		        "rtl"
 		        "bufg"
 		        "no_lc"
@@ -186,6 +184,7 @@
 		        "keep_equivalent_registers"
 		        "resource_sharing"
 		        "control_set_opt_thershold"
+		        "---"
 		        "quiet"
 		        "verbose"
 			</group>
@@ -225,7 +224,7 @@
 			      "read_verilog %FilteredSourceList\n"
 			      <if VivadoSynthActionIndex="0">
 				      <if ConstraintsFiles="">
-				          'puts "No constraints files specified, skipping read_xdc command"\n'
+				          "puts \"No constraints files specified, skipping read_xdc command\";\n"
 				      </if>
 				      <if-not ConstraintsFiles="">
 	                          "%read_xdc\n"
@@ -260,7 +259,7 @@
 			              VivadoSynthActionIndex="0">
 				      		"write_checkpoint -force %SnapshotSynth\n"
 			      </if-and>
-				"puts '@@FINISH@@'\n"
+				"puts \"@@FINISH@@\"\n"
 			</line>
 <!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
 			<if-and SkipSnapshotSynth="false"
@@ -273,10 +272,12 @@
 					"%VivadoLocalDir/"
 				</line>
 	        </if-and>
+	        <!-- errors=".*[ERROR|CRITICAL WARNING]: (\[.*\].*)\[(.*):([0-9]+)\]"
+	         -->
 			<line name="parser_VivadoSynth"
-			    errors=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
-				warnings=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
-				info=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]">
+				errors=   ".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+				warnings= ".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+				info=     ".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]">
 				"-c"
      			"%GrepEWI"
      			"| %SedPaths"

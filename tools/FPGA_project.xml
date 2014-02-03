@@ -8,123 +8,119 @@
 		<!-- typedef -->
 	</interface>
 	<package name="FPGA_package"
-	              label="Common parameters for all FPGA projects"
+	              label="Common parameters for FPGA projects"
 	              interface="FPGAPprojectInterface">
-	     <parameter id="RemoteHost" label="Remote Host IP" type="String"
+	     <parameter id="RemoteHost" label="Remote Host IP" tooltip="Remote Host IP" type="String"
 			format="CopyValue" default="192.168.0.122" readonly="false" visible="true" />
 
 
-		<parameter id="RemoteUser" label="Remote user name" type="String"
+		<parameter id="RemoteUser" label="Remote user name" tooltip="Remote user name" type="String"
 			format="CopyValue" default="xilinx" readonly="false" visible="true" />
 
-		<parameter id="PreSSH" label="pre-ssh shell parameters"
+		<parameter id="PreSSH" label="pre-ssh" tooltip="pre-ssh shell parameters"
 			type="String" format="CopyValue" default="" readonly="false" visible="true" />
 
-		<parameter id="ShellSwitches" label="Shell switches" type="String"
+		<parameter id="ShellSwitches" label="Shell switch" tooltip="Shell switches" type="String"
 			format="CopyValue" default="-c" readonly="false" visible="true" />
 
 		<parameter id="TerminalMode" type="BoolYesNo" format="None"
-			default="false" label="Force terminal mode for the remote program" />
+			default="false" label="Force terminal mode" tooltip="Force terminal mode for the remote program" />
 
-		<parameter id="SSHSwitches" label="Other ssh switches"
+		<parameter id="SSHSwitches" label="ssh switches" tooltip="Other ssh switches"
 			type="String" format="CopyValue" default="" readonly="false" visible="true" />
 
 
-		<parameter id="VivadoRelease" label="Vivado release number (part of the path)"
+		<parameter id="VivadoRelease" label="Vivade release" tooltip="Vivado release number (part of the path)"
 			type="String" format="CopyValue" default="2013.4" readonly="false"
 			visible="true" />
 
-		<parameter id="VivadoInstallationRoot" label="Vivado Installation Root"
+		<parameter id="VivadoInstallationRoot" label="Vivado root" tooltip="Vivado Installation Root"
 			type="String" format="CopyValue" default="/opt/Xilinx/Vivado" readonly="false"
 			visible="true" />
 			
-		<parameter id="VivadoRelativeExeOptions" label="Vivado relative executable path and options"
+		<parameter id="VivadoRelativeExeOptions" label="Vivado launch command" tooltip="Vivado relative executable path and command options"
 			type="String" format="CopyValue" default="bin/vivado -mode tcl" readonly="false"
 			visible="true" />
 
-		<parameter id="VivadoUnisimsPath" label="Relative location of Xilinx unisims library"
+		<parameter id="VivadoUnisimsPath" label="unisims location" tooltip="Relative location of Xilinx unisims library"
 			type="String" format="CopyValue" default="data/verilog/src" readonly="false"
 			visible="true" />
 <!-- /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
-		<parameter id="RemoteCommand" label="Remote ssh command"
+		<parameter id="RemoteCommand" label="Remote command" tooltip="Remote ssh command"
 			type="String" format="CopyValue"
 			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoRelativeExeOptions"
 			readonly="true"
 			visible="true" />
-		<parameter id="VivadoUnisimsAbsolutePath" label="Full path of Xilinx unisims primitives library"
+		<parameter id="VivadoUnisimsAbsolutePath" label="Full unisims path" tooltip="Full path of Xilinx unisims primitives library"
 			type="String" format="CopyValue"
 			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoUnisimsPath"
 			readonly="true"
 			visible="true" />
 			
 
-		<parameter id="SSHExtra" label="ssh extra parameters" type="String"
+		<parameter id="SSHExtra" label="ssh extra parameters" tooltip="ssh extra parameters" type="String"
 			format="CopyValue" default="" readonly="false" visible="true" />
 
-		<parameter id="VivadoConsole" default="Vivado" label="Vivado console name"
+		<parameter id="VivadoConsole" default="Vivado" label="Vivado console name" tooltip="Vivado console name in Eclipse, used by other tools"
 			type="String" format="CopyValue" visible="true" readonly="false"/>
-			
-	<!-- 
-	
-	 -->
 			
 	     <input>
 			<group name="VivadoServer" label="Vivado server setup">
 				"RemoteHost"
 				"RemoteUser"
+				"VivadoRelease"
+				"VivadoInstallationRoot"
+			</group>
+			<group name="Advanced" label="Vivado server advanced setup">
 				"TerminalMode"
 				"ShellSwitches"
 				"PreSSH"
 				"SSHSwitches"
 				"SSHExtra"
 				"VivadoConsole"
-				"VivadoRelease"
-				"VivadoInstallationRoot"
 				"VivadoRelativeExeOptions"
 				"VivadoUnisimsPath"
 				"RemoteCommand"
 				"VivadoUnisimsAbsolutePath"
 			</group>
 		</input>
-	              
-	
 	</package>
 
 	<project name="FPGA_project" label="Project parameters for FPGA_project"
 	    package="FPGA_package"
 		interface="FPGAPprojectInterface">
 		<!--  Simulation parameters  -->
-		<parameter id="SimulationTopFile" label="Project top simulation file"
+		<parameter id="SimulationTopFile" label="Top simulation file" tooltip="Project top simulation file"
 			type="Filename" default="" format="CopyValue"
 			readonly="false" />
-		<parameter id="SimulationTopModule" label="Project top simulation module"
+		<parameter id="SimulationTopModule" label="Simulation top module" tooltip="Project top simulation module"
 			type="String" default="" format="CopyValue" readonly="false" />
-		<parameter id="ImplementationTopFile" label="Project file with top implementation module"
+		<parameter id="ImplementationTopFile" label="Implementation top module" tooltip="Project file with top implementation module"
 			type="Filename" default="" format="CopyValue" readonly="false" />
-		<parameter id="SimulDir" label="project simulation directory"
+		<parameter id="SimulDir" label="Simulation directory" tooltip="Project simulation directory"
 			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
 		<!--  Vivado parameters  -->
-		<parameter	id="part"             label= "Xilinx device to use"
+		<parameter	id="part" label="Device" tooltip= "FPGA part number (device) to use"
         		default="" visible="true" omit="" type="String" format="Dash"/>
-		<parameter id="VivadoProjectRoot" label="Relative (to user home directory) path of the workspace on Vivado server"
+		<parameter id="VivadoProjectRoot" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on Vivado server"
 			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
 
-		<parameter id="VivadoLocalDir" label="Project subdirectroy for Vivado files"
+		<parameter id="VivadoLocalDir" label="Local Xilinx directory" tooltip="Local project subdirectroy for Xilinx Vivado generated files"
 			type="Pathname" default="vivado" format="CopyValue" readonly="false" />
 
-		<parameter id="VivadoIgnoreSource" label="Ignore source files that match this regular expression"
+		<parameter id="VivadoIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
 			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
 <!-- Calculated -->
-		<parameter id="VivadoProjectRoot" label="Relative (to user home directory) path of the project on Vivado server"
-			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
+<!-- 	<parameter id="VivadoProjectRoot" label="" tooltip="Relative (to user home directory) path of the project on Vivado server"
+			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" /> -->
 			
 	 	    <parameter id="SnapshotSynth"
-	        label="name of Vivado snapshot archive after synthesis"
+	        label="Synthesis snapshot" tooltip="Name of Vivado snapshot archive after synthesis"
 	        default="%%ProjectName-synth.dcp"
 			type="String" format="CopyValue" />
 
 	 	    <parameter id="SnapshotOptPlace"
-	        label="name of Vivado snapshot archive after optimization/placement"
+	        label="Placement snapshot" tooltip="Name of Vivado snapshot archive after optimization/placement"
 	        default="%%ProjectName-opt-pace.dcp"
 			type="String" format="CopyValue" />
 
@@ -136,7 +132,7 @@
 		<parameter id="SimulDirSlash" type="Pathname" visible="false"
 		 default="?%SimulDir=:,%SimulDir/" format="CopyValue"/>
 		<parameter id="SedPaths" type="String" format="CopyValue"
-		label="Remote file prefix to be removed for the local error parser"
+		label="sed commaaand line" tooltip="Remote file prefix to be removed for the local error parser"
 		default="sed -u 's@/home/%RemoteUser/%VivadoProjectRoot/%%ProjectName/@@'"/>
 		
 			
@@ -164,4 +160,3 @@
 		</output>
 	</project>
 </vdt-project>
-<!--   				"| sed -u 's@/home/xilinx/vdt/npmtest/@@'"  -->

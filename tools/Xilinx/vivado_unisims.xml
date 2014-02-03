@@ -10,6 +10,11 @@
 		<action-menu>
 			<action label="Copy unisims" resource="" icon="xilinx.png" />
 		</action-menu>
+		<input>
+ 			<group name="General">
+		   		"VivadoUnisimsAbsolutePath"
+ 			</group>
+		</input>
 
 		<output>
 			<line name="copy_unisims">

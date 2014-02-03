@@ -57,27 +57,27 @@
 		<action-menu>
 			<action label="Optimize and Place" resource="" icon="xilinx.png" />
 		</action-menu>
-		<parameter id="FromMemory" tooltip="Do not load snapshot created after synthesis" label="Run from memory"
+		<parameter id="FromMemory" label="Run from memory" tooltip="Do not load snapshot created after synthesis" 
 		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipPreOptimization" label="Do not run pre optimization TCL commands"
+		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
 		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipOptimization" label="Do not run opt_design"
+		<parameter id="SkipOptimization" label="Skip optimize" tooltip="Do not run opt_design"
 		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipPowerOptimization" label="Do not run power_opt_design"
+		<parameter id="SkipPowerOptimization" label="skip power optimize" tooltip="Do not run power_opt_design"
 		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipPlacement" label="Do not run place_design"
+		<parameter id="SkipPlacement" label="Skip place" tooltip="Do not run place_design"
 		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipPhysOpt" label="Do not run phys_opt_design"
+		<parameter id="SkipPhysOpt" label="Skip physical optimize" tooltip="Do not run phys_opt_design"
 		           default="false" type= "Boolean" format="None"/>
 		           
-		<parameter id="SkipSnapshotPlace" label="Do not create snapshot after placement"
+		<parameter id="SkipSnapshotPlace" label="Skip snapshot save" tooltip="Do not create snapshot after placement"
 		           default="false" type= "Boolean" format="None"/>
 
 <!--   left from synthesis, may need update--> 
-		<parameter id="ShowWarnings" label="Parse warning messages"
+		<parameter id="ShowWarnings" label="Parse warnings" tooltip="Parse warning messages"
 		           default="true"
 		           type= "Boolean" format="None"/>
-		<parameter id="ShowInfo" label="Parse info messages"
+		<parameter id="ShowInfo" label="Parse info" tooltip="Parse info messages"
 		           default="true"
 		           type= "Boolean" format="None"/>
         <parameter id="PreGrepW" visible="false"
@@ -86,94 +86,91 @@
         <parameter id="PreGrepI" visible="false"
                    type="String" format="None"
                    default="?%ShowInfo=true: |INFO, "/>
-        <parameter id="GrepEWI" label="Grep filter"
+        <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
                    default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
                    
-		<parameter id="PreOptTCL" label="TCL commands to run before opt_design"
+		<parameter id="PreOptTCL" label="Pre-optimize TCL commands" tooltip="TCL commands to run before opt_design"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
 			readonly="false" visible="true" />
                    
   
 <!-- opt_design arguments -->  
 
-        <parameter 	id="retarget"             label= "Retarget"
+        <parameter 	id="directive_opt" outid="directive" label="Directive" tooltip= "Mode of behaviour for opt_design command, not compatible with individual optimization settings."
+        			default="Default" visible="true" omit="off" type="OptDirectiveType" format="Dash"/>
+        <parameter 	id="retarget"  label="Retarget" tooltip= "Retarget block types when using different part"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="propconst"             label= "Propagate constants across leaf-level instances"
+        <parameter 	id="propconst" label="Propagate constants" tooltip= "Propagate constants across leaf-level instances"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="sweep"             label= "Remove unconnected leaf-level instances"
+        <parameter 	id="sweep" label="Remove unconnected instances" tooltip= "Remove unconnected leaf-level instances"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="bram_power_opt"             label= "Retarget"
+        <parameter 	id="bram_power_opt" label="Optimize BRAM" tooltip= "Power optimization of BRAM cells - changes WRITE_MODE and clock gating"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="remap"             label= "Remap logic optimally in LUTs"
+        <parameter 	id="remap" label="Remap LUTs" tooltip= "Remap logic optimally in LUTs"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="resynth_area"               label= "Resynthesis"
+        <parameter 	id="resynth_area" label="Re-synthesis in area mode" tooltip= " Perform re-synthesis in area mode to reduce the number of LUTs."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="resynth_seq_area"           label= "Resynthesis (with Sequential optimizations)"
+        <parameter 	id="resynth_seq_area" label="Re-synthesis with sequential" tooltip= "Re-synthesis with both combinatorial and sequential optimizations)."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="directive_opt"              label= "Mode of behaviour for opt_design command"
-        			default="Default" visible="true" omit="off" type="OptDirectiveType" format="DirectiveSyntax"/>
-        <parameter	id="quiet_opt"    label= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
-        <parameter	id="verbose_opt"   label= "Temporarily override message limits set with set_msg_config"
-        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
+        <parameter	id="quiet_opt" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="verbose_opt" outid="verbose" label="verbose" tooltip= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="False" type="Boolean" format="DashName"/>
 <!-- power_opt_design arguments -->  
-        <parameter	id="quiet_pwr_opt"    label= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
-        <parameter	id="verbose_pwr_opt"   label= "Temporarily override message limits set with set_msg_config"
-        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
+        <parameter	id="quiet_pwr_opt" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="verbose_pwr_opt" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 <!-- place_design arguments -->
         <!-- No support yet for "-cells" to limit placement to selected cells. Will require multiple runs with
         different settings. Can probably create several pages of parameters alternatives for that purpose
         and then run "placement - alt1", "placement - alt2", ... -->
-        <parameter 	id="directive_place"       label= "Placement algorithm mode (not compatible with other specific options)"
-        			default="Default" visible="true" omit="off" type="PlaceDirectiveType" format="DirectiveSyntax"/>
-        <parameter 	id="no_timing_driven"          label= "Disables the default timing driven placement algorithm."
+        <parameter 	id="directive_place"  outid="directive" label="Directive" tooltip= "Placement algorithm mode (not compatible with other specific options)"
+        			default="Default" visible="true" omit="off" type="PlaceDirectiveType" format="Dash"/>
+        <parameter 	id="no_timing_driven" label="No timing-driven" tooltip= "Disables the default timing driven placement algorithm."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="unplace"          label= "Unplace all the instances which are not locked by constraints."
+        <parameter 	id="unplace" label="Unplace" tooltip= "Unplace all the instances which are not locked by constraints."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="post_place_opt"          label= "Run optimization after placement to improve critical path timing."
+        <parameter 	id="post_place_opt" label="Post-placement" tooltip= "Run optimization after placement to improve critical path timing."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="quiet_place"    label= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
-        <parameter	id="verbose_place"   label= "Temporarily override message limits set with set_msg_config"
-        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
+        <parameter	id="quiet_place" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="verbose_place" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 <!-- phys_opt_design arguments -->
 <!--  TODO: Make a separate command with several different settings sets -->
-        <parameter 	id="directive_phys_opt"       label= "Placement algorithm mode (not compatible with other specific options)"
-        			default="Default" visible="true" omit="off" type="PhysOptDirectiveType" format="DirectiveSyntax"/>
-        <parameter 	id="fanout_opt"         label= "Delay-driven optimization on high-fanout timing critical nets by replicating drivers."
+        <parameter 	id="directive_phys_opt"  outid="directive" label="Directive" tooltip= "Placement algorithm mode (not compatible with other specific options)"
+        			default="Default" visible="true" omit="off" type="PhysOptDirectiveType" format="Dash"/>
+        <parameter 	id="fanout_opt" label="Fanout optimization" tooltip= "Delay-driven optimization on high-fanout timing critical nets by replicating drivers."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="placement_opt"      label= "Move cells to reduce delay on timing-critical nets."
+        <parameter 	id="placement_opt" label="Placement optimization" tooltip= "Move cells to reduce delay on timing-critical nets."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="rewire"             label= "Refactor logic cones to reduce logic levels and reduce delay on critical signals."
+        <parameter 	id="rewire" label="Rewire" tooltip= "Refactor logic cones to reduce logic levels and reduce delay on critical signals."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="critical_cell_opt"  label= "Replicate cells on timing critical nets to reduce delays."
+        <parameter 	id="critical_cell_opt"  label="Replicate cells" tooltip= "Replicate cells on timing critical nets to reduce delays."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="dsp_register_opt"   label= "Improve critical path delay by moving registers from slices to DSP or from DSP to slices."
+        <parameter 	id="dsp_register_opt" label="DSP register optimization" tooltip= "Improve critical path delay by moving registers from slices to DSP or from DSP to slices."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="bram_register_opt"  label= "Improve critical path delay by moving registers from slices to BRAM or from BRAM to slices."
+        <parameter 	id="bram_register_opt"  label="BRAM register optimization" tooltip= "Improve critical path delay by moving registers from slices to BRAM or from BRAM to slices."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="bram_enable_opt"    label= "Selectively reverses power optimization for enable logic of BRAMs."
+        <parameter 	id="bram_enable_opt" label="BRAM clock enable optimization" tooltip= "Selectively reverses power optimization for enable logic of BRAMs."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="shift_register_opt" label= "Eextract beginnning/end FF from SLR to improve timing"
+        <parameter 	id="shift_register_opt" label="Shift register optimization" tooltip= "Eextract beginnning/end FF from SLR to improve timing"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="hold_fix"           label= "Insert data path delay to fix hold time violations."
+        <parameter 	id="hold_fix" label="Hold violations fix" tooltip= "Insert data path delay to fix hold time violations."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="retime"             label= "Move registers through combinatorial fabric."
+        <parameter 	id="retime" label="Move registers" tooltip= "Move registers through combinatorial fabric."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
         			<!-- TODO: Implement force_replication_on_nets args (requires?  get_nets command ) --> 
-        <parameter 	id="critical_pin_opt"   label= "Swap LUT pins to improve critical path timimg."
+        <parameter 	id="critical_pin_opt"   label="Swap LUT pins" tooltip= "Swap LUT pins to improve critical path timimg."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="quiet_phys_opt" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="verbose_phys_opt" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
-        <parameter	id="quiet_phys_opt"     label= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
-        <parameter	id="verbose_phys_opt"   label= "Temporarily override message limits set with set_msg_config"
-        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
-        			
-<!-- TODO: Try outid to use with different parameters having same keyword -->        			
-        			
 <!-- hidden (calculated) parameters -->			
 			
 		<input>
@@ -185,6 +182,7 @@
 				"SkipPlacement"
 				"SkipPhysOpt"
 				"SkipSnapshotPlace"
+				"---"
  				"SnapshotOptPlace" <!--  same as in project -->
 				"ShowWarnings"
 				"ShowInfo"
@@ -195,6 +193,7 @@
 			</group>
 			<group name="Optimization">
         			"directive_opt"
+        			"---"
 					"retarget"
 					"propconst"
         			"sweep"
@@ -212,14 +211,17 @@
 			</group>
 			<group name="Placement">
         			"directive_place"
+        			"---"
         			"no_timing_driven"
         			"unplace"
         			"post_place_opt"
+        			"---"
         			"quiet_place"
         			"verbose_place"
 			</group>
 			<group name="Physical Optimization">
         			"directive_phys_opt"
+        			"---"
         			"fanout_opt"
         			"placement_opt"
         			"rewire"
@@ -232,6 +234,7 @@
         			"retime"
         			<!-- TODO: Implement force_replication_on_nets args (requires?  get_nets command ) --> 
         			"critical_pin_opt"
+        			"---"
         			"quiet_phys_opt"
         			"verbose_phys_opt"
 			</group>
@@ -342,7 +345,7 @@
 			      <if SkipSnapshotPlace="false">
 				      	"write_checkpoint -force %SnapshotOptPlace\n"
 			      </if>
-				"puts '@@FINISH@@'\n"
+				"puts \"@@FINISH@@\"\n"
 			</line>
 <!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
 			<if-and SkipSnapshotSynth="false"
