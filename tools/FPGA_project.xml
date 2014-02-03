@@ -123,6 +123,15 @@
 	        default="%%ProjectName-synth.dcp"
 			type="String" format="CopyValue" />
 
+	 	    <parameter id="SnapshotOptPlace"
+	        label="name of Vivado snapshot archive after optimization/placement"
+	        default="%%ProjectName-opt-pace.dcp"
+			type="String" format="CopyValue" />
+
+ 				"" <!--  same as in project -->
+
+
+
 <!-- Invisible (calculated) project-wide parameters -->			
 		<parameter id="SimulDirSlash" type="Pathname" visible="false"
 		 default="?%SimulDir=:,%SimulDir/" format="CopyValue"/>
@@ -148,6 +157,7 @@
 			<!--  TODO: make time-stamped and "latest" for snapshots -->
 			<group name="VivadoSnapshots" label="Vivado snapshot archive names">
 				"SnapshotSynth"
+				"SnapshotOptPlace"
 			</group>
 		</input>
 		<output>

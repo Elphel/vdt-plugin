@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="VivadoOptPlaceInterface" extends="VivadoInterface">
+	    <typedef name="OptDirectiveType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="Explore"               label="Run multiple passes of optimization to improve results."/>
+      			<item value="ExploreArea"           label="Run multiple passes of optimization, with an emphasis on reducing area."/>
+      			<item value="ExploreSequentialArea" label="Run multiple passes of optimization, with an emphasis on reducing registers and related combinational logic."/>
+      			<item value="AddRemap"              label="Run the default optimization, and include LUT remapping to reduce logic levels."/>
+      			<item value="RuntimeOptimized"      label="Run the fewest iterations, trading optimization results for faster runtime."/>
+      			<item value="Default"               label=" Run the default optimization."/>
+      		</paramtype>
+    	</typedef>
+	    <typedef name="PlaceDirectiveType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "Explore"                label="Increased placer effort in detail placement and post-placement optimization."/>
+      			<item value= "WLDrivenBlockPlacement" label="Wirelength-driven placement of RAM and DSP blocks."/>
+      			<item value= "LateBlockPlacement"     label="Defer detailed placement of RAMB and DSP blocks to the final stages of placement."/>
+      			<item value= "ExtraNetDelay_high"     label="Increases estimated delay of high fanout and long-distance nets. High pessimism option"/>
+      			<item value= "ExtraNetDelay_medium"   label="Increases estimated delay of high fanout and long-distance nets. Medium pessimism option"/>
+      			<item value= "ExtraNetDelay_low"      label="Increases estimated delay of high fanout and long-distance nets. Low pessimism option"/>
+      			<item value= "SpreadLogic_high"       label="Distribute logic across the device - highest level of distribution."/>
+      			<item value= "SpreadLogic_medium"     label="Distribute logic across the device - medium level of distribution."/>
+      			<item value= "SpreadLogic_low"        label="Distribute logic across the device - lowest level of distribution."/>
+      			<item value= "ExtraPostPlacementOpt"  label="Increased placer effort in post-placement optimization."/>
+      			<item value= "SSI_ExtraTimingOpt"     label="Use an alternate algorithm for timing-driven partitioning across SLRs."/>
+      			<item value= "SSI_SpreadSLLs"         label="Partition across SLRs and allocate extra area for regions of higher connectivity."/>
+      			<item value= "SSI_BalanceSLLs"        label="Partition across SLRs while attempting to balance SLLs between SLRs."/>
+      			<item value= "SSI_BalanceSLRs"        label="Partition across SLRs to balance number of cells between SLRs."/>
+      			<item value= "SSI_HighUtilSLRs"       label="Direct the placer to attempt to place logic closer together in each SLR."/>
+      			<item value= "RuntimeOptimized"       label="Run fewest iterations, trade higher design performance for faster run time"/>
+      			<item value= "Quick "                 label="Fastest runtime, non-timing-driven, performs the minimum required placement for the design."/>
+      			<item value= "Default"                label="Run the default placement."/>
+      		</paramtype>
+    	</typedef>
+	    <typedef name="PhysOptDirectiveType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "Explore"                label="Run different algorithms in multiple passes of optimization, including replication for very high fanout nets."/>
+      			<item value= "ExploreWithHoldFix"     label="Same as Explore with addition of hold violation fixing."/>
+      			<item value= "AggressiveExplore"      label="Similar to Explore but with different more aggressive optimization algorithms."/>
+      			<item value= "AlternateReplication"   label="Use different algorithms for performing critical cell replication."/>
+      			<item value= "AggressiveFanoutOpt"    label="Uses different and more aggressiver algorithms for fanout-related optimizations."/>
+      			<item value= "AlternateDelayModeling" label="Performs all optimizations using alternate algorithms for estimating net delays."/>
+      			<item value= "AddRetime"              label="Deafault optimization with additional register re-timing."/>
+      			<item value= "Default"                label="Run the default physical optimization."/>
+      		</paramtype>
+    	</typedef>
+	</interface>
+
+	<tool name="VivadoOptPlace" label="Optimize and place design"
+	    project="FPGA_project"
+		interface="VivadoOptPlaceInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Vivado Synthesis">
+		<action-menu>
+			<action label="Optimize and Place" resource="" icon="xilinx.png" />
+		</action-menu>
+		<parameter id="FromMemory" label="Do not load snapshot created after synthesis"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipPreOptimization" label="Do not run pre optimization TCL commands"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipOptimization" label="Do not run opt_design"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipPowerOptimization" label="Do not run power_opt_design"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipPlacement" label="Do not run place_design"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipPhysOpt" label="Do not run phys_opt_design"
+		           default="false" type= "Boolean" format="None"/>
+		           
+		<parameter id="SkipSnapshotPlace" label="Do not create snapshot after placement"
+		           default="false" type= "Boolean" format="None"/>
+
+<!--   left from synthesis, may need update--> 
+		<parameter id="ShowWarnings" label="Parse warning messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+		<parameter id="ShowInfo" label="Parse info messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+        <parameter id="PreGrepW" visible="false"
+                   type="String" format="None"
+                   default="?%ShowWarnings=true: |WARNING, "/>
+        <parameter id="PreGrepI" visible="false"
+                   type="String" format="None"
+                   default="?%ShowInfo=true: |INFO, "/>
+        <parameter id="GrepEWI" label="Grep filter"
+                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
+                   type="String" format="CopyValue"
+                   visible="true" readonly="true"/>
+                   
+		<parameter id="PreOptTCL" label="TCL commands to run before opt_design"
+			type="Stringlist" format="ProgramSyntax" default="" omit=""
+			readonly="false" visible="true" />
+                   
+  
+<!-- opt_design arguments -->  
+
+        <parameter 	id="retarget"             label= "Retarget"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="propconst"             label= "Propagate constants across leaf-level instances"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="sweep"             label= "Remove unconnected leaf-level instances"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="bram_power_opt"             label= "Retarget"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="remap"             label= "Remap logic optimally in LUTs"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="resynth_area"               label= "Resynthesis"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="resynth_seq_area"           label= "Resynthesis (with Sequential optimizations)"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="directive_opt"              label= "Mode of behaviour for opt_design command"
+        			default="Default" visible="true" omit="off" type="OptDirectiveType" format="DirectiveSyntax"/>
+        <parameter	id="quiet_opt"    label= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
+        <parameter	id="verbose_opt"   label= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
+<!-- power_opt_design arguments -->  
+        <parameter	id="quiet_pwr_opt"    label= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
+        <parameter	id="verbose_pwr_opt"   label= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
+<!-- place_design arguments -->
+        <!-- No support yet for "-cells" to limit placement to selected cells. Will require multiple runs with
+        different settings. Can probably create several pages of parameters alternatives for that purpose
+        and then run "placement - alt1", "placement - alt2", ... -->
+        <parameter 	id="directive_place"       label= "Placement algorithm mode (not compatible with other specific options)"
+        			default="Default" visible="true" omit="off" type="PlaceDirectiveType" format="DirectiveSyntax"/>
+        <parameter 	id="no_timing_driven"          label= "Disables the default timing driven placement algorithm."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="unplace"          label= "Unplace all the instances which are not locked by constraints."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="post_place_opt"          label= "Run optimization after placement to improve critical path timing."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="quiet_place"    label= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
+        <parameter	id="verbose_place"   label= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
+<!-- phys_opt_design arguments -->
+<!--  TODO: Make a separate command with several different settings sets -->
+        <parameter 	id="directive_phys_opt"       label= "Placement algorithm mode (not compatible with other specific options)"
+        			default="Default" visible="true" omit="off" type="PhysOptDirectiveType" format="DirectiveSyntax"/>
+        <parameter 	id="fanout_opt"         label= "Delay-driven optimization on high-fanout timing critical nets by replicating drivers."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="placement_opt"      label= "Move cells to reduce delay on timing-critical nets."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="rewire"             label= "Refactor logic cones to reduce logic levels and reduce delay on critical signals."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="critical_cell_opt"  label= "Replicate cells on timing critical nets to reduce delays."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="dsp_register_opt"   label= "Improve critical path delay by moving registers from slices to DSP or from DSP to slices."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="bram_register_opt"  label= "Improve critical path delay by moving registers from slices to BRAM or from BRAM to slices."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="bram_enable_opt"    label= "Selectively reverses power optimization for enable logic of BRAMs."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="shift_register_opt" label= "Eextract beginnning/end FF from SLR to improve timing"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="hold_fix"           label= "Insert data path delay to fix hold time violations."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="retime"             label= "Move registers through combinatorial fabric."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        			<!-- TODO: Implement force_replication_on_nets args (requires?  get_nets command ) --> 
+        <parameter 	id="critical_pin_opt"   label= "Swap LUT pins to improve critical path timimg."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+
+        <parameter	id="quiet_phys_opt"     label= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="QuietSyntax"/>
+        <parameter	id="verbose_phys_opt"   label= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="VerboseSyntax"/>
+        			
+<!-- TODO: Try outid to use with different parameters having same keyword -->        			
+        			
+<!-- hidden (calculated) parameters -->			
+			
+		<input>
+			<group name="General">
+				"FromMemory"
+				"SkipPreOptimization"
+				"SkipOptimization"
+				"SkipPowerOptimization"
+				"SkipPlacement"
+				"SkipPhysOpt"
+				"SkipSnapshotPlace"
+ 				"SnapshotOptPlace" <!--  same as in project -->
+				"ShowWarnings"
+				"ShowInfo"
+				"GrepEWI"
+			</group>
+			<group name="Optimization">
+			        "PreOptTCL"
+        			"directive_opt"
+					"retarget"
+					"propconst"
+        			"sweep"
+        			"bram_power_opt"
+					"remap"
+        			"resynth_area"
+        			"resynth_seq_area"
+        			"---"
+        			"quiet_opt"
+        			"verbose_opt"
+			</group>
+			<group name="Power Optimization">
+        			"quiet_pwr_opt"
+        			"verbose_pwr_opt"
+			</group>
+			<group name="Placement">
+        			"directive_place"
+        			"no_timing_driven"
+        			"unplace"
+        			"post_place_opt"
+        			"quiet_place"
+        			"verbose_place"
+			</group>
+			<group name="Physical Optimization">
+        			"directive_phys_opt"
+        			"fanout_opt"
+        			"placement_opt"
+        			"rewire"
+        			"critical_cell_opt"
+        			"dsp_register_opt"
+        			"bram_register_opt"
+        			"bram_enable_opt"
+        			"shift_register_opt"
+        			"hold_fix"
+        			"retime"
+        			<!-- TODO: Implement force_replication_on_nets args (requires?  get_nets command ) --> 
+        			"critical_pin_opt"
+        			"quiet_phys_opt"
+        			"verbose_phys_opt"
+			</group>
+		</input>
+
+		<output>
+		<!-- mkdir -p vdt/npmtest-->
+		<!-- Now skipping completely pre_opt copying - maybe some will still be needed (custom tcl scripts), then move conditional inside block -->
+		<if FromMemory = "false">
+			<line name="vivado_copy_pre_opt">
+				"-c"
+				<!-- Create project directory on remote server if it did not exist -->
+				"ssh -l"
+				"%RemoteUser"
+				"%RemoteHost"
+				"'"
+				"mkdir -p"
+				"%VivadoProjectRoot"
+				"' ;"
+				<!-- Copy snapshot generated after synthesis from local to remote -->
+				"rsync -avrR -e ssh"
+				<!--  from: -->
+				"%VivadoLocalDir/%SnapshotSynth"
+				<!-- to: -->
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				";"
+			</line>
+		</if>	
+<!-- Combining optimization and placement TCL commands in a single command block
+     May need to split if they will need different error parsers (external and/or Eclipse patterns)  -->
+<!-- Set sep="", so all new lines should be specified as \n -->
+			<line name="vivado_run_opt"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep=""
+			      prompt="@@FINISH@@" 
+			      stdout="parser_VivadoOpt">
+			      "cd ~/%VivadoProjectRoot\n"
+			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "file mkdir $outputDir\n"
+			      <!-- Start fresh from the loaded checkpoint -->
+		          <if FromMemory = "false">
+		          		"open_checkpoint %SnapshotSynth\n"
+		          </if>
+		          <!-- Run pre-optimization TCL commands (if specified) -->
+			      <if SkipPreOptimization="false">
+				      <if-not PreOptTCL="">
+				      		"%PreOptTCL\n"
+				      </if-not>
+				      <if PreOptTCL="">
+				      		'puts "No pre-optimization TCL commands specified"\n'
+				      </if>
+			      </if>
+			      <if SkipOptimization="false">
+		          <!-- Run optimization -->
+			          "opt_design"
+			          "%retarget"
+			          "%propconst"
+			          "%sweep"
+			          "%bram_power_opt"
+			          "%remap"
+			          "%resynth_area"
+			          "%resynth_seq_area"
+			          "%directive"
+			          "%quiet_opt"
+			          "%verbose_opt"
+				      "\n"
+			      </if>
+			      <if SkipPowerOptimization="false">
+			      <!-- Run power optimization -->
+			          "power_opt_design"
+			          "%quiet_pwr_opt"
+			          "%verbose_pwr_opt"
+				      "\n"
+			      </if>
+			      <if SkipPlacement="false">
+			      <!-- Run placement -->
+			          "place_design"
+			          "%directive_place"
+			          "%no_timing_driven"
+			          "%unplace"
+			          "%post_place_opt"
+			          "%quiet_place"
+			          "%verbose_place"
+				      "\n"
+			      </if>
+			      <if SkipPhysOpt="false">
+			      <!-- Run physical optimization -->
+			      <!--  TODO: make an extra command to run several optimizations -->
+			          "phys_opt_design"
+			          "%directive_phys_opt"
+			          "%fanout_opt"
+			          "%placement_opt"
+			          "%rewire"
+			          "%critical_cell_opt"
+			          "%dsp_register_opt"
+			          "%bram_register_opt"
+			          "%bram_enable_opt"
+			          "%shift_register_opt"
+			          "%hold_fix"
+			          "%retime"
+        			<!-- TODO: Implement force_replication_on_nets args (requires?  get_nets command ) --> 
+			          "%critical_pin_opt"
+			          "%quiet_phys_opt"
+			          "%verbose_phys_opt"
+				      "\n"
+			      </if>
+			      <if SkipSnapshotPlace="false">
+				      	"write_checkpoint -force %SnapshotOptPlace\n"
+			      </if>
+				"puts '@@FINISH@@'\n"
+			</line>
+<!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
+			<if-and SkipSnapshotSynth="false"
+			        VivadoSynthActionIndex="0">
+				<line name="vivado_copy_after_synth">
+					"-c"
+					"mkdir -p %VivadoLocalDir ;"
+					"rsync -avr -e ssh"
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
+					"%VivadoLocalDir/"
+				</line>
+	        </if-and>
+			<line name="parser_VivadoOpt"
+			    errors=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+				warnings=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+				info=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]">
+				"-c"
+     			"%GrepEWI"
+     			"| %SedPaths"
+			</line>
+		</output>
+	</tool>
+
+</vdt-project>

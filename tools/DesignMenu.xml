@@ -52,6 +52,13 @@
                           label="Run Vivado synthesis"
                           icon="xilinx.png"
                           call="VivadoSynthesis"/>
+                <menuitem name="VivadoOptPlace"
+                          label="Optimize and place design"
+                          icon="xilinx.png"
+                          call="VivadoOptPlace"/>
+                          
+                          
+                          
         </menu>                  
     </menu>
     
