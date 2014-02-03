@@ -53,7 +53,7 @@
 		interface="VivadoOptPlaceInterface"
 		package="FPGA_package"
 		shell="/bin/bash"
-		description="Vivado Synthesis">
+		description="Vivado optimize, power optimize, place and physical optimize design">
 		<action-menu>
 			<action label="Optimize and Place" resource="" icon="xilinx.png" />
 		</action-menu>
@@ -99,7 +99,7 @@
 <!-- opt_design arguments -->  
 
         <parameter 	id="directive_opt" outid="directive" label="Directive" tooltip= "Mode of behaviour for opt_design command, not compatible with individual optimization settings."
-        			default="Default" visible="true" omit="off" type="OptDirectiveType" format="Dash"/>
+        			default="Default" visible="true" omit="Default" type="OptDirectiveType" format="Dash"/>
         <parameter 	id="retarget"  label="Retarget" tooltip= "Retarget block types when using different part"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
         <parameter 	id="propconst" label="Propagate constants" tooltip= "Propagate constants across leaf-level instances"
@@ -128,7 +128,7 @@
         different settings. Can probably create several pages of parameters alternatives for that purpose
         and then run "placement - alt1", "placement - alt2", ... -->
         <parameter 	id="directive_place"  outid="directive" label="Directive" tooltip= "Placement algorithm mode (not compatible with other specific options)"
-        			default="Default" visible="true" omit="off" type="PlaceDirectiveType" format="Dash"/>
+        			default="Default" visible="true" omit="Default" type="PlaceDirectiveType" format="Dash"/>
         <parameter 	id="no_timing_driven" label="No timing-driven" tooltip= "Disables the default timing driven placement algorithm."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
         <parameter 	id="unplace" label="Unplace" tooltip= "Unplace all the instances which are not locked by constraints."
@@ -142,7 +142,7 @@
 <!-- phys_opt_design arguments -->
 <!--  TODO: Make a separate command with several different settings sets -->
         <parameter 	id="directive_phys_opt"  outid="directive" label="Directive" tooltip= "Placement algorithm mode (not compatible with other specific options)"
-        			default="Default" visible="true" omit="off" type="PhysOptDirectiveType" format="Dash"/>
+        			default="Default" visible="true" omit="Default" type="PhysOptDirectiveType" format="Dash"/>
         <parameter 	id="fanout_opt" label="Fanout optimization" tooltip= "Delay-driven optimization on high-fanout timing critical nets by replicating drivers."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
         <parameter 	id="placement_opt" label="Placement optimization" tooltip= "Move cells to reduce delay on timing-critical nets."
@@ -171,7 +171,10 @@
         <parameter	id="verbose_phys_opt" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
-<!-- hidden (calculated) parameters -->			
+<!-- hidden (calculated) parameters -->
+<!--  not really used now, always "0" -->			
+			   	   <parameter   id="VivadoOptPlaceActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
 			
 		<input>
 			<group name="General">
@@ -285,7 +288,7 @@
 				      		"%PreOptTCL\n"
 				      </if-not>
 				      <if PreOptTCL="">
-				      		'puts "No pre-optimization TCL commands specified"\n'
+				      		"puts \"No pre-optimization TCL commands specified\"\n"'
 				      </if>
 			      </if>
 			      <if SkipOptimization="false">
@@ -298,7 +301,7 @@
 			          "%remap"
 			          "%resynth_area"
 			          "%resynth_seq_area"
-			          "%directive"
+			          "%directive_opt"
 			          "%quiet_opt"
 			          "%verbose_opt"
 				      "\n"
@@ -348,13 +351,13 @@
 				"puts \"@@FINISH@@\"\n"
 			</line>
 <!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
-			<if-and SkipSnapshotSynth="false"
-			        VivadoSynthActionIndex="0">
+			<if-and SkipSnapshotPlace="false"
+			        VivadoOptPlaceActionIndex="0">
 				<line name="vivado_copy_after_synth">
 					"-c"
 					"mkdir -p %VivadoLocalDir ;"
 					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotOptPlace"
 					"%VivadoLocalDir/"
 				</line>
 	        </if-and>
@@ -365,6 +368,10 @@
 				"-c"
      			"%GrepEWI"
      			"| %SedPaths"
+     			<if NoBabyTalk="true">
+     				"| grep --line-buffered -v \"license\""
+     			</if>
+     			
 			</line>
 		</output>
 	</tool>

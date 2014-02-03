@@ -63,6 +63,8 @@
 
 		<parameter id="VivadoConsole" default="Vivado" label="Vivado console name" tooltip="Vivado console name in Eclipse, used by other tools"
 			type="String" format="CopyValue" visible="true" readonly="false"/>
+        <parameter 	id="NoBabyTalk" label="No Baby talk" tooltip= "Remove licensing baby talk from INFO messages."
+        			default="true" visible="true" omit="false" type="Boolean" format="DashName"/>
 			
 	     <input>
 			<group name="VivadoServer" label="Vivado server setup">

@@ -281,6 +281,9 @@
 				"-c"
      			"%GrepEWI"
      			"| %SedPaths"
+     			<if NoBabyTalk="true">
+     				"| grep --line-buffered -v \"license\""
+     			</if>
 			</line>
 		</output>
 	</tool>
