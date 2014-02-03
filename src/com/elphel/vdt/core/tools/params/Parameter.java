@@ -36,6 +36,7 @@ public class Parameter implements Cloneable, Updateable {
     private String syntaxName;
     private String defaultValue;
     private String label;
+    private String tooltip;
     private String omitValue;
     private String readonly;
     private String visible;
@@ -58,6 +59,7 @@ public class Parameter implements Cloneable, Updateable {
                      String syntaxName, 
                      String defaultValue,
                      String label,
+                     String tooltip,
                      String omitValue,
                      String readonly, 
                      String visible,
@@ -71,6 +73,7 @@ public class Parameter implements Cloneable, Updateable {
         this.syntaxName = syntaxName;
         this.defaultValue = defaultValue;
         this.label = label;
+        this.tooltip = tooltip;
         this.omitValue = omitValue; 
         this.readonly = readonly;
         this.visible = visible;
@@ -90,6 +93,7 @@ public class Parameter implements Cloneable, Updateable {
              param.syntaxName, 
              param.defaultValue,
              param.label,      
+             param.tooltip,      
              param.omitValue,
              param.readonly,  
              param.visible,
@@ -241,6 +245,10 @@ public class Parameter implements Cloneable, Updateable {
         return label;
     }
     
+    public String getToolTip() {
+        return tooltip;
+    }
+
     public ParamType getType() {
         return type;
     }
@@ -442,6 +450,9 @@ public class Parameter implements Cloneable, Updateable {
         if(label == null)
             label = param.label;
            
+        if(tooltip == null)
+        	tooltip = param.tooltip;
+
         if(omitValue == null)
            omitValue = param.omitValue; 
            

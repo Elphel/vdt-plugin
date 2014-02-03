@@ -57,7 +57,7 @@
 		<action-menu>
 			<action label="Optimize and Place" resource="" icon="xilinx.png" />
 		</action-menu>
-		<parameter id="FromMemory" label="Do not load snapshot created after synthesis"
+		<parameter id="FromMemory" tooltip="Do not load snapshot created after synthesis" label="Run from memory"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPreOptimization" label="Do not run pre optimization TCL commands"
 		           default="false" type= "Boolean" format="None"/>
@@ -190,8 +190,10 @@
 				"ShowInfo"
 				"GrepEWI"
 			</group>
-			<group name="Optimization">
+			<group name="Pre-optimization commands">
 			        "PreOptTCL"
+			</group>
+			<group name="Optimization">
         			"directive_opt"
 					"retarget"
 					"propconst"

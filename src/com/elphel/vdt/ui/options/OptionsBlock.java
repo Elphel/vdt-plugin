@@ -182,14 +182,6 @@ public class OptionsBlock {
             component = new LabelComponent(param);            
         } else if (paramType instanceof ParamTypeNumber) {
             component = new NumberComponent(param);            
- 
-/*    	
-        Component component = null;
-        ParamType paramType = param.getType();
-        
-        if (paramType instanceof ParamTypeNumber) {
-            component = new NumberComponent(param);
-*/            
         } else if (paramType instanceof ParamTypeBool) {
             component = new BoolComponent(param);            
         } else if (paramType instanceof ParamTypeString) {
@@ -244,30 +236,12 @@ public class OptionsBlock {
                 		component = createComponent(param);
                 	if (component == null)
                 		continue;
+                	
                 }
                 activeComponents.add(component);
                 //              component.setPreferenceStore(store);
                 component.createControl(tabComposites[i]);
                 component.setChangeListener(changeListener);
-
-/*            	
-                String paramID = (String)pi.next();                
-                Parameter param = context.findParam(paramID);
-                
-                if (!param.isVisible())
-                    continue;
-                
-                Component component = components.get(param);
-                if (component == null)
-                    component = createComponent(param);
-                if (component == null)
-                    continue;
-
-                activeComponents.add(component);
-//              component.setPreferenceStore(store);
-                component.createControl(tabComposites[i]);
-                component.setChangeListener(changeListener);
-*/                
             }
         }
     } // addProperties()

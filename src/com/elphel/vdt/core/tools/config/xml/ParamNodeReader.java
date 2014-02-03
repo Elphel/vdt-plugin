@@ -58,6 +58,7 @@ public class ParamNodeReader extends AbstractConditionNodeReader {
         String defaultValue = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_DEFAULT_VALUE_ATTR);
         String omitValue    = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_OMIT_VALUE_ATTR);
         String label        = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_LABEL_ATTR);
+        String tooltip      = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_TOOLTIP_ATTR);
         String readOnly     = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_READONLY_ATTR);
         String visible      = XMLConfig.getAttributeValue(paramNode, XMLConfig.PARAMETER_VISIBLE_ATTR);
         if(id == null)
@@ -69,6 +70,7 @@ public class ParamNodeReader extends AbstractConditionNodeReader {
                              formatName,
                              defaultValue,
                              label,
+                             tooltip,
                              omitValue,
                              readOnly,
                              visible,

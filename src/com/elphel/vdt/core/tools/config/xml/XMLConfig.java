@@ -76,6 +76,7 @@ public class XMLConfig extends Config {
     static final String PARAMETER_DEFAULT_VALUE_ATTR = "default";
     static final String PARAMETER_OMIT_VALUE_ATTR = "omit";
     static final String PARAMETER_LABEL_ATTR = "label";
+    static final String PARAMETER_TOOLTIP_ATTR = "tooltip";
     static final String PARAMETER_READONLY_ATTR = "readonly";
     static final String PARAMETER_VISIBLE_ATTR = "visible";
     

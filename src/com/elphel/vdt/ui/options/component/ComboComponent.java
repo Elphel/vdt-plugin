@@ -18,6 +18,7 @@
 package com.elphel.vdt.ui.options.component;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -48,7 +49,21 @@ public class ComboComponent extends GeneralComponent {
         StringBuilder sb= new StringBuilder();
         String [] values=type.getValues();
         String [] labels=type.getLabels();
+/*        
+        String paramTooltip=param.getToolTip();
         
+        String paramTooltip=null;
+        try {
+           paramTooltip=comboField.getToolTipText();
+        } catch (SWTException e){
+        	
+        }
+
+        if ((paramTooltip!=null) && (paramTooltip.length()>0)){
+        	sb.append(paramTooltip);
+        	sb.append("\n---------------------------\n");
+        }
+*/        
         for (int i=0;i<type.getValues().length;i++){
         	sb.append("\"");
         	sb.append(values[i]);
@@ -59,7 +74,6 @@ public class ComboComponent extends GeneralComponent {
         	}
         }
         comboField.setToolTipText(sb.toString());
-        
         comboField.setMenu(createPopupMenu(comboField.getShell()));        
         endCreateControl();
     }    

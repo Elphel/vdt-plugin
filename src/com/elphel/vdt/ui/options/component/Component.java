@@ -79,6 +79,9 @@ public abstract class Component {
         if (param!=null) {// Andrey - to add labels
         	labelField = createLabel(parent, param.getLabel());
         	labelField.setMenu(createPopupMenu(labelField.getShell()));
+        	if (param.getToolTip()!=null){
+        		labelField.setToolTipText(param.getToolTip());
+        	}
         }
     }
 
