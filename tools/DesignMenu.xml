@@ -49,7 +49,7 @@
                           icon="my_tool.gif"
                           call="VivadoTest"/>
                 <menuitem name="VivadoSynthesis"
-                          label="Synthesise design"
+                          label="Synthesize design"
                           icon="xilinx.png"
                           call="VivadoSynthesis"/>
                 <menuitem name="VivadoOptPlace"

@@ -22,9 +22,9 @@
 					"rsync -avr -e ssh"
 					"%RemoteUser@%RemoteHost:%VivadoUnisimsAbsolutePath/unisims"
 					"./;"
-					"rsync -avr -e ssh"
+<!-- 				"rsync -avr -e ssh"
 					"%RemoteUser@%RemoteHost:%VivadoUnisimsAbsolutePath/unisim_retarget_comp.v"
-					"unisims ;"
+					"unisims ;" -->
 			</line>
 		</output>
 	</tool>

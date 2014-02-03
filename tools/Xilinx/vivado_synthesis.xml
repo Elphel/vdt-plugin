@@ -49,7 +49,7 @@
     	</typedef>
 	</interface>
 
-	<tool name="VivadoSynthesis" label="Load Source files to Vivado and Synthesise"
+	<tool name="VivadoSynthesis" label="Load Source files to Vivado and Synthesize"
 	    project="FPGA_project"
 		interface="VivadoSynthesisInterface"
 		package="FPGA_package"
@@ -62,7 +62,7 @@
 		</extensions-list>
 
 		<action-menu>
-			<action label="Synthesise with Vivado:" resource="%ImplementationTopFile"
+			<action label="Synthesize with Vivado:" resource="%ImplementationTopFile"
 			        check-extension="false" check-existence="true"  icon="xilinx.png" />
 			<action label="Check by Vivado Synthesis:" resource="%%SelectedFile"
 			        check-extension="true" check-existence="true" icon="sample.gif" />

@@ -97,7 +97,7 @@
 			readonly="false" />
 		<parameter id="SimulationTopModule" label="Simulation top module" tooltip="Project top simulation module"
 			type="String" default="" format="CopyValue" readonly="false" />
-		<parameter id="ImplementationTopFile" label="Implementation top module" tooltip="Project file with top implementation module"
+		<parameter id="ImplementationTopFile" label="Implementation top file" tooltip="Project file with top implementation module"
 			type="Filename" default="" format="CopyValue" readonly="false" />
 		<parameter id="SimulDir" label="Simulation directory" tooltip="Project simulation directory"
 			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
