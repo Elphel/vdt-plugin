@@ -267,12 +267,30 @@ public class XMLConfig extends Config {
         if(isTextNode(node)) {
             // we need the raw text in this node
             String text = node.getNodeValue();
+            
             String[] lines = text.split("\"");
             
             // we need only lines enclosed in quotes
-            // so in the 'lines' array we need only odd elems (1, 3, 5, ...) 
-            for(int k = 1; k < lines.length; k += 2)
+            // so in the 'lines' array we need only odd elems (1, 3, 5, ...)
+            /*
+            for(int k = 1; k < lines.length; k += 2) {
                 stringList.add(lines[k]);
+                if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+                	System.out.println ("got quoted string: \""+lines[k]+"\"");
+            }
+            */
+            //Andrey: modified to accept \"
+            String line=null;
+            for (int k=1;k<lines.length;k++){
+            	if (line ==null){
+            		line=lines[k];
+            	} else if (line.endsWith("\\")){ // So it was \"
+            		line=line.substring(0,line.length()-1)+"\""+lines[k];
+            	} else {
+            		stringList.add(line);
+            		line=null;
+            	}
+            }
         } else {    
             NodeList childNodes = node.getChildNodes();
             
