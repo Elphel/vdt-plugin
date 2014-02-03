@@ -148,6 +148,7 @@ public class VDT {
     public static final String GENERATOR_ID_CURRENT_BASE  = "CurrentFileBase"; 
     public static final String GENERATOR_ID_CHOSEN_ACTION = "ChosenActionIndex"; 
     public static final String GENERATOR_ID_BUILD_STAMP   = "BuildStamp"; 
+    public static final String GENERATOR_ID_USERNAME      = "UserName"; 
     public static final String GENERATOR_ID_BLANK         = "Blank"; 
     public static final String GENERATOR_ID_NEWLINE       = "NewLine"; 
 } // class VDT

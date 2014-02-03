@@ -11,11 +11,11 @@
 	              label="Common parameters for FPGA projects"
 	              interface="FPGAPprojectInterface">
 	     <parameter id="RemoteHost" label="Remote Host IP" tooltip="Remote Host IP" type="String"
-			format="CopyValue" default="192.168.0.122" readonly="false" visible="true" />
+			format="CopyValue" default="127.0.0.1" readonly="false" visible="true" />
 
 
 		<parameter id="RemoteUser" label="Remote user name" tooltip="Remote user name" type="String"
-			format="CopyValue" default="xilinx" readonly="false" visible="true" />
+			format="CopyValue" default="%%UserName" readonly="false" visible="true" />
 
 		<parameter id="PreSSH" label="pre-ssh" tooltip="pre-ssh shell parameters"
 			type="String" format="CopyValue" default="" readonly="false" visible="true" />

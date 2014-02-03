@@ -18,15 +18,14 @@
 package com.elphel.vdt.core.tools.generators;
 
 import com.elphel.vdt.VDT;
-import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
-public class BuildStampGenerator extends AbstractGenerator {
-    public static final String NAME = VDT.GENERATOR_ID_BUILD_STAMP;
+public class UserNameGenerator extends AbstractGenerator {
+    public static final String NAME = VDT.GENERATOR_ID_USERNAME;
     public String getName() {
         return NAME;
     }
     
     protected String[] getStringValues() {
-    	return new String[] {SelectedResourceManager.getDefault().getBuildStamp()};
+    	return new String[] {System.getProperty("user.name")};
     }
-}
+} //UserNameGenerator
