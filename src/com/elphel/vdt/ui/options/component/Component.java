@@ -76,8 +76,10 @@ public abstract class Component {
 //        System.out.println("-- Component.createControl: id= "+param.getID()+"; label= "+param.getLabel());
         this.parent = parent;
         activated = false;
-        labelField = createLabel(parent, param.getLabel());
-        labelField.setMenu(createPopupMenu(labelField.getShell()));    
+        if (param!=null) {// Andrey - to add labels
+        	labelField = createLabel(parent, param.getLabel());
+        	labelField.setMenu(createPopupMenu(labelField.getShell()));
+        }
     }
 
     protected void endCreateControl() {
@@ -134,27 +136,31 @@ public abstract class Component {
     }
 
     public boolean isEnable() {
+    	if (param==null) return true; // label
         return ! param.isReadOnly();
     }
 
     public void setVisible (boolean visible) {
-        labelField.setVisible(visible);
+    	if (labelField!=null) 
+    		labelField.setVisible(visible);
     }
     
     public void setEnabled (boolean enabled) {
-        labelField.setEnabled(enabled);
+    	if (labelField!=null) 
+    		labelField.setEnabled(enabled);
     }
     
     protected void setDefault(boolean defaulted) {
 //        System.out.println("-- Component.setDefault: id= "+param.getID()+"; label= "+param.getLabel());
         isDefault = defaulted;
-        labelField.setForeground(defaulted ? colorForegroundDefault
-                                           : colorForeground );     
+    	if (labelField!=null) 
+    		labelField.setForeground(defaulted ? colorForegroundDefault
+    				: colorForeground );     
     }
     
     protected void selectionChanged() {
 //        System.out.println("-- Component.selectionChanged: id= "+param.getID()+"; label= "+param.getLabel());
-        if (! param.hasDependentParameters())
+        if ((param == null) || (! param.hasDependentParameters()))
             return;
             
         if (changeNotifier == null)

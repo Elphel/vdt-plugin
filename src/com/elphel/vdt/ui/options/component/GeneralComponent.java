@@ -35,10 +35,12 @@ public abstract class GeneralComponent extends Component {
     protected Menu popupMenu; 
     
     GeneralComponent(Parameter param) {
-        super(param);
-        option = new ParamBasedOption(param);
-        isDefault = option.isStoredDefault();
-        modifyListener = createModifyListener();
+    	super(param);
+    	if (param!=null) { //Andrey
+    		option = new ParamBasedOption(param);
+    		isDefault = option.isStoredDefault();
+    		modifyListener = createModifyListener();
+    	}
     }
 
     protected void endCreateControl() {

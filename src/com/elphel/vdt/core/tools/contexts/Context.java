@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.elphel.vdt.core.tools.config.Config;
 import com.elphel.vdt.core.tools.config.ConfigException;
+import com.elphel.vdt.core.tools.config.xml.XMLConfig;
 import com.elphel.vdt.core.tools.params.*;
 import com.elphel.vdt.core.tools.params.recognizers.*;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString;
@@ -224,14 +225,14 @@ public abstract class Context {
         		timeout=Integer.parseInt(sTimeout);
         	} catch(Exception e){
         	}
-        	prompt=commandLinesBlock.parseCntrl(prompt); // replace control character codes (\n,\t,\x)
+        	prompt=CommandLinesBlock.parseCntrl(prompt); // replace control character codes (\n,\t,\x)
         	prompt=commandLinesBlock.applyMark(prompt); // remove mark sequence
         	String interrupt=commandLinesBlock.getInterrupt();
             List<String> lines = commandLinesBlock.getLines();  // [%Param_Shell_Options, echo BuildDir=%BuildDir ;, echo SimulationTopFile=%SimulationTopFile ;, echo SimulationTopModule=%SimulationTopModule ;, echo BuildDir=%BuildDir;, %Param_PreExe, %Param_Exe, %Param_TopModule, %TopModulesOther, %ModuleLibrary, %LegacyModel, %NoSpecify, %v, %SourceList, %ExtraFiles, %Filter_String]
             if ((lines.size()==0) && commandLinesBlock.hadStrings()){
                 if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
                 	System.out.println("Removing command lines block by false condition");
-            	continue; // to enable conditionals for the command line blocks, still making possible to use emty blocks for no-arguments programs
+            	continue; // to enable conditionals for the command line blocks, still making possible to use empty blocks for no-arguments programs
             }
             List<List<String>> commandSequence = new ArrayList<List<String>>();
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
@@ -386,6 +387,8 @@ public abstract class Context {
                 continue;
             
             for(String id : paramIDs) {
+            	if (id.equals(XMLConfig.PARAMGROUP_SEPARATOR)) // Will try to add separator to the dialog
+            		continue;
                 if(findParam(id) == null)
                     throw new ConfigException("Parameter '" + id + 
                                               "' in context '" + name + 

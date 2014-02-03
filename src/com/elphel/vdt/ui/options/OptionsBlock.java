@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import com.elphel.vdt.core.tools.config.xml.XMLConfig;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.params.ParamGroup;
 import com.elphel.vdt.core.tools.params.Parameter;
@@ -48,6 +49,7 @@ import com.elphel.vdt.ui.options.component.DirComponent;
 import com.elphel.vdt.ui.options.component.DirListComponent;
 import com.elphel.vdt.ui.options.component.FileComponent;
 import com.elphel.vdt.ui.options.component.FileListComponent;
+import com.elphel.vdt.ui.options.component.LabelComponent;
 import com.elphel.vdt.ui.options.component.NumberComponent;
 import com.elphel.vdt.ui.options.component.StringListComponent;
 import com.elphel.vdt.ui.options.component.TextComponent;
@@ -96,7 +98,8 @@ public class OptionsBlock {
         ParamGroup paramGroups[] = getParamGroups();
         tabComposites = new Composite[paramGroups.length];
         scrolledComposite = new ScrolledComposite[paramGroups.length];
-        
+        if (paramGroups.length==0)
+        	return;
         if (paramGroups.length > 1)
             createTabFolder(parent, paramGroups);
         else
@@ -173,10 +176,20 @@ public class OptionsBlock {
 
     protected Component createComponent(Parameter param) {
         Component component = null;
+        ParamType paramType = (param==null)?null:param.getType();
+        
+        if (param == null) {
+            component = new LabelComponent(param);            
+        } else if (paramType instanceof ParamTypeNumber) {
+            component = new NumberComponent(param);            
+ 
+/*    	
+        Component component = null;
         ParamType paramType = param.getType();
         
         if (paramType instanceof ParamTypeNumber) {
-            component = new NumberComponent(param);            
+            component = new NumberComponent(param);
+*/            
         } else if (paramType instanceof ParamTypeBool) {
             component = new BoolComponent(param);            
         } else if (paramType instanceof ParamTypeString) {
@@ -194,8 +207,9 @@ public class OptionsBlock {
         } else {
             System.out.println("Param type " + param.getType().getName() + " unknown (not implemented?)");
         }
-
-        components.put(param, component);
+        if (param!=null) { // Andrey
+        	components.put(param, component);
+        }
         return component;
     } // createComponent()
     
@@ -213,6 +227,30 @@ public class OptionsBlock {
             ParamGroup paramGroup = paramGroups[i];
             
             for (Iterator<String> pi = paramGroup.getParams().iterator(); pi.hasNext();) {
+                String paramID = (String)pi.next();
+                Component component;
+
+                if (paramID.equals(XMLConfig.PARAMGROUP_SEPARATOR)){
+                	component = createComponent(null); // will create horizontal separator?
+                    component.createControl(tabComposites[i]);
+                	continue;
+                } else {
+                	//
+                	Parameter param = context.findParam(paramID);
+                	if (!param.isVisible())
+                		continue;
+                	component = components.get(param);
+                	if (component == null)
+                		component = createComponent(param);
+                	if (component == null)
+                		continue;
+                }
+                activeComponents.add(component);
+                //              component.setPreferenceStore(store);
+                component.createControl(tabComposites[i]);
+                component.setChangeListener(changeListener);
+
+/*            	
                 String paramID = (String)pi.next();                
                 Parameter param = context.findParam(paramID);
                 
@@ -229,6 +267,7 @@ public class OptionsBlock {
 //              component.setPreferenceStore(store);
                 component.createControl(tabComposites[i]);
                 component.setChangeListener(changeListener);
+*/                
             }
         }
     } // addProperties()
