@@ -168,7 +168,9 @@ public class VDTLaunchUtil {
             return arguments;
 */
             BuildParamsItem[] paramItemsArray = tool.buildParams();
-    		System.out.println("Andrey: called tool.buildParams() here (from VDTLaunchUtils.java");
+    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+    			System.out.println("called tool.buildParams() here (from VDTLaunchUtils.java)");
+    		}
     		return paramItemsArray;
 
         } catch(ToolException e) {
