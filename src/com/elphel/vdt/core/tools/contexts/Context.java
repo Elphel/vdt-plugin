@@ -188,7 +188,17 @@ public abstract class Context {
     public List<String> getCreatedControlFiles() {
         return createdControlFiles;
     }
+    
+    public String subsitutePattern(String pattern){
+    	if ((pattern==null) || (pattern.length()==0)) return pattern;
+    	Parameter param=findParam(pattern);
+    	if (param==null) return pattern;
+    	List<String> lv=param.getCurrentValue();
+    	if ((lv==null) || (lv.size()==0)) return null;
+    	return lv.get(0);
+    }
 
+    
     // scans all the parameters that belong to the tool, checks those of them
     // which need to be put into a control file, and puts them to that file
     // all other needed params are built into command line array
@@ -213,12 +223,12 @@ public abstract class Context {
             
             String name=commandLinesBlock.getName();    
         	String mark=commandLinesBlock.getMark();
-        	String toolErrors=commandLinesBlock.getErrors();
-        	String toolWarnings=commandLinesBlock.getWarnings();
-        	String toolInfo=commandLinesBlock.getInfo();
+        	String toolErrors=  subsitutePattern(commandLinesBlock.getErrors());
+        	String toolWarnings=subsitutePattern(commandLinesBlock.getWarnings());
+        	String toolInfo=    subsitutePattern(commandLinesBlock.getInfo());
         	String stderr=commandLinesBlock.getStderr();
         	String stdout=commandLinesBlock.getStdout();
-        	String prompt=buildSimpleString(commandLinesBlock.getPrompt()); // evaluate string
+        	String prompt=  buildSimpleString(commandLinesBlock.getPrompt()); // evaluate string
         	String sTimeout=buildSimpleString(commandLinesBlock.getTimeout());
         	int timeout=0;
         	try{

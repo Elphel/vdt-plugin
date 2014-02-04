@@ -152,6 +152,17 @@
    	   <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
         			
+<!-- parser parameters -->
+        <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
+        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
+        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
+        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+
 			
 		<input>
 			<group name="General">
@@ -187,6 +198,11 @@
 		        "---"
 		        "quiet"
 		        "verbose"
+			</group>
+			<group name="Parser">
+				"PatternErrors"
+				"PatternWarnings"
+ 				"PatternInfo" 
 			</group>
 		</input>
 
@@ -275,17 +291,22 @@
 	        <!-- errors=".*[ERROR|CRITICAL WARNING]: (\[.*\].*)\[(.*):([0-9]+)\]"
 	         -->
 			<line name="parser_VivadoSynth"
-				errors=   ".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
-				warnings= ".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
-				info=     ".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]">
+				errors=   "PatternErrors"
+				warnings= "PatternWarnings"
+				info=     "PatternInfo">
 				"-c"
      			"%GrepEWI"
      			"| %SedPaths"
      			<if NoBabyTalk="true">
      				"| grep --line-buffered -v \"license\""
+     				<!-- Add  [Synthesis:0000] to lines that do not have [file:line] - then "Synthesis" will appear in "Problems" location-->
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Synthesis:0000\]@'"
      			</if>
 			</line>
 		</output>
 	</tool>
-
+<!--  sed    's@^[^\[]*\[[^\[]*$@&\[Synthesis:0000\]@'
+      sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Synthesis:0000\]@'
+ 
+ -->
 </vdt-project>

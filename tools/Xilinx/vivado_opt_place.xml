@@ -370,6 +370,8 @@
      			"| %SedPaths"
      			<if NoBabyTalk="true">
      				"| grep --line-buffered -v \"license\""
+		  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Placement:0000\]@'"
      			</if>
      			
 			</line>

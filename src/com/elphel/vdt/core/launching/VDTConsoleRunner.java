@@ -98,14 +98,16 @@ public class VDTConsoleRunner{
 		IConsole[] consoles=(IConsole[]) man.getConsoles();
 		IOConsole iCons=null;
 		consoleInStreamProxy=null;
+		String consoleStartsWith=consolePrefix+" ("; // space and start of date
 		for (int i=0;i<consoles.length;i++){
-			if (consoles[i].getName().startsWith(consolePrefix)){
+//			if (consoles[i].getName().startsWith(consolePrefix)){
+			if (consoles[i].getName().startsWith(consoleStartsWith)){
 				iCons=(IOConsole) consoles[i];
 				break;
 			}
 		}
 		if (iCons==null) {
-			MessageUI.error("Specified console: "+consolePrefix+" is not found");
+			MessageUI.error("Specified console: "+consolePrefix+" is not found (was looking for \""+consoleStartsWith+"\"");
 			return null;
 		}
 		// try to send 

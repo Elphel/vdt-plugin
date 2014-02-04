@@ -180,7 +180,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
             					"' or '" + ParamTypeString.KIND_TEXT_ID +
             					"'");                    
             		}
-//            		System.out.println("Got string text kind for command block (for console name)");
+ //           		System.out.println("Got string text kind for command block (for console name)");
             	}
             }
         }
