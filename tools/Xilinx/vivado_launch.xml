@@ -8,31 +8,80 @@
 		shell="/bin/bash" interface="VivadoInterface" description="Launching remote Xilinx Vivado in console"> 
 		<action-menu>
 			<action label="Launch Vivado" resource="" icon="xilinx.png" />
+			<action label="Generate public key" resource="" icon="gnu.png" />
+			<action label="Setup connection to" resource="%RemoteUser@%RemoteHost" icon="gnu.png" />
 		</action-menu>
+<!-- 
+		<parameter   id="command" label="Command" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />  -->
+
+		<parameter   id="actionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+		
 		<input>
 			<group name="General">
-			"RemoteCommand"
+<!-- 		"command" -->
+ 			"RemoteCommand"
 			</group>
 		</input>
 
 		<output>
-			<line name="Vivado"
-			      interrupt="\x03">
-				"%ShellSwitches"
-				"%PreSSH"
-				"ssh"
-				<if TerminalMode = "true">
-				  "-t -t"
-				</if>
-				"%SSHSwitches"
-				"-l"
-				"%RemoteUser"
-				"%RemoteHost"
-				"'"
-				"%RemoteCommand"
-				"'"
-				"%SSHExtra"
-			</line>
+			<if actionIndex="0">
+				<line name="Vivado">
+					"%ShellSwitches"
+					"%PreSSH"
+					"ssh"
+					"-oBatchMode=yes"
+					<if TerminalMode = "true">
+					  "-t -t"
+					</if>
+					"%SSHSwitches"
+					"-l"
+					"%RemoteUser"
+					"%RemoteHost"
+					"'"
+					"%RemoteCommand"
+					"'"
+					"%SSHExtra"
+					"|| { echo '*** ssh connection to the server %RemoteUser@%RemoteHost failed ***';"
+					"echo 'You may need to configure connection - it is done in \"Package Setup\"';"
+					"echo 'Then generate a public key (if it is not done already), and post it to';"
+					"echo 'the remote server (currently set as %RemoteUser@%RemoteHost)';"
+					"exit 1; } ;"
+				</line>
+			</if>
+			<if actionIndex="1">
+				<line name="Keygen">
+					"%ShellSwitches"
+					"echo \"Generating public key with command:\";"
+					"echo \"ssh-keygen -t rsa -q -f ~/.ssh/id_rsa -N ''\";"
+					"ssh-keygen -t rsa -q -f ~/.ssh/id_rsa -N ''"
+				</line>
+			</if>
+			<if actionIndex="2">
+				<line name="SSHCopyID">
+					"%ShellSwitches"
+					"echo \"**********************************************\";"
+					"echo \"**                                         **\";"
+					"echo \"** This command requires you to be able    **\";"
+					"echo \"** to login to the remote system and enter **\";"
+					"echo \"** a password once to post your public key **\";"
+					"echo \"** there.                                  **\";"
+					"echo \"**                                         **\";"
+					"echo \"** For this you need 'ssh-askpass' to be   **\";"
+					"echo \"** installed in your system.               **\";"
+					"echo \"**                                         **\";"
+					"echo \"** If the command  will fail, you need to  **\";"
+					"echo \"** install 'ssh-askpass' or just manually  **\";"
+					"echo \"** run:                                    **\";"
+					"echo \"\n   ssh-copy-id %RemoteUser@%RemoteHost\n\";"
+					"echo \"** from the system terminal and enter your **\";"
+					"echo \"** password when prompted.                  **\";"
+					"echo \"**                                         **\";"
+					"echo \"**********************************************\";"
+					"ssh-copy-id %RemoteUser@%RemoteHost;"
+				</line>
+			</if>
 		</output>
 	</tool>
 </vdt-project>
