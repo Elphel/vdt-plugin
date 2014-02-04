@@ -30,7 +30,7 @@
 			type="String" format="CopyValue" default="" readonly="false" visible="true" />
 
 
-		<parameter id="VivadoRelease" label="Vivade release" tooltip="Vivado release number (part of the path)"
+		<parameter id="VivadoRelease" label="Vivado release" tooltip="Vivado release number (part of the path)"
 			type="String" format="CopyValue" default="2013.4" readonly="false"
 			visible="true" />
 

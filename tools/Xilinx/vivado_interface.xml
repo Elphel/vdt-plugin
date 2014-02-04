@@ -2,6 +2,9 @@
 
 <vdt-project>
 	<interface name="VivadoInterface" extends="FPGAPprojectInterface">
+		<syntax name="GrepFilterProblemSyntax"        format='| grep --line-buffered -v  "\[%%ParamName"' />
+		<syntax name="GrepFilterProblemOtherSyntax"   format='%(| grep --line-buffered -v  "\[%%ParamValue"%|\n%)' />
+	
 <!-- <syntax name="QuietSyntax"     format=" -quiet" />
 		<syntax name="VerboseSyntax"   format=" -verbose" />
 		<syntax name="DirectiveSyntax" format=" -directive %%ParamValue" /> -->

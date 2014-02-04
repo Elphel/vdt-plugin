@@ -101,12 +101,12 @@
         <parameter 	id="name"   label="Design name" tooltip= "Design to open after synth"
          			default="" visible="true" omit="" type="String" format="Dash"/>
 <!-- part is defined in "FPGA_project" -->         			
-<!--         <parameter	id="part"             label="Part" tooltip= "Xilinx device to use"
-         			default="" visible="true" omit="" type="String" format="Dash"/>  -->
+         <parameter	id="part_synth" outid="part"      label="Part (see Project)" tooltip= "Xilinx device to use (configured in 'project' dialog)"
+         			default="%part" visible="true" readonly="true" omit="" type="String" format="Dash"/>
+        <parameter	id="top" label="Design top module" tooltip= "Top module of the design, determined by the project top file"
+        			default="%%TopModule" visible="true" omit="" readonly="true" type="String" format="Dash"/>
         <parameter	id="constrset"        label="Constraints set" tooltip= "Constraints set to use"
        				 default="" visible="true" omit="" type="String" format="Dash"/>
-<!--    <parameter	id="top"              label="" tooltip= "Top module of the design (you may set in in project properties)"
-        			default="%ImplementationTopModule" visible="true" omit="" type="String" format="Dash"/> -->
         <parameter	id="include_dirs"     label="Include directory" tooltip= "Include directories for Verilog `include"
         			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
         <parameter	id="generic"          label="VHDL/Verilog parameters" tooltip= '"name=value" list of VHDL generic entity or Verilog parameter'
@@ -147,8 +147,8 @@
 	<!-- Parameter read_xdc just copies parameter ConstraintsFiles, but they have different syntax (output representation) -->		
 	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="" tooltip="read_xdc"
 			default="%ConstraintsFiles" visible="false" />
-       <parameter	id="top"              label="" tooltip= "Top module of the design"
-        			default="%%TopModule" visible="false" omit="" type="String" format="Dash"/>
+<!--        <parameter	id="top"              label="" tooltip= "Top module of the design"
+        			default="%%TopModule" visible="false" omit="" type="String" format="Dash"/> -->
    	   <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
         			
@@ -162,7 +162,22 @@
         <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
         			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
-
+        <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
+        			default="true" visible="true" omit="false" type="Boolean" format="None"/>
+        <parameter	id="Memdata"   label="Memdata" tooltip= "Enable problems with [Memdata to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Synth"     label="Synth"   tooltip= "Enable problems with [Synth to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Netlist"   label="Netlist" tooltip= "Enable problems with [Netlist to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Opt"       label="Opt"     tooltip= "Enable problems with [Opt to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Project"   label="Project" tooltip= "Enable problems with [Project to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Timing"    label="Timing"  tooltip= "Enable problems with [Timing to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
+        			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
 			
 		<input>
 			<group name="General">
@@ -179,7 +194,8 @@
 		        "---"
 	 	        "top"
 		        "name"
-		        "part"
+           <!-- "part" -->
+		        "part_synth"
 		        "constrset"
 		        "include_dirs"
 		        "generic"
@@ -200,9 +216,19 @@
 		        "verbose"
 			</group>
 			<group name="Parser">
+				"NoFileProblem"
+				"Memdata"
+		        "Synth"
+		        "Netlist"
+		        "Opt"
+		        "Project"
+		        "Timing"
+		        "OtherProblems"
+				"---"
 				"PatternErrors"
 				"PatternWarnings"
- 				"PatternInfo" 
+ 				"PatternInfo"
+				 				 
 			</group>
 		</input>
 
@@ -210,9 +236,9 @@
 		<!-- mkdir -p vdt/npmtest -->
 			<line name="vivado_copy_pre_synth">
 				"-c"
-				"ssh -l"
-				"%RemoteUser"
-				"%RemoteHost"
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
 				"'"
 				"mkdir -p"
 				"%VivadoProjectRoot"
@@ -250,7 +276,8 @@
 		          "%top"
 			      <if VivadoSynthActionIndex="0">
 		 		      "%name"
-			          "%part"
+			          <!-- "%part"  -->
+			          "%part_synth"
 			          "%constrset"
 			          "%include_dirs"
 			          "%generic"
@@ -299,7 +326,17 @@
      			"| %SedPaths"
      			<if NoBabyTalk="true">
      				"| grep --line-buffered -v \"license\""
-     				<!-- Add  [Synthesis:0000] to lines that do not have [file:line] - then "Synthesis" will appear in "Problems" location-->
+     			</if>
+				<!-- Various grep filters -->
+				"%Memdata"
+		        "%Synth"
+		        "%Netlist"
+		        "%Opt"
+		        "%Project"
+		        "%Timing"
+		        "%OtherProblems"
+     			<if NoFileProblem="true">
+     			   	<!-- Add  [Synthesis:0000] to lines that do not have [file:line] - then "Synthesis" will appear in "Problems" location-->
      				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Synthesis:0000\]@'"
      			</if>
 			</line>

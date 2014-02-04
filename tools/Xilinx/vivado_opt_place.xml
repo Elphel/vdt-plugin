@@ -171,6 +171,38 @@
         <parameter	id="verbose_phys_opt" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
+<!-- parser parameters -->
+        <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
+        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
+        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
+        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
+        			default="true" visible="true" omit="false" type="Boolean" format="None"/>
+        <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Memdata"   label="Memdata" tooltip= "Enable problems with [Memdata to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Netlist"   label="Netlist" tooltip= "Enable problems with [Netlist to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Opt"       label="Opt"     tooltip= "Enable problems with [Opt to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Project"   label="Project" tooltip= "Enable problems with [Project to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Timing"    label="Timing"  tooltip= "Enable problems with [Timing to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Pwropt"    label="Pwropt"  tooltip= "Enable problems with [Pwropt to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Vivado_Tcl" label="Vivado_Tcl"  tooltip= "Enable problems with [Vivado_Tcl to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
+        			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
+
+
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			
 			   	   <parameter   id="VivadoOptPlaceActionIndex" default="%%ChosenActionIndex"
@@ -192,55 +224,72 @@
 				"GrepEWI"
 			</group>
 			<group name="Pre-optimization commands">
-			        "PreOptTCL"
+		        "PreOptTCL"
 			</group>
 			<group name="Optimization">
-        			"directive_opt"
-        			"---"
-					"retarget"
-					"propconst"
-        			"sweep"
-        			"bram_power_opt"
-					"remap"
-        			"resynth_area"
-        			"resynth_seq_area"
-        			"---"
-        			"quiet_opt"
-        			"verbose_opt"
+       			"directive_opt"
+       			"---"
+				"retarget"
+				"propconst"
+       			"sweep"
+       			"bram_power_opt"
+				"remap"
+       			"resynth_area"
+       			"resynth_seq_area"
+       			"---"
+       			"quiet_opt"
+       			"verbose_opt"
 			</group>
 			<group name="Power Optimization">
-        			"quiet_pwr_opt"
-        			"verbose_pwr_opt"
+       			"quiet_pwr_opt"
+       			"verbose_pwr_opt"
 			</group>
 			<group name="Placement">
-        			"directive_place"
-        			"---"
-        			"no_timing_driven"
-        			"unplace"
-        			"post_place_opt"
-        			"---"
-        			"quiet_place"
-        			"verbose_place"
+       			"directive_place"
+       			"---"
+       			"no_timing_driven"
+       			"unplace"
+       			"post_place_opt"
+       			"---"
+       			"quiet_place"
+       			"verbose_place"
 			</group>
 			<group name="Physical Optimization">
-        			"directive_phys_opt"
-        			"---"
-        			"fanout_opt"
-        			"placement_opt"
-        			"rewire"
-        			"critical_cell_opt"
-        			"dsp_register_opt"
-        			"bram_register_opt"
-        			"bram_enable_opt"
-        			"shift_register_opt"
-        			"hold_fix"
-        			"retime"
-        			<!-- TODO: Implement force_replication_on_nets args (requires?  get_nets command ) --> 
-        			"critical_pin_opt"
-        			"---"
-        			"quiet_phys_opt"
-        			"verbose_phys_opt"
+       			"directive_phys_opt"
+       			"---"
+       			"fanout_opt"
+       			"placement_opt"
+       			"rewire"
+       			"critical_cell_opt"
+       			"dsp_register_opt"
+       			"bram_register_opt"
+       			"bram_enable_opt"
+       			"shift_register_opt"
+       			"hold_fix"
+       			"retime"
+       			<!-- TODO: Implement force_replication_on_nets args (requires?  get_nets command ) --> 
+       			"critical_pin_opt"
+       			"---"
+       			"quiet_phys_opt"
+       			"verbose_phys_opt"
 			</group>
+			<group name="Parser">
+				"NoFileProblem"
+		        "Drc"
+				"Memdata"
+		        "Netlist"
+		        "Opt"
+		        "Project"
+		        "Timing"
+		        "Pwropt"
+		        "Vivado_Tcl"
+		        "OtherProblems"
+				"---"
+				"PatternErrors"
+				"PatternWarnings"
+ 				"PatternInfo"
+			</group>
+			
 		</input>
 
 		<output>
@@ -250,9 +299,9 @@
 			<line name="vivado_copy_pre_opt">
 				"-c"
 				<!-- Create project directory on remote server if it did not exist -->
-				"ssh -l"
-				"%RemoteUser"
-				"%RemoteHost"
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
 				"'"
 				"mkdir -p"
 				"%VivadoProjectRoot"
@@ -362,18 +411,28 @@
 				</line>
 	        </if-and>
 			<line name="parser_VivadoOpt"
-			    errors=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
-				warnings=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
-				info=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]">
+				errors=   "PatternErrors"
+				warnings= "PatternWarnings"
+				info=     "PatternInfo">
 				"-c"
      			"%GrepEWI"
      			"| %SedPaths"
      			<if NoBabyTalk="true">
      				"| grep --line-buffered -v \"license\""
-		  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
+     			</if>
+     			"%Drc"
+     			"%Memdata"
+		        "%Netlist"
+		        "%Opt"
+		        "%Project"
+		        "%Timing"
+		        "%Pwropt"
+		        "%Vivado_Tcl"
+		        "%OtherProblems"
+     			<if NoFileProblem="true">
+	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
      				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Placement:0000\]@'"
      			</if>
-     			
 			</line>
 		</output>
 	</tool>
