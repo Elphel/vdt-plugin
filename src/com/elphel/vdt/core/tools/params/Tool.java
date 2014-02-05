@@ -194,9 +194,24 @@ public class Tool extends Context implements Cloneable, Inheritable {
         return newTool; 
     }
 
-    public String getExeName() {
-        if(locationSet)
-            return absoluteExeName;
+    public String getExeName() { // seems to be running in 2 parallel processes!!
+    	if ((absoluteExeName !=null) && !absoluteExeName.substring(0,1).equals("/")){
+    		String path=System.getenv("PATH");
+    		if (path!=null){ // Linux
+//    			System.out.println("PATH=\""+path+"\"");
+    			String [] dirs = path.split(":");
+    			for (int i=0;i<dirs.length;i++){
+    				File file=new File(dirs[i]+"/"+absoluteExeName);
+    				if (file.isFile() && file.exists()){
+    					absoluteExeName=dirs[i]+"/"+absoluteExeName;
+    					break;
+    				}
+    			}
+    		}
+    	}
+    	
+        if(locationSet) // true
+            return absoluteExeName; // bash
         
         return getResolvedExeName();
     }

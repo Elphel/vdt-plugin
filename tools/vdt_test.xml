@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vdt-project>
+	<interface name="VDTTestInterface" extends="FPGAPprojectInterface">
+	</interface>
+	<tool name="VDTTest"
+		label="VDT Test" 
+		shell="/bin/bash"
+		interface="VDTTestInterface"
+		description="Testing VDT features"> 
+		<action-menu>
+			<action label="Test VDT" resource="" icon="sample.gif" />
+		</action-menu>
+ 
+		<parameter   id="file1" label="File1 (for list)" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+		
+		<parameter   id="file2" label="File2 (for single)" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+
+		<parameter   id="command1" label="Command1 (for list)" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+
+		<parameter   id="command2" label="Command2 (for single)" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+					
+					
+		<parameter   id="file1Contents" label="File1 contents" default="@%file1"
+					type="Stringlist" format="ProgramSyntax" visible="true" readonly="false"  />
+					
+		<parameter   id="file2Contents" label="File2 contents" default="@%file2"
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+					
+		<parameter   id="command1Contents" label="Command1 contents" default="@@%command1"
+					type="Stringlist" format="ProgramSyntax" visible="true" readonly="false"  />
+					
+		<parameter   id="command2Contents" label="Command2 contents" default="@@%command2"
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+
+		<input>
+			<group name="General">
+				"file1"
+				"file2"
+				"command1"
+				"command2"
+				"file1Contents"
+				"file2Contents"
+				"command1Contents"
+				"command2Contents"
+			</group>
+		</input>
+
+		<output>
+			<line name="test">
+				"-c"
+				"echo \"file1=%file1\";"
+				"echo \"file2=%file2\";"
+				"echo \"command1=%command1\";"
+				"echo \"command2=%command2\";"
+				"echo \"file1Contents=%file1Contents\";"
+				"echo \"file2Contents=%file2Contents\";"
+				"echo \"command1Contents=%command1Contents\";"
+				"echo \"command2Contents=%command2Contents\";"
+			</line>
+		</output>
+	</tool>
+</vdt-project>

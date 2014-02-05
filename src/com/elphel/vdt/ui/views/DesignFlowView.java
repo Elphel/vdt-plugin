@@ -285,7 +285,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         showInstallationPropertiesAction = new Action() {
             public void run() {
                 if (openInstallationPropertiesDialog()==Window.OK){
-                	System.out.println("openInstallationPropertiesDialog()-> OK");
+            		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+            			System.out.println("openInstallationPropertiesDialog()-> OK");
+            		}
                 	fDesignFlowView.updateLaunchAction();
                 }; 
             }
@@ -340,7 +342,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             	if (LocalContextsAction.openDialog( "Project Parameters"
                                               , selectedItem.getProjectContext() 
                                               , selectedResource.getProject() )==Window.OK){
-                	System.out.println("LocalContextsAction.openDialog()-> OK");
+            		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+            			System.out.println("LocalContextsAction.openDialog()-> OK");
+            		}
                 	fDesignFlowView.updateLaunchAction();
                 }; 
             }
@@ -357,7 +361,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         showPropertiesAction = new Action() {
             public void run() {
             	if (openToolPropertiesDialog(selectedItem)==Window.OK){
-                	System.out.println("openToolPropertiesDialog()-> OK");
+            		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+            			System.out.println("openToolPropertiesDialog()-> OK");
+            		}
                 	fDesignFlowView.updateLaunchAction();
                 };  
 //              ConsoleView.getDefault().println("Action 1 executed", ConsoleView.MSG_INFORMATION);                
@@ -387,7 +393,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             public void run() {
                 try {
                     int result = openToolLaunchDialog(selectedItem);
-                	System.out.println("Ran openToolLaunchDialog() ->"+result);
+            		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+            			System.out.println("Ran openToolLaunchDialog() ->"+result);
+            		}
                 	fDesignFlowView.updateLaunchAction();
                 } catch (CoreException e) {
                     MessageUI.error(Txt.s("Action.OpenLaunchConfigDialog.Error", 

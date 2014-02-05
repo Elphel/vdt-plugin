@@ -17,7 +17,15 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.params;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import com.elphel.vdt.core.tools.params.recognizers.*;
 import com.elphel.vdt.core.tools.params.types.ParamType;
@@ -28,6 +36,9 @@ import com.elphel.vdt.core.tools.config.ConfigException;
 //import com.elphel.vdt.core.tools.generators.SourceListGenerator;
 import com.elphel.vdt.core.tools.*;
 import com.elphel.vdt.ui.MessageUI;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 public class Parameter implements Cloneable, Updateable {
     private String id;
@@ -352,9 +363,119 @@ public class Parameter implements Cloneable, Updateable {
         }
 
         canonicalizeValue(processedDefaultValue);
+    	String filename=null;
+    	String command=null;
+        if ((processedDefaultValue!=null) && (processedDefaultValue.size()>0)){
+        	String firstLine;
+        	try {
+        		firstLine=processedDefaultValue.get(0);
+            	if (firstLine.substring(0,1).equals("@")) {
+            		filename=firstLine.substring(1);
+            		if (filename.substring(0,1).equals("@")){
+            			command=filename.substring(1);
+            			filename=null;
+            		}
+            		
+            	}
+        	} catch (Exception e) {
+        		return processedDefaultValue; 
+        	}
+        	
+// "@" on the first two positions of result string can be escaped with "\", other "@" should not be escaped!        	
+        	if ((firstLine!=null) && (firstLine.length()>1) && (firstLine.indexOf("@")>=0)){
+        		if (firstLine.substring(0,2).equals("\\@")){
+        			firstLine=firstLine.substring(1);
+        		}
+        		if (firstLine.substring(1,3).equals("\\@")){
+        			firstLine=firstLine.substring(0,1)+firstLine.substring(2);
+        		}
+        		processedDefaultValue.remove(0);
+        		processedDefaultValue.add(0,firstLine);
+        	}
+        }
+        if (command!=null) return getCommandValue(command);
+        if (filename!=null) return getFileValue(filename);
         
         return processedDefaultValue;
     }
+    
+    List<String> getFileValue(String filename){
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+			System.out.println("Resolving \""+filename+"\"");
+		}
+    	File file=new File(filename);
+    	if (!file.exists()) {
+            IResource resource = SelectedResourceManager.getDefault().getSelectedResource();
+            if (resource != null) {
+                String workspaceRoot=resource.getWorkspace().getRoot().getLocation().toString();
+                String full_name = workspaceRoot+resource.getProject().getFullPath().toString()+
+                		File.separator+filename;
+                file=new File(full_name);
+            }
+    	}
+    	Scanner sc=null;
+    	if (file.exists() && file.isFile()) {
+    		try {
+    			sc = new Scanner(file);
+    		} catch (FileNotFoundException e) {
+    		}
+    	}
+		List<String> result=new ArrayList<String>();
+		if (sc==null){
+			result.add("");
+		} else {
+			while(sc.hasNextLine()){
+				result.add(sc.nextLine());                     
+			}
+	    	sc.close();
+		}
+    	return result;
+    }
+    
+    List<String> getCommandValue(String command){
+		List<String> result=new ArrayList<String>();
+		try {
+			result= doGetCommandValue(command);
+		} catch (Exception e){
+			
+		}
+		if (result.size()==0){
+			result.add("");
+		}
+    	return result;
+    }
+    
+    List<String> doGetCommandValue(String command) throws IOException, InterruptedException{
+		command=command.trim();
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+			System.out.println("Evaluating command: "+command);	
+		}
+		String [] array_args=command.split("\\s+");
+		List<String> args=new ArrayList<String>();
+		for (int i=0;i<array_args.length;i++){
+			args.add(array_args[i]);
+		}
+		List<String> result=new ArrayList<String>();
+		if (args.size()>0){
+			Process pr=null;
+			ProcessBuilder   ps=new ProcessBuilder(args);
+			ps.redirectErrorStream(true);
+			pr = ps.start();
+			BufferedReader in = new BufferedReader(new 
+					InputStreamReader(pr.getInputStream()));
+			String line;
+			while ((line = in.readLine()) != null) {
+				result.add(line);
+			}
+			pr.waitFor();
+			in.close();
+		}
+		if (result.size()==0){
+			result.add("");
+		}
+    	return result;
+    }
+    
     
     // returns current value if it is set 
     // otherwise returns default value 

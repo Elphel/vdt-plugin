@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vdt-project>
-	<!--  name shold be the same as VivadoConsole parameter -->
+	<!--  name should be the same as VivadoConsole parameter -->
 	<tool name="Vivado"
 		label="Launch Vivado" 
 	    project="FPGA_project"

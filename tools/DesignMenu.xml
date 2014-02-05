@@ -56,10 +56,12 @@
                           label="Optimize and place design"
                           icon="xilinx.png"
                           call="VivadoOptPlace"/>
+        </menu>
+           <menuitem name="Test VDT"
+             label="Testing some VDT features"
+             icon="sample.gif"
+             call="VDTTest"/>
                           
-                          
-                          
-        </menu>                  
     </menu>
     
     <menu name="MainDesignMenu2"

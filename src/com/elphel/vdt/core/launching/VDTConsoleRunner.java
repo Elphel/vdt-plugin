@@ -226,7 +226,9 @@ public class VDTConsoleRunner{
        		};
         	consoleOutStreamMonitor.addListener((IStreamListener) outputListener );
         }
-        outStream.setColor(new Color(null, 128, 128, 255));
+        //Problems occurred when invoking code from plug-in: "org.eclipse.ui.console".
+        //Exception occurred during console property change notification.
+        outStream.setColor(new Color(null, 128, 128, 255)); 
         try {
         	for (int i=0;i<arguments.length;i++){
         		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
