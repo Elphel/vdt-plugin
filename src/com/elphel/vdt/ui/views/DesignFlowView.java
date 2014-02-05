@@ -278,9 +278,16 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     }
     
     private void makeActions() {
+    	final DesignFlowView fDesignFlowView=this;
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+			System.out.println("makeActions()");
+		}
         showInstallationPropertiesAction = new Action() {
             public void run() {
-                openInstallationPropertiesDialog(); 
+                if (openInstallationPropertiesDialog()==Window.OK){
+                	System.out.println("openInstallationPropertiesDialog()-> OK");
+                	fDesignFlowView.updateLaunchAction();
+                }; 
             }
         };
         showInstallationPropertiesAction.setText("Installation Parameters");
@@ -298,15 +305,20 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         clearInstallationPropertiesAction.setEnabled(ToolsCore.getInstallationContext() != null);
         
         
-        showPackagePropertiesToolbarAction = new GlobalContextsAction("Package Parameters");
+        showPackagePropertiesToolbarAction = new GlobalContextsAction("Package Parameters",fDesignFlowView);
         showPackagePropertiesToolbarAction.setText("Package Parameters");
         showPackagePropertiesToolbarAction.setToolTipText("Set package parameters for this tool");
         showPackagePropertiesToolbarAction.setImageDescriptor(VDTPluginImages.DESC_PACKAGE_PROPERTIES);
         
         showPackagePropertiesAction = new Action() {
             public void run() {
-                GlobalContextsAction.openDialog( "Package Parameters"
-                                               , selectedItem.getPackageContext() );
+            	if (GlobalContextsAction.openDialog( "Package Parameters"
+                                               , selectedItem.getPackageContext() )==Window.OK){
+            		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+            			System.out.println("GlobalContextsAction.openDialog()-> OK");
+            		}
+                	fDesignFlowView.updateLaunchAction();
+                }; 
             }
         };
         showPackagePropertiesAction.setText("Package Parameters");
@@ -318,16 +330,19 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         clearPackagePropertiesAction.setImageDescriptor(VDTPluginImages.DESC_PACKAGE_PROPERTIES);
 
         
-        showProjectPropertiesToolbarAction = new LocalContextsAction("Project Parameters");
+        showProjectPropertiesToolbarAction = new LocalContextsAction("Project Parameters",fDesignFlowView);
         showProjectPropertiesToolbarAction.setText("Project Parameters");
         showProjectPropertiesToolbarAction.setToolTipText("Set project parameters (toolbar)");
         showProjectPropertiesToolbarAction.setImageDescriptor(VDTPluginImages.DESC_PROJECT_PROPERTIES);
 
         showProjectAction = new Action() {
             public void run() {
-                LocalContextsAction.openDialog( "Project Parameters"
+            	if (LocalContextsAction.openDialog( "Project Parameters"
                                               , selectedItem.getProjectContext() 
-                                              , selectedResource.getProject() );
+                                              , selectedResource.getProject() )==Window.OK){
+                	System.out.println("LocalContextsAction.openDialog()-> OK");
+                	fDesignFlowView.updateLaunchAction();
+                }; 
             }
         };
         showProjectAction.setText("Project Parameters");
@@ -341,7 +356,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         
         showPropertiesAction = new Action() {
             public void run() {
-                openToolPropertiesDialog(selectedItem); 
+            	if (openToolPropertiesDialog(selectedItem)==Window.OK){
+                	System.out.println("openToolPropertiesDialog()-> OK");
+                	fDesignFlowView.updateLaunchAction();
+                };  
 //              ConsoleView.getDefault().println("Action 1 executed", ConsoleView.MSG_INFORMATION);                
             }
         };
@@ -368,7 +386,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         showLaunchConfigAction = new Action() {
             public void run() {
                 try {
-                    openToolLaunchDialog(selectedItem); 
+                    int result = openToolLaunchDialog(selectedItem);
+                	System.out.println("Ran openToolLaunchDialog() ->"+result);
+                	fDesignFlowView.updateLaunchAction();
                 } catch (CoreException e) {
                     MessageUI.error(Txt.s("Action.OpenLaunchConfigDialog.Error", 
                                           new String[] {selectedItem.getLabel(), e.getMessage()}),
@@ -470,8 +490,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         }
         updateLaunchAction();
     } // selectionChanged()
-    
-    private void updateLaunchAction() {
+    // Made it public to call from ContexOptionsDialog.okPressed() as launch actions might change
+//    private void updateLaunchAction() {
+    public void updateLaunchAction() {
+
 //    	System.out.println("DesignFlowView.updateLaunchAction()");
 
         IProject project = selectedResource == null 
@@ -519,7 +541,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         	for (int i=0;i<runFor.length;i++){
 //                String name=runFor[i].getResource();
                 String name=SelectedResourceManager.getDefault().tryRelativePath(runFor[i].getResource());
-                String shortName=name;
+//                String shortName=name;
+                String shortName=runFor[i].getResource(); // as entered
                 String fullPath=name;
                 enabled=(selectedItem != null);
                 if (enabled && runFor[i].getCheckExistence()){
@@ -571,8 +594,16 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                     }
                 };
                 launchActions[i].setToolTipText(i+": "+runFor[i].getLabel()+" "+shortName);
-                launchActions[i].setText(runFor[i].getLabel()+" "+shortName);
+                if (shortName.indexOf("@")>=0){
+                    launchActions[i].setText(runFor[i].getLabel()+" "+shortName+"@");
+                } else {
+                    launchActions[i].setText(runFor[i].getLabel()+" "+shortName);
+                }
                 launchActions[i].setEnabled(enabled);
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+        			System.out.println("shortName="+shortName);
+        			System.out.println("launchActions[i].getText()="+launchActions[i].getText());
+        		}
                 String actionIconKey=tool.getImageKey(i);
                 if ((actionIconKey!=null) && (VDTPluginImages.getImageDescriptor(actionIconKey)!=null))
                 	launchActions[i].setImageDescriptor(VDTPluginImages.getImageDescriptor(actionIconKey));
@@ -655,17 +686,18 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         }
     } // launchTool()
     
-    private void openInstallationPropertiesDialog() {
+    private int openInstallationPropertiesDialog() {
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
         SetupOptionsDialog dialog = new SetupOptionsDialog(shell);
 //        ContextOptionsDialog dialog = new ContextOptionsDialog(shell, ToolsCore.getContextManager().getInstallationContext());
         dialog.setTitle("Instalation Parameters");
         dialog.create();
-        dialog.open();
+        return dialog.open();
+        
     } // openInstallationPropertiesDialog()
 
     
-    private void openToolPropertiesDialog(DesignMenuModel.Item item) {
+    private int openToolPropertiesDialog(DesignMenuModel.Item item) {
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
         Context context = item.getTool();
         ContextOptionsDialog dialog = new ContextOptionsDialog( shell
@@ -673,15 +705,17 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                                                               , selectedResource.getProject() );
         dialog.setTitle("Tool Parameters");
         dialog.create();
-        dialog.open();
+        return dialog.open();
     } // openToolPropertiesDialog()
 
-    private void openDesignMenuSelectionDialog(IProject project) {
+    private int openDesignMenuSelectionDialog(IProject project) {
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
         DesignMenuSelectionDialog dialog = new DesignMenuSelectionDialog( shell
                                                                         , desigMenuName.getValue() ); 
         dialog.create();
-        if (dialog.open() == Window.OK) {
+        int result=dialog.open();
+        if (result == Window.OK) {
+        	System.out.println("openDesignMenuSelectionDialog()-> OK");
             DesignMenu newDesignMenu = dialog.getSelectedDesignMenu();
             String newDesignMenuName = newDesignMenu == null ? null
                                                              : newDesignMenu.getName();
@@ -706,16 +740,19 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             OptionsCore.doStoreOption(desigMenuName, project);
             doLoadDesignMenu(newDesignMenuName);
         }
+        return result;
     }
 
-    
-    private void openToolLaunchDialog(DesignMenuModel.Item item) throws CoreException {
+
+    private int openToolLaunchDialog(DesignMenuModel.Item item) throws CoreException {
+    	System.out.println("openToolLaunchDialog()");
+
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
         ILaunchConfiguration launchConfig = LaunchCore.createLaunchConfiguration( item.getTool()
                                                                                 , selectedResource.getProject()
                                                                                 , null );
         IStructuredSelection selection = new StructuredSelection(launchConfig);
-        DebugUITools.openLaunchConfigurationDialogOnGroup( shell
+        return DebugUITools.openLaunchConfigurationDialogOnGroup( shell
                                                          , selection
                                                          , VDT.ID_VERILOG_TOOLS_LAUNCH_GROUP );                        
     } // openToolLaunchDialog()

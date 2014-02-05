@@ -33,6 +33,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.elphel.vdt.VDT;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 /**
  * Abstract options configuration block providing a general implementation
@@ -114,6 +116,8 @@ public class OptionsBlock {
                   // Nothing do do, we don't need to bother the user
             }
         }
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        	System.out.println("OptionsBlock.performOK()");
         return ok;
     } // performOk()
     

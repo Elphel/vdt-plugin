@@ -30,11 +30,13 @@ import org.eclipse.swt.widgets.Shell;
 import com.elphel.vdt.Txt;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.contexts.PackageContext;
 import com.elphel.vdt.core.tools.params.ToolException;
 import com.elphel.vdt.ui.MessageUI;
+import com.elphel.vdt.ui.views.DesignFlowView;
 
 public class ContextOptionsDialog extends Dialog {
 
@@ -44,7 +46,7 @@ public class ContextOptionsDialog extends Dialog {
     private IPreferenceStore store; 
     private OptionsBlock optionsBlock;
     private String location;  
-    
+//    private DesignFlowView designFlowView; // Andrey
     public ContextOptionsDialog(Shell parent, Context context, IProject project) {
         this( parent
             , context
@@ -70,6 +72,7 @@ public class ContextOptionsDialog extends Dialog {
         this.store = store;
         OptionsCore.doLoadContextOptions(context, store);
         setShellStyle(getShellStyle() | SWT.RESIZE);
+  //      this.designFlowView=null; // Andrey
     }
     
     protected void okPressed() {
@@ -83,9 +86,16 @@ public class ContextOptionsDialog extends Dialog {
                                  , new String[] {context.getLabel(), e.getMessage()})
                                  , e );
         }
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        	System.out.println("ContexOptionsDialog.okPressed()");
+        // Need to update Design menu as it uses calculated parameters
         super.okPressed();
+//        if (this.designFlowView!=null) this.designFlowView.updateLaunchAction();
     }
     
+//    public void setDesignFlowView(DesignFlowView designFlowView){
+//    	this.designFlowView=designFlowView;
+//    };
     protected Control createDialogArea(Composite parent) {
         GridLayout layout = new GridLayout(1, false);
         layout.marginHeight = 5;

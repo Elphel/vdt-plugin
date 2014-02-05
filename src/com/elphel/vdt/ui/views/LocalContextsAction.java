@@ -20,10 +20,12 @@ package com.elphel.vdt.ui.views;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.window.Window;
 
 import com.elphel.vdt.VDT;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.ui.options.ContextOptionsDialog;
 
@@ -36,9 +38,10 @@ import com.elphel.vdt.ui.options.ContextOptionsDialog;
 public class LocalContextsAction extends ContextsAction {
     private IProject project;
     
-    public LocalContextsAction(String title) {
+    public LocalContextsAction(String title, DesignFlowView designFlowView) {
         super(title);
         setEnabled(false);
+        super.setDesignFlowView(designFlowView);
     }
     
     public void setProject(IProject project) {
@@ -58,16 +61,26 @@ public class LocalContextsAction extends ContextsAction {
 
     public void run() {
         if (lastSelected != null) {
-            openDialog(title, lastSelected, project);
+            if (openDialog(title, lastSelected, project)== Window.OK){
+            	System.out.println("LocalContextsAction.run()");
+            	super.updateActions();
+            }
         }
     }
     
-    public static void openDialog(String title, Context context, IProject project) {
+    public static int openDialog(String title, Context context, IProject project) {
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
         ContextOptionsDialog dialog = new ContextOptionsDialog(shell, context, project);
         dialog.setTitle(title);
         dialog.create();
-        dialog.open();
+        int result=dialog.open();
+//        if (result == Window.OK){
+//        	updateActions();
+//        }
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+			System.out.println("LocalContextAction()->"+result);
+		}
+        return result;
     } // openDialog()
 
     

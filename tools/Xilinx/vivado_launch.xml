@@ -9,7 +9,8 @@
 		<action-menu>
 			<action label="Launch Vivado" resource="" icon="xilinx.png" />
 			<action label="Generate public key" resource="" icon="gnu.png" />
-			<action label="Setup connection to" resource="%RemoteUser@%RemoteHost" icon="gnu.png" />
+			<action label="Setup connection to" resource="%RemoteUser@%RemoteHost"
+			check-extension="false" check-existence="false" icon="gnu.png" />
 		</action-menu>
 <!-- 
 		<parameter   id="command" label="Command" default=""
@@ -61,8 +62,8 @@
 			<if actionIndex="2">
 				<line name="SSHCopyID">
 					"%ShellSwitches"
-					"echo \"**********************************************\";"
-					"echo \"**                                        **\";"
+					"echo \"*********************************************\";"
+					"echo \"**                                         **\";"
 					"echo \"** This command requires you to be able    **\";"
 					"echo \"** to login to the remote system and enter **\";"
 					"echo \"** a password once to post your public key **\";"
@@ -86,7 +87,7 @@
 					"echo \"** terminal - just switch to it and        **\";"
 					"echo \"** complete the setup.                     **\";"
 					"echo \"**                                         **\";"
-					"echo \"**********************************************\";"
+					"echo \"*********************************************\";"
 					"ssh-copy-id %RemoteUser@%RemoteHost;"
 				</line>
 			</if>

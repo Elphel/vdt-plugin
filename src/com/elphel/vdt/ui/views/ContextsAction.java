@@ -45,11 +45,22 @@ abstract public class ContextsAction extends Action
 
     protected String title;
     protected Context lastSelected;
+    protected DesignFlowView designFlowView; // Andrey
+
     
     public ContextsAction(String title) {
         this.title = title;
         setMenuCreator(this);
         setEnabled(false);
+        designFlowView=null;
+    }
+    
+    public void setDesignFlowView(DesignFlowView designFlowView){
+    	this.designFlowView=designFlowView;
+    }
+    
+    public void updateActions(){
+    	if (this.designFlowView!=null) this.designFlowView.updateLaunchAction();
     }
     
     public void setContexts(List<Context> contexts) {

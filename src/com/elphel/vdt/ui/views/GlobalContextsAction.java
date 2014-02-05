@@ -17,10 +17,15 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.views;
 
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
+
+
+
 
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.ui.options.ContextOptionsDialog;
 
@@ -32,9 +37,11 @@ import com.elphel.vdt.ui.options.ContextOptionsDialog;
  */
 public class GlobalContextsAction extends ContextsAction {
 
-    public GlobalContextsAction(String title) {
+    public GlobalContextsAction(String title, DesignFlowView designFlowView) {
         super(title);
+        super.setDesignFlowView(designFlowView);
     }
+
 
     protected ShowContextAction createContextAction(Context context) {
         return new ShowGlobalContextAction(context);
@@ -42,16 +49,22 @@ public class GlobalContextsAction extends ContextsAction {
     
     public void run() {
         if (lastSelected != null) {
-            openDialog(title, lastSelected);
+//            openDialog(title, lastSelected);
+            if (openDialog(title, lastSelected)== Window.OK){
+            	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+            		System.out.println("GlobalContextsAction.run()");
+            	}
+            	super.updateActions();
+            }
         }
     }
     
-    public static void openDialog(String title, Context context) {
+    public static int openDialog(String title, Context context) {
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
         ContextOptionsDialog dialog = new ContextOptionsDialog(shell, context);
         dialog.setTitle(title);
         dialog.create();
-        dialog.open();
+        return dialog.open();
     } // openDialog()
     
     // ------------------------------------------------------------------------

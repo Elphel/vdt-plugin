@@ -29,6 +29,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.elphel.vdt.Txt;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.params.ToolException;
@@ -85,6 +86,8 @@ public class ContextOptionsPage extends PreferencePage
                                  , new String[] {context.getLabel(), e.getMessage()})
                                  , e );
         }
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        	System.out.println("ContexOptionsPage.performOK()");
         return super.performOk();
     }
     
