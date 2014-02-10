@@ -619,9 +619,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         			System.out.println("launchActions[i].getText()="+launchActions[i].getText());
         		}
                 String actionIconKey=tool.getImageKey(i);
-                if ((actionIconKey!=null) && (VDTPluginImages.getImageDescriptor(actionIconKey)!=null))
+                if ((actionIconKey!=null) && (VDTPluginImages.getImageDescriptor(actionIconKey)!=null)) {
                 	launchActions[i].setImageDescriptor(VDTPluginImages.getImageDescriptor(actionIconKey));
-                else
+//                	System.out.println(i+":"+actionIconKey+" - "+ VDTPluginImages.getImageDescriptor(actionIconKey));
+                }else
                 	launchActions[i].setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
                 
                 if (i==0) { // set log play-back (always for default tool only)

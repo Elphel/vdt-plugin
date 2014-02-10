@@ -192,14 +192,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
         		imageKeysActions[i]=null;
         		image = runfor.get(i).getIconName();
         		if (image != null) {
-        			imageKeysActions[i] = ICON_ID_PREFIX + (new File(getExeName())).getName()+ICON_ID_ACTION+i;
+//        			imageKeysActions[i] = ICON_ID_PREFIX + (new File(getExeName())).getName()+ICON_ID_ACTION+i;
+        			imageKeysActions[i] = ICON_ID_PREFIX + name+ICON_ID_ACTION+i;
         			VDTPluginImages.addImage(image, imageKeysActions[i], null/*tool.getLaunchType()*/);
         		}
         	}
         }
        
     } // ToolUI()
-    
 
     public String getImageKey(int actionIndex) {
     	if (imageKeysActions==null) return null;
