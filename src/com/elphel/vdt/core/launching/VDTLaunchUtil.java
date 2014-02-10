@@ -158,15 +158,7 @@ public class VDTLaunchUtil {
         try {
             String location = getWorkingDirectory(configuration);
             tool.setWorkingDirectory(location);
-/*            
-            String[] paramArray = tool.buildParams();
-    		System.out.println("Andrey: called tool.buildParams() here (from VDTLaunchUtils.java");
-            List<String> arguments = new ArrayList<String>(paramArray.length);
-            for(int i = 0; i < paramArray.length; i++) {
-                arguments.add(paramArray[i]);
-            }
-            return arguments;
-*/
+
             BuildParamsItem[] paramItemsArray = tool.buildParams();
     		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
     			System.out.println("called tool.buildParams() here (from VDTLaunchUtils.java)");
@@ -210,6 +202,11 @@ public class VDTLaunchUtil {
      public static String getPatternInfo(ILaunchConfiguration configuration) throws CoreException {
          Tool tool = obtainTool(configuration);
          return tool.getPatternInfo();
+     }
+     
+     public static String getToolLogDir(ILaunchConfiguration configuration) throws CoreException {
+         Tool tool = obtainTool(configuration);
+         return tool.getLogDir();
      }
      
      public static List<String> getControlFiles(ILaunchConfiguration configuration) throws CoreException {
@@ -324,12 +321,15 @@ public class VDTLaunchUtil {
 
         return tool;
     }
-
     
     private static IStringVariableManager getStringVariableManager() {
         return VariablesPlugin.getDefault().getStringVariableManager();
     }
-        
+
+    public static String getLogBuildStamp(ILaunchConfiguration configuration) throws CoreException{
+    	return configuration.getAttribute(VDT.ATTR_LOG_BUILD_STAMP, (String) null);
+    }
+    
     /**
      * Throws a core exception with an error status object built from
      * the given message, lower level exception, and error code.

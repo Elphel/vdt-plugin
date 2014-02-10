@@ -56,6 +56,7 @@ import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.dialogs.PackageLocationDialog;
 import com.elphel.vdt.ui.dialogs.ToolLocationDialog;
 import com.elphel.vdt.ui.preferences.PreferencePage;
+import com.elphel.vdt.ui.views.DesignFlowView;
 
 /**
  * Support for launching verilog development tools programmatically.
@@ -88,7 +89,7 @@ public class LaunchCore {
     {
         workingCopy.setAttribute(VDT.ATTR_WORKING_DIRECTORY, project.getLocation().toOSString());
     } // setWorkingDirectory()
-    /* TODO: For now they are the same, implement build directory differnt from project path */
+    /* TODO: For now they are the same, implement build directory different from project path */
     /* Currently project path is only used to find launched project by it */
     public static void setProjectPath ( ILaunchConfigurationWorkingCopy workingCopy
     		, IProject project ) 
@@ -108,10 +109,15 @@ public class LaunchCore {
         workingCopy.setAttribute(VDT.ATTR_TOOL_ERRORS,   tool.getPatternErrors());
         workingCopy.setAttribute(VDT.ATTR_TOOL_WARNINGS, tool.getPatternWarnings());
         workingCopy.setAttribute(VDT.ATTR_TOOL_INFO,     tool.getPatternInfo());
-        
-        
     }
 
+    public static void setLogBuildStamp( ILaunchConfigurationWorkingCopy workingCopy
+    		, String logBuildStamp ) throws CoreException {
+    	workingCopy.setAttribute(VDT.ATTR_LOG_BUILD_STAMP,     logBuildStamp);
+    }
+
+    
+    
     
     public static void updateLaunchConfiguration( ILaunchConfigurationWorkingCopy workingCopy
                                                 , Tool tool ) throws CoreException
@@ -166,10 +172,12 @@ public class LaunchCore {
         OptionsCore.doLoadLocation(tool); // here it resolves condition with OS
     } // updateContextOptions()
     
-    public static ILaunchConfiguration createLaunchConfiguration( Tool tool
-                                                                , IProject project
-                                                                , String resource 
-                                                                ) throws CoreException
+    public static ILaunchConfiguration createLaunchConfiguration(
+    		Tool tool,
+    		IProject project,
+    		String resource,
+    		String logBuildStamp // null - run tool, "" - log latest, other - with specified buildStamp
+    		) throws CoreException
     {
         // get tools launch configuration
         ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
@@ -204,18 +212,32 @@ public class LaunchCore {
         setResource(workingCopy, resource);
         setWorkingDirectory(workingCopy, project);
         setProjectPath(workingCopy, project);
+        setLogBuildStamp(workingCopy,logBuildStamp);
         ILaunchConfiguration launchConfig = workingCopy.doSave();
         return launchConfig;
     } // createLaunchConfiguration()
     
-    
+/*    
     public static void launch(Tool tool, IProject project) throws CoreException {
         launch(tool, project, VDT.VARIABLE_RESOURCE_NAME);
     }
+*/
+    
+  
+    
+    public static void launch(
+    		Tool tool,
+    		IProject project,
+    		String resource,
+    		String logBuildStamp) throws CoreException {
+        if (!saveAllEditors(true))  return; // Andrey: added it here
 
-    public static void launch(Tool tool, IProject project, String resource) throws CoreException {
         try {
-            ILaunchConfiguration launchConfig = createLaunchConfiguration(tool, project, resource);
+            ILaunchConfiguration launchConfig = createLaunchConfiguration(
+            		tool,
+            		project,
+            		resource,
+            		logBuildStamp);
             DebugUITools.launch(launchConfig, ILaunchManager.RUN_MODE);
         } catch (CoreException e) {
             IStatus status = e.getStatus();
@@ -224,7 +246,7 @@ public class LaunchCore {
         }
     } // launch()
 
-   
+  
     
     private static String getToolLaunchName(Tool tool) throws CoreException {
         String location = tool.getExeName();
@@ -262,6 +284,7 @@ public class LaunchCore {
      * Launches the given run configuration in a background Job with progress 
      * reported via the Job. Exceptions are reported in the Progress view.
      */
+    // Never used - where it was supposed to be called from? //
     public static void launchInBackground(final VDTRunnerConfiguration configuration) {
         if (!saveAllEditors(true)) {
             return;
@@ -289,6 +312,7 @@ public class LaunchCore {
      * Launches the given run configuration in the foreground with a progress 
      * dialog. Reports any exceptions that occur in an error dialog.
      */
+    // Never used - where it was supposed to be called from? //
     public static void launchInForeground(final VDTRunnerConfiguration configuration) {
         if (!saveAllEditors(true)) {
             return;
@@ -313,13 +337,13 @@ public class LaunchCore {
         }                                                       
         
     } // launchInForeground()
-        
+
 //      public static void launch( final VDTRunnerConfiguration configuration
 //                             ) throws CoreException 
 //      {
 //              launch(configuration, null);
 //      }
-        
+  // Never used - where it was supposed to be called from? //
     private static void launch( final VDTRunnerConfiguration configuration
                               , IProgressMonitor monitor 
                               ) throws CoreException 
@@ -327,8 +351,17 @@ public class LaunchCore {
         ILaunch launch = new Launch(null, ILaunchManager.RUN_MODE, null);
         launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, null);
         DebugPlugin.getDefault().getLaunchManager().addLaunch(launch);                                       
-        VDTRunner runner = VDTLaunchUtil.getRunner();
+//        VDTRunner runner = VDTLaunchUtil.getRunner();
+        VDTProgramRunner runner = configuration.getProgramRunner();
 		int numItem=configuration.getBuildStep();
+		//getProgramRunner
+		
+// Probably wrong thing to launch - what if it starts with console?
+// but neither of the callers seem to be used anywhere else
+	    System.out.println("Probably wrong Launching from LaunchCore.java , numItem="+numItem);	
+	    MessageUI.error("Probably wrong: Launching from LaunchCore.java , numItem="+numItem +", normally goes through LaunchCOnfigurationDelegate");
+	    System.out.println("just stop here");	
+		
         runner.run(configuration,
         		VDTRunner.renderProcessLabel(configuration.getToolName()), // toolname + (date)
         		launch,
@@ -336,7 +369,7 @@ public class LaunchCore {
         		numItem);
     } // launch()
         
-        
+       
     /**
      * Save all dirty editors in the workbench.
      *  Returns whether the operation succeeded.

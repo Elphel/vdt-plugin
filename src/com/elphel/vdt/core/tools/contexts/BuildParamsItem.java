@@ -18,12 +18,13 @@
 package com.elphel.vdt.core.tools.contexts;
 
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.List;
 
 public class BuildParamsItem implements Cloneable{
 	private String [] params;
 	private String consoleName;  // null for external tools running in a new console
-//    private String nameAsParser; // name as a parser, null if not used as a parser
     private String name;         // name of a block
     private boolean is_parser;
     
@@ -39,13 +40,18 @@ public class BuildParamsItem implements Cloneable{
                                  // and connect to stderr of the terminal session
 
 	private int timeout;         // timeout for console tasks, in seconds
+	private String success;
+	private String failure;
+	private boolean keep_open;
+	private String logFile;
+	
+	private Timer timer=null;
+	
 	
 	public BuildParamsItem (
 			String [] params,
 			String consoleName,
-//		    String nameAsParser,
 		    String name,
-//		    boolean is_parser,
 		    String toolErrors,
 		    String toolWarnings,
 		    String toolInfo,
@@ -53,11 +59,14 @@ public class BuildParamsItem implements Cloneable{
 		    String interrupt, 
 		    String stderr,
 		    String stdout,
-		    int timeout
+		    int timeout,
+			String success,
+			String failure,
+			boolean keep_open,
+			String logFile
 			) {
 		this.consoleName=consoleName;
 		this.params=params; // no need to clone?
-//		this.nameAsParser=nameAsParser;
 		this.name=name;
 		this.is_parser=(name!=null); // true
 		this.toolErrors=toolErrors;
@@ -68,15 +77,17 @@ public class BuildParamsItem implements Cloneable{
 		this.stderr=stderr;
 		this.stdout=stdout;
 		this.timeout=timeout;
+		this.success=success;
+		this.failure=failure;
+		this.keep_open=keep_open;
+		this.logFile=logFile;
 		
 	}
 	public BuildParamsItem (BuildParamsItem item){
 		this (
 				item.params,
 				item.consoleName,
-//				item.nameAsParser,
 				item.name,
-//				item.is_parser,
 				item.toolErrors,
 				item.toolWarnings,
 				item.toolInfo,
@@ -84,7 +95,11 @@ public class BuildParamsItem implements Cloneable{
 				item.interrupt,
 				item.stderr,
 				item.stdout,
-				item.timeout
+				item.timeout,
+				item.success,
+				item.failure,
+				item.keep_open,
+				item.logFile
 				);
 		this.is_parser=item.is_parser;
 	}
@@ -107,17 +122,6 @@ public class BuildParamsItem implements Cloneable{
 	public String getConsoleName(){
 		return consoleName;
 	}
-/*	
-	public void applyMark(){
-		if ((mark==null) || (mark.length()==0)) return;
-		if (params!=null) {
-			for (int i=0;i<params.length;i++){
-				params[i].replace(mark, "");
-			}
-		}
-		if (prompt!=null) prompt.replace(mark, "");
-	}
-*/	
 	public void removeNonParser(List<BuildParamsItem> items){
 //		if (nameAsParser==null) return;
 		if (!is_parser) return;
@@ -125,10 +129,7 @@ public class BuildParamsItem implements Cloneable{
 	        Iterator<BuildParamsItem> itemsIter = items.iterator(); // command lines block is empty (yes, there is nothing in project output)
 	        while(itemsIter.hasNext()) {
 	        	BuildParamsItem item = (BuildParamsItem)itemsIter.next();
-				if(	
-//						nameAsParser.equals(item.stderr) ||
-//						nameAsParser.equals(item.stdout)){
-					name.equals(item.stderr) ||
+				if( name.equals(item.stderr) ||
 					name.equals(item.stdout)){
 					return; // do nothing - keep nameAsParser
 				}
@@ -137,16 +138,39 @@ public class BuildParamsItem implements Cloneable{
 		is_parser=false;
 	}
 
-//	public String getNameAsParser(){ return nameAsParser; }
-	public String getNameAsParser(){ return is_parser?name:null; }
-	public String getName()        { return name; }
-//	public String getMark()        { return mark; }
-	public String getErrors()      { return toolErrors; }
-	public String getWarnings()    { return toolWarnings; }
-	public String getInfo()        { return toolInfo; }
-	public String getPrompt()      { return prompt; }
-	public String getInterrupt()   { return interrupt; }
-	public String getStderr()      { return stderr; }
-	public String getStdout()      { return stdout; }
-	public int    getTimeout()     { return timeout; }
+	public String getNameAsParser() { return is_parser?name:null; }
+	public String getName()         { return name; }
+	public String getErrors()       { return toolErrors; }
+	public String getWarnings()     { return toolWarnings; }
+	public String getInfo()         { return toolInfo; }
+	public String getPrompt()       { return prompt; }
+	public String getInterrupt()    { return interrupt; }
+	public String getStderr()       { return stderr; }
+	public String getStdout()       { return stdout; }
+	public int    getTimeout()      { return timeout; }
+	
+	public String getSuccessString(){ return success; }
+	public String getFailureString(){ return failure; }
+	public boolean keepOpen()       { return keep_open; }
+	public String getLogName()      { return logFile; }
+	
+	//			String logFile
+
+	
+	public Timer getTimer(){
+		if (timer==null){
+			timer=new Timer();
+		}
+		return timer;
+	}
+	public void cancelTimer(){
+		if (timer==null) return;
+		timer.cancel();
+		timer=null;
+	}
+	
+	public void finalize() throws Throwable{
+		cancelTimer();
+		super.finalize();
+	}
 }

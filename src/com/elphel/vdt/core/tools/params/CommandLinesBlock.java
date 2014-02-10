@@ -52,7 +52,11 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     private String interrupt;    // send this to remote terminal to interrupt execution (parses use \xNN)
 	private String timeout;      // timeout for console tasks, in seconds
 
-        
+	private String success;
+	private String failure;
+	private boolean keep_open;
+	private String logPath;
+	
     public CommandLinesBlock(String contextName,
                              String name,
                              String destination,
@@ -67,6 +71,10 @@ public class CommandLinesBlock extends UpdateableStringsContainer
                              String stderr,
                              String stdout,
                              String timeout,
+                         	 String success,
+                         	 String failure,
+                         	 boolean keep_open,
+                         	 String logPath,
                              ConditionalStringsList lines,
                              ConditionalStringsList deleteLines,
                              List<NamedConditionalStringsList> insertLines)
@@ -87,20 +95,13 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         this.stderr=stderr;
         this.stdout=stdout;
         this.timeout=timeout;
-        
+        this.success=success;
+        this.failure=failure;
+        this.keep_open=keep_open;
+        this.logPath=logPath;
         if(this.separator != null) {
-//            separator = separator.replace("\\n", "\n");
-//            separator = separator.replace("\\t", "\t");
         	this.separator = parseCntrl(this.separator);
         }
-        /*
-        if (this.prompt!=null){
-        	this.prompt=parseCntrl(this.prompt);
-        	if (this.mark!=null){
-        		this.prompt=this.prompt.replace(this.mark,"");
-        	}
-        }
-        */
         if(this.interrupt != null) {
         	this.interrupt = parseCntrl(this.interrupt);
         }
@@ -140,6 +141,10 @@ public class CommandLinesBlock extends UpdateableStringsContainer
              block.stderr,
              block.stdout,
              block.timeout,
+             block.success,
+             block.failure,
+             block.keep_open,
+             block.logPath,
              block.strings != null?
                      (ConditionalStringsList)block.strings.clone() : null,
              block.deleteStrings != null?
@@ -213,6 +218,10 @@ public class CommandLinesBlock extends UpdateableStringsContainer
 	public String getStdout()      { return stdout; }
 	public String getTimeout()     { return timeout; }
     
+	public String getSuccessString() { return success; }
+	public String getFailureString() { return failure; }
+    public boolean isKeepOpen()      { return keep_open; }
+	public String getLogPath() { return logPath; }
     
     public boolean isEnabled() {
         if(destination == null) // command line

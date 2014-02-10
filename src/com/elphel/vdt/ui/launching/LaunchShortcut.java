@@ -58,7 +58,8 @@ public class LaunchShortcut implements ILaunchShortcut {
     public static void launch(Tool tool) {
         IProject project = getActiveProject();
         try {
-            LaunchCore.launch(tool, project, project.getName()); 
+        	 MessageUI.error("This type of tool launching is not supported");
+            LaunchCore.launch(tool, project,  project.getName(),null); 
         } catch (CoreException e) {
             MessageUI.error(Txt.s("Action.ToolLaunch.Error", 
                                   new String[] {tool.getName(), e.getMessage()}),

@@ -19,21 +19,27 @@ package com.elphel.vdt.ui;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
-
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 // TODO: remove this import?
 import org.eclipse.debug.internal.ui.DebugPluginImages;
 
 import com.elphel.vdt.VDT;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
-
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.contexts.PackageContext;
 import com.elphel.vdt.core.tools.contexts.ProjectContext;
@@ -58,14 +64,36 @@ public class VDTPluginImages {
 
     public static final ImageDescriptor DESC_VERILOG_FILE    = create(ICONS_PATH, "eview16"+File.separator+"verilog_file.gif", null);
 
-    public static final ImageDescriptor DESC_RUN_TOOL        = create(ICONS_PATH, "obj16"+File.separator+"run_tool.gif", null);
-    public static final ImageDescriptor DESC_TOOL_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"tool_prop.gif", null);
-    public static final ImageDescriptor DESC_LAUNCH_CONFIG   = create(ICONS_PATH, "obj16"+File.separator+"vdt_tools.gif", null);
+//    public static final ImageDescriptor DESC_RUN_TOOL        = create(ICONS_PATH, "obj16"+File.separator+"run_tool.gif", null);
+    public static final ImageDescriptor DESC_RUN_TOOL         = create(ICONS_PATH, "obj16"+File.separator+"run_tool.png", null);
+    public static final ImageDescriptor DESC_PLAY_BACK        = create(ICONS_PATH, "obj16"+File.separator+"play_back.png", null);
+    public static final ImageDescriptor DESC_PLAY_BACK_SELECT = create(ICONS_PATH, "obj16"+File.separator+"play_back_select.png", null);
+    public static final ImageDescriptor DESC_TOOL_PROPERTIES  = create(ICONS_PATH, "obj16"+File.separator+"tool_prop.gif", null);
+    public static final ImageDescriptor DESC_LAUNCH_CONFIG    = create(ICONS_PATH, "obj16"+File.separator+"vdt_tools.gif", null);
     public static final ImageDescriptor DESC_INSTALL_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"install_prop.gif", null);
     public static final ImageDescriptor DESC_PACKAGE_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"package_prop.gif", null);
     public static final ImageDescriptor DESC_PROJECT_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"project_prop.gif", null);
     public static final ImageDescriptor DESC_DESIGM_MENU = create(ICONS_PATH, "obj16"+File.separator+"design_menu.gif", null);
+
     
+    public static final String ICON_TOOLSTATE_NEW      = "obj16"+File.separator+"white.png";
+    public static final String ICON_TOOLSTATE_BAD      = "obj16"+File.separator+"cross.png";
+    public static final String ICON_TOOLSTATE_BAD_OLD  = "obj16"+File.separator+"cross_dim.png";
+    public static final String ICON_TOOLSTATE_GOOD     = "obj16"+File.separator+"check.png";
+    public static final String ICON_TOOLSTATE_GOOD_OLD = "obj16"+File.separator+"check_dim.png";
+    public static final String ICON_TOOLSTATE_WTF     =  "obj16"+File.separator+"question.png";
+    public static final String ICON_TOOLSTATE_WTF_OLD =  "obj16"+File.separator+"question_dim.png";
+    public static final String ICON_TOOLSTATE_RUNNING =  "obj16"+File.separator+"spinning.gif";
+
+    public static final String KEY_TOOLSTATE_NEW      = "TOOLSTATE_NEW";
+    public static final String KEY_TOOLSTATE_BAD      = "TOOLSTATE_BAD";
+    public static final String KEY_TOOLSTATE_BAD_OLD  = "TOOLSTATE_BAD_OLD";
+    public static final String KEY_TOOLSTATE_GOOD     = "TOOLSTATE_GOOD";
+    public static final String KEY_TOOLSTATE_GOOD_OLD = "TOOLSTATE_GOOD_OLD";
+    public static final String KEY_TOOLSTATE_WTF     =  "TOOLSTATE_WTF";
+    public static final String KEY_TOOLSTATE_WTF_OLD =  "TOOLSTATE_WTF_OLD";
+    public static final String KEY_TOOLSTATE_RUNNING =  "TOOLSTATE_RUNNING";
+
 
     public static final String CHECKBOX_ON  = "CHECKBOX_ON";
     public static final String CHECKBOX_OFF = "CHECKBOX_OFF";
@@ -85,6 +113,9 @@ public class VDTPluginImages {
     public static final ImageDescriptor DESC_CHECKBOX_ON_DEFAULT_DISABLE  = create(ICONS_PATH, "obj16"+File.separator+"cb_on_disable_default.gif", CHECKBOX_ON_DEFAULT_DISABLE);
     public static final ImageDescriptor DESC_CHECKBOX_OFF_DEFAULT_DISABLE = create(ICONS_PATH, "obj16"+File.separator+"cb_off_disable_default.gif", CHECKBOX_OFF_DEFAULT_DISABLE);
     
+    
+    private static Map<ImageDescriptor,ImageData[]> animatedGifMap = new HashMap<ImageDescriptor,ImageData[]>();
+    
     private static ImageDescriptor create (String prefix, String name, String key) {
         ImageDescriptor desc = ImageDescriptor.createFromURL(makeImageURL(prefix, name));
         if (key != null)
@@ -95,10 +126,12 @@ public class VDTPluginImages {
     public static void addImage(String fileName, String key, String launchType) {
         ImageDescriptor desc = null;
         File file = new File(fileName);
+        URL url=null;
         if (file.isAbsolute()) {
             desc = ImageDescriptor.createFromFile(null, fileName);  
         } else {
-            desc = ImageDescriptor.createFromURL(makeImageURL(ICONS_PATH, fileName));
+        	url=makeImageURL(ICONS_PATH, fileName);
+            desc = ImageDescriptor.createFromURL(url);
         }
         
         if (key != null)
@@ -106,14 +139,36 @@ public class VDTPluginImages {
         
         if ((launchType != null) && !VDT.ID_DEFAULT_LAUNCH_TYPE.equals(launchType))
             DebugPluginImages.getImageRegistry().put(launchType, desc);
-            
+//        ImageData [] imageData = new ImageLoader().load(new FileInputStream(fileName));
+        ImageData [] imageData = null;
+        if (url!=null){
+        	try {
+				imageData = new ImageLoader().load(url.openStream());
+			} catch (IOException e) {
+				System.out.println("Failed to open url "+url.toString());
+				return;
+			}
+        } else {
+        	try {
+        	imageData = new ImageLoader().load(file.getAbsolutePath());
+        	} catch (Exception e) {
+				System.out.println("Failed to open absolute path "+file.getAbsolutePath());
+				return;
+        	}
+        }
+        if (imageData.length>1){
+        	animatedGifMap.put(desc,imageData);
+//            System.out.println("animatedGifMap.size()="+animatedGifMap.size());
+//            System.out.println("imageData.length="+imageData.length);
+        }
     } // addImage()
     
     private static URL makeImageURL(String prefix, String name) {
         String path = "$nl$/" + prefix + name; //$NON-NLS-1$
         /* TODO: fix deprecation */
-        URL url_try= org.eclipse.core.runtime.FileLocator.find(VerilogPlugin.getDefault().getBundle(), new Path(path), null);
-        return Platform.find(VerilogPlugin.getDefault().getBundle(), new Path(path));
+//        URL url_try= org.eclipse.core.runtime.FileLocator.find(VerilogPlugin.getDefault().getBundle(), new Path(path), null);
+//        return Platform.find(VerilogPlugin.getDefault().getBundle(), new Path(path));
+        return FileLocator.find(VerilogPlugin.getDefault().getBundle(), new Path(path), null);
     }
 
     /**
@@ -131,6 +186,14 @@ public class VDTPluginImages {
     public static ImageDescriptor getImageDescriptor(String key) {
             return getImageRegistry().getDescriptor(key);
     }
+    
+    public static ImageData [] getImageData(String key) {
+    	ImageDescriptor imageDescriptor=getImageRegistry().getDescriptor(key);
+    	return animatedGifMap.get(imageDescriptor);
+   }
+
+
+    
     
     /**
      * Returns the VDTPlugin ImageRegistry.

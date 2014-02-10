@@ -19,6 +19,8 @@ package com.elphel.vdt.core.launching;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -28,6 +30,7 @@ import org.eclipse.ui.console.IConsole;
 
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
+import com.elphel.vdt.ui.MessageUI;
 
 
 /**
@@ -55,6 +58,8 @@ public class VDTRunnerConfiguration {
     private String toolErrors;
     private String toolWarnings;
     private String toolInfo;
+    private String toolLogDir;
+    
     private int    buildStep;
     private ILaunchConfiguration configuration;
     private  ILaunch launch;
@@ -62,18 +67,41 @@ public class VDTRunnerConfiguration {
     private BuildParamsItem[] argumentsItemsArray; // calculate once for the launch of the sequence
     
     private String consoleFinish; // double prompt? - string to look for in consoleBuffer to finish
+    private String consoleGood;   // output console sequence meaning success of the tool 
+    private String consoleBad;    //  output console sequence meaning failure of the tool
+    private boolean hasGood;      // at least one "good" sequence was received
+    private boolean hasBad;       // at least one "bad" sequence was received
+    
     private String consoleBuffer; // accumulates stdout & stderr, looking for consoleFinish (endsWith() )
-    private int extraChars=100; // Allow these chars to appear in the output after consoleFinish (user pressed smth.?)
+//    private int extraChars=100; // Allow these chars to appear in the output after consoleFinish (user pressed smth.?)
+    private int extraChars=1000; // Allow these chars to appear in the output after consoleFinish (user pressed smth.?)
     private String originalConsoleName=null; // will replace
     private String buildDateTime=null;
+    private int maxLength=extraChars;
+    private Pattern patternGood=null;
+    private Pattern patternBad=null;
+    
+    private String playBackStamp=null; // timestamp of the logs to play back ("" for latest), or
+                                       // null for normal running tools
+    
+    
     
     private Set<IConsole> consoles=null;  // parser consoles opened for this console
 	private VDTConsoleRunner consoleRunner=null;
+	private VDTProgramRunner programRunner=null;
+	private VDTConsolePlayback consolePlayback=null;
 
     
     public BuildParamsItem[] getArgumentsItemsArray(){
     	return argumentsItemsArray;
     }
+    
+    public void canceTimers(){
+    	if (argumentsItemsArray!=null) for (int i=0;i<buildStep;i++){
+    		argumentsItemsArray[i].cancelTimer();
+    	}
+    }
+    
     public void setArgumentsItemsArray(BuildParamsItem[] argumentsItemsArray){
     	this.argumentsItemsArray=argumentsItemsArray;
     }
@@ -93,13 +121,35 @@ public class VDTRunnerConfiguration {
 		}	
 		this.toolToLaunch = toolToLaunch;
 		this.consoleFinish=null;
+		this.consoleGood=null;
+		this.consoleBad=null;
+		this.playBackStamp=null;
+		
 		this.consoleBuffer="";
 		this.consoles= new HashSet<IConsole>();
 		this.consoleRunner= new VDTConsoleRunner(this); // arguments here?
+		this.programRunner=new VDTProgramRunner(); // arguments here?
+		this.consolePlayback=new VDTConsolePlayback(this);
+
+	}
+	
+	public void setPlayBackStamp(String str){
+		playBackStamp=str;
+	}
+	public String getPlayBackStamp(){
+		return playBackStamp;
 	}
 	
 	public VDTConsoleRunner getConsoleRunner(){
 		return this.consoleRunner;
+	}
+
+	public VDTConsolePlayback getConsolePlayback(){
+		return this.consolePlayback;
+	}
+	
+	public VDTProgramRunner getProgramRunner(){
+		return this.programRunner;
 	}
 	
 	public void addConsole(IConsole console){
@@ -117,19 +167,112 @@ public class VDTRunnerConfiguration {
 
 	public void setConsoleFinish(String consoleFinish){
 		this.consoleFinish=consoleFinish;
-	}
-	public boolean addConsoleText(String text){
-		if (consoleFinish==null){
-			System.out.println("Dinish console sequence is not defined");
-			return false;
+		if ((this.consoleFinish!=null) && ((this.consoleFinish.length()+extraChars) > maxLength)){
+			maxLength=this.consoleFinish.length()+extraChars;
 		}
+	}
+
+	public void setConsoleBad(String consoleBad){
+		this.consoleBad=consoleBad;
+		this.hasBad=false;
+		if ((consoleBad!=null) && (consoleBad.length()==0)) this.consoleBad=null; 
+		if ((this.consoleBad!=null) && ((this.consoleBad.length()+extraChars) > maxLength)){
+			maxLength=this.consoleBad.length()+extraChars;
+		}
+		// Patterns that start with "!" are always treated as not being regexp, "!" removed
+		// "\" in the first position escapes "!" (only in the first and on;y "!")
+		patternBad=null;
+		if (this.consoleBad!=null) {
+			if ((this.consoleBad.length()>=2) && (this.consoleBad.substring(0,2).equals("\\!"))){
+				this.consoleBad=this.consoleBad.substring(1);
+			} else if ((this.consoleBad.length()>=1) && (this.consoleBad.substring(0,1).equals("!"))){
+				this.consoleBad=this.consoleBad.substring(1);
+			} else {
+				try {
+					patternBad=Pattern.compile(this.consoleBad);
+				} catch (PatternSyntaxException e){
+					MessageUI.error("Invalid regular expression: \""+this.consoleBad+"\" - using is as a literal string");
+					// just use string, not pattern
+				}
+			}
+		}
+	}
+
+	public void setConsoleGood(String consoleGood){
+		if ((consoleGood!=null) && (consoleGood.length()==0)){ // empty but not null  - no need to check, considered always to happen
+			this.hasGood=true;
+			this.consoleGood=null;
+		} else {
+			this.consoleGood=consoleGood;
+			this.hasGood=false;
+		}
+		if ((this.consoleGood!=null) && ((this.consoleGood.length()+extraChars) > maxLength)){
+			maxLength=this.consoleGood.length()+extraChars;
+		}
+		patternGood=null;
+		// Patterns that start with "!" are always treated as not being regexp, "!" removed
+		// "\" in the first position escapes "!" (only in the first and on;y "!")
+		if (this.consoleGood!=null) {
+			if ((this.consoleGood.length()>=2) && (this.consoleGood.substring(0,2).equals("\\!"))){
+				this.consoleGood=this.consoleGood.substring(1);
+			} else if ((this.consoleGood.length()>=1) && (this.consoleGood.substring(0,1).equals("!"))){
+				this.consoleGood=this.consoleGood.substring(1);
+			} else {
+				try {
+					patternGood=Pattern.compile(this.consoleGood);
+				} catch (PatternSyntaxException e){
+					MessageUI.error("Invalid regular expression: \""+this.consoleGood+"\" - using is as a literal string");
+					patternGood=null;
+					// just use string, not pattern
+				}
+			}
+		}
+	}
+
+	public boolean gotBad(){
+		return hasBad;
+	}
+	public boolean gotGood(){
+		return hasGood;
+	}
+	public String getConsoluBuffer(){
+		return consoleBuffer; // just for debugging
+	}
+	
+	public boolean addConsoleText(String text){
+//		if (consoleFinish==null){
+//			System.out.println("Finish console sequence is not defined");
+//			return false;
+//		}
 		consoleBuffer=consoleBuffer+text;
-		int maxLength=consoleFinish.length()+extraChars;
 		if (consoleBuffer.length()>(maxLength)){
 			consoleBuffer=consoleBuffer.substring(consoleBuffer.length()-maxLength);
 		}
+		if ((patternBad!=null) && patternBad.matcher(consoleBuffer).matches()){
+			hasBad=true;
+			return true;
+		} else {
+			if ((consoleBad!=null) && (consoleBuffer.indexOf(consoleBad)>=0)) {
+				hasBad=true;
+				// Should we return true immediately or still wait for consoleFinish?
+				// Or only return true if (consoleFinish==null) ??
+				//			resetConsoleText();
+				return true; // return as soon as got failure - anyway there will be no next tools running 
+			}
+		}
+		if ((patternGood!=null) && patternGood.matcher(consoleBuffer).matches()){
+			hasGood=true;
+		} else {
+			if ((consoleGood!=null) && (consoleBuffer.indexOf(consoleGood)>=0)) {
+				hasGood=true;
+			}
+		}
+		
+		if (consoleFinish==null){
+			return false; 
+		}
 		if (consoleBuffer.indexOf(consoleFinish)>=0){
-			resetConsoleText();
+//			resetConsoleText();
 			return true;
 		}
 		return false;
@@ -242,8 +385,14 @@ public class VDTRunnerConfiguration {
     public void setPatternInfo(String str) {
     	this.toolInfo=str;
     }
-
     
+    public void setToolLogDir(String str) {
+    	this.toolLogDir=str;
+    }
+    
+    public String getLogDir(){
+    	return this.toolLogDir;
+    }
 	
 	/**
 	 * Returns the arguments to the tool.

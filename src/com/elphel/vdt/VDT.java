@@ -102,6 +102,8 @@ public class VDT {
     public static final String ATTR_TOOL_WARNINGS = ID_VDT + ".ATTR_TOOL_WARNINGS";
     public static final String ATTR_TOOL_INFO =     ID_VDT + ".ATTR_TOOL_INFO";
 
+    public static final String ATTR_LOG_BUILD_STAMP =     ID_VDT + ".ATTR_LOG_BUILD_STAMP";
+
     
     /**
      * Identifier for verilog tools launch configuration group. The verilog

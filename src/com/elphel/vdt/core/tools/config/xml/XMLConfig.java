@@ -110,7 +110,10 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_ACTION_CHECK_EXTENSION = "check-extension";
     static final String CONTEXT_TOOL_ACTION_CHECK_EXISTENCE = "check-existence";
     static final String CONTEXT_TOOL_ACTION_ICON = "icon";
-    
+    static final String CONTEXT_TOOL_DEPENDS_LIST_TAG = "depends-list";
+    static final String CONTEXT_TOOL_DEPENDS_TAG =      "depends";
+    static final String CONTEXT_TOOL_DEPENDS_TOOL_TAG = "tool";
+// TODO: May add other types of dependencies 
     
     static final String CONTEXT_TOOL_DFLT_ACTION_LABEL = "Run for";
     static final String CONTEXT_TOOL_DFLT_ACTION_RESOURCE = "%%CurrentFile";
@@ -122,6 +125,7 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_SYNTAX_WARNINGS= "warnings";
     static final String CONTEXT_TOOL_SYNTAX_INFO =    "info";
     static final String CONTEXT_TOOL_IGNORE_FILTER =  "ignore"; // file path regular expression to remove libraries from source list
+    static final String CONTEXT_TOOL_LOG_DIRECTORY =  "log-dir"; // folder to store the tool log files
 
     static final String CONTEXT_LINEBLOCK_TAG =           "line";
     static final String CONTEXT_LINEBLOCK_NAME_ATTR =     "name";
@@ -138,6 +142,11 @@ public class XMLConfig extends Config {
     static final String CONTEXT_LINEBLOCK_STDOUT_ATTR =   "stdout";
     static final String CONTEXT_LINEBLOCK_TIMEOUT_ATTR =  "timeout";
  
+    static final String CONTEXT_LINEBLOCK_SUCCESS_ATTR =  "success";
+    static final String CONTEXT_LINEBLOCK_FAILURE_ATTR =  "failure";
+    static final String CONTEXT_LINEBLOCK_KEEP_OPEN_ATTR ="keep-open";
+    static final String CONTEXT_LINEBLOCK_LOGPATH_ATTR =  "log";
+    
     static final String CONTEXT_STRINGS_DELETE_TAG = "delete";
     static final String CONTEXT_STRINGS_INSERT_TAG = "insert";
     static final String CONTEXT_STRINGS_INSERT_AFTER_ATTR = "after";
@@ -613,6 +622,7 @@ public class XMLConfig extends Config {
                 String toolWarnings = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_WARNINGS);
                 String toolInfo     = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_INFO);
                 String ignoreFilter = getAttributeValue(contextNode, CONTEXT_TOOL_IGNORE_FILTER);
+                String logDir =       getAttributeValue(contextNode, CONTEXT_TOOL_LOG_DIRECTORY);
                 
                 boolean isShell=false;
                 if (toolShell != null){
@@ -625,7 +635,7 @@ public class XMLConfig extends Config {
                     
                 List<String> toolExtensionsList = readToolExtensionsList(contextNode, contextName);
                 List<RunFor> toolRunfor=  readToolRunForList(contextNode, contextName);
-                
+                List<String> toolDepends= readToolDependsList(contextNode, contextName);
                 
                 if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
                 	System.out.println("contextNode.getNodeValue()="+contextNode.getNodeValue());
@@ -654,6 +664,8 @@ public class XMLConfig extends Config {
                                    toolInfo,
                                    toolRunfor,
                                    ignoreFilter,
+                                   toolDepends,
+                                   logDir,
                                    null,
                                    null,
                                    null);
@@ -978,16 +990,11 @@ public class XMLConfig extends Config {
     
         if(extListNodes.isEmpty())
             return null;
-            
-//          throw new ConfigException(toolInfo + 
-//                                    " definition doesn't contain '" + 
-//                                    CONTEXT_OUTPUT_SECTION_TAG + 
-//                                    "' node");
-            
+           
         if(extListNodes.size() > 1)
             throw new ConfigException(toolInfo + 
                                       " definition cannot contain several '" + 
-                                      CONTEXT_OUTPUT_SECTION_TAG + 
+                                      CONTEXT_TOOL_EXTENSIONS_LIST_TAG + 
                                       "' nodes");
                 
         Node extListNode = extListNodes.get(0);
@@ -1002,10 +1009,37 @@ public class XMLConfig extends Config {
 
             extList.add(ext);
         }
-        
         return extList;
     }
     
+    private List<String> readToolDependsList(Node toolNode, String toolName)
+            throws ConfigException 
+        {
+            String toolInfo = "Tool '" + toolName + "'";
+            
+            List<String> depList = new ArrayList<String>();
+            List<Node> depListNodes = findChildNodes(toolNode, CONTEXT_TOOL_DEPENDS_LIST_TAG);
+        
+            if(depListNodes.isEmpty())
+                return null;
+               
+            if(depListNodes.size() > 1)
+                throw new ConfigException(toolInfo + 
+                                          " definition cannot contain several '" + 
+                                          CONTEXT_TOOL_DEPENDS_LIST_TAG + 
+                                          "' nodes");
+            Node depListNode = depListNodes.get(0);
+            List<Node> depNodes = findChildNodes(depListNode, CONTEXT_TOOL_DEPENDS_TAG);
+// TODO: allow here other types of dependencies (conditionals(source files)            
+            for(Iterator<Node> n = depNodes.iterator(); n.hasNext();) {
+                Node node = (Node)n.next();
+                String dep = getAttributeValue(node, CONTEXT_TOOL_DEPENDS_TOOL_TAG);
+                if(dep == null)
+                    throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_DEPENDS_TOOL_TAG + "' is absent");
+                depList.add(dep);
+            }
+            return depList;
+        }
 
     private  List<RunFor> readToolRunForList(Node toolNode, String toolName) throws ConfigException {
     	String toolInfo = "Tool '" + toolName + "'";

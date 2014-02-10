@@ -235,6 +235,12 @@ public abstract class Context {
         		timeout=Integer.parseInt(sTimeout);
         	} catch(Exception e){
         	}
+        	String successString=  subsitutePattern(commandLinesBlock.getSuccessString());
+        	String failureString=  subsitutePattern(commandLinesBlock.getFailureString());
+        	boolean keepOpen=      commandLinesBlock.isKeepOpen();
+        	String logFile=        subsitutePattern(commandLinesBlock.getLogPath());
+
+
         	prompt=CommandLinesBlock.parseCntrl(prompt); // replace control character codes (\n,\t,\x)
         	prompt=commandLinesBlock.applyMark(prompt); // remove mark sequence
         	String interrupt=commandLinesBlock.getInterrupt();
@@ -272,7 +278,11 @@ public abstract class Context {
             					    interrupt,
             					    stderr,
             					    stdout,
-            					    timeout
+            					    timeout,
+            			        	successString,
+            			        	failureString,
+            			        	keepOpen,
+            			        	logFile
             					    )
             				);
             	} else { // processing command file
@@ -309,10 +319,13 @@ public abstract class Context {
         					    interrupt,
         					    stderr,
         					    stdout,
-        					    timeout
+        					    timeout,
+        			        	successString,
+        			        	failureString,
+        			        	keepOpen,
+        			        	logFile
         					    )
         				);
-            	
             }
         }
         

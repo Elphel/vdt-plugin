@@ -121,8 +121,15 @@ public class VerilogUtils {
     
     public static OutlineElement[] getTopModulesVeditor(IFile file) {
         IProject project = file.getProject();
+        if (project==null){
+        	System.out.println("getTopModulesVeditor(): Projectis null for file="+file.getFullPath());
+        	return null;
+        }
         OutlineDatabase outlineDatabase=getVeditorOutlineDatabase(project);
-        
+        if (outlineDatabase==null){
+        	System.out.println("getTopModulesVeditor(): outlineDatabase is null for project: "+project+" file="+file.getFullPath());
+        	return null;
+        }
     	OutlineContainer outlineContainer=outlineDatabase.getOutlineContainer(file);
         if (outlineContainer != null) {
         	OutlineElement[] allTopElements=outlineContainer.getTopLevelElements();

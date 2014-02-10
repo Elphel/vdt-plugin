@@ -21,6 +21,7 @@ import java.util.*;
 import java.io.*;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.swt.widgets.Display;
 
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.core.options.OptionsCore;
@@ -31,6 +32,7 @@ import com.elphel.vdt.core.tools.params.conditions.ConditionUtils;
 import com.elphel.vdt.core.tools.params.recognizers.*;
 import com.elphel.vdt.core.tools.params.types.RunFor;
 import com.elphel.vdt.ui.VDTPluginImages;
+import com.elphel.vdt.ui.views.DesignFlowView;
 
 
 public class Tool extends Context implements Cloneable, Inheritable {
@@ -62,6 +64,17 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private String projectPath=null;
     private boolean initialized = false;
     private String [] imageKeysActions = null;
+    
+    private List<String> depends=null;       // list of tools this one depends on
+    private String logDir=null;              // directory to store this tool log files
+ 
+    private boolean dirty=false;             // tool ran before its sources (runtime value)
+    private long runStamp=0;                 // timestamp of the tool last ran (0 - never)
+    private TOOL_STATE state=TOOL_STATE.NEW; // tool state (succ, fail,new, running)
+    private boolean running=false;
+    private long finishTimeStamp=0;
+    
+    private DesignFlowView designFlowView;
 
     public Tool(String name,
                 String controlInterfaceName,
@@ -79,6 +92,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 String toolInfo,
                 List<RunFor> runfor,
                 String ignoreFilter,
+                List<String> depends,
+                String logDir,
                 /* never used ??? */
                 List<Parameter> params,
                 List<ParamGroup> paramGroups,
@@ -104,8 +119,69 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.toolErrors   = toolErrors;
         this.toolWarnings = toolWarnings;
         this.toolInfo     = toolInfo;
+        this.depends=       depends;
+        this.logDir=        logDir;
         this.choice=0;
+        this.designFlowView =null;
+        this.finishTimeStamp=0;
     }
+    public enum TOOL_STATE {
+        NEW,
+        UNKNOWN,
+        FAILURE,
+        SUCCESS //,
+//        RUNNING
+    }
+   
+    public void setRunStamp(long runStamp) { this.runStamp=runStamp; }
+    public List<String> getDepends()       { return depends; }
+    public boolean isDirty()               { return dirty; }
+    public boolean isRunning()             { return running; }
+    public long getRunStamp()              { return runStamp; }
+    public TOOL_STATE getState()           { return state; }
+    public String getLogDir()              { return logDir; }
+    
+    public void setFinishTimeStamp(){
+    	finishTimeStamp=System.nanoTime();
+    }
+    
+    public long getFinishTimeStamp(){
+    	return finishTimeStamp;
+    }
+    
+    public void setDirty(boolean dirty) {
+    	this.dirty=dirty;
+//    	updateViewStateIcon();
+    	System.out.println("SetDirty("+dirty+")");
+    }
+
+    public void setRunning(boolean running) {
+    	this.running=running;
+//    	updateViewStateIcon();
+    	System.out.println("SetRunning("+running+")");
+    }
+
+    
+    public void setState(TOOL_STATE state) {
+    	this.state=state;
+//    	updateViewStateIcon();
+    	System.out.println("SetState("+state+")");
+    }
+    
+    public void setDesignFlowView (DesignFlowView designFlowView){
+    	this.designFlowView =  designFlowView; // to be able to update actions and so the state icons
+    }
+
+    public void updateViewStateIcon(){
+    	if (designFlowView!=null){
+        	Display.getDefault().syncExec(new Runnable() {
+        		public void run() {
+            		designFlowView.updateLaunchAction(); // Run from Display thread to prevent "invalid thread access" when called from Runner
+        		}
+        	});
+    	}
+    }
+    
     
     public void initIcons(boolean force) {
     	if (!force && (imageKeysActions!=null)) return;
@@ -123,6 +199,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         }
        
     } // ToolUI()
+    
 
     public String getImageKey(int actionIndex) {
     	if (imageKeysActions==null) return null;

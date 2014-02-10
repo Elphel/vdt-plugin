@@ -17,12 +17,27 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.views;
 
+//import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Rectangle;
+
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IResource;
+//import org.eclipse.jface.viewers.TreeViewer;
+//import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+//import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.core.tools.ToolsCore;
@@ -47,7 +62,7 @@ public class DesignMenuModel {
     private Config config;
     
     private MenuItem root;
-    
+    private final int IMAGE_MARGIN=2;
     public DesignMenuModel(DesignMenu menu) {
         config = ToolsCore.getConfig();
         root = new MenuItem(null, menu);
@@ -61,13 +76,22 @@ public class DesignMenuModel {
     public abstract class Item {
         private static final String ICON_ID_PREFIX = VDT.ID_VDT + ".DesignMenu.Image.";
         private String imageKey = null;
+        
+        protected String imageKeyState = null;
 
         private DesignMenuItem source;
         private Item parent;
-        
+        private int animN;
+        private Rectangle animBounds=null;
+        private ImageData[] imageData=null;
+//        private boolean animEn=true; // just testing, fill be  false;
+        final private AtomicBoolean animBusy=new AtomicBoolean(false);
+        private Timer timer=null;
+//        private int updateWidth=16;
         private Item(Item parent, DesignMenuItem source) {
             this.parent = parent;
             this.source = source;
+            this.timer=null;
 
             String image = source.getIcon();
             if (image != null) {
@@ -104,10 +128,92 @@ public class DesignMenuModel {
         public String getLabel() {
             return toString();
         }
-
         public String getImageKey() {
             return imageKey;
         }
+        public void measureItem (Event event){
+        	if (imageKeyState==null) return;
+        	Image image=VDTPluginImages.getImage(imageKeyState);
+        	if (image!=null) event.width+=IMAGE_MARGIN+image.getBounds().width;
+        }
+        
+        public void showStateIcon(Event event, final Tree tree, final TreeItem item){
+        	if ((imageKeyState==null) || (item.isDisposed())) return;
+        	int x = event.x + event.width + IMAGE_MARGIN;
+        	int itemHeight = tree.getItemHeight();
+        	imageData=VDTPluginImages.getImageData(imageKeyState);
+        	Image frameImage;
+        	boolean isAnimation=false;
+        	if ((imageData!=null) && (imageData.length>1) && animBusy.compareAndSet(false,true)){
+        		isAnimation=true;
+        		animN=animN % imageData.length;
+        		frameImage = new Image(Display.getDefault(),imageData[animN]);
+        	} else {
+        		frameImage = VDTPluginImages.getImage(imageKeyState); // do not dispose() !
+        	}
+        	int imageHeight = frameImage.getBounds().height;
+        	int y = event.y + (itemHeight - imageHeight) / 2;
+    		event.gc.drawImage(frameImage, x, y);
+        	if (isAnimation){
+            	animBounds=frameImage.getBounds();
+            	frameImage.dispose();
+            	final int fDelayTime=imageData[animN].delayTime*10; // ms
+            	animN++;
+    			// item does not include our animation on the right of it, so we need to store image location
+    			// relative to the top right corner of the item (height does not change)
+    			Rectangle r=item.getBounds();
+            	animBounds.x=x-(r.x+r.width);
+            	animBounds.y=y-(r.y);
+            	
+            	TimerTask timerTask=new TimerTask() {          
+            		@Override
+            		public void run() {
+           				refresh(item, tree); // threw on shutdown - 
+            		}
+            	};
+        	
+            	if (timer==null) timer=new Timer();
+            	try {
+            		timer.schedule(timerTask, fDelayTime);
+            	} catch (IllegalStateException e){
+            		System.out.println("DesignMenuModel(): Timer was somewhere canceled, recovering");
+            		timer.cancel();
+            		timer=new Timer();
+            		timer.schedule(timerTask, fDelayTime);
+            	}
+
+            	
+            	
+/*            	
+            	timer.schedule(new TimerTask() {          
+            		@Override
+            		public void run() {
+           				refresh(item, tree); // threw on shutdown - 
+            		}
+            	}, fDelayTime);
+*/            	
+        	}
+        }
+        
+        public void refresh(final TreeItem item, final Tree tree) {
+        	Display.getDefault().syncExec(new Runnable() {
+        		public void run() {
+        			if (item.isDisposed()) {
+            			animBusy.compareAndSet(true, false);
+        				return;
+        			}
+        			Rectangle r=item.getBounds();
+//        			System.out.println("animBounds="+animBounds.toString()+" item.getBounds()="+item.getBounds().toString());
+        			tree.redraw(
+        					animBounds.x+r.x+r.width,
+        					animBounds.y+r.y,
+        					animBounds.width,
+        					animBounds.height,true);
+        			animBusy.compareAndSet(true, false);
+        		}
+        	});
+        }
+        
         public Tool getTool() {
             return null;   
         }
@@ -191,6 +297,59 @@ public class DesignMenuModel {
                 return context;
             else
                 return null;
+        }
+        
+        public void measureItem (Event event){
+        	super.measureItem (event);
+        	boolean dirty=tool.isDirty();
+        	String iconName,key;
+        	if (tool.isRunning()){
+        		iconName=VDTPluginImages.ICON_TOOLSTATE_RUNNING;
+        		key=     VDTPluginImages.KEY_TOOLSTATE_RUNNING;
+
+        	} else {
+        		switch (tool.getState()){
+        		case NEW:
+        			iconName=VDTPluginImages.ICON_TOOLSTATE_NEW;
+        			key= VDTPluginImages.KEY_TOOLSTATE_NEW;
+        			break;
+        		case FAILURE:
+        			if (dirty){
+        				iconName=VDTPluginImages.ICON_TOOLSTATE_BAD_OLD;
+        				key= VDTPluginImages.KEY_TOOLSTATE_BAD_OLD;
+        			} else {
+        				iconName=VDTPluginImages.ICON_TOOLSTATE_BAD;
+        				key= VDTPluginImages.KEY_TOOLSTATE_BAD;
+        			}
+        			break;
+        		case SUCCESS:
+        			if (dirty){
+        				iconName=VDTPluginImages.ICON_TOOLSTATE_GOOD_OLD;
+        				key= VDTPluginImages.KEY_TOOLSTATE_GOOD_OLD;
+        			} else {
+        				iconName=VDTPluginImages.ICON_TOOLSTATE_GOOD;
+        				key= VDTPluginImages.KEY_TOOLSTATE_GOOD;
+        			}
+        			break;
+        		default:
+        			if (dirty){
+        				iconName=VDTPluginImages.ICON_TOOLSTATE_WTF_OLD;
+        				key= VDTPluginImages.KEY_TOOLSTATE_WTF_OLD;
+        			} else {
+        				iconName=VDTPluginImages.ICON_TOOLSTATE_WTF;
+        				key= VDTPluginImages.KEY_TOOLSTATE_WTF;
+        			}
+        		}
+        	}
+            key = Item.ICON_ID_PREFIX + key;
+            if (VDTPluginImages.getImage(key) == null){
+                VDTPluginImages.addImage(iconName, key, null);
+        	}
+        	super.imageKeyState=key;
+//        	System.out.println("iconName="+iconName+", key="+key+" imageKeyState="+super.imageKeyState);
+        	/*        	
+        */
+//TODO: Save tool state in memento        	
         }
     } // class ToolItem
 

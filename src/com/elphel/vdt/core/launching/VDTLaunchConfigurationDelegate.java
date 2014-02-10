@@ -103,6 +103,8 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
     	runConfig.setToolName(VDTLaunchUtil.getToolName(configuration));
     	runConfig.setPatternWarnings(VDTLaunchUtil.getPatternWarnings(configuration));
     	runConfig.setPatternInfo(VDTLaunchUtil.getPatternInfo(configuration));
+    	runConfig.setToolLogDir(VDTLaunchUtil.getToolLogDir(configuration));
+    	
     	runConfig.setToolProjectPath(VDTLaunchUtil.getToolProjectPath(configuration));
     	runConfig.setBuildStep(0);
     	List<String> controlFiles = VDTLaunchUtil.getControlFiles(configuration);
@@ -110,9 +112,16 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
 //        String consoleName=VDTRunner.renderProcessLabel(runConfig.getToolName());
     	
         String consoleName=runConfig.getOriginalConsoleName();
-        
         runner.getRunningBuilds().saveUnfinished(consoleName, runConfig );
-        runner.resumeLaunch(consoleName);
+        
+        String playBackStamp=VDTLaunchUtil.getLogBuildStamp(configuration); // got null
+        runConfig.setPlayBackStamp(playBackStamp); // null
+        
+        if (playBackStamp==null){
+        	runner.resumeLaunch(consoleName); // actual run of the tools
+        } else {
+        	runner.logPlaybackLaunch(consoleName); // tool logs playback with parsing
+        }
         return;
     }
 

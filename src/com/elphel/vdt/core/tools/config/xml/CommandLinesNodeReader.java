@@ -69,17 +69,27 @@ public class CommandLinesNodeReader extends AbstractConditionNodeReader {
         String stdout  =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_STDOUT_ATTR);
         String timeout =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_TIMEOUT_ATTR);
         
+        String success =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_SUCCESS_ATTR);
+        String failure =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_FAILURE_ATTR);
+        String s_keep_open =XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_KEEP_OPEN_ATTR);
+        String logPath =    XMLConfig.getAttributeValue(node, XMLConfig.CONTEXT_LINEBLOCK_LOGPATH_ATTR);
+
+        boolean keep_open=false;
+        
+        if(s_keep_open != null) {
+            XMLConfig.checkBoolAttr(s_keep_open, XMLConfig.CONTEXT_LINEBLOCK_KEEP_OPEN_ATTR);
+            keep_open = XMLConfig.getBoolAttrValue(s_keep_open);
+        }
+
         if(name == null)
             throw new ConfigException("Unnamed lines block definition in context '" +
                                       context.getName() + "' definition");
-        
         ConditionalStringsList lines = 
             config.readConditionalStringsNode(node, context, condition);        
         ConditionalStringsList deleteLines = 
             config.readDeleteStringsNode(node, context, condition);
         List<NamedConditionalStringsList> insertLines = 
             config.readInsertStringsNode(node, context, condition);
-        
         return new CommandLinesBlock(context.getName(), 
                                      name, 
                                      dest,
@@ -94,6 +104,10 @@ public class CommandLinesNodeReader extends AbstractConditionNodeReader {
                                      stderr,
                                      stdout,
                                      timeout,
+                                     success,
+                                     failure,
+                                     keep_open,
+                                     logPath,
                                      lines,
                                      deleteLines,
                                      insertLines);
