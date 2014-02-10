@@ -55,7 +55,9 @@
 		package="FPGA_package"
 		shell="/bin/bash"
 		ignore="%VivadoIgnoreSource"
-		description="Vivado Synthesis">
+		description="Vivado Synthesis"
+		log-dir="vivado_logs">
+		
 		<extensions-list>
 			<extension mask="v" />
 			<extension mask="tf" />
@@ -63,9 +65,9 @@
 
 		<action-menu>
 			<action label="Synthesize with Vivado:" resource="%ImplementationTopFile"
-			        check-extension="false" check-existence="true"  icon="xilinx.png" />
+			        check-extension="false" check-existence="true"  icon="Retort.png" />
 			<action label="Check by Vivado Synthesis:" resource="%%SelectedFile"
-			        check-extension="true" check-existence="true" icon="sample.gif" />
+			        check-extension="true" check-existence="true" icon="IconTestTube.png" />
 		</action-menu>
 		
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
@@ -255,8 +257,11 @@
 			      dest="VivadoConsole"
 			      mark="``" 
 			      sep=""
-			      prompt="@@FINISH@@" 
+			      prompt="@@FINISH@@"
+			      success="synth_design completed successfully"
+			      log=""
 			      stdout="parser_VivadoSynth">
+			      <!-- synth_design completed successfully -->
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      <if ResetProject="true"> 

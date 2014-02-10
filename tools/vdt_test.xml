@@ -8,7 +8,7 @@
 		interface="VDTTestInterface"
 		description="Testing VDT features"> 
 		<action-menu>
-			<action label="Test VDT" resource="" icon="sample.gif" />
+			<action label="Test VDT" resource="" icon="obj16/spinning.gif" />
 		</action-menu>
  
 		<parameter   id="file1" label="File1 (for list)" default=""

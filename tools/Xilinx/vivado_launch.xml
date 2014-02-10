@@ -7,28 +7,33 @@
 	    package="FPGA_package"
 		shell="/bin/bash" interface="VivadoInterface" description="Launching remote Xilinx Vivado in console"> 
 		<action-menu>
-			<action label="Launch Vivado" resource="" icon="xilinx.png" />
+			<action label="Launch Vivado" resource="" icon="door_in.png" />
 			<action label="Generate public key" resource="" icon="gnu.png" />
 			<action label="Setup connection to" resource="%RemoteUser@%RemoteHost"
 			check-extension="false" check-existence="false" icon="gnu.png" />
+			<action label="Launch shell on remote" resource="" icon="xilinx.png" />
 		</action-menu>
-<!-- 
-		<parameter   id="command" label="Command" default=""
-					type="String" format="CopyValue" visible="true" readonly="false"  />  -->
+ 
+		<parameter   id="command" label="Shell command" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />
 
 		<parameter   id="actionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
 		
 		<input>
 			<group name="General">
-<!-- 		"command" -->
- 			"RemoteCommand"
+ 				"RemoteCommand"
+			</group>
+			<group name="Shell">
+		- 		"command"
 			</group>
 		</input>
 
 		<output>
 			<if actionIndex="0">
-				<line name="Vivado">
+				<line name="Vivado"
+				      timeout="1"
+				      keep-open= "true">
 					"%ShellSwitches"
 					"%PreSSH"
 					"ssh"
@@ -50,6 +55,18 @@
 					"echo 'the remote server (currently set as %RemoteUser@%RemoteHost)';"
 					"exit 1; } ;"
 				</line>
+			<line name="vivado_check"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep=""
+			      success="Finished parsing RTL primitives"
+			      prompt="@@FINISH@@">
+<!--			      "cd ~/%VivadoProjectRoot\n"
+			      "set outputDir ~/%VivadoProjectRoot/build\n"-->
+				  "puts \"@@FINISH@@\"\n"
+			</line>
+				
+				
 			</if>
 			<if actionIndex="1">
 				<line name="Keygen">
@@ -91,6 +108,31 @@
 					"ssh-copy-id %RemoteUser@%RemoteHost;"
 				</line>
 			</if>
+			<if actionIndex="3">
+				<line name="Vivado">
+					"%ShellSwitches"
+					"%PreSSH"
+					"ssh"
+					"-oBatchMode=yes"
+					<if TerminalMode = "true">
+					  "-t -t"
+					</if>
+					"%SSHSwitches"
+					"-l"
+					"%RemoteUser"
+					"%RemoteHost"
+					"'"
+					"%command"
+					"'"
+					"%SSHExtra"
+					"|| { echo '*** ssh connection to the server %RemoteUser@%RemoteHost failed ***';"
+					"echo 'You may need to configure connection - it is done in \"Package Setup\"';"
+					"echo 'Then generate a public key (if it is not done already), and post it to';"
+					"echo 'the remote server (currently set as %RemoteUser@%RemoteHost)';"
+					"exit 1; } ;"
+				</line>
+			</if>
+			
 		</output>
 	</tool>
 </vdt-project>

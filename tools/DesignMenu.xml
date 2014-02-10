@@ -38,24 +38,25 @@
               
                 <menuitem name="CopyUnisims"
                           label="Copy Xilinx primitives library to the local project"
-                          icon="xilinx.png"
+                          icon="copy.png"
                           call="VivadoUnisims"/>
                 <menuitem name="Vivado Server"
                           label="Start remote Vivado session"
-                          icon="xilinx.png"
+                          icon="door_in.png"
                           call="Vivado"/>
+                <menuitem name="VivadoSynthesis"
+                          label="Synthesize design"
+                          icon="Retort.png"
+                          call="VivadoSynthesis"/>
+                <menuitem name="VivadoOptPlace"
+                          label="Optimize and place design"
+                          icon="mondrian2x2.png"
+                          call="VivadoOptPlace"/>
                 <menuitem name="Vivado Test"
                           label="Send a 'Hello World' command to the remote Vivado session"
                           icon="my_tool.gif"
                           call="VivadoTest"/>
-                <menuitem name="VivadoSynthesis"
-                          label="Synthesize design"
-                          icon="xilinx.png"
-                          call="VivadoSynthesis"/>
-                <menuitem name="VivadoOptPlace"
-                          label="Optimize and place design"
-                          icon="xilinx.png"
-                          call="VivadoOptPlace"/>
+                          
         </menu>
            <menuitem name="Test VDT"
              label="Testing some VDT features"

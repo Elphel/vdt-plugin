@@ -8,7 +8,7 @@
 		shell="/bin/bash"
 		description="Copy unisims library to the project directory">
 		<action-menu>
-			<action label="Copy unisims" resource="" icon="xilinx.png" />
+			<action label="Copy unisims" resource="" icon="door_in.png" />
 		</action-menu>
 		<input>
  			<group name="General">
