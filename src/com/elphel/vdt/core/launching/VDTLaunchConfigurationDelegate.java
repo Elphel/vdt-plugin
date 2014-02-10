@@ -120,6 +120,7 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         if (playBackStamp==null){
         	runner.resumeLaunch(consoleName); // actual run of the tools
         } else {
+        	runConfig.setBuildStep(-1); // to cause errors if will try to continue
         	runner.logPlaybackLaunch(consoleName); // tool logs playback with parsing
         }
         return;

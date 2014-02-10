@@ -55,8 +55,11 @@ public class ToolLogFile {
 	private IFile targetErrIFile;
 	private boolean hasOut;
 	private boolean hasErr;
-
 	private boolean singleFile;
+	private int errBytes;
+	private int outBytes;
+	
+	
 	private boolean debugPrint;
 	public static IFolder getDir(String logDir){
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
@@ -161,6 +164,8 @@ public class ToolLogFile {
 		targetErrIFile = singleFile? targetOutIFile : iLogFolder.getFile(baseNameErr+buildStampWithSep+ext);
 		
 		if (writeMode) {
+			outBytes=0; // jsut for debugging
+			errBytes=0;
 			byte [] emptyBA={};
 
 			IFile linkOutIFile=   iLogFolder.getFile(baseNameOut+ext);
@@ -249,6 +254,7 @@ public class ToolLogFile {
 		if (!hasOut ||(logOutWriter==null)) return; // do nothing
 		try {
 			logOutWriter.append(string);
+			errBytes+=string.length();
 //			if(debugPrint) System.out.println("out->out: "+string);
 
 		} catch (IOException e) {
@@ -263,6 +269,7 @@ public class ToolLogFile {
 		try {
 			if (singleFile) {
 				logOutWriter.append(string);
+				outBytes+=string.length();
 //				if(debugPrint) System.out.println("err->out: "+string);
 			} else {
 				logErrWriter.append(string);
@@ -278,20 +285,22 @@ public class ToolLogFile {
 	}
 
 	public void closeOut(){
-		if (logOutWriter!=null)
+		if (logOutWriter!=null) {
 			try {
 				logOutWriter.close();
-				if(debugPrint) System.out.println("closeOut()");
+				if(debugPrint) System.out.println("closeOut(), wrote "+outBytes+" bytes");
 			} catch (IOException e) {
 				System.out.println("Failed to close log file "+targetOutIFile.toString());
 			}
+
+		}
 	}
 
 	public void closeErr(){
 		if (logErrWriter!=null)
 			try {
 				logErrWriter.close();
-				if(debugPrint) System.out.println("closeErr()");
+				if(debugPrint) System.out.println("closeErr(), wrote "+errBytes+" bytes");
 			} catch (IOException e) {
 				System.out.println("Failed to close error log file "+targetErrIFile.toString());
 			}

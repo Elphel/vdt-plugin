@@ -306,7 +306,10 @@ public class VDTRunner {
 		
 		BuildParamsItem[] argumentsItemsArray = runConfig.getArgumentsItemsArray(); // uses already calculated
 		runConfig.canceTimers(); // If some timers were set, but a task finished earlier
-		int numItem=runConfig.getBuildStep();
+//		int numItem=runConfig.getBuildStep();
+		// made buildStep for logs negative (it does not need to sleep and does everything in one call)
+		// to catch stray resumes
+		int numItem=0; //runConfig.getBuildStep();
 		if (debugPrint) System.out.println("--------- re-playing log from "+ consoleName+", numItem="+numItem+" ------------");
 		ILaunch launch=runConfig.getLaunch();
 		IProgressMonitor monitor=runConfig.getMonitor();

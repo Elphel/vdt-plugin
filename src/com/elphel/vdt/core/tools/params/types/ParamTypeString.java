@@ -161,9 +161,9 @@ public class ParamTypeString extends ParamType {
     public String canonicalizeValue(String value) {
 // Try to convert file/dir parameters to project-relative
     	if ((kind == KIND.FILE) || (kind == KIND.FILE)) {
-    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.print("Converting \""+value+"\"to ");
+//    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.print("Converting \""+value+"\"to ");
     		value=tryProjectRelativePath(value);
-    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.println("\""+value+"\"");
+//    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.println("\""+value+"\"");
     	}
     	
         switch(caseSensitive) {

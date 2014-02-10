@@ -18,13 +18,17 @@
 package com.elphel.vdt.core.launching;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.IStreamListener;
+import org.eclipse.debug.core.model.IStreamMonitor;
 //import org.eclipse.debug.ui.console.IConsole;
 import org.eclipse.ui.console.IConsole;
 
@@ -45,6 +49,29 @@ import com.elphel.vdt.ui.MessageUI;
  */
 
 public class VDTRunnerConfiguration {
+	public class MonListener{
+		private IStreamMonitor monitor;
+		private IStreamListener listener;
+		public IStreamMonitor getMonitor() {
+			return monitor;
+		}
+		public IStreamListener getListener() {
+			return listener;
+		}
+		public MonListener(IStreamMonitor monitor, IStreamListener listener) {
+			super();
+			this.monitor = monitor;
+			this.listener = listener;
+		}
+		public void finalize() throws Throwable{
+			if ((monitor!=null) && (listener!=null)){
+				monitor.removeListener(listener);
+			}
+			monitor=null;
+			listener=null;
+			super.finalize();
+		}
+	}
 
 	private String   toolToLaunch;
 	private String   toolProjectPath;
@@ -83,10 +110,13 @@ public class VDTRunnerConfiguration {
     
     private String playBackStamp=null; // timestamp of the logs to play back ("" for latest), or
                                        // null for normal running tools
-    
-    
-    
     private Set<IConsole> consoles=null;  // parser consoles opened for this console
+    
+    private Map<IConsole,MonListener> parserListeners=null; // consoles mapped to pairs of monitors and listeners
+                                                            // that should be disconnected when parser is terminated
+    
+    
+    
 	private VDTConsoleRunner consoleRunner=null;
 	private VDTProgramRunner programRunner=null;
 	private VDTConsolePlayback consolePlayback=null;
@@ -127,11 +157,27 @@ public class VDTRunnerConfiguration {
 		
 		this.consoleBuffer="";
 		this.consoles= new HashSet<IConsole>();
+		this.parserListeners= new ConcurrentHashMap<IConsole,MonListener>();
 		this.consoleRunner= new VDTConsoleRunner(this); // arguments here?
 		this.programRunner=new VDTProgramRunner(); // arguments here?
 		this.consolePlayback=new VDTConsolePlayback(this);
-
 	}
+	public void addMonListener(IConsole parserConsole, IStreamMonitor monitor, IStreamListener listener){
+		parserListeners.put(parserConsole, new MonListener(monitor, listener));
+	}
+	public void removeMonListener(IConsole parserConsole){
+		MonListener monListener=parserListeners.remove(parserConsole);
+		if (monListener!=null){
+			try {
+				monListener.finalize();
+			} catch (Throwable e) {
+				System.out.println("Failed to finalize monListener for console "+parserConsole.getName());
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
 	
 	public void setPlayBackStamp(String str){
 		playBackStamp=str;
@@ -152,12 +198,16 @@ public class VDTRunnerConfiguration {
 		return this.programRunner;
 	}
 	
-	public void addConsole(IConsole console){
+	public void addConsole(IConsole console){ // not used
 		consoles.add(console);
 	}
-	public void removeConsole(IConsole console){
+	public void removeConsole(IConsole console){ // from VDTRunnerConfiguration
 		consoles.remove(console);
 	}
+	//TODO: add Map<IConsole,
+	
+	
+	
 	public boolean noConsoles(){
 		return consoles.isEmpty();
 	}

@@ -23,13 +23,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.IStreamListener;
 import org.eclipse.debug.core.model.IProcess;
-
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy2;
 import org.eclipse.swt.graphics.Color;
@@ -52,8 +52,9 @@ public class VDTConsoleRunner{
 	private IProcess processErr=null; //*
 	private IProcess processOut=null; //*
 	private IStreamsProxy2 sendErrorsToStreamProxy=null;
-	private Object errorListener=null; //+
-	private Object outputListener=null; //+
+//	private Object errorListener=null; //+
+	private IStreamListener errorListener=null; //+
+	private IStreamListener outputListener=null; //+
     private IStreamsProxy2 consoleInStreamProxy= null; //+
     private Timer timer;
     private IStreamsProxy2 stdoutStreamProxy=null;
@@ -236,12 +237,15 @@ public class VDTConsoleRunner{
         		if (runConfig.addConsoleText(text)){
         			if (debugPrint)  System.out.println("Got finish sequence");
         			// TODO: launch continuation of the build process
-        			finishConsolescript();
+        			finishConsolescript(); // got here when computer running Vivado was disconnected
         		}
         	}
         };
-        consoleErrStreamMonitor.addListener((IStreamListener) errorListener);       		
-        //      	}
+        VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated
+        		DebugUITools.getConsole(processErr), //IConsole parserConsole,
+        		consoleErrStreamMonitor,
+        		errorListener);
+        consoleErrStreamMonitor.addListener(errorListener);
         outputListener=null;
         //        if (fSendOutputToStreamProxy!=null){
         consoleOutStreamMonitor=consoleInStreamProxy.getOutputStreamMonitor();
@@ -264,7 +268,11 @@ public class VDTConsoleRunner{
         		}
         	}
         };
-        consoleOutStreamMonitor.addListener((IStreamListener) outputListener );
+        VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated
+        		DebugUITools.getConsole(processOut), //IConsole parserConsole,
+        		consoleOutStreamMonitor,
+        		outputListener);
+        consoleOutStreamMonitor.addListener(outputListener );
         //       }
         //Problems occurred when invoking code from plug-in: "org.eclipse.ui.console".
         //Exception occurred during console property change notification.
@@ -303,6 +311,15 @@ public class VDTConsoleRunner{
     public void finishConsolescript() {
         final boolean debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
     	if (debugPrint) System.out.println("finishConsolescript()");
+		String playBackStamp=runConfig.getPlayBackStamp();
+		if (playBackStamp!=null){
+			// happened when Vivaod console was disconnected with old console listener still attached
+			// they should be removed when a parser process is terminated
+			
+			
+			System.out.println("Wrong, it should be playback, not run, as playBackStamp = "+playBackStamp+ "(not null)");
+			return;
+		}
 		if (timer!=null){
 			timer.cancel();
 		}
@@ -316,11 +333,11 @@ public class VDTConsoleRunner{
     	}
     	if (errorListener !=null) { // disconnect error stream listener
     		IStreamMonitor consoleErrorStreamMonitor=consoleInStreamProxy.getOutputStreamMonitor();
-    		consoleErrorStreamMonitor.removeListener((IStreamListener) errorListener);
+    		consoleErrorStreamMonitor.removeListener(errorListener);
     	}
     	if (outputListener !=null) { // disconnect output stream listener
     		IStreamMonitor consoleOutStreamMonitor=consoleInStreamProxy.getOutputStreamMonitor();
-    		consoleOutStreamMonitor.removeListener((IStreamListener) outputListener);
+    		consoleOutStreamMonitor.removeListener(outputListener);
     	}
     	// terminate parser(s). Do those console listeners (parsers) have to be removed too?
     	// TODO: Maybe wait for the process (small time) to terminate by disconnecting it's stdin
@@ -330,6 +347,12 @@ public class VDTConsoleRunner{
     	
     	if (stderrStreamProxy!=null){
     		try {
+            	// Checked that all is sent through write() method, by end of data is often lost when calling closeInputStream() too soon AFTER
+            	if(debugPrint) System.out.println("mitigating possible closeInputStream() bug - sleeping "+VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY+" ms");
+            	try {
+					Thread.sleep(VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY);
+				} catch (InterruptedException e) {
+				}
     			stderrStreamProxy.closeInputStream();
 			} catch (IOException e) {
 				System.out.println("Failed to disconnect stdin of the processErr parser process");
@@ -344,6 +367,12 @@ public class VDTConsoleRunner{
     	}
     	if (stdoutStreamProxy!=null){
     		try {
+            	// Checked that all is sent through write() method, by end of data is often lost when calling closeInputStream() too soon AFTER
+            	if(debugPrint) System.out.println("mitigating possible closeInputStream() bug - sleeping "+VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY+" ms");
+            	try {
+					Thread.sleep(VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY);
+				} catch (InterruptedException e) {
+				}
     			stdoutStreamProxy.closeInputStream();
 			} catch (IOException e) {
 				System.out.println("Failed to disconnect stdin of the processOut parser process");

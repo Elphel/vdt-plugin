@@ -17,6 +17,8 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.variables;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Stack;
 
 import com.elphel.vdt.VerilogUtils;
@@ -68,7 +70,8 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     private String fChosenShort=null; // last segment of the chosen resource name
     private IResource fChosenVerilogFile = null; // to keep fSelectedVerilogFile
     private int fChosenAction=0; // Chosen variant of running the tool
-    private long timestamp=0;
+//    private long timestamp=0;
+    private String timestamp;
     private String ignoreFilter=null;
 //    private Tool selectedTool=null; // last selected tool
  //   
@@ -273,12 +276,15 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     }
     
     public String setBuildStamp(){
-    	timestamp=System.nanoTime();
+//    	timestamp=System.nanoTime();
+    	//String fileName = new SimpleDateFormat("yyyyMMddHHmmssSSS'.txt'").format(new Date()));
+    	timestamp= new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
     	return getBuildStamp();
     }
 
     public String getBuildStamp(){
-    	return ""+timestamp;
+    	
+    	return timestamp;
     }
     
     

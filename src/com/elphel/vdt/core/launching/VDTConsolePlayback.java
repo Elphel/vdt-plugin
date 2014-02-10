@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy2;
-import org.eclipse.swt.widgets.Display;
 
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.veditor.VerilogPlugin;
@@ -179,10 +178,12 @@ public class VDTConsolePlayback{
         // Read logs should be fast, not sure how much will be buffered in IStreamsProxy2, so sending logs
         // one after another in the same thread
         if (errBufReader!=null){
+        	int dbgBytes=0;
         	String line;
         	try {
         		while ((line = errBufReader.readLine()) != null){
         			fSendErrorsToStreamProxy.write(line+"\n");
+        			dbgBytes+=line.length()+1;
         			//if(debugPrint) System.out.println ("err->>"+line);
 
         		}
@@ -191,45 +192,58 @@ public class VDTConsolePlayback{
         	} finally {
         		try {
 					errBufReader.close();
-//					if(debugPrint) System.out.println ("err->>CLOSED");
+					if(debugPrint) System.out.println ("err->>CLOSED, got "+dbgBytes+" bytes");
 				} catch (IOException e) {
 	        		System.out.println ("Failed to close "+errLogName+" BufferedReader");
 				}
         	}
         }
         
-        
         if (outBufReader!=null){
+        	int dbgBytes=0;
         	String line;
         	try {
         		while ((line = outBufReader.readLine()) != null){
         			fSendOutputToStreamProxy.write(line+"\n");
-//        			if(debugPrint) System.out.println ("out->>"+line);
+        			dbgBytes+=line.length()+1;
+ //       			if(debugPrint) System.out.println ("out->>"+line);
         		}
         	} catch (IOException e) {
         		System.out.println ("Failed to replay "+outLogName+" to output parser");
         	} finally {
         		try {
 					outBufReader.close();
-//					if(debugPrint) System.out.println ("out->>CLOSED");
+					if(debugPrint) System.out.println ("out->>CLOSED, got "+dbgBytes+" bytes"); // bytes OK, always the same
 				} catch (IOException e) {
 	        		System.out.println ("Failed to close "+outLogName+" BufferedReader");
 				}
         	}
         }
-        
-        try {
-        	if (stdoutStreamProxy!=null) stdoutStreamProxy.closeInputStream();
+
+        if (stdoutStreamProxy!=null) try {
+        	// Checked that all is sent through write() method, by end of data is often lost when calling closeInputStream() too soon AFTER
+        	// Less visible when the source is doing something, more - here, when it is just a play back
+        	if(debugPrint) System.out.println("mitigating possible closeInputStream() bug - sleeping "+VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY+" ms");
+        	Thread.sleep(VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY);
+        	stdoutStreamProxy.closeInputStream();
+//        	System.out.println ("closed output stream proxy");
         } catch (IOException e){
         	System.out.println ("Failed to close output stream proxy");
-        }
+        } catch (InterruptedException e) {
+		}
         // next uses stderrStreamProxy, not fSendErrorsToStreamProxy as it can be the same as fSendOutputToStreamProxy
-        try {
-        	if (stderrStreamProxy!=null) stderrStreamProxy.closeInputStream(); 
+        if (stderrStreamProxy!=null) try {
+        	if(debugPrint) System.out.println("mitigating possible closeInputStream() bug - sleeping "+VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY+" ms");
+        	Thread.sleep(VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY);
+        	stderrStreamProxy.closeInputStream(); 
+        	System.out.println ("closed error stream proxy"); // ???
         } catch (IOException e){
         	System.out.println ("Failed to close error stream proxy");
-        }
-         return true;
+        } catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+        return true;
 	}
     
     

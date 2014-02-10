@@ -59,6 +59,7 @@ import com.elphel.vdt.ui.MessageUI;
  */
 
 public class VDTLaunchUtil {
+	public final static int CLOSE_INPUT_STREAM_DELAY = 1000; // ms
     private static VDTRunner toolRunner;
 
     /**

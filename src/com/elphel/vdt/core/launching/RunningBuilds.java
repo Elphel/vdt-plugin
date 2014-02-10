@@ -20,17 +20,49 @@ package com.elphel.vdt.core.launching;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.eclipse.debug.core.IStreamListener;
+import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
+
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
+
 import org.eclipse.ui.console.IConsoleListener;
 
 public class RunningBuilds {
+	public class MonListener{
+		private IStreamMonitor monitor;
+		private IStreamListener listener;
+		public IStreamMonitor getMonitor() {
+			return monitor;
+		}
+		public IStreamListener getListener() {
+			return listener;
+		}
+		public MonListener(IStreamMonitor monitor, IStreamListener listener) {
+			super();
+			this.monitor = monitor;
+			this.listener = listener;
+		}
+		public void finalize() throws Throwable{
+			if ((monitor!=null) && (listener!=null)){
+				monitor.removeListener(listener);
+			}
+			monitor=null;
+			listener=null;
+			super.finalize();
+		}
+	}
+    private Map<IConsole,MonListener> parserListeners=null; // consoles mapped to pairs of monitors and listeners
+                                                            // that should be disconnected when parser is terminated
+
 //	int nextBuildStep=0;
 	private final Map<String, VDTRunnerConfiguration> unfinishedBuilds;
 	public RunningBuilds(){
+		parserListeners= new ConcurrentHashMap<IConsole,MonListener>();
 		unfinishedBuilds = new ConcurrentHashMap<String, VDTRunnerConfiguration>();
 		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
 // This is not used, just for testing
@@ -52,10 +84,30 @@ public class RunningBuilds {
 						System.out.println("--- Removed: "+consoles[i].getName());
 					}
 					//					unfinishedBuilds.remove(consoles[i]);
+					removeMonListener(consoles[i]); // remove listeners that provided input data for parsers
 					removeConsole(consoles[i]);
 				}
 			}
 		});
+		
+	}
+	
+	public void addMonListener(IConsole parserConsole, IStreamMonitor monitor, IStreamListener listener){
+		parserListeners.put(parserConsole, new MonListener(monitor, listener));
+	}
+	private void removeMonListener(IConsole parserConsole){
+		MonListener monListener=parserListeners.remove(parserConsole);
+		if (monListener!=null){
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+				System.out.println("--- Removing listener from the terminated parser console "+parserConsole.getName());
+			}
+			try {
+				monListener.finalize();
+			} catch (Throwable e) {
+				System.out.println("Failed to finalize monListener for console "+parserConsole.getName());
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public String findConsoleParent(IConsole console){
