@@ -22,6 +22,10 @@
       <paramtype kind="bool" formatTrue="On" formatFalse="Off" />
     </typedef>
 
+    <typedef name = "Bool_on_off">
+      <paramtype kind="bool" formatTrue="on" formatFalse="off" />
+    </typedef>
+
     <typedef name = "Cardinal">
       <paramtype kind="number" lo="0" hi="65535" format="%d" />
     </typedef>
@@ -82,12 +86,14 @@
     </typedef>
 
 <!-- Syntax definitions -->
-    <syntax name="None"      format="" />
-    <syntax name="CopyValue" format="%%ParamValue" />
-	<syntax name="ParamListSyntax" format="%(%%ParamValue%| %)" />
-	<syntax name="Dash"      format=" -%%ParamName %%ParamValue" />
-	<syntax name="DashList"  format=" -%%ParamName %(-s%%ParamValue%| %)" />
-	<syntax name="DashName"  format=" -%%ParamName" />
+    <syntax name="None"                format="" />
+    <syntax name="CopyValue"           format="%%ParamValue" />
+	<syntax name="ParamListSyntax"     format="%(%%ParamValue%| %)" />
+	<syntax name="Dash"                format=" -%%ParamName %%ParamValue" />
+<!-- <syntax name="DashList"  format=" -%%ParamName %(-s%%ParamValue%| %)" /> -->
+	<syntax name="DashListIndividual"  format="%(-%%ParamName %%ParamValue%| %)" />
+	<syntax name="DashListCommon"      format="-%%ParamName %(%%ParamValue%| %)" />
+	<syntax name="DashName"            format=" -%%ParamName" />
 
   </interface>
 

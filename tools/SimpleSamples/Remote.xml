@@ -43,6 +43,9 @@
 
 		<parameter id="SSHExtra" label="ssh extra parameters" type="String"
 			format="CopyValue" default="" readonly="false" visible="true" />
+			
+		<parameter id="PythonConsole" default="RemotePython" type="String" format="CopyValue" visible="false"/>
+			
 
 		<input>
 			<group name="General">
@@ -59,7 +62,8 @@
 
 		<output>
 			<line name="command_line"
-			      interrupt="\x03">
+			      timeout="1"
+				  keep-open= "true">
 				"%ShellSwitches"
 				"%PreSSH"
 				"ssh"
@@ -75,6 +79,16 @@
 				"'"
 				"%SSHExtra"
 			</line>
+			<line name="python_check"
+			      dest="PythonConsole"
+			      mark="``" 
+			      sep=""
+			      success="FINISH"
+			      prompt="@@FINISH@@">
+				  "print (\"********\")\n"
+				  "print (\"@@FINISH@@\")\n\n"
+			</line>
+			
 		</output>
 	</tool>
 	<tool name="RemotePythonCommand" project="FPGA_project" label="RemotePythonCommand"
@@ -125,6 +139,7 @@
 			      sep="\n"
 			      prompt="@@FINISH@@" 
 			      stdout="parser_001"
+			      success="FINISH"
 			      timeout="Timeout">
 				"%RemoteCommand"
 				"print  '@@FINISH@@'"

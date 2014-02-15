@@ -126,6 +126,12 @@
 	        default="%%ProjectName-opt-pace.dcp"
 			type="String" format="CopyValue" />
 
+
+	 	    <parameter id="SnapshotRoute"
+	        label="Routing snapshot" tooltip="Name of Vivado snapshot archive after routing"
+	        default="%%ProjectName-route.dcp"
+			type="String" format="CopyValue" />
+
  				"" <!--  same as in project -->
 
 
@@ -156,6 +162,7 @@
 			<group name="VivadoSnapshots" label="Vivado snapshot archive names">
 				"SnapshotSynth"
 				"SnapshotOptPlace"
+				"SnapshotRoute"
 			</group>
 		</input>
 		<output>

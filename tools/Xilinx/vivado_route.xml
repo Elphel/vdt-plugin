@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="VivadoRouteInterface" extends="VivadoInterface">
+	    <typedef name="RouteDirectiveType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "Explore"                label="Allows the Vivado router to explore different critical path routes after an initial route."/>
+      			<item value= "NoTimingRelaxation"     label="Prevents the router from relaxing timing to complete routing."/>
+      			<item value= "MoreGlobalIterations"   label="Uses detailed timing analysis throughout all stages instead of just the final stages."/>
+      			<item value= "HigherDelayCost"        label="Adjusts the router's internal cost functions to emphasize delay over iterations."/>
+      			<item value= "AdvancedSkewModeling"   label="Uses more accurate skew modeling throughout all routing stages."/>
+      			<item value= "RuntimeOptimized"       label="Run fewest iterations, trade higher design performance for faster run time"/>
+      			<item value= "Quick "                 label="Fastest runtime, non-timing-driven, performs the minimum required placement for the design."/>
+      			<item value= "Default"                label="Run the default routing."/>
+      		</paramtype>
+    	</typedef>
+	</interface>
+
+	<tool name="VivadoRoute" label="Route design"
+	    project="FPGA_project"
+		interface="VivadoRouteInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Route design with Vivado"
+		log-dir="vivado_logs">
+		<action-menu>
+			<action label="Route" resource="" icon="route66.png" />
+		</action-menu>
+		<parameter id="FromMemoryRouting" label="Run from memory" tooltip="Do not load snapshot created after placement" 
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipPreRoute" label="Skip pre-route" tooltip="Do not run pre route TCL commands"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipSnapshotRoute" label="Skip snapshot save" tooltip="Do not create snapshot after route"
+		           default="false" type= "Boolean" format="None"/>
+
+<!--   left from synthesis, may need update--> 
+		<parameter id="ShowWarnings" label="Parse warnings" tooltip="Parse warning messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+		<parameter id="ShowInfo" label="Parse info" tooltip="Parse info messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+        <parameter id="PreGrepW" visible="false"
+                   type="String" format="None"
+                   default="?%ShowWarnings=true: |WARNING, "/>
+        <parameter id="PreGrepI" visible="false"
+                   type="String" format="None"
+                   default="?%ShowInfo=true: |INFO, "/>
+        <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
+                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
+                   type="String" format="CopyValue"
+                   visible="true" readonly="true"/>
+                   
+		<parameter id="PreRouteTCL" label="Pre-route TCL commands" tooltip="TCL commands to run before route_design"
+			type="Stringlist" format="ProgramSyntax" default="" omit=""
+			readonly="false" visible="true" />
+                   
+  
+<!-- route_design arguments -->
+        <!-- No support yet for "-cells" to limit placement to selected cells. Will require multiple runs with
+        different settings. Can probably create several pages of parameters alternatives for that purpose
+        and then run "placement - alt1", "placement - alt2", ... -->
+        <parameter 	id="directive_route"  outid="directive" label="Directive" tooltip= "Direct routing to achieve specific design objectives"
+        			default="Default" visible="true" omit="Default" type="RouteDirectiveType" format="Dash"/>
+        <parameter 	id="unroute" label="Unroute" tooltip= "Unroute all nets (specific nets unroute not supported."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="re_entrant" label="Re-entrant mode" tooltip= "When on - preserve routing data after finishing routing to speed-up next passes."
+        			default="false" visible="true" omit="false" type="Bool_on_off" format="Dash"/>
+        <parameter 	id="physical_nets" label="Physical nets only" tooltip= "Route/unroute only logical '1'/logical '0' nets. Note: The -re_entrant, -nets, -physical_nets, and -pin options are mutually exclusive."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+<!-- Note: Vivado get_nets command output can be redirected to a file and then used as default for the parameter -->
+        <parameter 	id="nets" label="Nets to priocess" tooltip= "Route/unroute only the specified nets. Note: The -re_entrant, -nets, -physical_nets, and -pin options are mutually exclusive."
+        			default="" visible="true" omit="" type="Stringlist" format="DashListCommon"/>
+        <parameter 	id="pin" label="To pin only" tooltip= "Route/unroute only the specified pin. Note: The -re_entrant, -nets, -physical_nets, and -pin options are mutually exclusive."
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter 	id="delay" label="Use timing constraints" tooltip= "Use timing constraints when -nets or -pin options are selected (otherwise they are ignored)"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="max_delay" label="Max delay to pin (ps)" tooltip= "With -pin only. Target maximal delay to the specified pin (-delay option is implied). "
+        			default="" visible="true" omit="" type="Cardinal" format="Dash"/>
+        <parameter 	id="min_delay" label="Min delay to pin (ps)" tooltip= "With -pin only. Target minimal delay to the specified pin (-delay option is implied). "
+        			default="" visible="true" omit="" type="Cardinal" format="Dash"/>
+        <parameter 	id="no_timing_driven_routing" outid="no_timing_driven" label="No timing-driven" tooltip= "Disables the default timing driven routing algorithm."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="preserve" label="Preserve routing" tooltip= "Preserve routing for the current routing session (no rip-up and reroute phase)"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="free_resource_mode" label="Do not overlap " tooltip= "Do not overlap routing resources at early stages of routing (before final resolution)."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="quiet_route" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="verbose_route" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+
+<!-- parser parameters -->
+        <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
+        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
+        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
+        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
+        			default="true" visible="true" omit="false" type="Boolean" format="None"/>
+<!--  TODO: change to router-specific problems -->        			
+        			
+        <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Vivado_Tcl" label="Vivado_Tcl"  tooltip= "Enable problems with [Vivado_Tcl to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Route"     label="Route" tooltip= "Enable problems with [Route to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        			
+<!-- Other patterns copied from other commands, maybe not applicablwe here -->        			
+        			
+        <parameter	id="Memdata"   label="Memdata" tooltip= "Enable problems with [Memdata to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Netlist"   label="Netlist" tooltip= "Enable problems with [Netlist to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Opt"       label="Opt"     tooltip= "Enable problems with [Opt to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Project"   label="Project" tooltip= "Enable problems with [Project to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Timing"    label="Timing"  tooltip= "Enable problems with [Timing to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Pwropt"    label="Pwropt"  tooltip= "Enable problems with [Pwropt to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
+        			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
+
+
+<!-- hidden (calculated) parameters -->
+<!--  not really used now, always "0" -->			
+			   	   <parameter   id="VivadoRouteActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+			
+		<input>
+			<group name="General">
+				"FromMemoryRouting"
+				"SkipPreRoute"
+				"SkipSnapshotRoute"
+ 				"SnapshotRoute" <!--  same as in project -->
+				"ShowWarnings"
+				"ShowInfo"
+				"GrepEWI"
+			</group>
+			<group name="Pre-routing commands">
+		        "PreRouteTCL"
+			</group>
+			<group name="Routing">
+       			"directive_route"
+       			"---"
+       			"unroute"
+       			"re_entrant"
+       			"physical_nets"
+       			"nets"
+       			"pin"
+       			"delay"
+       			"max_delay"
+       			"min_delay"
+       			"no_timing_driven_routing"
+       			"preserve"
+       			"free_resource_mode"
+       			"---"
+       			"quiet_route"
+               	"verbose_route"
+			</group>
+			<group name="Parser">
+				"NoFileProblem"
+		        "Drc"
+		        "Vivado_Tcl"
+				"Route"
+				"---"
+				"Memdata"
+		        "Netlist"
+		        "Opt"
+		        "Project"
+		        "Timing"
+		        "Pwropt"
+		        "OtherProblems"
+				"---"
+				"PatternErrors"
+				"PatternWarnings"
+ 				"PatternInfo"
+			</group>
+			
+		</input>
+
+		<output>
+		<!-- mkdir -p vdt/npmtest-->
+		<!-- Now skipping completely pre_opt copying - maybe some will still be needed (custom tcl scripts), then move conditional inside block -->
+		<if FromMemoryRouting = "false">
+			<line name="vivado_copy_pre_opt">
+				"-c"
+				<!-- Create project directory on remote server if it did not exist -->
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%VivadoProjectRoot"
+				"' ;"
+				<!-- Copy snapshot generated after opt/place from local to remote -->
+				"rsync -avrR -e ssh"
+				<!--  from: -->
+				"%VivadoLocalDir/%SnapshotOptPlace"
+				<!-- to: -->
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				";"
+			</line>
+		</if>	
+<!-- Set sep="", so all new lines should be specified as \n -->
+			<line name="vivado_run_route"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep=""
+			      prompt="@@FINISH@@"
+			      success="route_design completed successfully"
+			      log=""
+			      stdout="parser_VivadoRoute">
+			      "cd ~/%VivadoProjectRoot\n"
+			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "file mkdir $outputDir\n"
+			      <!-- Start fresh from the loaded checkpoint -->
+		          <if FromMemoryRouting = "false">
+		          		"open_checkpoint %SnapshotOptPlace\n"
+		          </if>
+		          <!-- Run pre-route TCL commands (if specified) -->
+			      <if SkipPreRoute="false">
+				      <if-not PreRouteTCL="">
+				      		"%PreRouteTCL\n"
+				      </if-not>
+				      <if PreRouteTCL="">
+				      		"puts \"No pre-route TCL commands specified\"\n"'
+				      </if>
+			      </if>
+			      <!-- Run routing -->
+			      "route_design"
+			      "%directive_route"
+			      "%unroute"
+			      "%re_entrant"
+			      "%physical_nets"
+			      "%nets"
+			      "%pin"
+			      "%delay"
+			      "%max_delay"
+			      "%min_delay"
+			      "%no_timing_driven_routing"
+			      "%preserve"
+			      "%free_resource_mode"
+			      "%quiet_route"
+			      "%verbose_route"
+			      "\n"
+			      <if SkipSnapshotRoute="false">
+				      	"write_checkpoint -force %SnapshotRoute\n"
+			      </if>
+				"puts \"@@FINISH@@\"\n"
+			</line>
+<!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
+			<if-and SkipSnapshotRoute="false"
+			        VivadoRouteActionIndex="0">
+				<line name="vivado_copy_after_route">
+					"-c"
+					"mkdir -p %VivadoLocalDir ;"
+					"rsync -avr -e ssh"
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotRoute"
+					"%VivadoLocalDir/"
+				</line>
+	        </if-and>
+			<line name="parser_VivadoRoute"
+				errors=   "PatternErrors"
+				warnings= "PatternWarnings"
+				info=     "PatternInfo">
+				"-c"
+     			"%GrepEWI"
+     			"| %SedPaths"
+     			<if NoBabyTalk="true">
+     				"| grep --line-buffered -v \"license\""
+     			</if>
+     			"%Drc"
+		        "%Vivado_Tcl"
+		        "%Route"
+     			"%Memdata"
+		        "%Netlist"
+		        "%Opt"
+		        "%Project"
+		        "%Timing"
+		        "%Pwropt"
+		        "%OtherProblems"
+		        <!-- TODO: change Placement to Routing? or such -->
+     			<if NoFileProblem="true">
+	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Routing:0000\]@'"
+     			</if>
+			</line>
+		</output>
+	</tool>
+</vdt-project>

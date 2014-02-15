@@ -110,11 +110,11 @@
         <parameter	id="constrset"        label="Constraints set" tooltip= "Constraints set to use"
        				 default="" visible="true" omit="" type="String" format="Dash"/>
         <parameter	id="include_dirs"     label="Include directory" tooltip= "Include directories for Verilog `include"
-        			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
         <parameter	id="generic"          label="VHDL/Verilog parameters" tooltip= '"name=value" list of VHDL generic entity or Verilog parameter'
-        			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
         <parameter	id="verilog_define"   label="Verilog defines" tooltip= 'Verilog "macro=text" definitions'
-        			default="" visible="true" omit="" type="Stringlist" format="DashList"/>
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
         <parameter	id="flatten_hierarchy" label="Flatten hierarchy" tooltip= "Flatten Hierarchy during LUT mapping"
         			default="rebuilt" visible="true" omit="rebuilt" type="FlattenHierarchyType" format="Dash"/>
         <parameter	id="gated_clock_conversion" label="Gated clock conversion" tooltip= "Conversion of gated clocks to FF CE where possible"

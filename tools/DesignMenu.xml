@@ -52,6 +52,10 @@
                           label="Optimize and place design"
                           icon="mondrian2x2.png"
                           call="VivadoOptPlace"/>
+                <menuitem name="VivadoRoute"
+                          label="Route design"
+                          icon="route66.png"
+                          call="VivadoRoute"/>
                 <menuitem name="Vivado Test"
                           label="Send a 'Hello World' command to the remote Vivado session"
                           icon="my_tool.gif"

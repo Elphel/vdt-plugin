@@ -405,7 +405,7 @@
 <!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
 			<if-and SkipSnapshotPlace="false"
 			        VivadoOptPlaceActionIndex="0">
-				<line name="vivado_copy_after_synth">
+				<line name="vivado_copy_after_opt_place">
 					"-c"
 					"mkdir -p %VivadoLocalDir ;"
 					"rsync -avr -e ssh"
