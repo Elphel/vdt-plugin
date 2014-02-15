@@ -331,6 +331,10 @@ public class DesignMenuModel {
         				key= VDTPluginImages.KEY_TOOLSTATE_GOOD;
         			}
         			break;
+        		case KEPT_OPEN:
+        				iconName=VDTPluginImages.ICON_TOOLSTATE_KEPT_OPEN;
+        				key= VDTPluginImages.KEY_TOOLSTATE_KEPT_OPEN;
+        			break;
         		default:
         			if (dirty){
         				iconName=VDTPluginImages.ICON_TOOLSTATE_WTF_OLD;

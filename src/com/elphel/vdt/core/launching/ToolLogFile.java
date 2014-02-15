@@ -277,33 +277,35 @@ public class ToolLogFile {
 			}
 		} catch (IOException e) {
 			System.out.println("Failed to append error log file "+
-		   (singleFile?targetOutIFile:targetErrIFile).toString());
+		   (singleFile?targetOutIFile:targetErrIFile).toString()+" string was:"+string);
 			if (singleFile) closeOut();
 			else  closeErr();
 //			close();
 		}
 	}
 
-	public void closeOut(){
-		if (logOutWriter!=null) {
+	public void closeOut(){ // should be called first
+		if ((logOutWriter!=null) && ((logErrWriter==null) || (logErrWriter==logOutWriter))) {
 			try {
 				logOutWriter.close();
 				if(debugPrint) System.out.println("closeOut(), wrote "+outBytes+" bytes");
 			} catch (IOException e) {
 				System.out.println("Failed to close log file "+targetOutIFile.toString());
 			}
-
+			logOutWriter=null;
 		}
 	}
 
 	public void closeErr(){
-		if (logErrWriter!=null)
+		if (logErrWriter!=null) {
 			try {
 				logErrWriter.close();
 				if(debugPrint) System.out.println("closeErr(), wrote "+errBytes+" bytes");
 			} catch (IOException e) {
 				System.out.println("Failed to close error log file "+targetErrIFile.toString());
 			}
+			logErrWriter=null;
+		}
 	}
 	
 	public FileReader getOutReader(){

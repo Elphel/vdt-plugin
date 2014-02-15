@@ -92,7 +92,7 @@ public class VDTConsoleRunner{
 		String playBackStamp=runConfig.getPlayBackStamp();
 		if (playBackStamp!=null){
 			System.out.println("Wrong, it should be playback, not run, as playBackStamp = "+playBackStamp+ "(not null)");
-			return null;
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
 		}
 		
 		
@@ -113,14 +113,7 @@ public class VDTConsoleRunner{
 		}
 		if (iCons==null) {
 			MessageUI.error("Specified console: "+consolePrefix+" is not found (was looking for \""+consoleStartsWith+"\"");
-	    	Tool tool=ToolsCore.getTool(runConfig.getToolName());
-    		tool.setDirty(false);
-    		tool.setState(TOOL_STATE.FAILURE);
-    		tool.setRunning(false);
-    		tool.setFinishTimeStamp();
-    		tool.updateViewStateIcon();
-    		//removeConfiguration
-    		VDTLaunchUtil.getRunner().getRunningBuilds().removeConfiguration(runConfig.getOriginalConsoleName());
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
 			return null;
 		}
 		// try to send 
@@ -189,8 +182,6 @@ public class VDTConsoleRunner{
         final IStreamsProxy2 fSendOutputToStreamProxy= stdoutStreamProxy;
 
 // connect input streams of the parsers to the out from the console process         
-        IStreamMonitor consoleOutStreamMonitor=null;
-        IStreamMonitor consoleErrStreamMonitor=null;
         runConfig.resetConsoleText();
         String interrupt=buildParamsItem.getInterrupt(); // Not yet used
         runConfig.setConsoleFinish(buildParamsItem.getPrompt());
@@ -220,7 +211,8 @@ public class VDTConsoleRunner{
         //final ToolLogFile fToolLogFile=toolLogFile;	
         //errorListener=null;
         //        if (fSendErrorsToStreamProxy!=null){
-        consoleErrStreamMonitor=consoleInStreamProxy.getErrorStreamMonitor();
+
+        final IStreamMonitor consoleErrStreamMonitor=consoleInStreamProxy.getErrorStreamMonitor();
         errorListener=new IStreamListener(){
         	public void streamAppended(String text, IStreamMonitor monitor){
         		if (fSendErrorsToStreamProxy!=null) {
@@ -236,19 +228,19 @@ public class VDTConsoleRunner{
         		}
         		if (runConfig.addConsoleText(text)){
         			if (debugPrint)  System.out.println("Got finish sequence");
-        			// TODO: launch continuation of the build process
+        			consoleErrStreamMonitor.removeListener(errorListener);
         			finishConsolescript(); // got here when computer running Vivado was disconnected
         		}
         	}
         };
-        VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated
+        if (processErr!=null) VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated
         		DebugUITools.getConsole(processErr), //IConsole parserConsole,
         		consoleErrStreamMonitor,
         		errorListener);
         consoleErrStreamMonitor.addListener(errorListener);
         outputListener=null;
         //        if (fSendOutputToStreamProxy!=null){
-        consoleOutStreamMonitor=consoleInStreamProxy.getOutputStreamMonitor();
+        final IStreamMonitor consoleOutStreamMonitor=consoleInStreamProxy.getOutputStreamMonitor();
         outputListener=new IStreamListener(){
         	public void streamAppended(String text, IStreamMonitor monitor){
         		if (fSendOutputToStreamProxy!=null){
@@ -264,11 +256,12 @@ public class VDTConsoleRunner{
         		if (runConfig.addConsoleText(text)){
         			if (debugPrint) System.out.println("Got finish sequence");
         			// TODO: launch continuation of the build process
+        			consoleOutStreamMonitor.removeListener(outputListener);
         			finishConsolescript();
         		}
         	}
         };
-        VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated
+        if (processOut!=null) VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated
         		DebugUITools.getConsole(processOut), //IConsole parserConsole,
         		consoleOutStreamMonitor,
         		outputListener);
@@ -276,11 +269,12 @@ public class VDTConsoleRunner{
         //       }
         //Problems occurred when invoking code from plug-in: "org.eclipse.ui.console".
         //Exception occurred during console property change notification.
-        outStream.setColor(new Color(null, 128, 128, 255)); 
+        outStream.setColor(new Color(null, 128, 128, 255)); // org.eclipse.swt.SWTException: Invalid thread access
         try {
         	for (int i=0;i<arguments.length;i++){
         		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
         			outStream.write(arguments[i]+"\n"); // writes to console itself
+        			System.out.println("--->"+arguments[i]+"\n");
         		}
         		consoleInStreamProxy.write(arguments[i]+"\n");
         	}
@@ -294,6 +288,7 @@ public class VDTConsoleRunner{
         	if (debugPrint) System.out.println("Setting timeout "+timeout);
         	final int fTimeout = timeout;
         	timer=new Timer();
+        	System.out.println("VDTConsoleRunner(): setting timer "+fTimeout*1000);
         	timer.schedule(new TimerTask() {          
         		@Override
         		public void run() {
@@ -313,11 +308,10 @@ public class VDTConsoleRunner{
     	if (debugPrint) System.out.println("finishConsolescript()");
 		String playBackStamp=runConfig.getPlayBackStamp();
 		if (playBackStamp!=null){
-			// happened when Vivaod console was disconnected with old console listener still attached
+			// happened when Vivado console was disconnected with old console listener still attached
 			// they should be removed when a parser process is terminated
-			
-			
 			System.out.println("Wrong, it should be playback, not run, as playBackStamp = "+playBackStamp+ "(not null)");
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
 			return;
 		}
 		if (timer!=null){
@@ -329,6 +323,7 @@ public class VDTConsoleRunner{
         }
     	if (consoleInStreamProxy==null) {
     		System.out.println("Bug: consoleInStreamProxy == null");
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
     		return; // or continue other commands?
     	}
     	if (errorListener !=null) { // disconnect error stream listener
@@ -401,13 +396,7 @@ public class VDTConsoleRunner{
     					!runConfig.gotGood() &&
     					(buildParamsItem.getSuccessString()!=null) &&
     					(buildParamsItem.getFailureString()==null))){
-    		tool.setDirty(false);
-    		tool.setState(TOOL_STATE.FAILURE);
-    		tool.setRunning(false);
-    		tool.setFinishTimeStamp();
-    		tool.updateViewStateIcon();
-    		//removeConfiguration
-    		VDTLaunchUtil.getRunner().getRunningBuilds().removeConfiguration(runConfig.getOriginalConsoleName());
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
     		return;
     	}
     	if (runConfig.gotGood()){

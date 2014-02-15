@@ -238,6 +238,9 @@ public class LaunchCore {
             		project,
             		resource,
             		logBuildStamp);
+            if (VDTLaunchUtil.getRunner().getRunningBuilds().isAlreadyOpen(tool.getName())){
+            	return;
+            }
             DebugUITools.launch(launchConfig, ILaunchManager.RUN_MODE);
         } catch (CoreException e) {
             IStatus status = e.getStatus();

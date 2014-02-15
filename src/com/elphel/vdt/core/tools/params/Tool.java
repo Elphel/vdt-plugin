@@ -129,7 +129,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
         NEW,
         UNKNOWN,
         FAILURE,
-        SUCCESS //,
+        SUCCESS,
+        KEPT_OPEN//,
 //        RUNNING
     }
    

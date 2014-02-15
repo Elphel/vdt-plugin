@@ -95,7 +95,7 @@ public class VDTProgramRunner {
      * @param monitor progress monitor or <code>null</code>
      * @exception CoreException if an exception occurs while launching
      */
-    public IProcess run( VDTRunnerConfiguration configuration
+    public IProcess run( VDTRunnerConfiguration runConfig
     		   , String consoleLabel
                , ILaunch launch
                , IProgressMonitor monitor
@@ -105,20 +105,20 @@ public class VDTProgramRunner {
         if (monitor == null) {
             monitor = new NullProgressMonitor();
         }
-//		int numItem=configuration.getBuildStep();
+//		int numItem=runConfig.getBuildStep();
     	VDTRunner runner = VDTLaunchUtil.getRunner();
-        BuildParamsItem buildParamsItem = configuration.getArgumentsItemsArray()[numItem]; // uses already calculated
-        String patternErrors=  combinePatterns(buildParamsItem.getErrors(),  configuration.getPatternErrors()) ;
-        String patternWarnings=combinePatterns(buildParamsItem.getWarnings(),configuration.getPatternWarnings()) ;
-        String patternInfo=    combinePatterns(buildParamsItem.getInfo(),    configuration.getPatternInfo()) ;
+        BuildParamsItem buildParamsItem = runConfig.getArgumentsItemsArray()[numItem]; // uses already calculated
+        String patternErrors=  combinePatterns(buildParamsItem.getErrors(),  runConfig.getPatternErrors()) ;
+        String patternWarnings=combinePatterns(buildParamsItem.getWarnings(),runConfig.getPatternWarnings()) ;
+        String patternInfo=    combinePatterns(buildParamsItem.getInfo(),    runConfig.getPatternInfo()) ;
         
         IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
         subMonitor.beginTask(Txt.s("Launch.Message.Launching"), 2);
         subMonitor.subTask(Txt.s("Launch.Message.ConstructingCommandLine"));
         
-        String toolTolaunch = configuration.getToolToLaunch();
-        String[] arguments = configuration.getToolArguments();
-    	boolean isShell= configuration.getIsShell();
+        String toolTolaunch = runConfig.getToolToLaunch();
+        String[] arguments = runConfig.getToolArguments();
+    	boolean isShell= runConfig.getIsShell();
         if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
         	System.out.println("patternErrors= \""+  patternErrors+"\"");
         	System.out.println("patternWarnings= \""+patternWarnings+"\"");
@@ -159,29 +159,32 @@ public class VDTProgramRunner {
         		System.out.println("cmdLine["+i+"] = \""+cmdLine[i]+"\"");
         	}
         }
-        String[] controlFiles = configuration.getControlFiles();
+        String[] controlFiles = runConfig.getControlFiles();
         runner.log(null,cmdLine, controlFiles, false, true); /* Appears in the console of the target Eclipse (immediately erased) */
         runner.log(null,cmdLine, controlFiles, false, false); /* Appears in the console of the parent Eclipse */
 
-        String[] envp = configuration.getEnvironment();
+        String[] envp = runConfig.getEnvironment();
         
         subMonitor.worked(1);
 
         // check for cancellation
         if (monitor.isCanceled()) {
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
             return null;
         }
 
         subMonitor.subTask(Txt.s("Launch.Message.Starting"));
-        File workingDir = getWorkingDir(configuration); /* /data/vdt/runtime-EclipseApplication/x353 */
+        File workingDir = getWorkingDir(runConfig); /* /data/vdt/runtime-EclipseApplication/x353 */
         Process p = exec(cmdLine, workingDir, envp);
         if (p == null) {
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
             return null;
         }
 
         // check for cancellation
         if (monitor.isCanceled()) {
             p.destroy();
+    		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
             return null;
         }       
     		
@@ -191,10 +194,10 @@ public class VDTProgramRunner {
 		/* IProcess may set/get client parameters */
         IProcess process= newProcess( launch
         		, p
-        		, consoleLabel // renderProcessLabel(configuration.getToolName())
-        		, getDefaultProcessAttrMap(configuration));
+        		, consoleLabel // renderProcessLabel(runConfig.getToolName())
+        		, getDefaultProcessAttrMap(runConfig));
         parser.parserSetup(
-        		configuration,
+        		runConfig,
         		process,
         		patternErrors,
         		patternWarnings,

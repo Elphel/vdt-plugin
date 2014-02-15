@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -107,14 +108,11 @@ public class VDTRunnerConfiguration {
     private int maxLength=extraChars;
     private Pattern patternGood=null;
     private Pattern patternBad=null;
+    private AtomicBoolean gotFinish;
+    private boolean keptOpen;
     
     private String playBackStamp=null; // timestamp of the logs to play back ("" for latest), or
                                        // null for normal running tools
-    private Set<IConsole> consoles=null;  // parser consoles opened for this console
-    
-    private Map<IConsole,MonListener> parserListeners=null; // consoles mapped to pairs of monitors and listeners
-                                                            // that should be disconnected when parser is terminated
-    
     
     
 	private VDTConsoleRunner consoleRunner=null;
@@ -122,7 +120,18 @@ public class VDTRunnerConfiguration {
 	private VDTConsolePlayback consolePlayback=null;
 
     
-    public BuildParamsItem[] getArgumentsItemsArray(){
+	private IConsole iConsole;
+	
+	
+    public IConsole getIConsole() {
+		return iConsole;
+	}
+
+	public void setIConsole(IConsole iConsole) {
+		this.iConsole = iConsole;
+	}
+
+	public BuildParamsItem[] getArgumentsItemsArray(){
     	return argumentsItemsArray;
     }
     
@@ -156,28 +165,19 @@ public class VDTRunnerConfiguration {
 		this.playBackStamp=null;
 		
 		this.consoleBuffer="";
-		this.consoles= new HashSet<IConsole>();
-		this.parserListeners= new ConcurrentHashMap<IConsole,MonListener>();
+		this.gotFinish=new AtomicBoolean(false);
 		this.consoleRunner= new VDTConsoleRunner(this); // arguments here?
 		this.programRunner=new VDTProgramRunner(); // arguments here?
 		this.consolePlayback=new VDTConsolePlayback(this);
+		this.keptOpen=false;
+		this.iConsole=null;
 	}
-	public void addMonListener(IConsole parserConsole, IStreamMonitor monitor, IStreamListener listener){
-		parserListeners.put(parserConsole, new MonListener(monitor, listener));
+	public void setKeptOpen(boolean keepOpen){
+		this.keptOpen=keepOpen;
 	}
-	public void removeMonListener(IConsole parserConsole){
-		MonListener monListener=parserListeners.remove(parserConsole);
-		if (monListener!=null){
-			try {
-				monListener.finalize();
-			} catch (Throwable e) {
-				System.out.println("Failed to finalize monListener for console "+parserConsole.getName());
-				e.printStackTrace();
-			}
-		}
+	public boolean isKeptOpen(){
+		return this.keptOpen;
 	}
-	
-	
 	
 	public void setPlayBackStamp(String str){
 		playBackStamp=str;
@@ -197,24 +197,20 @@ public class VDTRunnerConfiguration {
 	public VDTProgramRunner getProgramRunner(){
 		return this.programRunner;
 	}
-	
+/*	
 	public void addConsole(IConsole console){ // not used
 		consoles.add(console);
 	}
 	public void removeConsole(IConsole console){ // from VDTRunnerConfiguration
 		consoles.remove(console);
 	}
-	//TODO: add Map<IConsole,
-	
-	
-	
 	public boolean noConsoles(){
 		return consoles.isEmpty();
 	}
 	public boolean hasConsole(IConsole console){
 		return consoles.contains(console);
 	}
-
+*/	
 	public void setConsoleFinish(String consoleFinish){
 		this.consoleFinish=consoleFinish;
 		if ((this.consoleFinish!=null) && ((this.consoleFinish.length()+extraChars) > maxLength)){
@@ -298,19 +294,19 @@ public class VDTRunnerConfiguration {
 		if (consoleBuffer.length()>(maxLength)){
 			consoleBuffer=consoleBuffer.substring(consoleBuffer.length()-maxLength);
 		}
-		if ((patternBad!=null) && patternBad.matcher(consoleBuffer).matches()){
+		if ((patternBad!=null) && patternBad.matcher(consoleBuffer).find()){
 			hasBad=true;
-			return true;
+			return !gotFinish.getAndSet(true); // return true;
 		} else {
 			if ((consoleBad!=null) && (consoleBuffer.indexOf(consoleBad)>=0)) {
 				hasBad=true;
 				// Should we return true immediately or still wait for consoleFinish?
 				// Or only return true if (consoleFinish==null) ??
 				//			resetConsoleText();
-				return true; // return as soon as got failure - anyway there will be no next tools running 
+				return !gotFinish.getAndSet(true); //return true; // return as soon as got failure - anyway there will be no next tools running 
 			}
 		}
-		if ((patternGood!=null) && patternGood.matcher(consoleBuffer).matches()){
+		if ((patternGood!=null) && patternGood.matcher(consoleBuffer).find()){
 			hasGood=true;
 		} else {
 			if ((consoleGood!=null) && (consoleBuffer.indexOf(consoleGood)>=0)) {
@@ -323,7 +319,7 @@ public class VDTRunnerConfiguration {
 		}
 		if (consoleBuffer.indexOf(consoleFinish)>=0){
 //			resetConsoleText();
-			return true;
+			return !gotFinish.getAndSet(true); //return true;
 		}
 		return false;
 	}

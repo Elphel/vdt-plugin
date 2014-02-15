@@ -160,6 +160,7 @@ public class BuildParamsItem implements Cloneable{
 	public Timer getTimer(){
 		if (timer==null){
 			timer=new Timer();
+        	System.out.println("BuildParamsitem(): : making new timer");
 		}
 		return timer;
 	}
@@ -167,6 +168,7 @@ public class BuildParamsItem implements Cloneable{
 		if (timer==null) return;
 		timer.cancel();
 		timer=null;
+    	System.out.println("BuildParamsitem(): canceled and nulled timer");
 	}
 	
 	public void finalize() throws Throwable{

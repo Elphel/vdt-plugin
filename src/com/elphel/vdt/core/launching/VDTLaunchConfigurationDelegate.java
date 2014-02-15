@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
+import org.eclipse.swt.widgets.Display;
 
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
@@ -111,14 +112,26 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
     	runConfig.setControlFiles((String[])controlFiles.toArray(new String[controlFiles.size()]));
 //        String consoleName=VDTRunner.renderProcessLabel(runConfig.getToolName());
     	
-        String consoleName=runConfig.getOriginalConsoleName();
+        final String consoleName=runConfig.getOriginalConsoleName();
         runner.getRunningBuilds().saveUnfinished(consoleName, runConfig );
         
         String playBackStamp=VDTLaunchUtil.getLogBuildStamp(configuration); // got null
         runConfig.setPlayBackStamp(playBackStamp); // null
         
         if (playBackStamp==null){
-        	runner.resumeLaunch(consoleName); // actual run of the tools
+        	// Causes "Invalid thread access" when trying to  write to console output if got there directly, not through console event
+//        	runner.resumeLaunch(consoleName); // actual run of the tools
+        	// try from Display thread
+        	Display.getDefault().syncExec(new Runnable() {
+        		public void run() {
+					try {
+						VDTLaunchUtil.getRunner().resumeLaunch(consoleName);
+					} catch (CoreException e) {
+						System.out.println("Failed to resumeLaunch");
+					} //, fiCons, this); // replace with console
+        		}
+        	});
+        	
         } else {
         	runConfig.setBuildStep(-1); // to cause errors if will try to continue
         	runner.logPlaybackLaunch(consoleName); // tool logs playback with parsing

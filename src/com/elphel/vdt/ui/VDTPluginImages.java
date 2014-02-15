@@ -84,6 +84,8 @@ public class VDTPluginImages {
     public static final String ICON_TOOLSTATE_WTF     =  "obj16"+File.separator+"question.png";
     public static final String ICON_TOOLSTATE_WTF_OLD =  "obj16"+File.separator+"question_dim.png";
     public static final String ICON_TOOLSTATE_RUNNING =  "obj16"+File.separator+"spinning.gif";
+//    public static final String ICON_TOOLSTATE_KEPT_OPEN= "obj16"+File.separator+"heart.gif";
+    public static final String ICON_TOOLSTATE_KEPT_OPEN= "obj16"+File.separator+"beat.gif";
 
     public static final String KEY_TOOLSTATE_NEW      = "TOOLSTATE_NEW";
     public static final String KEY_TOOLSTATE_BAD      = "TOOLSTATE_BAD";
@@ -93,6 +95,7 @@ public class VDTPluginImages {
     public static final String KEY_TOOLSTATE_WTF     =  "TOOLSTATE_WTF";
     public static final String KEY_TOOLSTATE_WTF_OLD =  "TOOLSTATE_WTF_OLD";
     public static final String KEY_TOOLSTATE_RUNNING =  "TOOLSTATE_RUNNING";
+    public static final String KEY_TOOLSTATE_KEPT_OPEN ="TOOLSTATE_KEPT_OPEN";
 
 
     public static final String CHECKBOX_ON  = "CHECKBOX_ON";

@@ -18,31 +18,16 @@
 package com.elphel.vdt.core.launching;
 
 
-import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Timer;
 import java.util.TimerTask;
 
-import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
-//import org.eclipse.core.resources.IProject;
-//import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.IStreamListener;
 //import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 //import org.eclipse.debug.ui.DebugUITools;
@@ -69,10 +54,16 @@ import org.eclipse.ui.console.IOConsoleOutputStream;
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
+import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
 import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
+
+
+
+
 
 
 
@@ -97,6 +88,18 @@ public class VDTRunner {
 	public RunningBuilds getRunningBuilds(){
 		return runningBuilds;
 	}
+	
+	public void abortLaunch(String consoleName){
+		final VDTRunnerConfiguration runConfig=runningBuilds.resumeConfiguration(consoleName);
+    	Tool tool=ToolsCore.getTool(runConfig.getToolName());
+		tool.setDirty(false);
+		tool.setState(TOOL_STATE.FAILURE);
+		tool.setRunning(false);
+		tool.setFinishTimeStamp();
+		tool.updateViewStateIcon();
+		//removeConfiguration
+		runningBuilds.removeConfiguration(runConfig.getOriginalConsoleName());
+	}
 
     public void resumeLaunch(String consoleName) throws CoreException  {
     	try {
@@ -115,12 +118,14 @@ public class VDTRunner {
 
 		if (runConfig==null){
 			System.out.println("Turned out nothing to do. Probably a bug");
+    		abortLaunch(consoleName);    		
 			return;
 		}
 		
 		String playBackStamp=runConfig.getPlayBackStamp();
 		if (playBackStamp!=null){
 			System.out.println("doResumeLaunch(): wrong, it should be playback, not run, as playBackStamp = "+playBackStamp+ "(not null)");
+    		abortLaunch(consoleName);    		
 			return;
 		}
 
@@ -152,8 +157,6 @@ public class VDTRunner {
 				if (debugPrint) System.out.println("Skipping parser "+argumentsItemsArray[numItem].getNameAsParser());
 				continue;
 			}
-			// Launch the configuration - 1 unit of work
-			//        	VDTRunner runner = VDTLaunchUtil.getRunner();
 //			IProcess process=run(
 			IProcess process=runConfig.getProgramRunner().run(
 					runConfig,
@@ -163,26 +166,12 @@ public class VDTRunner {
 					numItem
               );
 
-			//Andrey: if there is a single item - launch asynchronously, if more - verify queue is empty
-
 			// check for cancellation
 			if (monitor.isCanceled() || (process==null)) {
-				runningBuilds.removeConfiguration(consoleName); 
+	    		abortLaunch(consoleName);    		
 				return;
 			}
-//			if (numItem<(argumentsItemsArray.length-1)){ // Not for the last
-			// find out if there are any non-parsers left
-/*			
-			boolean moreToProcess=false;
-			for (int i=numItem+1;i<argumentsItemsArray.length;numItem++)
-				if (argumentsItemsArray[numItem].getNameAsParser()==null) {
-					moreToProcess=true;
-					break;
-			}
-			
-			moreToProcess=true; // TODO: remove later - should always wait if keep is not set
-			if (moreToProcess){	
-			*/
+
 			IOConsole iCons=  (IOConsole) DebugUITools.getConsole(process); // had non-null fPatternMatcher , fType="org.eclipse.debug.ui.ProcessConsoleType"
 			if (iCons==null){
 				System.out.println("Could not get console for the specified process");
@@ -228,6 +217,7 @@ public class VDTRunner {
 			int timeout=argumentsItemsArray[numItem].getTimeout();
 			//keepOpen()
 			final boolean fKeepOpen=argumentsItemsArray[numItem].keepOpen();
+			if (fKeepOpen) runConfig.setKeptOpen(true);
 			if (fKeepOpen && (timeout<1)) timeout=1; // some minimal timeout
 			if (timeout>0){
 				if (debugPrint)  System.out.println ("timeout="+timeout+"s, keep-open="+ fKeepOpen);
@@ -236,15 +226,15 @@ public class VDTRunner {
 				if (timeout>0) { //never with no warnings 
 					final int fTimeout = timeout;
 					final IProcess fProcess=process;
-					// new Timer().schedule(new TimerTask() {          
-
+					// new Timer().schedule(new TimerTask() {
+		        	System.out.println("VDTRunner(): setting old timer "+fTimeout*1000);
 					argumentsItemsArray[numItem].getTimer().schedule(new TimerTask() {
 						@Override
 						public void run() {
 							if (debugPrint)  System.out.println(">> Got timeout after "+fTimeout+"sec <<");
 							if (fKeepOpen) {
 								fiCons.removePropertyChangeListener(fListener);
-								if (debugPrint)  System.out.println("Timeout-initialted firePropertyChange on  "+fConsoleName);
+								if (debugPrint)  System.out.println("Timeout-initialted resumeLaunch on  "+fConsoleName);
 					        	Display.getDefault().syncExec(new Runnable() {
 					        		public void run() {
 										try {
@@ -273,9 +263,15 @@ public class VDTRunner {
 		} //for (;numItem<argumentsItemsArray.length;numItem++){
 		if (debugPrint)  System.out.println("All finished");
 		monitor.done();
-		ToolsCore.getTool(runConfig.getToolName()).setRunning(false);
-		ToolsCore.getTool(runConfig.getToolName()).setFinishTimeStamp();
-		ToolsCore.getTool(runConfig.getToolName()).updateViewStateIcon();
+		Tool tool=ToolsCore.getTool(runConfig.getToolName());
+		tool.setRunning(false);
+		tool.setFinishTimeStamp();
+		if ((tool.getState()==TOOL_STATE.SUCCESS) && runConfig.isKeptOpen()) {
+			tool.setState(TOOL_STATE.KEPT_OPEN);
+		} else { // failure on not
+			runningBuilds.removeConfiguration(consoleName); 
+		}
+		tool.updateViewStateIcon();
 	}
 
     public void logPlaybackLaunch(String consoleName) throws CoreException  {
