@@ -1,38 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <vdt-project>
-	<interface name="VivadoRouteInterface" extends="VivadoInterface">
-	    <typedef name="RouteDirectiveType">
-      		<paramtype kind= "enum" base="String">
-      			<item value= "Explore"                label="Allows the Vivado router to explore different critical path routes after an initial route."/>
-      			<item value= "NoTimingRelaxation"     label="Prevents the router from relaxing timing to complete routing."/>
-      			<item value= "MoreGlobalIterations"   label="Uses detailed timing analysis throughout all stages instead of just the final stages."/>
-      			<item value= "HigherDelayCost"        label="Adjusts the router's internal cost functions to emphasize delay over iterations."/>
-      			<item value= "AdvancedSkewModeling"   label="Uses more accurate skew modeling throughout all routing stages."/>
-      			<item value= "RuntimeOptimized"       label="Run fewest iterations, trade higher design performance for faster run time"/>
-      			<item value= "Quick "                 label="Fastest runtime, non-timing-driven, performs the minimum required placement for the design."/>
-      			<item value= "Default"                label="Run the default routing."/>
-      		</paramtype>
-    	</typedef>
+	<interface name="VivadoBitstreamInterface" extends="VivadoInterface">
 	</interface>
 
-	<tool name="VivadoRoute" label="Route design"
+	<tool name="VivadoBitstream" label="Generate bitstream"
 	    project="FPGA_project"
-		interface="VivadoRouteInterface"
+		interface="VivadoBitstreamInterface"
 		package="FPGA_package"
 		shell="/bin/bash"
-		description="Route design with Vivado"
+		description="Generate bitstream"
 		log-dir="vivado_logs">
 		<action-menu>
-			<action label="Route" resource="" icon="route66.png" />
+			<action label="Generate bitstream" resource="" icon="bitstream.png" />
 		</action-menu>
-		<parameter id="FromMemory" label="Run from memory" tooltip="Do not load snapshot created after placement" 
+		<parameter id="FromMemory" label="Run from memory" tooltip="Do not load snapshot created after routing" 
 		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipPreRoute" label="Skip pre-route" tooltip="Do not run pre route TCL commands"
+		<parameter id="SkipPreBitstream" label="Skip pre-bitstream" tooltip="Do not run pre bitstream TCL commands"
 		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipSnapshotRoute" label="Skip snapshot save" tooltip="Do not create snapshot after route"
-		           default="false" type= "Boolean" format="None"/>
-
 <!--   left from synthesis, may need update--> 
 		<parameter id="ShowWarnings" label="Parse warnings" tooltip="Parse warning messages"
 		           default="true"
@@ -51,43 +36,33 @@
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
                    
-		<parameter id="PreRouteTCL" label="Pre-route TCL commands" tooltip="TCL commands to run before route_design"
+		<parameter id="PreBitstreamTCL" label="Pre-bitstream TCL commands" tooltip="TCL commands to run before write_bitstream"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
 			readonly="false" visible="true" />
                    
   
-<!-- route_design arguments -->
-        <!-- No support yet for "-cells" to limit placement to selected cells. Will require multiple runs with
-        different settings. Can probably create several pages of parameters alternatives for that purpose
-        and then run "placement - alt1", "placement - alt2", ... -->
-        <parameter 	id="directive_route"  outid="directive" label="Directive" tooltip= "Direct routing to achieve specific design objectives"
-        			default="Default" visible="true" omit="Default" type="RouteDirectiveType" format="Dash"/>
-        <parameter 	id="unroute" label="Unroute" tooltip= "Unroute all nets (specific nets unroute not supported."
+<!-- write_bitstream arguments -->
+        <parameter 	id="filename" label="Bitstream filename" tooltip= "Bitstream file name (will add *.bit extension)."
+        			default="%%ProjectName" visible="true" omit="" type="String" format="CopyValue"/>
+        <parameter 	id="force" label="Force (overwrite)" tooltip= "Overwrite existent files."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="re_entrant" label="Re-entrant mode" tooltip= "When on - preserve routing data after finishing routing to speed-up next passes."
-        			default="false" visible="true" omit="false" type="Bool_on_off" format="Dash"/>
-        <parameter 	id="physical_nets" label="Physical nets only" tooltip= "Route/unroute only logical '1'/logical '0' nets. Note: The -re_entrant, -nets, -physical_nets, and -pin options are mutually exclusive."
+        <parameter 	id="raw_bitfile" label="Write raw bitfile" tooltip= "Write bitfile in ASCII (*.rbt)."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-<!-- Note: Vivado get_nets command output can be redirected to a file and then used as default for the parameter -->
-        <parameter 	id="nets" label="Nets to priocess" tooltip= "Route/unroute only the specified nets. Note: The -re_entrant, -nets, -physical_nets, and -pin options are mutually exclusive."
-        			default="" visible="true" omit="" type="Stringlist" format="DashListCommon"/>
-        <parameter 	id="pin" label="To pin only" tooltip= "Route/unroute only the specified pin. Note: The -re_entrant, -nets, -physical_nets, and -pin options are mutually exclusive."
-        			default="" visible="true" omit="" type="String" format="Dash"/>
-        <parameter 	id="delay" label="Use timing constraints" tooltip= "Use timing constraints when -nets or -pin options are selected (otherwise they are ignored)"
+        <parameter 	id="no_binary_bitfile" label="Do not write .bit" tooltip= "Do not write to binary bitfile (*.bit)."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="max_delay" label="Max delay to pin (ps)" tooltip= "With -pin only. Target maximal delay to the specified pin (-delay option is implied). "
-        			default="" visible="true" omit="" type="Cardinal" format="Dash"/>
-        <parameter 	id="min_delay" label="Min delay to pin (ps)" tooltip= "With -pin only. Target minimal delay to the specified pin (-delay option is implied). "
-        			default="" visible="true" omit="" type="Cardinal" format="Dash"/>
-        <parameter 	id="no_timing_driven_routing" outid="no_timing_driven" label="No timing-driven" tooltip= "Disables the default timing driven routing algorithm."
+        <parameter 	id="readback_file" label="Create readback file (.rbd, .msd)" tooltip= "Create file needed for readback."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="preserve" label="Preserve routing" tooltip= "Preserve routing for the current routing session (no rip-up and reroute phase)"
+        <parameter 	id="logic_location_file" label="Create logic location file (.ll)" tooltip= "Create ASCII logic location file showing locations of latches, FF, BRAM and I/O."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="free_resource_mode" label="Do not overlap " tooltip= "Do not overlap routing resources at early stages of routing (before final resolution)."
+
+        <parameter 	id="bin_file" label="Create .bin file" tooltip= "Create bitsteream without the header (.bin)."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="quiet_route" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
+
+        <parameter 	id="reference_bitfile" label="Read reference bitfile" tooltip= "Read reference bitstream file."
+        			default="" visible="true" omit="" type="Filename" format="Dash"/>
+        <parameter	id="quiet_bit" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="verbose_route" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
+        <parameter	id="verbose_bit" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
 <!-- parser parameters -->
@@ -102,7 +77,7 @@
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
         			default="true" visible="true" omit="false" type="Boolean" format="None"/>
-<!--  TODO: change to router-specific problems -->        			
+<!--  TODO: change to bitstream-specific problems -->        			
         			
         <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
@@ -131,46 +106,38 @@
 
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			
-			   	   <parameter   id="VivadoRouteActionIndex" default="%%ChosenActionIndex"
+			   	   <parameter   id="VivadoBitstreamActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
 			
 		<input>
 			<group name="General">
 				"FromMemory"
-				"SkipPreRoute"
-				"SkipSnapshotRoute"
- 				"SnapshotRoute" <!--  same as in project -->
+				"SkipPreBitstream"
 				"ShowWarnings"
 				"ShowInfo"
 				"GrepEWI"
 			</group>
-			<group name="Pre-routing commands">
-		        "PreRouteTCL"
+			<group name="Pre-bitstream commands">
+		        "PreBitstreamTCL"
 			</group>
-			<group name="Routing">
-       			"directive_route"
+			<group name="Bitstream">
+       			"filename"
+       			"force"
+       			"raw_bitfile"
+       			"no_binary_bitfile"
+       			"readback_file"
+       			"logic_location_file"
+       			"bin_file"
+       			"reference_bitfile"
        			"---"
-       			"unroute"
-       			"re_entrant"
-       			"physical_nets"
-       			"nets"
-       			"pin"
-       			"delay"
-       			"max_delay"
-       			"min_delay"
-       			"no_timing_driven_routing"
-       			"preserve"
-       			"free_resource_mode"
-       			"---"
-       			"quiet_route"
-               	"verbose_route"
+       			"quiet_bit"
+       			"verbose_bit"
 			</group>
 			<group name="Parser">
 				"NoFileProblem"
 		        "Drc"
 		        "Vivado_Tcl"
 				"Route"
-				"---"
 				"Memdata"
 		        "Netlist"
 		        "Opt"
@@ -207,67 +174,66 @@
 				<!-- to: -->
 				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
 				";"
+				<!-- Copy bitstream reference file (full name) reference_bitfile  -->
+				<if-not reference_bitfile="">
+					"rsync -avrR -e ssh"
+					<!--  from: (trying full name) -->
+<!-- 					"%VivadoLocalDir/%SnapshotOptPlace"  -->
+					"%reference_bitfile"
+					<!-- to: -->
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build"
+					";"
+				</if-not>
 			</line>
 		</if>	
 <!-- Set sep="", so all new lines should be specified as \n -->
-			<line name="vivado_run_route"
+			<line name="vivado_run_bitstream"
 			      dest="VivadoConsole"
 			      mark="``" 
 			      sep=""
 			      prompt="@@FINISH@@"
-			      success="route_design completed successfully"
+			      success="write_bitstream completed successfully"
 			      log=""
-			      stdout="parser_VivadoRoute">
+			      stdout="parser_VivadoBitstream">
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      "file mkdir $outputDir\n"
 			      <!-- Start fresh from the loaded checkpoint -->
 		          <if FromMemory = "false">
-		          		"open_checkpoint %SnapshotOptPlace\n"
+		          		"open_checkpoint %SnapshotRoute\n"
 		          </if>
-		          <!-- Run pre-route TCL commands (if specified) -->
-			      <if SkipPreRoute="false">
-				      <if-not PreRouteTCL="">
-				      		"%PreRouteTCL\n"
+		          <!-- Run pre-bitstream TCL commands (if specified) -->
+			      <if SkipPreBitstream="false">
+				      <if-not PreBitstreamTCL="">
+				      		"%PreBitstreamTCL\n"
 				      </if-not>
-				      <if PreRouteTCL="">
-				      		"puts \"No pre-route TCL commands specified\"\n"'
+				      <if PreBitstreamTCL="">
+				      		"puts \"No pre-bitstream TCL commands specified\"\n"'
 				      </if>
 			      </if>
 			      <!-- Run routing -->
-			      "route_design"
-			      "%directive_route"
-			      "%unroute"
-			      "%re_entrant"
-			      "%physical_nets"
-			      "%nets"
-			      "%pin"
-			      "%delay"
-			      "%max_delay"
-			      "%min_delay"
-			      "%no_timing_driven_routing"
-			      "%preserve"
-			      "%free_resource_mode"
-			      "%quiet_route"
-			      "%verbose_route"
+			      "write_bitstream "
+			      "%filename"
+			      "%force"
+			      "%raw_bitfile"
+			      "%no_binary_bitfile"
+			      "%readback_file"
+			      "%logic_location_file"
+			      "%bin_file"
+			      "%reference_bitfile"
+			      "%quiet_bit"
+			      "%verbose_bit"
 			      "\n"
-			      <if SkipSnapshotRoute="false">
-				      	"write_checkpoint -force %SnapshotRoute\n"
-			      </if>
 				"puts \"@@FINISH@@\"\n"
 			</line>
-<!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
-			<if-and SkipSnapshotRoute="false"
-			        VivadoRouteActionIndex="0">
-				<line name="vivado_copy_after_route">
-					"-c"
-					"mkdir -p %VivadoLocalDir ;"
-					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotRoute"
-					"%VivadoLocalDir/"
-				</line>
-	        </if-and>
-			<line name="parser_VivadoRoute"
+			<line name="vivado_copy_after_bitstream">
+				"-c"
+				"mkdir -p %VivadoLocalDir ;"
+				"rsync -avr -e ssh"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build/%filename.*"
+				"%VivadoLocalDir/"
+			</line>
+			<line name="parser_VivadoBitstream"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
 				info=     "PatternInfo">
@@ -290,7 +256,7 @@
 		        <!-- TODO: change Placement to Routing? or such -->
      			<if NoFileProblem="true">
 	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
-     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Routing:0000\]@'"
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Bitstream:0000\]@'"
      			</if>
 			</line>
 		</output>

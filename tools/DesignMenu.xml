@@ -56,6 +56,10 @@
                           label="Route design"
                           icon="route66.png"
                           call="VivadoRoute"/>
+                <menuitem name="VivadoBitstream"
+                          label="Generate bitstream"
+                          icon="bitstream.png"
+                          call="VivadoBitstream"/>
                 <menuitem name="Vivado Test"
                           label="Send a 'Hello World' command to the remote Vivado session"
                           icon="my_tool.gif"
