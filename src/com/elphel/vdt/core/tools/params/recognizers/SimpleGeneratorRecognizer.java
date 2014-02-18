@@ -19,6 +19,7 @@ package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.Utils;
 import com.elphel.vdt.core.tools.generators.*;
+import com.elphel.vdt.core.tools.params.Tool;
 
 
 public class SimpleGeneratorRecognizer implements Recognizer {
@@ -35,7 +36,9 @@ public class SimpleGeneratorRecognizer implements Recognizer {
         new CurrentFileBaseGenerator(),
         new ChosenActionGenerator(),
         new BuildStampGenerator(),
-        new UserNameGenerator()
+        new UserNameGenerator(),
+        new StateDirGenerator(),
+        new StateFileGenerator()
     };
   
     public SimpleGeneratorRecognizer(){
@@ -45,6 +48,19 @@ public class SimpleGeneratorRecognizer implements Recognizer {
     	super();
     	for (int i=0;i<generators.length;i++){
     		generators[i].setMenuMode(menuMode);
+    	}
+    }
+    public SimpleGeneratorRecognizer(boolean menuMode, Tool tool){
+    	super();
+    	for (int i=0;i<generators.length;i++){
+    		generators[i].setMenuMode(menuMode);
+    		generators[i].setTool(tool);
+    	}
+    }
+    public SimpleGeneratorRecognizer(Tool tool){
+    	super();
+    	for (int i=0;i<generators.length;i++){
+    		generators[i].setTool(tool);
     	}
     }
 	public RecognizerResult recognize(String template, int startPos) {

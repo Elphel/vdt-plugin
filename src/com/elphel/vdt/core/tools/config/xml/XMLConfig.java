@@ -126,6 +126,12 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_SYNTAX_INFO =    "info";
     static final String CONTEXT_TOOL_IGNORE_FILTER =  "ignore"; // file path regular expression to remove libraries from source list
     static final String CONTEXT_TOOL_LOG_DIRECTORY =  "log-dir"; // folder to store the tool log files
+    static final String CONTEXT_TOOL_STATE_DIRECTORY = "state-dir"; // folder to store the tool state (snapshot) files
+    
+    static final String CONTEXT_TOOL_DISABLED =       "disabled"; // Parameter name that disables the tool if true
+    static final String CONTEXT_TOOL_RESULT =         "result";   // Parameter name keeps the filename representing result (snapshot)
+    static final String CONTEXT_TOOL_RESTORE =        "restore";  // tool name that restores the state form result
+    
 
     static final String CONTEXT_LINEBLOCK_TAG =           "line";
     static final String CONTEXT_LINEBLOCK_NAME_ATTR =     "name";
@@ -162,6 +168,7 @@ public class XMLConfig extends Config {
 
     static final String MENUITEM_TAG = "menuitem";
     static final String MENUITEM_CALL_ATTR = "call";
+    static final String MENUITEM_INSTANCE_ATTR = "tool-instance";
     static final String MENUITEM_NAME_ATTR = MENU_NAME_ATTR;
     static final String MENUITEM_LABEL_ATTR = MENU_LABEL_ATTR;
     static final String MENUITEM_ICON_ATTR = MENU_ICON_ATTR;
@@ -623,6 +630,11 @@ public class XMLConfig extends Config {
                 String toolInfo     = getAttributeValue(contextNode, CONTEXT_TOOL_SYNTAX_INFO);
                 String ignoreFilter = getAttributeValue(contextNode, CONTEXT_TOOL_IGNORE_FILTER);
                 String logDir =       getAttributeValue(contextNode, CONTEXT_TOOL_LOG_DIRECTORY);
+                String stateDir =     getAttributeValue(contextNode, CONTEXT_TOOL_STATE_DIRECTORY);
+                
+                String disabled =     getAttributeValue(contextNode, CONTEXT_TOOL_DISABLED);
+                String result =       getAttributeValue(contextNode, CONTEXT_TOOL_RESULT);
+                String restore =      getAttributeValue(contextNode, CONTEXT_TOOL_RESTORE);
                 
                 boolean isShell=false;
                 if (toolShell != null){
@@ -666,10 +678,13 @@ public class XMLConfig extends Config {
                                    ignoreFilter,
                                    toolDepends,
                                    logDir,
+                                   stateDir,
+                                   disabled,
+                                   result,
+                                   restore,
                                    null,
                                    null,
                                    null);
-                
                 break;
                 
             default:
@@ -1189,6 +1204,8 @@ public class XMLConfig extends Config {
         String itemLabel    = getAttributeValue(menuItemNode, MENUITEM_LABEL_ATTR);
         String itemIcon     = getAttributeValue(menuItemNode, MENUITEM_ICON_ATTR);
         String itemCall     = getAttributeValue(menuItemNode, MENUITEM_CALL_ATTR);
+        String itemInstance = getAttributeValue(menuItemNode, MENUITEM_INSTANCE_ATTR);
+        
         String itemVisible  = getAttributeValue(menuItemNode, MENUITEM_VISIBLE_ATTR);
         String itemAfter    = getAttributeValue(menuItemNode, MENUITEM_AFTER_ATTR);
         
@@ -1206,7 +1223,8 @@ public class XMLConfig extends Config {
                                       itemLabel,
                                       itemIcon,
                                       isVisible,
-                                      itemCall);
+                                      itemCall,
+                                      itemInstance);
     }
 
     private List<CommandLinesBlock> readCommandLinesBlocks(Node node, Context context)

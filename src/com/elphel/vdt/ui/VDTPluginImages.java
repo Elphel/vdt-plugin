@@ -75,6 +75,12 @@ public class VDTPluginImages {
     public static final ImageDescriptor DESC_PROJECT_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"project_prop.gif", null);
     public static final ImageDescriptor DESC_DESIGM_MENU = create(ICONS_PATH, "obj16"+File.separator+"design_menu.gif", null);
 
+    public static final ImageDescriptor DESC_TOOLS_LINKED = create(ICONS_PATH, "obj16"+File.separator+"link.png", null);
+    public static final ImageDescriptor DESC_TOOLS_UNLINKED = create(ICONS_PATH, "obj16"+File.separator+"broken_link.png", null);
+
+    public static final ImageDescriptor DESC_TOOLS_PIN =            create(ICONS_PATH, "obj16"+File.separator+"pin.png", null);
+    public static final ImageDescriptor DESC_TOOLS_RESTORE =        create(ICONS_PATH, "obj16"+File.separator+"restore.png", null);
+    public static final ImageDescriptor DESC_TOOLS_RESTORE_SELECT = create(ICONS_PATH, "obj16"+File.separator+"restore_select.png", null);
     
     public static final String ICON_TOOLSTATE_NEW      = "obj16"+File.separator+"white.png";
     public static final String ICON_TOOLSTATE_BAD      = "obj16"+File.separator+"cross.png";
@@ -86,6 +92,7 @@ public class VDTPluginImages {
     public static final String ICON_TOOLSTATE_RUNNING =  "obj16"+File.separator+"spinning.gif";
 //    public static final String ICON_TOOLSTATE_KEPT_OPEN= "obj16"+File.separator+"heart.gif";
     public static final String ICON_TOOLSTATE_KEPT_OPEN= "obj16"+File.separator+"beat.gif";
+    public static final String ICON_TOOLSTATE_PINNED  =  "obj16"+File.separator+"pinned_good.png";
 
     public static final String KEY_TOOLSTATE_NEW      = "TOOLSTATE_NEW";
     public static final String KEY_TOOLSTATE_BAD      = "TOOLSTATE_BAD";
@@ -96,6 +103,7 @@ public class VDTPluginImages {
     public static final String KEY_TOOLSTATE_WTF_OLD =  "TOOLSTATE_WTF_OLD";
     public static final String KEY_TOOLSTATE_RUNNING =  "TOOLSTATE_RUNNING";
     public static final String KEY_TOOLSTATE_KEPT_OPEN ="TOOLSTATE_KEPT_OPEN";
+    public static final String KEY_TOOLSTATE_PINNED  =  "TOOLSTATE_PINNED";
 
 
     public static final String CHECKBOX_ON  = "CHECKBOX_ON";

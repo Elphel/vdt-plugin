@@ -103,6 +103,7 @@ public class VDT {
     public static final String ATTR_TOOL_INFO =     ID_VDT + ".ATTR_TOOL_INFO";
 
     public static final String ATTR_LOG_BUILD_STAMP =     ID_VDT + ".ATTR_LOG_BUILD_STAMP";
+    public static final String ATTR_TOOL_STATE_FILE =     ID_VDT + ".TOOL_STATE_FILE"; // name of state (snapshot)  file to restore passed at tool launch
 
     
     /**
@@ -153,4 +154,9 @@ public class VDT {
     public static final String GENERATOR_ID_USERNAME      = "UserName"; 
     public static final String GENERATOR_ID_BLANK         = "Blank"; 
     public static final String GENERATOR_ID_NEWLINE       = "NewLine"; 
+
+    public static final String GENERATOR_ID_STATE_DIR     = "StateDir"; 
+    public static final String GENERATOR_ID_STATE_FILE    = "StateFile"; 
+
+
 } // class VDT

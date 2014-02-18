@@ -18,6 +18,7 @@
 package com.elphel.vdt.core.tools.generators;
 
 import com.elphel.vdt.core.Utils;
+import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.ui.MessageUI;
 
 /**
@@ -32,6 +33,7 @@ public abstract class AbstractGenerator {
     protected String separator;
     private final boolean forcedMultiline;
     private boolean menuMode=false; // managing menu items, not running tool. Ignore Generator errors
+    protected Tool tool0; // "tool" was already used in ToolParamRecognizer / Andrey
 
     public AbstractGenerator() {
         this(false);
@@ -67,6 +69,9 @@ public abstract class AbstractGenerator {
     }
     public boolean getMenuMode(){
     	return menuMode;
+    }
+    public void setTool(Tool tool){
+    	this.tool0=tool;
     }
 
     

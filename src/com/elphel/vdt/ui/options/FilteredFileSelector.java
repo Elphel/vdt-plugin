@@ -50,6 +50,28 @@ public class FilteredFileSelector{
 		if (approveToolTip!=null) fileChooser.setApproveButtonToolTipText(approveToolTip);
 		fileChooser.setApproveButtonText(this.approveText);
 	}
+	public FilteredFileSelector(
+			File dir,
+			String title,
+			Component parent,
+			String approveText,
+			String approveToolTip,
+			String prefix,
+			String suffix,
+			boolean allowEmptyMiddle,
+			String filterDescription,
+			boolean allowDirs
+			){
+		this.parent=parent;
+		fileChooser = new JFileChooser(dir);
+		FileFilter filter1 = new PrefixSuffixFileFilter(prefix,suffix, allowEmptyMiddle,filterDescription,allowDirs);
+		fileChooser.setFileFilter(filter1);
+		if (title!=null) fileChooser.setDialogTitle(title);
+		this.approveText=approveText;
+		if (this.approveText==null) this.approveText="Select";
+		if (approveToolTip!=null) fileChooser.setApproveButtonToolTipText(approveToolTip);
+		fileChooser.setApproveButtonText(this.approveText);
+	}
 	
 	public File openDialog() {
 		if (fileChooser.showDialog(parent, approveText) ==  JFileChooser.APPROVE_OPTION) {
@@ -82,6 +104,43 @@ public class FilteredFileSelector{
 		        String name = file.getName();
 //		        System.out.println("filename="+name+", matches()="+pattern.matcher(name).matches());
 		        return pattern.matcher(name).matches();
+		    }
+		}
+		@Override
+		public String getDescription() {
+			return description;
+		}
+	}
+	private class PrefixSuffixFileFilter extends FileFilter {
+		private String prefix;
+		private String suffix;
+		private boolean allowEmptyMiddle;
+		private String description;
+		private boolean allowDirs;
+		public PrefixSuffixFileFilter(
+				String prefix,
+				String suffix,
+				boolean allowEmptyMiddle,
+				String description,
+				boolean allowDirs){
+			this.prefix=prefix;
+			this.suffix=suffix;
+			this.allowEmptyMiddle=allowEmptyMiddle;
+			this.description=description;
+			this.allowDirs=allowDirs;
+			this.allowEmptyMiddle=allowEmptyMiddle;
+		}
+		@Override
+		public boolean accept(File file) {
+		    if (file.isDirectory()) {
+		        return allowDirs;
+		      } else {
+		        String name = file.getName();
+//		        System.out.println("filename="+name+", matches()="+pattern.matcher(name).matches());
+		        if (!name.startsWith(prefix)) return false;
+		        if (!name.endsWith(suffix)) return false;
+		        if (allowEmptyMiddle || (name.length()> (prefix.length()+suffix.length()))) return true;
+		        return false;
 		    }
 		}
 		@Override

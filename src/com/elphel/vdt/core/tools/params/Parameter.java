@@ -118,7 +118,10 @@ public class Parameter implements Cloneable, Updateable {
     public Object clone() { // did not clone context (intentionally)
         return new Parameter(this);
     }
-    
+   
+    public String getSourceXML(){
+    	return sourceXML;
+    }
     public boolean getIsChild(){
     	return isChild;
     }
@@ -386,7 +389,7 @@ public class Parameter implements Cloneable, Updateable {
         		if (firstLine.substring(0,2).equals("\\@")){
         			firstLine=firstLine.substring(1);
         		}
-        		if (firstLine.substring(1,3).equals("\\@")){
+        		if ((firstLine.length()>2) && (firstLine.substring(1,3).equals("\\@"))){
         			firstLine=firstLine.substring(0,1)+firstLine.substring(2);
         		}
         		processedDefaultValue.remove(0);

@@ -37,9 +37,10 @@ public class ToolParamRecognizer extends ParamRecognizer {
     
     protected AbstractGenerator getGenerator(final Parameter param) throws ToolException {
         return new StringsGenerator(param.getCommandLine()) {
+        	String toolName=(tool==null)?"<null>":tool.getName();
             public String getName() {
                 return "Param '" + param + 
-                       "' of tool '" + tool.getName() + 
+                       "' of tool '" + toolName + 
                        "' command line";
             }
         };

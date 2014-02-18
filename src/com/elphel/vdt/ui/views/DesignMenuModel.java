@@ -49,6 +49,7 @@ import com.elphel.vdt.core.tools.menu.DesignMenuItem;
 import com.elphel.vdt.core.tools.menu.DesignMenuToolItem;
 import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.ui.VDTPluginImages;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 /**
  * Adapter of core design menu for user interface level.
@@ -302,6 +303,7 @@ public class DesignMenuModel {
         public void measureItem (Event event){
         	super.measureItem (event);
         	boolean dirty=tool.isDirty();
+        	boolean pinned=tool.isPinned() || !SelectedResourceManager.getDefault().isToolsLinked();
         	String iconName,key;
         	if (tool.isRunning()){
         		iconName=VDTPluginImages.ICON_TOOLSTATE_RUNNING;
@@ -323,12 +325,17 @@ public class DesignMenuModel {
         			}
         			break;
         		case SUCCESS:
-        			if (dirty){
-        				iconName=VDTPluginImages.ICON_TOOLSTATE_GOOD_OLD;
-        				key= VDTPluginImages.KEY_TOOLSTATE_GOOD_OLD;
+        			if (pinned){
+    					iconName=VDTPluginImages.ICON_TOOLSTATE_PINNED;
+    					key= VDTPluginImages.KEY_TOOLSTATE_PINNED;
         			} else {
-        				iconName=VDTPluginImages.ICON_TOOLSTATE_GOOD;
-        				key= VDTPluginImages.KEY_TOOLSTATE_GOOD;
+        				if (dirty){
+        					iconName=VDTPluginImages.ICON_TOOLSTATE_GOOD_OLD;
+        					key= VDTPluginImages.KEY_TOOLSTATE_GOOD_OLD;
+        				} else {
+        					iconName=VDTPluginImages.ICON_TOOLSTATE_GOOD;
+        					key= VDTPluginImages.KEY_TOOLSTATE_GOOD;
+        				}
         			}
         			break;
         		case KEPT_OPEN:

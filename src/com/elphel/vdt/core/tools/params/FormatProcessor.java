@@ -79,7 +79,7 @@ public class FormatProcessor {
         while(pos < template.length()) {
             if(template.startsWith(CONTROL_SEQ, pos)) {
                 pos += CONTROL_SEQ_LEN;
-                
+                // got different instance of ToolParamRecognizer with tool==null
                 RecognizerResult result = recognize(template, pos); // Already skipped blank lines (and spaces in each line, added separators - no, on deifferent level
                 
                 if(result != null && result.getGenerator() != null) {

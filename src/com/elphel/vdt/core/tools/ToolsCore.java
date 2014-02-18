@@ -21,6 +21,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import org.eclipse.ui.IMemento;
+
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.core.options.OptionsCore;
@@ -35,7 +38,7 @@ import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.ui.MessageUI;
 
 /**
- * Manager of tools configuartion
+ * Manager of tools configuration
  * 
  * Created: 14.01.2006
  * @author  Lvov Konstantin
@@ -73,6 +76,17 @@ public class ToolsCore {
         
         return null;
     }
+    
+    public static void saveToolsState(IMemento memento){
+        for (Tool tool : getConfig().getContextManager().getToolList())
+        	tool.saveState(memento);
+    }
+    
+    public static void restoreToolsState(IMemento memento){
+        for (Tool tool : getConfig().getContextManager().getToolList())
+        	tool.restoreState(memento);
+    }
+    
 
     public static Tool getToolWorkingCopy(String toolID) {
         Tool tool = getTool(toolID);

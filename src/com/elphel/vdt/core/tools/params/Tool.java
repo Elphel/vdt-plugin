@@ -22,22 +22,32 @@ import java.io.*;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IMemento;
 
 import com.elphel.vdt.VDT;
+import com.elphel.vdt.core.launching.ToolLogFile;
 import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.*;
 import com.elphel.vdt.core.tools.contexts.*;
 import com.elphel.vdt.core.tools.config.*;
 import com.elphel.vdt.core.tools.params.conditions.ConditionUtils;
 import com.elphel.vdt.core.tools.params.recognizers.*;
+import com.elphel.vdt.core.tools.params.types.ParamTypeBool;
+import com.elphel.vdt.core.tools.params.types.ParamTypeString;
+import com.elphel.vdt.core.tools.params.types.ParamTypeString.KIND;
 import com.elphel.vdt.core.tools.params.types.RunFor;
 import com.elphel.vdt.ui.VDTPluginImages;
 import com.elphel.vdt.ui.views.DesignFlowView;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 
 public class Tool extends Context implements Cloneable, Inheritable {
     private static final String ICON_ID_PREFIX = VDT.ID_VDT + ".Tool.Image.";
     private static final String ICON_ID_ACTION = ".action.";
+    private static final String TAG_TOOL_PINNED = ".toolstate.pinned";
+    private static final String TAG_TOOL_STATE =  ".toolstate.state";
+    private static final String TAG_TOOL_TIMESTAMP =  ".toolstate.timeStamp";
+
 
     private String baseToolName;
     private String parentPackageName;
@@ -53,7 +63,6 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private int choice; // selected variant for runfor
     private String ignoreFilter;
     
-    
     private Tool baseTool;
     private PackageContext parentPackage;
     private ProjectContext parentProject;
@@ -65,16 +74,39 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private boolean initialized = false;
     private String [] imageKeysActions = null;
     
-    private List<String> depends=null;       // list of tools this one depends on
-    private String logDir=null;              // directory to store this tool log files
+    private List<String> depends=null;       // list of tools this one depends on -> list of files (states) and strings (name of sessions)
+    private String logDirString=null;              // directory to store this tool log files
+    private String stateDirString=null;            // directory to store this tool log files
+    private Parameter logDir=null;              // directory to store this tool log files
+    private Parameter stateDir=null;            // directory to store this tool log files
+    private String disabledString=null;          // to disable tools from automatic running
+    private String resultString=null;              // parameter name of kind of file that represents state after running this tool
+    private String restoreString=null;             // name of tool that restores the state of this tool ran (has own dependencies)
  
+    private Parameter disabled;
+    private Tool restore;
+    private Parameter result;
+    
+    // TODO: Compare dependFiles with literary result of other tools, if match - these are states, not files
+    private List<Parameter> dependSessions;
+    private List<Parameter> dependFiles;
+//    private boolean toolIsRestore;           // this tool is referenced by other as restore="this-tool"
+    private Tool restoreMaster;              // Tool, for which this one is restore (or null if for none). Same restore for
+                                             // multiple masters is not allowed
     private boolean dirty=false;             // tool ran before its sources (runtime value)
+    private boolean pinned=false;             // tool ran before its sources (runtime value)
+    private String openState=null;           // (only for open sessions) - last successful result ran in this session 
     private long runStamp=0;                 // timestamp of the tool last ran (0 - never)
     private TOOL_STATE state=TOOL_STATE.NEW; // tool state (succ, fail,new, running)
     private boolean running=false;
-    private long finishTimeStamp=0;
-    
+//    private long finishTimeStamp=0;
+    private String timeStamp=null;
     private DesignFlowView designFlowView;
+    
+    private String resultFile;               // used to overwrite name of the default result file that normally
+                                             // is calculated from result and timestamp;
+    
+    
 
     public Tool(String name,
                 String controlInterfaceName,
@@ -93,7 +125,12 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 List<RunFor> runfor,
                 String ignoreFilter,
                 List<String> depends,
-                String logDir,
+                String logDirString,
+                String stateDirString,
+                String disabledString,          // to disable tools from automatic running
+                String resultString,            // parameter name of kind of file that represents state after running this tool
+                String restoreString,           // name of tool that restores the state of this tool ran (has own dependencies)
+                
                 /* never used ??? */
                 List<Parameter> params,
                 List<ParamGroup> paramGroups,
@@ -120,10 +157,28 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.toolWarnings = toolWarnings;
         this.toolInfo     = toolInfo;
         this.depends=       depends;
-        this.logDir=        logDir;
+        this.logDirString=        logDirString;
+        this.stateDirString=      stateDirString;
+        
+        this.disabledString=      disabledString;          // to disable tools from automatic running
+        this.resultString=        resultString;            // parameter name of kind of file that represents state after running this tool
+        this.restoreString=       restoreString;           // name of tool that restores the state of this tool ran (has own dependencies)
+        disabled=null;
+        restore=null;
+        result=null;
+        dependSessions=null;
+        dependFiles=null;
+
+        this.pinned=false;
+        this.openState=null;
         this.choice=0;
         this.designFlowView =null;
-        this.finishTimeStamp=0;
+        this.timeStamp=null;
+        this.logDir=null;
+        this.stateDir=null;
+        this.resultFile=null;
+        restoreMaster=null;
+        
     }
     public enum TOOL_STATE {
         NEW,
@@ -140,32 +195,40 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public boolean isRunning()             { return running; }
     public long getRunStamp()              { return runStamp; }
     public TOOL_STATE getState()           { return state; }
-    public String getLogDir()              { return logDir; }
+    public boolean isPinned()              { return pinned; }
+    public String getOpenState()           { return openState; }
+    public void setOpenState(String stateName) { openState=stateName;}
+
     
-    public void setFinishTimeStamp(){
-    	finishTimeStamp=System.nanoTime();
+    public void setTimeStamp(){
+    	timeStamp=SelectedResourceManager.getDefault().getBuildStamp();
     }
     
-    public long getFinishTimeStamp(){
-    	return finishTimeStamp;
+    public String getFinishTimeStamp(){
+    	return timeStamp;
     }
     
     public void setDirty(boolean dirty) {
     	this.dirty=dirty;
-//    	updateViewStateIcon();
+//    	toolFinished();
     	System.out.println("SetDirty("+dirty+")");
+    }
+    public void setPinned(boolean pinned) {
+    	this.pinned=pinned;
+//    	toolFinished();
+    	System.out.println("SetPinned("+pinned+")");
     }
 
     public void setRunning(boolean running) {
     	this.running=running;
-//    	updateViewStateIcon();
+//    	toolFinished();
     	System.out.println("SetRunning("+running+")");
     }
 
     
     public void setState(TOOL_STATE state) {
     	this.state=state;
-//    	updateViewStateIcon();
+//    	toolFinished();
     	System.out.println("SetState("+state+")");
     }
     
@@ -173,7 +236,12 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	this.designFlowView =  designFlowView; // to be able to update actions and so the state icons
     }
 
-    public void updateViewStateIcon(){
+    public void toolFinished(){
+    	designFlowView.getToolSequence().toolFinished(this);
+/*    	
+System.out.println("Tool "+getName()+" FINISHED - add more stuff here");    	
+    	
+    	
     	if (designFlowView!=null){
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
@@ -181,6 +249,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         		}
         	});
     	}
+*/    	
     }
     
     
@@ -240,10 +309,252 @@ public class Tool extends Context implements Cloneable, Inheritable {
         initParentProject();
         initParams(); // *Inherits and sets up contexts? Also Error with copying context to items
         initOtherAttributes();
-        initCommandLines();
         
+        initDisabled();
+        initDepends();
+        initResult();
+        initRestore();
+        initStateDir();
+        initLogDir();
+        
+        initCommandLines();
         initialized = true;
     }
+
+    public void initDisabled() throws ConfigException{
+    	if (disabledString==null) return;
+    	disabled=findParam(disabledString);
+        if(disabled == null) {
+            throw new ConfigException("Parameter disabled='" + disabledString + 
+                                      "' used for tool '" + name + 
+                                      "' is absent");
+        } else if(!(disabled.getType() instanceof ParamTypeBool)) {
+            throw new ConfigException("Parameter disabled='" + disabledString + 
+                    "' used for tool '" + name + 
+                                      "' must be of type '" + ParamTypeBool.NAME + 
+                                      "'");
+        }
+    }
+    
+    public boolean isDisabled(){
+    	if (disabled==null) return false;
+    	List<String> values=disabled.getValue();
+    	if ((values==null) || (values.size()==0)) return false;
+    	return (!values.get(0).equals("true"));
+    }
+    
+    public void initDepends() throws ConfigException{
+    	if (depends==null) return;
+        dependSessions=new ArrayList<Parameter>();
+        dependFiles=   new ArrayList<Parameter>();
+    	for(Iterator<String> iter = depends.iterator(); iter.hasNext();) {
+    		String paramID=iter.next();
+
+    		Parameter param=findParam(paramID);
+    		if(param == null) {
+    			throw new ConfigException("Parameter depends='" + paramID + 
+    					"' used for tool '" + name + 
+    					"' is absent");
+    		} else if(!(param.getType() instanceof ParamTypeString)) {
+    			throw new ConfigException("Parameter depends='" + paramID + 
+        				"' defined in "+param.getSourceXML()+" used for tool '" + name + 
+    					"' must be of type '" + ParamTypeString.NAME + 
+    					"'");                    
+    		} else {
+    			KIND kind=((ParamTypeString)param.getType()).getKind();
+    			if (kind == ParamTypeString.KIND.FILE) {
+    				dependFiles.add(param);
+    			} else if (kind == ParamTypeString.KIND.TEXT) {
+    				dependSessions.add(param);
+    			} else {
+    				throw new ConfigException("Parameter depends='" + paramID + 
+    						"' of type '" + ParamTypeString.NAME +
+    						"' defined in "+param.getSourceXML()+" used for tool '" + name + 
+    						"' must be of kind '" + ParamTypeString.KIND_FILE_ID + "' (for snapshot fiels) "+
+    						" or '" + ParamTypeString.KIND_TEXT_ID + "' (for tool name of the open session)"+
+        				", it is '"+kind+"'");                   
+    			}
+    		}
+    	}
+    }
+    public List<String> getDependFiles(){
+    	if ((dependFiles == null) || (dependFiles.size()==0)) return null;
+    	List<String> list = new ArrayList<String>();
+    	for (Iterator<Parameter> iter= dependFiles.iterator(); iter.hasNext();) {
+    		List<String> vList=iter.next().getValue();
+    		if (vList!=null) list.addAll(vList);
+    	}
+    	return list;
+    }
+
+    public List<String> getDependSessions(){
+    	if ((dependSessions == null) || (dependSessions.size()==0)) return null;
+    	List<String> list = new ArrayList<String>();
+    	for (Iterator<Parameter> iter= dependSessions.iterator(); iter.hasNext();) {
+    		List<String> vList=iter.next().getValue();
+    		if (vList!=null) list.addAll(vList);
+    	}
+    	return list;
+    }
+    
+    
+    public void initResult() throws ConfigException{
+    	if (resultString==null) return;
+    	result=findParam(resultString);
+        if(result == null) {
+            throw new ConfigException("Parameter result='" + resultString + 
+                                      "' used for tool '" + name + 
+                                      "' is absent");
+        } else if(!(result.getType() instanceof ParamTypeString)) {
+            throw new ConfigException("Parameter result='" + resultString +
+            		"' defined in "+result.getSourceXML()+" used for tool '" + name + 
+                                      "' must be of type '" + ParamTypeString.NAME + 
+                                      "'");
+        } else {
+        	KIND kind=((ParamTypeString)result.getType()).getKind();
+        	if(kind != ParamTypeString.KIND.FILE) {
+        		throw new ConfigException("Parameter result='" + resultString + 
+        				"' of type '" + ParamTypeString.NAME +
+        				"' defined in "+result.getSourceXML()+" used for tool '" + name + 
+        				"' must be of kind '" + ParamTypeString.KIND_FILE_ID + "'"+
+        				" (it is '"+kind+"')");                    
+        	}
+        }
+    }
+    public List<String> getResultNames(){
+    	if (result==null) return null;
+    	return result.getValue();
+    }
+    
+    public void initRestore() throws ConfigException{
+    	if (restoreString==null) return;
+        restore=config.getContextManager().findTool(restoreString);
+    	if (restore == null) {
+    		throw new ConfigException("Restore tool '" + restoreString +
+    				"' of tool '" + name + 
+    				"' is absent");
+    	}
+    	if (restore.restoreMaster!=null){ // verify they have the same result
+    		throw new ConfigException("Same restore tool ("+restore.getName()+") for multiple master tools: " +
+    				restore.restoreMaster.getName() + " and "+this.getName()+" - restore tools should differ.");
+    	}
+    	if (resultString==null){
+    		throw new ConfigException("Tool "+getName()+" has restore='"+restore.getName()+
+    				"' defined, but does not have the result attribute.");
+    	}
+    	//restoreMaster
+    	restore.restoreMaster=this;
+    }
+    public Tool getRestore(){
+    	return restore;
+    }
+    public Tool getRestoreMaster(){
+    	return restoreMaster;
+    }
+
+    public void initLogDir() throws ConfigException{
+    	if (logDirString==null) return;
+    	logDir=findParam(logDirString);
+        if(logDir == null) {
+            throw new ConfigException("Parameter log-dir='" + logDirString + 
+                                      "' used for tool '" + name + 
+                                      "' is absent");
+        } else if(!(logDir.getType() instanceof ParamTypeString)) {
+            throw new ConfigException("Parameter log-dir='" + logDirString + 
+            		"' defined in "+logDir.getSourceXML()+" used for tool '" + name + 
+                                      "' must be of type '" + ParamTypeString.NAME + 
+                                      "'");
+        } else {
+        	KIND kind=((ParamTypeString) logDir.getType()).getKind();
+        	if(kind != ParamTypeString.KIND.DIR) {
+        		throw new ConfigException("Parameter log-dir='" + logDirString + 
+        				"' of type '" + ParamTypeString.NAME +
+        				"' defined in "+logDir.getSourceXML()+" used for tool '" + name + 
+        				"' used for tool '" + name + 
+        				"' must be of kind '" + ParamTypeString.KIND_DIR_ID + "'"+
+        				" (it is '"+kind+"')");                   
+        	}
+        }
+    }
+
+    public void initStateDir() throws ConfigException{
+    	if (stateDirString==null) return;
+    	stateDir=findParam(stateDirString);
+        if(stateDir == null) {
+            throw new ConfigException("Parameter log-dir='" + stateDirString + 
+                                      "' used for tool '" + name + 
+                                      "' is absent");
+        } else if(!(stateDir.getType() instanceof ParamTypeString)) {
+            throw new ConfigException("Parameter state-dir='" + stateDirString + 
+            				"' defined in "+stateDir.getSourceXML()+" used for tool '" + name + 
+                                      "' must be of type '" + ParamTypeString.NAME + 
+                                      "'");
+        } else {
+        	KIND kind=((ParamTypeString) stateDir.getType()).getKind();
+        	if(kind != ParamTypeString.KIND.DIR) {
+        		throw new ConfigException("Parameter state-dir='" + stateDirString + 
+        				"' of type '" + ParamTypeString.NAME +
+           				"' defined in "+stateDir.getSourceXML()+" used for tool '" + name + 
+        				"' must be of kind '" + ParamTypeString.KIND_DIR_ID + "'"+
+        				" (it is '"+kind+"')");                    
+        	}
+        }
+    }
+    
+    public String getLogDir() {
+    	if (logDir==null) return null;
+    	List<String> value=logDir.getValue();
+    	if (value.size()==0) return null;
+    	return value.get(0);
+    }
+
+    public String getStateDir() {
+    	if (stateDir==null) return null;
+    	List<String> value=stateDir.getValue();
+    	if (value.size()==0) return null;
+    	return value.get(0);
+    }
+    
+    public void setResultFile(String filename){
+    	resultFile=filename;
+    }
+    public String getStateFile(){
+    	if (resultFile!=null) return resultFile;
+    	List<String> names=	getResultNames();
+    	if ((names==null) || (names.size()==0)) return null;
+    	return ToolLogFile.insertTimeStamp(names.get(0),SelectedResourceManager.getDefault().getBuildStamp());
+    }
+    
+    public String getResultName(){
+    	List<String> names=	getResultNames();
+    	if ((names==null) || (names.size()==0)) return null;
+    	return names.get(0);
+    }
+    
+    
+    public void saveState(IMemento memento) {
+        memento.putBoolean(name+TAG_TOOL_PINNED, new Boolean(pinned));
+        memento.putString(name+TAG_TOOL_STATE, this.state.toString());
+        if (timeStamp!=null) memento.putString(name+TAG_TOOL_TIMESTAMP, timeStamp);
+    }
+    
+    public void restoreState(IMemento memento) {
+    	Boolean pinned=memento.getBoolean(name+TAG_TOOL_PINNED);
+    	if (pinned!=null) this.pinned=pinned;
+    	String state=memento.getString(name+TAG_TOOL_STATE);
+    	if (state!=null){
+    		try {
+    			this.state=TOOL_STATE.valueOf(state);
+    		} catch (IllegalArgumentException e){
+    			System.out.println("Invalid tool state: "+state+" for tool "+name+" in memento");
+    		}
+    		if (this.state==TOOL_STATE.KEPT_OPEN)
+    			this.state=TOOL_STATE.NEW;
+    	}
+    	String timestamp=memento.getString(name+TAG_TOOL_TIMESTAMP);
+    	if (timestamp!=null) this.timeStamp=timestamp;
+    }
+    
     
     public void checkBaseTool() throws ConfigException {
         if(baseToolName != null) {
@@ -552,7 +863,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     {
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             new ToolParamRecognizer(this),
-                                                            new SimpleGeneratorRecognizer(),
+//                                                            new SimpleGeneratorRecognizer(),
+                                                            new SimpleGeneratorRecognizer(this),
                                                             new RepeaterRecognizer(),
                                                             new ContextParamRecognizer(this),
                                                             new ContextParamRepeaterRecognizer(this)

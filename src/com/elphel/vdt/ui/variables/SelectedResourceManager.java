@@ -23,6 +23,8 @@ import java.util.Stack;
 
 import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -73,6 +75,8 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
 //    private long timestamp=0;
     private String timestamp;
     private String ignoreFilter=null;
+    private boolean toolsLinked=true;
+    
 //    private Tool selectedTool=null; // last selected tool
  //   
     private SelectedResourceManager() {
@@ -104,6 +108,13 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
             if (view != null)
             	selectionChanged(view, view.getViewSite().getSelectionProvider().getSelection());
         }
+    }
+    
+    public void setToolsLinked(boolean linked){
+    	this.toolsLinked=linked;
+    }
+    public boolean isToolsLinked(){
+    	return toolsLinked;
     }
     
     /**

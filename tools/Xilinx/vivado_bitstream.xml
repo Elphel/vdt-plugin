@@ -10,12 +10,13 @@
 		package="FPGA_package"
 		shell="/bin/bash"
 		description="Generate bitstream"
-		log-dir="vivado_logs">
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		disable="DisableVivadoBitsteam"
+		>
 		<action-menu>
 			<action label="Generate bitstream" resource="" icon="bitstream.png" />
 		</action-menu>
-		<parameter id="FromMemory" label="Run from memory" tooltip="Do not load snapshot created after routing" 
-		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPreBitstream" label="Skip pre-bitstream" tooltip="Do not run pre bitstream TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 <!--   left from synthesis, may need update--> 
@@ -111,7 +112,6 @@
 			
 		<input>
 			<group name="General">
-				"FromMemory"
 				"SkipPreBitstream"
 				"ShowWarnings"
 				"ShowInfo"
@@ -156,36 +156,17 @@
 		<output>
 		<!-- mkdir -p vdt/npmtest-->
 		<!-- Now skipping completely pre_opt copying - maybe some will still be needed (custom tcl scripts), then move conditional inside block -->
-		<if FromMemory = "false">
+		<if-not reference_bitfile="">
 			<line name="vivado_copy_pre_opt">
 				"-c"
-				<!-- Create project directory on remote server if it did not exist -->
-				"ssh"
-				"-oBatchMode=yes"
-				"-l %RemoteUser %RemoteHost"
-				"'"
-				"mkdir -p"
-				"%VivadoProjectRoot"
-				"' ;"
-				<!-- Copy snapshot generated after opt/place from local to remote -->
 				"rsync -avrR -e ssh"
-				<!--  from: -->
-				"%VivadoLocalDir/%SnapshotOptPlace"
+				<!--  from: (trying full name) -->
+				"%reference_bitfile"
 				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build"
 				";"
-				<!-- Copy bitstream reference file (full name) reference_bitfile  -->
-				<if-not reference_bitfile="">
-					"rsync -avrR -e ssh"
-					<!--  from: (trying full name) -->
-<!-- 					"%VivadoLocalDir/%SnapshotOptPlace"  -->
-					"%reference_bitfile"
-					<!-- to: -->
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build"
-					";"
-				</if-not>
 			</line>
-		</if>	
+		</if-not>	
 <!-- Set sep="", so all new lines should be specified as \n -->
 			<line name="vivado_run_bitstream"
 			      dest="VivadoConsole"
@@ -198,10 +179,6 @@
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      "file mkdir $outputDir\n"
-			      <!-- Start fresh from the loaded checkpoint -->
-		          <if FromMemory = "false">
-		          		"open_checkpoint %SnapshotRoute\n"
-		          </if>
 		          <!-- Run pre-bitstream TCL commands (if specified) -->
 			      <if SkipPreBitstream="false">
 				      <if-not PreBitstreamTCL="">

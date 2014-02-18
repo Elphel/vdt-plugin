@@ -97,6 +97,14 @@ public class ToolLogFile {
 		return null;
 	}
 	
+	public static String insertTimeStamp(String filename, String timestamp){
+		int index=filename.lastIndexOf(".");
+		if (index>=0){
+			return filename.substring(0, index)+BUILD_STAMP_SEPARATOR+timestamp+filename.substring(index);
+		} else {
+			return filename+BUILD_STAMP_SEPARATOR+timestamp;
+		}
+	}
 	
 	/**
 	 * @param logDir  Directory path of the log files root directory (or null)

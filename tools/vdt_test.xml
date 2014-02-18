@@ -32,10 +32,9 @@
 					
 		<parameter   id="command1Contents" label="Command1 contents" default="@@%command1"
 					type="Stringlist" format="ProgramSyntax" visible="true" readonly="false"  />
-					
+
 		<parameter   id="command2Contents" label="Command2 contents" default="@@%command2"
 					type="String" format="CopyValue" visible="true" readonly="false"  />
-
 		<input>
 			<group name="General">
 				"file1"
@@ -52,6 +51,7 @@
 		<output>
 			<line name="test">
 				"-c"
+				"echo \"ProjectName=%%ProjectName\";"
 				"echo \"file1=%file1\";"
 				"echo \"file2=%file2\";"
 				"echo \"command1=%command1\";"
@@ -63,4 +63,31 @@
 			</line>
 		</output>
 	</tool>
+		<tool name="VDTTest1"
+		inherits="VDTTest"
+		shell="/bin/bash"
+		label="VDT Test1" 
+		interface="VDTTestInterface"
+		description="Testing VDT features - variant 1"> 
+		<action-menu>
+			<action label="Test VDT - variant 1" resource="" icon="route66.png" />
+		</action-menu>
+		
+<!--   all calculated parameters that depend on this tool parameters should also be here, not in the base tool-->		
+		<parameter   id="command1" label="Command1 (for list)" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+		<parameter   id="command2" label="Command2 (for single)" default=""
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+		<parameter   id="file1Contents" label="File1 contents" default="@%file1"
+					type="Stringlist" format="ProgramSyntax" visible="true" readonly="false"  />
+		<parameter   id="file2Contents" label="File2 contents" default="@%file2"
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+		<parameter   id="command1Contents" label="Command1 contents" default="@@%command1"
+					type="Stringlist" format="ProgramSyntax" visible="true" readonly="false"  />
+ 				
+		<parameter   id="command2Contents" label="Command2 contents" default="@@%command2"
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+					
+	</tool>
+	
 </vdt-project>

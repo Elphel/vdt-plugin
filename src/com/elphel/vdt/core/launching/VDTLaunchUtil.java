@@ -330,7 +330,11 @@ public class VDTLaunchUtil {
     public static String getLogBuildStamp(ILaunchConfiguration configuration) throws CoreException{
     	return configuration.getAttribute(VDT.ATTR_LOG_BUILD_STAMP, (String) null);
     }
-    
+
+    public static String getToolStateFile(ILaunchConfiguration configuration) throws CoreException{
+    	return configuration.getAttribute(VDT.ATTR_TOOL_STATE_FILE, (String) null);
+    }
+
     /**
      * Throws a core exception with an error status object built from
      * the given message, lower level exception, and error code.

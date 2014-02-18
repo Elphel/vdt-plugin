@@ -204,6 +204,22 @@ public abstract class Context {
     // all other needed params are built into command line array
     // that array is then returned
 //    public String[] buildParams() throws ToolException {
+    public List<String> getSessionConsoles(){
+    	List<String> consoleList=new ArrayList<String>();
+    	Iterator<CommandLinesBlock> commandLinesBlockIter = commandLinesBlocks.iterator();
+    	while(commandLinesBlockIter.hasNext()) {
+    		CommandLinesBlock commandLinesBlock = (CommandLinesBlock)commandLinesBlockIter.next();
+    		if (commandLinesBlock.isConsoleKind()){
+    			Parameter parName = findParam(commandLinesBlock.getDestination());  // command file or console name
+    			String consoleName = (parName != null)?	parName.getValue().get(0).trim() : null;
+    			if (consoleName!=null) consoleList.add(consoleName);
+    		}
+    	}
+    	return consoleList;
+    }
+    
+    
+    
       public BuildParamsItem[] buildParams() throws ToolException {
     	List<BuildParamsItem> buildParamItems = new ArrayList<BuildParamsItem>();
     	

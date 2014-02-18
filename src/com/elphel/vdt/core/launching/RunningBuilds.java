@@ -290,7 +290,7 @@ public class RunningBuilds {
 			if (toolName.equals(runConfig.getToolName())){
 				Tool tool=ToolsCore.getTool(runConfig.getToolName());
 				tool.setRunning(false);
-				tool.updateViewStateIcon();
+				tool.toolFinished();
 				if (tool.getState()==TOOL_STATE.KEPT_OPEN) {
 					MessageUI.error("Termninal that starts by this tool ("+toolName+") is already open in console \""+consoleName+"\"");
 					return true;

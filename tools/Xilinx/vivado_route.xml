@@ -22,12 +22,15 @@
 		package="FPGA_package"
 		shell="/bin/bash"
 		description="Route design with Vivado"
-		log-dir="vivado_logs">
+		result="SnapshotRoute"
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		restore="RestoreVivadoRoute"
+		disable="DisableVivadoRoute"
+		>
 		<action-menu>
 			<action label="Route" resource="" icon="route66.png" />
 		</action-menu>
-		<parameter id="FromMemory" label="Run from memory" tooltip="Do not load snapshot created after placement" 
-		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPreRoute" label="Skip pre-route" tooltip="Do not run pre route TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipSnapshotRoute" label="Skip snapshot save" tooltip="Do not create snapshot after route"
@@ -136,7 +139,6 @@
 			
 		<input>
 			<group name="General">
-				"FromMemory"
 				"SkipPreRoute"
 				"SkipSnapshotRoute"
  				"SnapshotRoute" <!--  same as in project -->
@@ -187,28 +189,6 @@
 		</input>
 
 		<output>
-		<!-- mkdir -p vdt/npmtest-->
-		<!-- Now skipping completely pre_opt copying - maybe some will still be needed (custom tcl scripts), then move conditional inside block -->
-		<if FromMemory = "false">
-			<line name="vivado_copy_pre_opt">
-				"-c"
-				<!-- Create project directory on remote server if it did not exist -->
-				"ssh"
-				"-oBatchMode=yes"
-				"-l %RemoteUser %RemoteHost"
-				"'"
-				"mkdir -p"
-				"%VivadoProjectRoot"
-				"' ;"
-				<!-- Copy snapshot generated after opt/place from local to remote -->
-				"rsync -avrR -e ssh"
-				<!--  from: -->
-				"%VivadoLocalDir/%SnapshotOptPlace"
-				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
-				";"
-			</line>
-		</if>	
 <!-- Set sep="", so all new lines should be specified as \n -->
 			<line name="vivado_run_route"
 			      dest="VivadoConsole"
@@ -221,10 +201,6 @@
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      "file mkdir $outputDir\n"
-			      <!-- Start fresh from the loaded checkpoint -->
-		          <if FromMemory = "false">
-		          		"open_checkpoint %SnapshotOptPlace\n"
-		          </if>
 		          <!-- Run pre-route TCL commands (if specified) -->
 			      <if SkipPreRoute="false">
 				      <if-not PreRouteTCL="">
@@ -293,6 +269,52 @@
      				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Routing:0000\]@'"
      			</if>
 			</line>
+		</output>
+	</tool>
+	<tool name="RestoreVivadoRoute" label="Restore state after Vivado Route"
+	    project="FPGA_project"
+		interface="VivadoRouteInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%VivadoIgnoreSource"
+		description="Restore Vivado Routing"
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		>
+		<output>
+			<line name="vivado_pre_restore_route">
+				"-c"
+				<!-- Create project directory on remote server if it did not exist -->
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%VivadoProjectRoot"
+				"' ;"
+				<!-- Copy snapshot generated after route from local to remote -->
+				"rsync -avrR -e ssh"
+				<!--  from: -->
+				"%VivadoLocalDir/%%StateFile"
+				<!-- to: -->
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				";"
+			</line>
+			<!--       success="phys_opt_design completed successfully"  -->
+			<line name="vivado_restore_route"
+			      dest="VivadoConsole"
+			      mark="``"
+			      sep=""
+			      failure="ERROR"
+			      prompt="@@FINISH@@"
+			      log="">
+			      "cd ~/%VivadoProjectRoot\n"
+			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "file mkdir $outputDir\n"
+			      <!-- Start fresh from the loaded checkpoint -->
+		          "open_checkpoint %%StateFile\n"
+		          "puts \"@@FINISH@@\"\n"
+		    </line>
 		</output>
 	</tool>
 </vdt-project>

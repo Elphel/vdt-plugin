@@ -95,8 +95,8 @@ public class VDTRunner {
 		tool.setDirty(false);
 		tool.setState(TOOL_STATE.FAILURE);
 		tool.setRunning(false);
-		tool.setFinishTimeStamp();
-		tool.updateViewStateIcon();
+		tool.setTimeStamp();
+		tool.toolFinished();
 		//removeConfiguration
 		runningBuilds.removeConfiguration(runConfig.getOriginalConsoleName());
 	}
@@ -265,13 +265,13 @@ public class VDTRunner {
 		monitor.done();
 		Tool tool=ToolsCore.getTool(runConfig.getToolName());
 		tool.setRunning(false);
-		tool.setFinishTimeStamp();
+		tool.setTimeStamp();
 		if ((tool.getState()==TOOL_STATE.SUCCESS) && runConfig.isKeptOpen()) {
 			tool.setState(TOOL_STATE.KEPT_OPEN);
 		} else { // failure on not
 			runningBuilds.removeConfiguration(consoleName); 
 		}
-		tool.updateViewStateIcon();
+		tool.toolFinished();
 	}
 
     public void logPlaybackLaunch(String consoleName) throws CoreException  {
@@ -332,7 +332,7 @@ public class VDTRunner {
 		System.out.println("All playbacks finished");
 		monitor.done();
 		ToolsCore.getTool(runConfig.getToolName()).setRunning(false);
-		ToolsCore.getTool(runConfig.getToolName()).updateViewStateIcon();
+		ToolsCore.getTool(runConfig.getToolName()).toolFinished();
 	}
 
 	

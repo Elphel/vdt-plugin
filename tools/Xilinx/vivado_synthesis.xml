@@ -56,7 +56,12 @@
 		shell="/bin/bash"
 		ignore="%VivadoIgnoreSource"
 		description="Vivado Synthesis"
-		log-dir="vivado_logs">
+		result="SnapshotSynth"
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		restore="RestoreVivadoSynthesis"
+		disable="DisableVivadoSynth"
+		>
 		
 		<extensions-list>
 			<extension mask="v" />
@@ -305,7 +310,8 @@
 			      "\n"
 			      <if-and SkipSnapshotSynth="false"
 			              VivadoSynthActionIndex="0">
-				      		"write_checkpoint -force %SnapshotSynth\n"
+<!-- 				      		"write_checkpoint -force %SnapshotSynth\n"  -->
+				      		"write_checkpoint -force %%StateFile\n"
 			      </if-and>
 				"puts \"@@FINISH@@\"\n"
 			</line>
@@ -316,8 +322,10 @@
 					"-c"
 					"mkdir -p %VivadoLocalDir ;"
 					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
-					"%VivadoLocalDir/"
+<!--				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
+					"%VivadoLocalDir/"   -->
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%%StateFile"
+					"%%StateDir/"
 				</line>
 	        </if-and>
 	        <!-- errors=".*[ERROR|CRITICAL WARNING]: (\[.*\].*)\[(.*):([0-9]+)\]"
@@ -347,8 +355,50 @@
 			</line>
 		</output>
 	</tool>
-<!--  sed    's@^[^\[]*\[[^\[]*$@&\[Synthesis:0000\]@'
-      sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Synthesis:0000\]@'
- 
- -->
+	<tool name="RestoreVivadoSynthesis" label="Restore state after Vivado Synthesis"
+	    project="FPGA_project"
+		interface="VivadoSynthesisInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%VivadoIgnoreSource"
+		description="Restore Vivado Synthesis"
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		>
+		<output>
+			<line name="vivado_pre_restore_synthesis">
+				"-c"
+				<!-- Create project directory on remote server if it did not exist -->
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%VivadoProjectRoot"
+				"' ;"
+				<!-- Copy snapshot generated after synthesis from local to remote -->
+				"rsync -avrR -e ssh"
+				<!--  from: -->
+				"%VivadoLocalDir/%%StateFile"
+				<!-- to: -->
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				";"
+			</line>
+			<!--       success="phys_opt_design completed successfully"  -->
+			<line name="vivado_restore_synthesis"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep=""
+			      failure="ERROR"
+			      prompt="@@FINISH@@"
+			      log="">
+			      "cd ~/%VivadoProjectRoot\n"
+			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "file mkdir $outputDir\n"
+			      <!-- Start fresh from the loaded checkpoint -->
+		          "open_checkpoint %%StateFile\n"
+		          "puts \"@@FINISH@@\"\n"
+		    </line>
+		</output>
+	</tool>
 </vdt-project>

@@ -70,6 +70,17 @@
              label="Testing some VDT features"
              icon="sample.gif"
              call="VDTTest"/>
+<!--              
+           <menuitem name="Test VDT-A"
+             label="Testing some VDT features"
+             icon="sample.gif"
+             tool-instance="VDTTest_inst2"
+             call="VDTTest"/>
+               -->
+           <menuitem name="Test VDT1"
+             label="Testing some VDT features - variant 1"
+             icon="sample.gif"
+             call="VDTTest1"/>
                           
     </menu>
     

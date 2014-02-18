@@ -54,12 +54,15 @@
 		package="FPGA_package"
 		shell="/bin/bash"
 		description="Vivado optimize, power optimize, place and physical optimize design"
-		log-dir="vivado_logs">
+		result="SnapshotOptPlace"
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		restore="RestoreVivadoOptPlace"
+		disable="DisableVivadoOptPlace"
+		>
 		<action-menu>
 			<action label="Optimize and Place" resource="" icon="mondrian2x2.png" />
 		</action-menu>
-		<parameter id="FromMemory" label="Run from memory" tooltip="Do not load snapshot created after synthesis" 
-		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipOptimization" label="Skip optimize" tooltip="Do not run opt_design"
@@ -211,7 +214,6 @@
 			
 		<input>
 			<group name="General">
-				"FromMemory"
 				"SkipPreOptimization"
 				"SkipOptimization"
 				"SkipPowerOptimization"
@@ -294,28 +296,6 @@
 		</input>
 
 		<output>
-		<!-- mkdir -p vdt/npmtest-->
-		<!-- Now skipping completely pre_opt copying - maybe some will still be needed (custom tcl scripts), then move conditional inside block -->
-		<if FromMemory = "false">
-			<line name="vivado_copy_pre_opt">
-				"-c"
-				<!-- Create project directory on remote server if it did not exist -->
-				"ssh"
-				"-oBatchMode=yes"
-				"-l %RemoteUser %RemoteHost"
-				"'"
-				"mkdir -p"
-				"%VivadoProjectRoot"
-				"' ;"
-				<!-- Copy snapshot generated after synthesis from local to remote -->
-				"rsync -avrR -e ssh"
-				<!--  from: -->
-				"%VivadoLocalDir/%SnapshotSynth"
-				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
-				";"
-			</line>
-		</if>	
 <!-- Combining optimization and placement TCL commands in a single command block
      May need to split if they will need different error parsers (external and/or Eclipse patterns)  -->
 <!-- Set sep="", so all new lines should be specified as \n -->
@@ -330,10 +310,6 @@
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      "file mkdir $outputDir\n"
-			      <!-- Start fresh from the loaded checkpoint -->
-		          <if FromMemory = "false">
-		          		"open_checkpoint %SnapshotSynth\n"
-		          </if>
 		          <!-- Run pre-optimization TCL commands (if specified) -->
 			      <if SkipPreOptimization="false">
 				      <if-not PreOptTCL="">
@@ -398,7 +374,7 @@
 				      "\n"
 			      </if>
 			      <if SkipSnapshotPlace="false">
-				      	"write_checkpoint -force %SnapshotOptPlace\n"
+		      		"write_checkpoint -force %%StateFile\n"
 			      </if>
 				"puts \"@@FINISH@@\"\n"
 			</line>
@@ -409,8 +385,8 @@
 					"-c"
 					"mkdir -p %VivadoLocalDir ;"
 					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotOptPlace"
-					"%VivadoLocalDir/"
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%%StateFile"
+					"%%StateDir/"
 				</line>
 	        </if-and>
 			<line name="parser_VivadoOpt"
@@ -439,5 +415,53 @@
 			</line>
 		</output>
 	</tool>
-
+	
+	
+	<tool name="RestoreVivadoOptPlace" label="Restore state after Vivado OptPlace"
+	    project="FPGA_project"
+		interface="VivadoOptPlaceInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%VivadoIgnoreSource"
+		description="Restore Vivado OptPlace"
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		>
+		<output>
+			<line name="vivado_pre_restore_opt_place">
+				"-c"
+				<!-- Create project directory on remote server if it did not exist -->
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%VivadoProjectRoot"
+				"' ;"
+				<!-- Copy snapshot generated after opt/place from local to remote -->
+				"rsync -avrR -e ssh"
+				<!--  from: -->
+				"%VivadoLocalDir/%%StateFile"
+				<!-- to: -->
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
+				";"
+			</line>
+			<!--       success="phys_opt_design completed successfully"  -->
+			<line name="vivado_restore_synthesis"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep=""
+			      failure="ERROR"
+			      prompt="@@FINISH@@"
+			      log="">
+			      "cd ~/%VivadoProjectRoot\n"
+			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "file mkdir $outputDir\n"
+			      <!-- Start fresh from the loaded checkpoint -->
+		          "open_checkpoint %%StateFile\n"
+		          "puts \"@@FINISH@@\"\n"
+		    </line>
+		</output>
+	</tool>
 </vdt-project>
+

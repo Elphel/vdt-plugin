@@ -110,6 +110,9 @@
 		<parameter id="VivadoLocalDir" label="Local Xilinx directory" tooltip="Local project subdirectroy for Xilinx Vivado generated files"
 			type="Pathname" default="vivado" format="CopyValue" readonly="false" />
 
+		<parameter id="VivadoLogDir" label="Local Vivado tool logsx directory" tooltip="Local project subdirectroy for Xilinx Vivado tools log files"
+			type="Pathname" default="vivado_logs" format="CopyValue" readonly="false" />
+
 		<parameter id="VivadoIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
 			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
 <!-- Calculated -->
@@ -119,22 +122,40 @@
 	 	    <parameter id="SnapshotSynth"
 	        label="Synthesis snapshot" tooltip="Name of Vivado snapshot archive after synthesis"
 	        default="%%ProjectName-synth.dcp"
-			type="String" format="CopyValue" />
+			type="Filename" format="CopyValue" />
 
 	 	    <parameter id="SnapshotOptPlace"
 	        label="Placement snapshot" tooltip="Name of Vivado snapshot archive after optimization/placement"
-	        default="%%ProjectName-opt-pace.dcp"
-			type="String" format="CopyValue" />
+	        default="%%ProjectName-opt-place.dcp"
+			type="Filename" format="CopyValue" />
 
 
 	 	    <parameter id="SnapshotRoute"
 	        label="Routing snapshot" tooltip="Name of Vivado snapshot archive after routing"
 	        default="%%ProjectName-route.dcp"
-			type="String" format="CopyValue" />
+			type="Filename" format="CopyValue" />
 
+	 	    <parameter id="DisableVivadoSynth"
+	        label="Disable Vivado synthesis" tooltip="Disable tool Vivado Synthesis"
+	        default="false"
+			type="Boolean" format="None" />
+
+	 	    <parameter id="DisableVivadoOptPlace"
+	        label="Disable Vivado opt/place" tooltip="Disable tool Vivado Optimize and Place"
+	        default="false"
+			type="Boolean" format="None" />
+
+
+	 	    <parameter id="DisableVivadoRoute"
+	        label="Disable Vivado route" tooltip="Disable tool Vivado route"
+	        default="false"
+			type="Boolean" format="None" />
+			
+	 	    <parameter id="DisableVivadoBitsteam"
+	        label="Disable Vivado bitstream" tooltip="Disable tool Vivado bitstream generator"
+	        default="false"
+			type="Boolean" format="None" />
  				"" <!--  same as in project -->
-
-
 
 <!-- Invisible (calculated) project-wide parameters -->			
 		<parameter id="SimulDirSlash" type="Pathname" visible="false"
@@ -155,8 +176,15 @@
 			    "part"
 				"VivadoProjectRoot"
 				"VivadoLocalDir"
+				"VivadoLogDir"
 				"VivadoIgnoreSource"
 				"SedPaths"
+			</group>
+			<group name="VivadoDisable" label="Selectively disable Vivado tools">
+			    "DisableVivadoSynth"
+			    "DisableVivadoOptPlace"
+			    "DisableVivadoRoute"
+			    "DisableVivadoBitsteam"
 			</group>
 			<!--  TODO: make time-stamped and "latest" for snapshots -->
 			<group name="VivadoSnapshots" label="Vivado snapshot archive names">

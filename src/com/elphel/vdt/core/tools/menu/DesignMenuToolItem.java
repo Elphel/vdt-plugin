@@ -24,6 +24,7 @@ import com.elphel.vdt.core.tools.params.Tool;
 
 public class DesignMenuToolItem extends DesignMenuItem {
     private String tcall;
+    private String toolInstance;
 
     public DesignMenuToolItem(Config config,
                               DesignMenu parentMenu,
@@ -32,7 +33,8 @@ public class DesignMenuToolItem extends DesignMenuItem {
                               String label,
                               String icon,
                               Boolean visible,
-                              String tcall)
+                              String tcall,
+                              String toolInstance)
     {
         super(config,
               parentMenu,
@@ -43,6 +45,7 @@ public class DesignMenuToolItem extends DesignMenuItem {
               visible);
         
         this.tcall = tcall;
+        this.toolInstance = toolInstance;
     }
 
     public void init() throws ConfigException {
@@ -74,7 +77,8 @@ public class DesignMenuToolItem extends DesignMenuItem {
                                       label,
                                       icon,
                                       visible,
-                                      tcall);
+                                      tcall,
+                                      toolInstance);
     }
     
     

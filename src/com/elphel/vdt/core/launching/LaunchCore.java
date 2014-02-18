@@ -115,8 +115,10 @@ public class LaunchCore {
     		, String logBuildStamp ) throws CoreException {
     	workingCopy.setAttribute(VDT.ATTR_LOG_BUILD_STAMP,     logBuildStamp);
     }
-
-    
+    public static void setToolStateFile( ILaunchConfigurationWorkingCopy workingCopy
+    		, String stateFile ) throws CoreException {
+    	workingCopy.setAttribute(VDT.ATTR_TOOL_STATE_FILE,     stateFile);
+    }
     
     
     public static void updateLaunchConfiguration( ILaunchConfigurationWorkingCopy workingCopy
@@ -217,12 +219,7 @@ public class LaunchCore {
         return launchConfig;
     } // createLaunchConfiguration()
     
-/*    
-    public static void launch(Tool tool, IProject project) throws CoreException {
-        launch(tool, project, VDT.VARIABLE_RESOURCE_NAME);
-    }
-*/
-    
+   
   
     
     public static void launch(

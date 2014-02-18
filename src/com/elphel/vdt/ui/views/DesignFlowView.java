@@ -41,7 +41,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
 import java.io.File;
+
 import com.elphel.vdt.core.launching.LaunchCore;
 import com.elphel.vdt.core.launching.ToolLogFile;
 import com.elphel.vdt.core.options.OptionsCore;
@@ -50,6 +52,8 @@ import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.menu.DesignMenu;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
+import com.elphel.vdt.core.tools.params.ToolSequence;
 import com.elphel.vdt.core.tools.params.types.RunFor;
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
@@ -64,6 +68,7 @@ import com.elphel.vdt.ui.options.ContextOptionsDialog;
 import com.elphel.vdt.ui.options.FilteredFileSelector;
 import com.elphel.vdt.ui.options.SetupOptionsDialog;
 import com.elphel.vdt.ui.options.SetupOptionsManager;
+
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 
@@ -89,13 +94,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     // Persistance tags.
     private static final String TAG_SELECTED_RESOURCE = "SelectedProject";
+    private static final String TAG_LINKED_TOOLS = "LinkedTools";
 
     private TreeViewer viewer;
     private DrillDownAdapter drillDownAdapter;
     private Action showLaunchConfigAction;
 //    private Action launchAction;
     
-    
+    private Action toggleLinkedTools;
 
     private Action showInstallationPropertiesAction;
     private ClearAction clearInstallationPropertiesAction;
@@ -123,18 +129,27 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     private IMemento memento;
     
+    private Action pinAction;
+    private Action restoreAction;
+    private Action restoreSelectAction;
+
     private Action playbackLogLatestAction;
     private Action playbackLogSelectAction;
     
     
     IDoubleClickListener doubleClickListener=null;
     private Action [] launchActions;
+    private ToolSequence toolSequence=null;
 
     /**
      * The constructor.
      */
     public DesignFlowView() {
         desigMenuName = new ValueBasedOption(VDT.OPTION_PROJECT_MENU);
+        toolSequence = new ToolSequence(this);
+    }
+    public ToolSequence getToolSequence(){
+    	return toolSequence;
     }
 
     /* 
@@ -268,6 +283,16 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         //      manager.add(new Separator());
 //      drillDownAdapter.addNavigationActions(manager);
       // Other plug-ins can contribute their actions here
+    	
+    	if (pinAction!=null){
+    		manager.add(new Separator());
+    		manager.add(pinAction);
+    	}    	
+    	if ((restoreAction!=null) || (restoreSelectAction!=null) ) {
+    		manager.add(new Separator()); 
+    		if (restoreAction!=null) manager.add(restoreAction);
+    		if (restoreSelectAction!=null) manager.add(restoreSelectAction);
+    	}    	
     	if ((playbackLogLatestAction!=null) || (playbackLogSelectAction!=null) ) {
     		manager.add(new Separator()); 
     		if (playbackLogLatestAction!=null) manager.add(playbackLogLatestAction);
@@ -295,6 +320,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 //      manager.add(new Separator());
 //      drillDownAdapter.addNavigationActions(manager);
         manager.add(new Separator("toolbar-separator"));
+        manager.add(toggleLinkedTools);
+        
         manager.add(showInstallationPropertiesAction);
         manager.add(showPackagePropertiesToolbarAction);
         manager.add(showProjectPropertiesToolbarAction);
@@ -308,6 +335,22 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
 			System.out.println("makeActions()");
 		}
+		
+	    toggleLinkedTools= new Action("Toggle tool dependency", Action.AS_CHECK_BOX) {
+            public void run() {
+//            	System.out.println("isChecked()="+isChecked());
+            	SelectedResourceManager.getDefault().setToolsLinked(!isChecked());
+            	if (isChecked()){
+            		toggleLinkedTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_UNLINKED);
+            	} else {
+            		toggleLinkedTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_LINKED);
+            	}
+            }
+        };
+        toggleLinkedTools.setToolTipText("Toggle tool dependency");
+        toggleLinkedTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_LINKED);
+        toggleLinkedTools.setChecked(!SelectedResourceManager.getDefault().isToolsLinked()); // normally happens before reading memento
+		
         showInstallationPropertiesAction = new Action() {
             public void run() {
                 if (openInstallationPropertiesDialog()==Window.OK){
@@ -534,6 +577,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         		}
         	}
         }
+        final Tool fTool=tool;
         boolean enabled = (selectedItem != null) // At startup null (twice went through this); Right Click - "Icarus Ver..."
                        && (selectedResource != null) // at startup x353_1.tf;  Right Click - "L/x353/x353_1.tf
                        && (selectedItem.isEnabled(selectedResource));
@@ -544,6 +588,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         launchActions=null;
         playbackLogLatestAction=null;
         playbackLogSelectAction=null;
+        pinAction=null;
+        restoreAction=null;
+        restoreSelectAction=null;
+
         if ((runFor!=null) && (project!=null)){
         	launchActions=new Action [runFor.length];
         	for (int i=0;i<runFor.length;i++){
@@ -595,6 +643,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                     public void run() {
                         try {
                             launchTool(
+                            		fTool, // tool, will get 
                             		fDesignFlowView, // to be able to launch update when build state of the tool changes
 //                            		selectedItem, // is it needed?
                             		finalI,
@@ -626,6 +675,75 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 	launchActions[i].setImageDescriptor(VDTPluginImages.DESC_RUN_TOOL);
                 
                 if (i==0) { // set log play-back (always for default tool only)
+// Add pinned action;                	
+                	pinAction=new Action("Toggle tool dependency", Action.AS_CHECK_BOX){
+                		public void run(){
+                			fTool.setPinned(isChecked());
+                		}
+                	};
+                	pinAction.setText("Pin "+tool.getName());
+                	pinAction.setToolTipText("Do not automatically re-run "+tool.getName()+" when its dependency changes");
+                	pinAction.setEnabled((tool.getState()==TOOL_STATE.SUCCESS) || (tool.isPinned()));
+                	pinAction.setImageDescriptor(VDTPluginImages.DESC_TOOLS_PIN);
+                	if (tool.getRestore()!=null){
+                		restoreAction=new Action(){
+                    		public void run(){
+                    			System.out.println("*** Will restore latest state of "+fTool.getName());
+                    			String stateFileName=toolSequence.getSelectedStateFile(fTool, false);
+                    			System.out.println("***Selected restore file: "+stateFileName);
+                    			Tool restoreTool=fTool.getRestore();
+                    			if ((stateFileName!=null) && (restoreTool!=null)){
+                    				restoreTool.setResultFile(stateFileName);
+                                    try {
+                                        launchTool(
+                                        		restoreTool,
+                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
+                                        		0,
+                                        		fFullPath,
+                                        		fIgnoreFilter);
+                                    } catch (Exception e) {
+                                    	MessageUI.error( Txt.s("Action.ToolLaunch.Error", 
+                                    			new String[] {fTool.getName()+" -> "+
+                                    					restoreTool.getName() , e.getMessage()}), e);
+                                    }    
+                    				
+                    			}
+                    			
+                    		}
+                    	};
+                    	restoreAction.setText("Restote latest "+tool.getName());
+                    	restoreAction.setToolTipText("Restore state of the latest successful run of "+tool.getName());
+                    	restoreAction.setEnabled(tool.getRestore()!=null); // just to decide should it be removed or disabled
+                    	restoreAction.setImageDescriptor(VDTPluginImages.DESC_TOOLS_RESTORE);
+
+                    	restoreSelectAction=new Action(){
+                    		public void run(){
+                    			System.out.println("*** Will restore selected state of "+fTool.getName());
+                    			String stateFileName=toolSequence.getSelectedStateFile(fTool, false);
+                    			System.out.println("***Selected restore file: "+stateFileName);
+                    			Tool restoreTool=fTool.getRestore();
+                    			if ((stateFileName!=null) && (restoreTool!=null)){
+                    				restoreTool.setResultFile(stateFileName);
+                                    try {
+                                        launchTool(
+                                        		restoreTool,
+                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
+                                        		0,
+                                        		fFullPath,
+                                        		fIgnoreFilter);
+                                    } catch (Exception e) {
+                                    	MessageUI.error( Txt.s("Action.ToolLaunch.Error", 
+                                    			new String[] {fTool.getName()+" -> "+
+                                    					restoreTool.getName() , e.getMessage()}), e);
+                                    }    
+                    			}
+                    		}
+                    	};
+                    	restoreSelectAction.setText("Restote selected "+tool.getName());
+                    	restoreSelectAction.setToolTipText("Restore state of the selected successful run of "+tool.getName());
+                    	restoreSelectAction.setEnabled(tool.getRestore()!=null); // just to decide should it be removed or disabled
+                    	restoreSelectAction.setImageDescriptor(VDTPluginImages.DESC_TOOLS_RESTORE_SELECT);
+                	}
                 	boolean logEnabled=(tool.getLogDir()!=null);
 // see if tool has log-dir                	
                 	playbackLogLatestAction=new Action() {
@@ -709,16 +827,17 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     } // updateLaunchAction()
 
     private void launchTool(
+    		Tool tool,
     		final DesignFlowView designFlowView,
 //    		DesignMenuModel.Item item,
     		int choice,
     		String fullPath,
     		String ignoreFilter) throws CoreException {
-        Tool tool = selectedItem.getTool();
+//    	if (tool==null) tool = selectedItem.getTool();
         if (tool != null) {
             tool.setDesignFlowView(designFlowView);
             tool.setRunning(true);
-            tool.updateViewStateIcon();
+            tool.toolFinished();
         	tool.setChoice(0);
         	SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
         	SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
@@ -737,6 +856,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         }
     } // launchTool()
     
+    
+    
     private void playLogs(
     		final DesignFlowView designFlowView,
     		boolean select, // select log file
@@ -751,7 +872,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     		}
             tool.setDesignFlowView(designFlowView);
             tool.setRunning(true);
-            tool.updateViewStateIcon();
+            tool.toolFinished();
         	tool.setChoice(0);
         	SelectedResourceManager.getDefault().updateActionChoice(fullPath, 0, ignoreFilter); // Andrey
         	SelectedResourceManager.getDefault().setBuildStamp(); // OK - even for log? Or use old/selected one?
@@ -831,24 +952,6 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             DesignMenu newDesignMenu = dialog.getSelectedDesignMenu();
             String newDesignMenuName = newDesignMenu == null ? null
                                                              : newDesignMenu.getName();
-            if (newDesignMenuName != null) {
-/*                try {
-                    Utils.addNature(VDT.VERILOG_NATURE_ID, project, null);
-                    desigMenuName.setValue(newDesignMenuName);
-                } catch (CoreException e) {
-                    MessageUI.error( "Cannot set " + VDT.VERILOG_NATURE_ID + "nature for " + project.getName() 
-                                   , e);
-                }
-*/                
-            } else {
-/*                try {
-                    Utils.removeNature(VDT.VERILOG_NATURE_ID, project, null);
-                    desigMenuName.doClear();
-                } catch (CoreException e) {
-                    MessageUI.error( "Cannot remove " + VDT.VERILOG_NATURE_ID + "nature for " + project.getName() 
-                                   , e);
-                }
-*/            }
             OptionsCore.doStoreOption(desigMenuName, project);
             doLoadDesignMenu(newDesignMenuName);
         }
@@ -988,10 +1091,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
      * @since 2.0
      */
     protected void restoreState(IMemento memento) {
+    	Boolean linkedTools= memento.getBoolean(TAG_LINKED_TOOLS);
+    	ToolsCore.restoreToolsState(memento);
+    	if (linkedTools==null) linkedTools=true;
+    	SelectedResourceManager.getDefault().setToolsLinked(linkedTools);
+        toggleLinkedTools.setChecked(!SelectedResourceManager.getDefault().isToolsLinked());
         String location = memento.getString(TAG_SELECTED_RESOURCE);
         if (location == null)
             return;
-
         selectedResource = ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(location));
         doLoadDesignMenu();
         updateLaunchAction();
@@ -1011,6 +1118,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             String location = selectedResource.getFullPath().toPortableString();
             memento.putString(TAG_SELECTED_RESOURCE, location);
         }
+        memento.putBoolean(TAG_LINKED_TOOLS, new Boolean(SelectedResourceManager.getDefault().isToolsLinked()));
+        ToolsCore.saveToolsState(memento);
+
     }
 
 } // class DesignFlowView
