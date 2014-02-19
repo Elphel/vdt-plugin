@@ -18,7 +18,6 @@
 package com.elphel.vdt.core.tools.generators;
 
 import com.elphel.vdt.VDT;
-import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 public class StateDirGenerator extends AbstractGenerator {
     public static final String NAME = VDT.GENERATOR_ID_STATE_DIR;
@@ -27,8 +26,6 @@ public class StateDirGenerator extends AbstractGenerator {
     }
     
     protected String[] getStringValues() {
-    	String stateDir=(tool0==null)?null:tool0.getStateDir();
-    	if (stateDir==null) stateDir="";
-    	return new String[] {stateDir};
+    	return new String[] {(tool0!=null)?tool0.getStateDir(): ""};
     }
 }

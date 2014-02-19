@@ -166,6 +166,7 @@ public class ContextManager {
 
     private Context findContext(List<? extends Context> contexts, String name) {
         for(Context context : contexts) {
+ //       	System.out.println("Comparing "+context.getName() +" with "+name);
             if(context.getName().equals(name))
                 return context;
         }

@@ -55,11 +55,13 @@ import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
 import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
+
 
 
 
@@ -94,7 +96,8 @@ public class VDTRunner {
     	Tool tool=ToolsCore.getTool(runConfig.getToolName());
 		tool.setDirty(false);
 		tool.setState(TOOL_STATE.FAILURE);
-		tool.setRunning(false);
+//		tool.setRunning(false);
+		tool.setMode(TOOL_MODE.STOP);
 		tool.setTimeStamp();
 		tool.toolFinished();
 		//removeConfiguration
@@ -264,7 +267,9 @@ public class VDTRunner {
 		if (debugPrint)  System.out.println("All finished");
 		monitor.done();
 		Tool tool=ToolsCore.getTool(runConfig.getToolName());
-		tool.setRunning(false);
+//		tool.setRunning(false);
+		tool.setMode(TOOL_MODE.STOP);
+
 		tool.setTimeStamp();
 		if ((tool.getState()==TOOL_STATE.SUCCESS) && runConfig.isKeptOpen()) {
 			tool.setState(TOOL_STATE.KEPT_OPEN);
@@ -331,11 +336,10 @@ public class VDTRunner {
 		} //for (;numItem<argumentsItemsArray.length;numItem++){
 		System.out.println("All playbacks finished");
 		monitor.done();
-		ToolsCore.getTool(runConfig.getToolName()).setRunning(false);
+//		ToolsCore.getTool(runConfig.getToolName()).setRunning(false);
+		ToolsCore.getTool(runConfig.getToolName()).setMode(TOOL_MODE.STOP);
 		ToolsCore.getTool(runConfig.getToolName()).toolFinished();
 	}
-
-	
 	
     public void log(String header,
     		         String[] strings, 

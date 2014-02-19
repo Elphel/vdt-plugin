@@ -61,7 +61,8 @@
 		state-dir="VivadoLocalDir"
 		restore="RestoreVivadoSynthesis"
 		disable="DisableVivadoSynth"
-		>
+		autosave="AutosaveVivadoSynthesis"
+		save="SaveVivadoSynthesis"	>
 		
 		<extensions-list>
 			<extension mask="v" />
@@ -185,6 +186,11 @@
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
         <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
         			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
+        			
+<!--  invisible/calculated parameters -->        			
+        <parameter	id="AutosaveVivadoSynthesis" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
+        			
 			
 		<input>
 			<group name="General">
@@ -308,28 +314,8 @@
 		          "%quiet"
 		          "%verbose"
 			      "\n"
-			      <if-and SkipSnapshotSynth="false"
-			              VivadoSynthActionIndex="0">
-<!-- 				      		"write_checkpoint -force %SnapshotSynth\n"  -->
-				      		"write_checkpoint -force %%StateFile\n"
-			      </if-and>
 				"puts \"@@FINISH@@\"\n"
 			</line>
-<!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
-			<if-and SkipSnapshotSynth="false"
-			        VivadoSynthActionIndex="0">
-				<line name="vivado_copy_after_synth">
-					"-c"
-					"mkdir -p %VivadoLocalDir ;"
-					"rsync -avr -e ssh"
-<!--				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotSynth"
-					"%VivadoLocalDir/"   -->
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%%StateFile"
-					"%%StateDir/"
-				</line>
-	        </if-and>
-	        <!-- errors=".*[ERROR|CRITICAL WARNING]: (\[.*\].*)\[(.*):([0-9]+)\]"
-	         -->
 			<line name="parser_VivadoSynth"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
@@ -355,50 +341,18 @@
 			</line>
 		</output>
 	</tool>
-	<tool name="RestoreVivadoSynthesis" label="Restore state after Vivado Synthesis"
-	    project="FPGA_project"
-		interface="VivadoSynthesisInterface"
+	
+	<!--  Restore tool for VivadoSynthesis -->
+	<tool name="RestoreVivadoSynthesis"
+		project="FPGA_project"
+		interface="VivadoInterface"
 		package="FPGA_package"
-		shell="/bin/bash"
-		ignore="%VivadoIgnoreSource"
-		description="Restore Vivado Synthesis"
-		log-dir="VivadoLogDir"
-		state-dir="VivadoLocalDir"
-		>
-		<output>
-			<line name="vivado_pre_restore_synthesis">
-				"-c"
-				<!-- Create project directory on remote server if it did not exist -->
-				"ssh"
-				"-oBatchMode=yes"
-				"-l %RemoteUser %RemoteHost"
-				"'"
-				"mkdir -p"
-				"%VivadoProjectRoot"
-				"' ;"
-				<!-- Copy snapshot generated after synthesis from local to remote -->
-				"rsync -avrR -e ssh"
-				<!--  from: -->
-				"%VivadoLocalDir/%%StateFile"
-				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
-				";"
-			</line>
-			<!--       success="phys_opt_design completed successfully"  -->
-			<line name="vivado_restore_synthesis"
-			      dest="VivadoConsole"
-			      mark="``" 
-			      sep=""
-			      failure="ERROR"
-			      prompt="@@FINISH@@"
-			      log="">
-			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
-			      "file mkdir $outputDir\n"
-			      <!-- Start fresh from the loaded checkpoint -->
-		          "open_checkpoint %%StateFile\n"
-		          "puts \"@@FINISH@@\"\n"
-		    </line>
-		</output>
-	</tool>
+		inherits="RestoreVivado"/>
+	<!--  Save tool for VivadoSynthesis -->
+
+	<tool name="SaveVivadoSynthesis"
+		project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		inherits="SaveVivado"/>
 </vdt-project>

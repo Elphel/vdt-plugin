@@ -39,6 +39,8 @@ import com.elphel.vdt.core.tools.params.types.RunFor;
 import com.elphel.vdt.ui.VDTPluginImages;
 import com.elphel.vdt.ui.views.DesignFlowView;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 public class Tool extends Context implements Cloneable, Inheritable {
@@ -82,23 +84,25 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private String disabledString=null;          // to disable tools from automatic running
     private String resultString=null;              // parameter name of kind of file that represents state after running this tool
     private String restoreString=null;             // name of tool that restores the state of this tool ran (has own dependencies)
+    private String saveString=null;             // name of tool that saves the state of this tool run 
+    private String autoSaveString=null;         // name of boolean that turns on/off auto-save after the tool run
+    private boolean abstractTool;               // abstract tools can only be used for inheritance, not directly (so they will not be
+                                                // considered when looking for solution to run
  
     private Parameter disabled;
-    private Tool restore;
+    private Tool restoreTool;
     private Parameter result;
     
     // TODO: Compare dependFiles with literary result of other tools, if match - these are states, not files
     private List<Parameter> dependSessions;
     private List<Parameter> dependFiles;
 //    private boolean toolIsRestore;           // this tool is referenced by other as restore="this-tool"
-    private Tool restoreMaster;              // Tool, for which this one is restore (or null if for none). Same restore for
-                                             // multiple masters is not allowed
     private boolean dirty=false;             // tool ran before its sources (runtime value)
     private boolean pinned=false;             // tool ran before its sources (runtime value)
-    private String openState=null;           // (only for open sessions) - last successful result ran in this session 
+    
     private long runStamp=0;                 // timestamp of the tool last ran (0 - never)
     private TOOL_STATE state=TOOL_STATE.NEW; // tool state (succ, fail,new, running)
-    private boolean running=false;
+//    private boolean running=false;
 //    private long finishTimeStamp=0;
     private String timeStamp=null;
     private DesignFlowView designFlowView;
@@ -106,6 +110,17 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private String resultFile;               // used to overwrite name of the default result file that normally
                                              // is calculated from result and timestamp;
     
+    private String openState=null;           // (only for open sessions) - last successful result ran in this session
+    private Tool openTool=null;              // (only for open sessions) - tool last successful result ran in this session (null if none/failed)
+    private Tool restoreMaster;              // Tool, for which this one is restore (or null if for none). Same restore for
+    										 // multiple masters is not allowed
+    private Tool saveMaster;                 // Tool, for which one this is used to save state (should have only one master)
+    									     // with inheritance "disabled" will be taken from master
+    private Tool saveTool;
+    private Parameter autoSave;                // automatically run saveTool after successful completion of this one
+    
+    private TOOL_MODE runMode;
+    private TOOL_MODE lastRunMode;           // last running (not STOP) mode
     
 
     public Tool(String name,
@@ -130,7 +145,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 String disabledString,          // to disable tools from automatic running
                 String resultString,            // parameter name of kind of file that represents state after running this tool
                 String restoreString,           // name of tool that restores the state of this tool ran (has own dependencies)
-                
+                String saveString,              // name of tool that saves the state of this tool run 
+                String autoSaveString,          // name of boolean that turns on/off auto-save after the tool run
+                boolean abstractTool,
                 /* never used ??? */
                 List<Parameter> params,
                 List<ParamGroup> paramGroups,
@@ -163,22 +180,31 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.disabledString=      disabledString;          // to disable tools from automatic running
         this.resultString=        resultString;            // parameter name of kind of file that represents state after running this tool
         this.restoreString=       restoreString;           // name of tool that restores the state of this tool ran (has own dependencies)
+        this.saveString=          saveString;             // name of tool that saves the state of this tool run 
+        this.autoSaveString=      autoSaveString;         // name of boolean that turns on/off auto-save after the tool run
+        this.abstractTool=        abstractTool;
+
         disabled=null;
-        restore=null;
+        restoreTool=null;
         result=null;
         dependSessions=null;
         dependFiles=null;
 
-        this.pinned=false;
-        this.openState=null;
-        this.choice=0;
-        this.designFlowView =null;
-        this.timeStamp=null;
-        this.logDir=null;
-        this.stateDir=null;
-        this.resultFile=null;
+        pinned=false;
+        openState=null;
+        openTool=null;
+        choice=0;
+        designFlowView =null;
+        timeStamp=null;
+        logDir=null;
+        stateDir=null;
+        resultFile=null;
         restoreMaster=null;
-        
+        saveMaster=null;
+        saveTool=null;
+        autoSave=null;
+        runMode=TOOL_MODE.STOP;
+        lastRunMode=TOOL_MODE.STOP;
     }
     public enum TOOL_STATE {
         NEW,
@@ -188,17 +214,31 @@ public class Tool extends Context implements Cloneable, Inheritable {
         KEPT_OPEN//,
 //        RUNNING
     }
+    public enum TOOL_MODE {
+    	STOP,
+        RUN,
+        RESTORE,
+        SAVE,
+        PLAYBACK
+    }
    
     public void setRunStamp(long runStamp) { this.runStamp=runStamp; }
     public List<String> getDepends()       { return depends; }
     public boolean isDirty()               { return dirty; }
-    public boolean isRunning()             { return running; }
+//    public boolean isRunning()             { return running; }
+    public boolean isRunning()             { return runMode!=TOOL_MODE.STOP; }
+    public TOOL_MODE getMode()             { return runMode; }
+    public TOOL_MODE getLastMode()         { return lastRunMode; }
+    
+
     public long getRunStamp()              { return runStamp; }
     public TOOL_STATE getState()           { return state; }
     public boolean isPinned()              { return pinned; }
     public String getOpenState()           { return openState; }
     public void setOpenState(String stateName) { openState=stateName;}
 
+    public Tool getOpenTool()              { return openTool; }
+    public void setOpenTool(Tool openTool) { this.openTool=openTool;}
     
     public void setTimeStamp(){
     	timeStamp=SelectedResourceManager.getDefault().getBuildStamp();
@@ -216,20 +256,26 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public void setPinned(boolean pinned) {
     	this.pinned=pinned;
 //    	toolFinished();
-    	System.out.println("SetPinned("+pinned+")");
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+    		System.out.println("SetPinned("+pinned+")");
+    	}
     }
-
-    public void setRunning(boolean running) {
-    	this.running=running;
-//    	toolFinished();
-    	System.out.println("SetRunning("+running+")");
+    
+    public void setMode(TOOL_MODE mode) {
+    	runMode=mode;
+    	if (mode!=TOOL_MODE.STOP)  lastRunMode=mode;
+    	//    	toolFinished();
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+    		System.out.println("--->> "+name+": setMode("+mode+"), lastRunMode="+lastRunMode);
+    	}
     }
-
     
     public void setState(TOOL_STATE state) {
     	this.state=state;
 //    	toolFinished();
-    	System.out.println("SetState("+state+")");
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+    		System.out.println("SetState("+state+")");
+    	}
     }
     
     public void setDesignFlowView (DesignFlowView designFlowView){
@@ -300,20 +346,26 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
 
         Checks.checkCyclicInheritance(this, "tool");
 
-        if(baseTool != null)
+        if(baseTool != null) {
             baseTool.init(config);
+            abstractTool=false;
+            copyBaseAttributes();
+        }
         
         checkBaseTool();
         
         initParentPackage();
         initParentProject();
         initParams(); // *Inherits and sets up contexts? Also Error with copying context to items
+        
         initOtherAttributes();
         
         initDisabled();
         initDepends();
         initResult();
         initRestore();
+        initSave();
+        initAutoSave();
         initStateDir();
         initLogDir();
         
@@ -321,6 +373,29 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
         initialized = true;
     }
 
+    // Should be called before strings are processed
+    public void copyBaseAttributes(){
+    	if (label==null) label=baseTool.label;
+    	if (exeName==null) {
+    		exeName=baseTool.exeName;
+    		isShell=baseTool.isShell;
+    	}
+    	if (extensions==     null) extensions =     baseTool.extensions;
+    	if (toolErrors==     null) toolErrors =     baseTool.toolErrors;
+    	if (toolWarnings==   null) toolWarnings =   baseTool.toolWarnings;
+    	if (toolInfo==       null) toolInfo =       baseTool.toolInfo;
+    	if (runfor==         null) runfor =         baseTool.runfor;
+    	if (ignoreFilter==   null) ignoreFilter =   baseTool.ignoreFilter;
+    	if (depends==        null) depends =        baseTool.depends;
+    	if (logDirString==   null) logDirString =   baseTool.logDirString;
+    	if (stateDirString== null) stateDirString = baseTool.stateDirString;
+    	if (disabledString== null) disabledString = baseTool.disabledString;
+    	if (resultString==   null) resultString =   baseTool.resultString;
+    	if (restoreString==  null) restoreString =  baseTool.restoreString;
+    	if (saveString==     null) saveString =     baseTool.saveString;
+    	if (autoSaveString== null) autoSaveString = baseTool.autoSaveString;
+    }
+    
     public void initDisabled() throws ConfigException{
     	if (disabledString==null) return;
     	disabled=findParam(disabledString);
@@ -337,6 +412,7 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
     }
     
     public boolean isDisabled(){
+    	if (abstractTool) return true; // abstract are always disabled
     	if (disabled==null) return false;
     	List<String> values=disabled.getValue();
     	if ((values==null) || (values.size()==0)) return false;
@@ -421,6 +497,30 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
         	}
         }
     }
+//        this.autoSaveString=autoSaveString;         // name of boolean that turns on/off auto-save after the tool run
+
+    public void initAutoSave() throws ConfigException{
+    	if (autoSaveString==null) return;
+    	autoSave=findParam(autoSaveString);
+        if(autoSave == null) {
+            throw new ConfigException("Parameter autoSave='" + autoSaveString + 
+                                      "' used for tool '" + name + 
+                                      "' is absent");
+        } else if(!(autoSave.getType() instanceof ParamTypeBool)) {
+            throw new ConfigException("Parameter autoSave='" + autoSaveString +
+            		"' defined in "+result.getSourceXML()+" used for tool '" + name + 
+                                      "' must be of type '" + ParamTypeBool.NAME + 
+                                      "'");
+        }
+    }
+
+    public boolean getAutoSave(){
+    	if (autoSave==null) return false;
+    	List<String>result=autoSave.getValue();
+    	if (!result.isEmpty()) return result.get(0).equals("true");
+    	return false;
+    }
+    
     public List<String> getResultNames(){
     	if (result==null) return null;
     	return result.getValue();
@@ -428,30 +528,63 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
     
     public void initRestore() throws ConfigException{
     	if (restoreString==null) return;
-        restore=config.getContextManager().findTool(restoreString);
-    	if (restore == null) {
+    	restoreTool=config.getContextManager().findTool(restoreString);
+    	if (restoreTool == null) {
     		throw new ConfigException("Restore tool '" + restoreString +
     				"' of tool '" + name + 
     				"' is absent");
     	}
-    	if (restore.restoreMaster!=null){ // verify they have the same result
-    		throw new ConfigException("Same restore tool ("+restore.getName()+") for multiple master tools: " +
-    				restore.restoreMaster.getName() + " and "+this.getName()+" - restore tools should differ.");
+    	if (restoreTool.restoreMaster!=null){ // verify they have the same result
+    		throw new ConfigException("Same restore tool ("+restoreTool.getName()+") for multiple master tools: " +
+    				restoreTool.restoreMaster.getName() + " and "+this.getName()+" - restore tools should differ.");
     	}
     	if (resultString==null){
-    		throw new ConfigException("Tool "+getName()+" has restore='"+restore.getName()+
+    		throw new ConfigException("Tool "+getName()+" has restore='"+restoreTool.getName()+
     				"' defined, but does not have the result attribute.");
     	}
     	//restoreMaster
-    	restore.restoreMaster=this;
+    	restoreTool.restoreMaster=this;
     }
+    
     public Tool getRestore(){
-    	return restore;
+    	return restoreTool;
     }
     public Tool getRestoreMaster(){
     	return restoreMaster;
     }
 
+    public void initSave() throws ConfigException{
+    	if (saveString==null) return;
+    	saveTool=config.getContextManager().findTool(saveString);
+    	if (saveTool == null) {
+    		throw new ConfigException("Save tool '" + saveString +
+    				"' of tool '" + name + 
+    				"' is absent");
+    	}
+    	if (saveTool.saveMaster!=null){ // verify they have the same result
+    		throw new ConfigException("Same save tool ("+saveTool.getName()+") for multiple master tools: " +
+    				saveTool.saveMaster.getName() + " and "+this.getName()+" - save tools should differ.");
+    	}
+    	if (resultString==null){
+    		throw new ConfigException("Tool "+getName()+" has save='"+saveTool.getName()+
+    				"' defined, but does not have the result attribute.");
+    	}
+    	//saveMaster
+    	saveTool.saveMaster=this;
+    }
+
+    public Tool getSave(){
+    	return saveTool;
+    }
+    public Tool getSaveMaster(){
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+			System.out.println("getSaveMaster("+name+")-> "+((saveMaster==null)?"null":"NOT null"));
+		}
+    	return saveMaster;
+    }
+    
+    
+    
     public void initLogDir() throws ConfigException{
     	if (logDirString==null) return;
     	logDir=findParam(logDirString);
@@ -500,31 +633,52 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
         	}
         }
     }
+    public String getLogDir() {return getLogDir(true); } 
+    public String getLogDir(boolean first) {
+    	if (logDir!=null) { // has logDir specified, but may be empty
+        	List<String> value=logDir.getValue();
+        	if (value.size()==0) return null; // overwrites with empty
+        	return value.get(0);
+    	}
+    	if (!first) return null ; // prevent loops
+    	if (restoreMaster != null) return restoreMaster.getLogDir(false);
+    	if (saveMaster != null)    return saveMaster.getLogDir(false);
+    	return null;
+    }
     
-    public String getLogDir() {
-    	if (logDir==null) return null;
-    	List<String> value=logDir.getValue();
-    	if (value.size()==0) return null;
-    	return value.get(0);
+    public String getStateDir() {return getStateDir(true); } 
+    public String getStateDir(boolean first) {
+    	if (stateDir!=null) { // has stateDir specified, but may be empty
+        	List<String> value=stateDir.getValue();
+        	if (value.size()==0) return null; // overwrites with empty
+        	return value.get(0);
+    	}
+    	if (!first) return null ; // prevent loops
+    	if (restoreMaster != null) return restoreMaster.getStateDir(false);
+    	if (saveMaster != null)    return saveMaster.getStateDir(false);
+    	return null;
     }
 
-    public String getStateDir() {
-    	if (stateDir==null) return null;
-    	List<String> value=stateDir.getValue();
-    	if (value.size()==0) return null;
-    	return value.get(0);
+    public String getStateFile() {return getStateFile(true); } 
+    public String getStateFile(boolean first) {
+    	if (resultFile!=null) return resultFile;
+    	List<String> names=	getResultNames();
+    	if (names!=null) {
+        	if (names.size()==0) return null; 
+    		return ToolLogFile.insertTimeStamp(names.get(0),SelectedResourceManager.getDefault().getBuildStamp());
+    	}
+    	if (!first) return null ; // prevent loops
+    	if (restoreMaster != null) return restoreMaster.getStateFile(false);
+    	if (saveMaster != null)    return saveMaster.getStateFile(false);
+    	return null;
     }
+    
+    
     
     public void setResultFile(String filename){
     	resultFile=filename;
     }
-    public String getStateFile(){
-    	if (resultFile!=null) return resultFile;
-    	List<String> names=	getResultNames();
-    	if ((names==null) || (names.size()==0)) return null;
-    	return ToolLogFile.insertTimeStamp(names.get(0),SelectedResourceManager.getDefault().getBuildStamp());
-    }
-    
+
     public String getResultName(){
     	List<String> names=	getResultNames();
     	if ((names==null) || (names.size()==0)) return null;

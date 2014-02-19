@@ -52,6 +52,7 @@ import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.menu.DesignMenu;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
 import com.elphel.vdt.core.tools.params.ToolSequence;
 import com.elphel.vdt.core.tools.params.types.RunFor;
@@ -644,8 +645,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                         try {
                             launchTool(
                             		fTool, // tool, will get 
-                            		fDesignFlowView, // to be able to launch update when build state of the tool changes
-//                            		selectedItem, // is it needed?
+//                            		fDesignFlowView, // to be able to launch update when build state of the tool changes
                             		finalI,
                             		fFullPath,
                             		fIgnoreFilter);
@@ -697,7 +697,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                                     try {
                                         launchTool(
                                         		restoreTool,
-                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
+//                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
                                         		0,
                                         		fFullPath,
                                         		fIgnoreFilter);
@@ -727,7 +727,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                                     try {
                                         launchTool(
                                         		restoreTool,
-                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
+//                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
                                         		0,
                                         		fFullPath,
                                         		fIgnoreFilter);
@@ -828,32 +828,30 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     private void launchTool(
     		Tool tool,
-    		final DesignFlowView designFlowView,
-//    		DesignMenuModel.Item item,
+//    		final DesignFlowView designFlowView,
     		int choice,
     		String fullPath,
     		String ignoreFilter) throws CoreException {
-//    	if (tool==null) tool = selectedItem.getTool();
-        if (tool != null) {
-            tool.setDesignFlowView(designFlowView);
-            tool.setRunning(true);
-            tool.toolFinished();
-        	tool.setChoice(0);
-        	SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
-        	SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
-        	// apply designFlowView to the tool itself
-            LaunchCore.launch( tool,
-                              selectedResource.getProject(),
-//                             , selectedResource.getFullPath().toString() );
-                              fullPath,
-                              null); // run, not playback 
+    	if (tool != null) {
+//    		tool.setDesignFlowView(designFlowView);
+    		tool.setDesignFlowView(this); // maybe will not be needed with ToolSequencing class
+    		tool.setMode(TOOL_MODE.RUN);
+    		tool.toolFinished();
+    		tool.setChoice(0);
+    		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
+    		SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
+    		// apply designFlowView to the tool itself
+    		LaunchCore.launch( tool,
+    				selectedResource.getProject(),
+    				fullPath,
+    				null); // run, not playback 
 
-        } else if (selectedItem.hasChildren()) {
-            if (viewer.getExpandedState(selectedItem))
-                viewer.collapseToLevel(selectedItem, AbstractTreeViewer.ALL_LEVELS);
-            else    
-                viewer.expandToLevel(selectedItem, 1);
-        }
+    	} else if (selectedItem.hasChildren()) {
+    		if (viewer.getExpandedState(selectedItem))
+    			viewer.collapseToLevel(selectedItem, AbstractTreeViewer.ALL_LEVELS);
+    		else    
+    			viewer.expandToLevel(selectedItem, 1);
+    	}
     } // launchTool()
     
     
@@ -871,7 +869,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     			System.out.println("logBuildStamp="+logBuildStamp);
     		}
             tool.setDesignFlowView(designFlowView);
-            tool.setRunning(true);
+//            tool.setRunning(true);
+    		tool.setMode(TOOL_MODE.PLAYBACK);
             tool.toolFinished();
         	tool.setChoice(0);
         	SelectedResourceManager.getDefault().updateActionChoice(fullPath, 0, ignoreFilter); // Andrey

@@ -32,6 +32,7 @@ import org.eclipse.ui.console.IConsoleManager;
 
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.veditor.VerilogPlugin;
@@ -289,7 +290,8 @@ public class RunningBuilds {
 			VDTRunnerConfiguration runConfig=unfinishedBuilds.get(consoleName);
 			if (toolName.equals(runConfig.getToolName())){
 				Tool tool=ToolsCore.getTool(runConfig.getToolName());
-				tool.setRunning(false);
+//				tool.setRunning(false);
+	    		tool.setMode(TOOL_MODE.STOP);
 				tool.toolFinished();
 				if (tool.getState()==TOOL_STATE.KEPT_OPEN) {
 					MessageUI.error("Termninal that starts by this tool ("+toolName+") is already open in console \""+consoleName+"\"");

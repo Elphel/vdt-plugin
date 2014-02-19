@@ -27,6 +27,8 @@
 		state-dir="VivadoLocalDir"
 		restore="RestoreVivadoRoute"
 		disable="DisableVivadoRoute"
+		autosave="AutosaveVivadoRoute"
+		save="SaveVivadoRoute"
 		>
 		<action-menu>
 			<action label="Route" resource="" icon="route66.png" />
@@ -131,6 +133,8 @@
         <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
         			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
 
+        <parameter	id="AutosaveVivadoRoute" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
 
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			
@@ -227,22 +231,8 @@
 			      "%quiet_route"
 			      "%verbose_route"
 			      "\n"
-			      <if SkipSnapshotRoute="false">
-				      	"write_checkpoint -force %SnapshotRoute\n"
-			      </if>
 				"puts \"@@FINISH@@\"\n"
 			</line>
-<!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
-			<if-and SkipSnapshotRoute="false"
-			        VivadoRouteActionIndex="0">
-				<line name="vivado_copy_after_route">
-					"-c"
-					"mkdir -p %VivadoLocalDir ;"
-					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%SnapshotRoute"
-					"%VivadoLocalDir/"
-				</line>
-	        </if-and>
 			<line name="parser_VivadoRoute"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
@@ -271,50 +261,18 @@
 			</line>
 		</output>
 	</tool>
-	<tool name="RestoreVivadoRoute" label="Restore state after Vivado Route"
-	    project="FPGA_project"
-		interface="VivadoRouteInterface"
+	
+	<!--  Restore tool for VivadoRoute -->
+	<tool name="RestoreVivadoRoute"
+		project="FPGA_project"
+		interface="VivadoInterface"
 		package="FPGA_package"
-		shell="/bin/bash"
-		ignore="%VivadoIgnoreSource"
-		description="Restore Vivado Routing"
-		log-dir="VivadoLogDir"
-		state-dir="VivadoLocalDir"
-		>
-		<output>
-			<line name="vivado_pre_restore_route">
-				"-c"
-				<!-- Create project directory on remote server if it did not exist -->
-				"ssh"
-				"-oBatchMode=yes"
-				"-l %RemoteUser %RemoteHost"
-				"'"
-				"mkdir -p"
-				"%VivadoProjectRoot"
-				"' ;"
-				<!-- Copy snapshot generated after route from local to remote -->
-				"rsync -avrR -e ssh"
-				<!--  from: -->
-				"%VivadoLocalDir/%%StateFile"
-				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
-				";"
-			</line>
-			<!--       success="phys_opt_design completed successfully"  -->
-			<line name="vivado_restore_route"
-			      dest="VivadoConsole"
-			      mark="``"
-			      sep=""
-			      failure="ERROR"
-			      prompt="@@FINISH@@"
-			      log="">
-			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
-			      "file mkdir $outputDir\n"
-			      <!-- Start fresh from the loaded checkpoint -->
-		          "open_checkpoint %%StateFile\n"
-		          "puts \"@@FINISH@@\"\n"
-		    </line>
-		</output>
-	</tool>
+		inherits="RestoreVivado"/>
+	<!--  Save tool for VivadoRoute -->
+
+	<tool name="SaveVivadoRoute"
+		project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		inherits="SaveVivado"/>
 </vdt-project>

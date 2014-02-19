@@ -483,11 +483,6 @@ public class Parameter implements Cloneable, Updateable {
     // returns current value if it is set 
     // otherwise returns default value 
     public List<String> getValue() {
-/*    	
-        if (id.equals("SimulationTopFile")){ // Andrey
-        	System.out.println("getValue() SimulationTopFile");
-        }
- */   	
         if(!currentValue.isEmpty())
             return currentValue;
         
@@ -497,11 +492,6 @@ public class Parameter implements Cloneable, Updateable {
     // returns external form of the current value unless it equals null; 
     // otherwise returns external form of the default value 
     public List<String> getExternalValueForm() {
-/*    	
-        if (id.equals("SimulationTopFile")){ // Andrey
-        	System.out.println("getExternalValueForm() SimulationTopFile");
-        }
-*/
         List<String> externalFormValue = new ArrayList<String>();
         
         for(Iterator<String> i = getValue().iterator(); i.hasNext();) {

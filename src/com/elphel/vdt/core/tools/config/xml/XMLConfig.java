@@ -130,7 +130,10 @@ public class XMLConfig extends Config {
     
     static final String CONTEXT_TOOL_DISABLED =       "disabled"; // Parameter name that disables the tool if true
     static final String CONTEXT_TOOL_RESULT =         "result";   // Parameter name keeps the filename representing result (snapshot)
-    static final String CONTEXT_TOOL_RESTORE =        "restore";  // tool name that restores the state form result
+    static final String CONTEXT_TOOL_RESTORE =        "restore";  // tool name that restores the state from result (shapshot)
+    static final String CONTEXT_TOOL_SAVE =           "save";     // tool name that saves the state to result file (snapshot)
+    static final String CONTEXT_TOOL_AUTOSAVE =       "autosave"; // Parameter name of boolean type that controls automatic save after success
+    static final String CONTEXT_TOOL_ABSTRACT =       "abstract";  // true for the prototype tools used only for inheritance by others
     
 
     static final String CONTEXT_LINEBLOCK_TAG =           "line";
@@ -572,7 +575,8 @@ public class XMLConfig extends Config {
         String contextLabel = getAttributeValue(contextNode, CONTEXT_LABEL_ATTR);
         
         if(contextLabel == null)
-            throw new ConfigException(err.msg(CONTEXT_LABEL_ATTR));
+        	contextLabel=contextName; // Use name as label /Andrey
+//            throw new ConfigException(err.msg(CONTEXT_LABEL_ATTR));
         
         Context context = null;
         
@@ -635,13 +639,25 @@ public class XMLConfig extends Config {
                 String disabled =     getAttributeValue(contextNode, CONTEXT_TOOL_DISABLED);
                 String result =       getAttributeValue(contextNode, CONTEXT_TOOL_RESULT);
                 String restore =      getAttributeValue(contextNode, CONTEXT_TOOL_RESTORE);
+  
+                String saveString =      getAttributeValue(contextNode, CONTEXT_TOOL_SAVE); 
+                String autoSaveString =  getAttributeValue(contextNode, CONTEXT_TOOL_AUTOSAVE);
+
+                String isAbstractAttr = getAttributeValue(contextNode, CONTEXT_TOOL_ABSTRACT);
+                boolean isAbstract;
+                if(isAbstractAttr != null) {
+                    checkBoolAttr(isAbstractAttr, CONTEXT_TOOL_ABSTRACT);
+                    isAbstract = getBoolAttrValue(isAbstractAttr);
+                } else {
+                	isAbstract = false;
+                }
                 
                 boolean isShell=false;
                 if (toolShell != null){
                 	toolExe=toolShell;
                 	isShell=true;
                 }
-                if(toolExe == null)
+                if((toolExe == null) && (toolBase == null)) // when tool inherits, it's exe will be inherited too - check!
                     throw new ConfigException(err.msg(CONTEXT_TOOL_EXE_ATTR));
 //                if(toolShell == null) toolShell="";
                     
@@ -659,7 +675,7 @@ public class XMLConfig extends Config {
                 		System.out.println("got toolRunfor.size()="+toolRunfor.size());
                 	}
                 }
-                
+              
                 context = new Tool(contextName,
                                    contextInterfaceName, 
                                    contextLabel,
@@ -682,11 +698,13 @@ public class XMLConfig extends Config {
                                    disabled,
                                    result,
                                    restore,
+                                   saveString, 
+                                   autoSaveString,
+                                   isAbstract,
                                    null,
                                    null,
                                    null);
                 break;
-                
             default:
                 throw new ConfigException("Internal error: unknown context kind '" + contextKind + "'");
         }

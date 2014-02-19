@@ -59,6 +59,9 @@
 		state-dir="VivadoLocalDir"
 		restore="RestoreVivadoOptPlace"
 		disable="DisableVivadoOptPlace"
+		autosave="AutosaveVivadoOptPlace"
+		save="SaveVivadoOptPlace"
+		
 		>
 		<action-menu>
 			<action label="Optimize and Place" resource="" icon="mondrian2x2.png" />
@@ -211,6 +214,10 @@
 <!--  not really used now, always "0" -->			
 			   	   <parameter   id="VivadoOptPlaceActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
+					<!--  invisible/calculated parameters -->        			
+        <parameter	id="AutosaveVivadoOptPlace" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
+					
 			
 		<input>
 			<group name="General">
@@ -373,22 +380,8 @@
 			          "%verbose_phys_opt"
 				      "\n"
 			      </if>
-			      <if SkipSnapshotPlace="false">
-		      		"write_checkpoint -force %%StateFile\n"
-			      </if>
 				"puts \"@@FINISH@@\"\n"
 			</line>
-<!-- 			       -top npmtest -part xc7k70tfbg484-2 -flatten rebuilt\n"  -->			
-			<if-and SkipSnapshotPlace="false"
-			        VivadoOptPlaceActionIndex="0">
-				<line name="vivado_copy_after_opt_place">
-					"-c"
-					"mkdir -p %VivadoLocalDir ;"
-					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%%StateFile"
-					"%%StateDir/"
-				</line>
-	        </if-and>
 			<line name="parser_VivadoOpt"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
@@ -416,52 +409,18 @@
 		</output>
 	</tool>
 	
-	
-	<tool name="RestoreVivadoOptPlace" label="Restore state after Vivado OptPlace"
-	    project="FPGA_project"
-		interface="VivadoOptPlaceInterface"
+	<!--  Restore tool for VivadoOptPlace -->
+	<tool name="RestoreVivadoOptPlace"
+		project="FPGA_project"
+		interface="VivadoInterface"
 		package="FPGA_package"
-		shell="/bin/bash"
-		ignore="%VivadoIgnoreSource"
-		description="Restore Vivado OptPlace"
-		log-dir="VivadoLogDir"
-		state-dir="VivadoLocalDir"
-		>
-		<output>
-			<line name="vivado_pre_restore_opt_place">
-				"-c"
-				<!-- Create project directory on remote server if it did not exist -->
-				"ssh"
-				"-oBatchMode=yes"
-				"-l %RemoteUser %RemoteHost"
-				"'"
-				"mkdir -p"
-				"%VivadoProjectRoot"
-				"' ;"
-				<!-- Copy snapshot generated after opt/place from local to remote -->
-				"rsync -avrR -e ssh"
-				<!--  from: -->
-				"%VivadoLocalDir/%%StateFile"
-				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot"
-				";"
-			</line>
-			<!--       success="phys_opt_design completed successfully"  -->
-			<line name="vivado_restore_synthesis"
-			      dest="VivadoConsole"
-			      mark="``" 
-			      sep=""
-			      failure="ERROR"
-			      prompt="@@FINISH@@"
-			      log="">
-			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
-			      "file mkdir $outputDir\n"
-			      <!-- Start fresh from the loaded checkpoint -->
-		          "open_checkpoint %%StateFile\n"
-		          "puts \"@@FINISH@@\"\n"
-		    </line>
-		</output>
-	</tool>
+		inherits="RestoreVivado"/>
+	<!--  Save tool for VivadoOptPlace -->
+
+	<tool name="SaveVivadoOptPlace"
+		project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		inherits="SaveVivado"/>
 </vdt-project>
 

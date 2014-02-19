@@ -25,8 +25,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Display;
 
+import com.elphel.vdt.Txt;
+import com.elphel.vdt.core.launching.LaunchCore;
 import com.elphel.vdt.core.launching.ToolLogFile;
 import com.elphel.vdt.core.tools.ToolsCore;
+import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.options.FilteredFileSelector;
@@ -53,7 +56,8 @@ public class ToolSequence {
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
 			System.out.println("\nTool "+tool.getName()+" FINISHED - add more stuff here");
 		if (tool.getState()==TOOL_STATE.SUCCESS){
-			updateLinkLatest(tool);
+			if (tryAutoSave(tool)) return;  // started autoSave that will trigger "toolFinished" again
+			updateLinkLatest(tool); // TODO - maybe swap and do updateLinkLatest before tryAutoSave
 		} else if (tool.getState()==TOOL_STATE.KEPT_OPEN){
 			
 		} else {
@@ -67,9 +71,54 @@ public class ToolSequence {
 			});
 		}
 	}
+	private boolean tryAutoSave(Tool tool){
+		if  (
+				(tool.getSave()!=null) &&
+				tool.getAutoSave() &&
+				(designFlowView!=null) &&
+				(tool.getLastMode()==TOOL_MODE.RUN)) { // it was not playback of logs
+			final Tool fTool=tool.getSave();
+			final IProject fProject = SelectedResourceManager.getDefault().getSelectedProject();
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+				System.out.println("Launching autosave tool "+fTool.getName()+" for "+tool.getName());
+			}
+			fTool.setDesignFlowView(designFlowView); // maybe will not be needed with ToolSequencing class
+//    		fTool.setRunning(true);
+			fTool.setMode(TOOL_MODE.SAVE);
+//    		fTool.toolFinished();
+			fTool.setChoice(0);
+//   		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // A
+//   		SelectedResourceManager.getDefault().setBuildStamp(); // Use the same from Master
+    		// apply designFlowView to the tool itself
+			Display.getDefault().asyncExec(new Runnable() { 
+				public void run() {
+		    		try {
+						LaunchCore.launch( fTool,
+								fProject,
+								null, //fullPath,
+								null);  // run, not playback 
+					} catch (CoreException e1) {
+                        MessageUI.error( Txt.s("Action.ToolLaunch.Error", 
+                                new String[] {"Autosave by "+fTool.getName(), e1.getMessage()})
+                         , e1);
+					}
+				}
+			});
+			return true;
+		} else if (tool.getSaveMaster()!=null){
+//			tool.getSaveMaster().setRunning(false); // turn off the master tool that invoked this save one (may be called directly too)
+    		tool.getSaveMaster().setMode(TOOL_MODE.STOP);
+
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+				System.out.println("Finished autosave tool "+tool.getName()+" for "+tool.getSaveMaster().getName());
+			}
+		}
+		return false;
+	}
 	
 	// Result file may be skipped, in that case link should not be updated, but the console state should be
 	private void updateLinkLatest(Tool tool){
+		if (tool.getLastMode()==TOOL_MODE.PLAYBACK) return; // do nothing here
 		String stateDirString=tool.getStateDir();
 		String linkString=tool.getResultName();
 		String targetString=tool.getStateFile(); // With timestamp or specifically set through selection 
@@ -143,15 +192,11 @@ public class ToolSequence {
 			for(Iterator<Tool> iter = sessionList.iterator(); iter.hasNext();) {
 				Tool consoleTool=iter.next();
 				consoleTool.setOpenState(targetString);
+				consoleTool.setOpenTool(tool);
 				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
 					System.out.println("Set openState of "+consoleTool.getName()+" to "+targetString);
 			}
 		}
-/*
-    public String getOpenState()           { return openState; }
-    public void setOpenState(String stateName) { openState=stateName;}
-
- */
 		return true;
 	}
 	public  String getSelectedStateFile(Tool tool, boolean select){

@@ -27,8 +27,6 @@ public class StateFileGenerator extends AbstractGenerator {
     }
     
     protected String[] getStringValues() {
-    	String stateFile=(tool0==null)? null: tool0.getStateFile(); // calculated from result name and timestamp, or explicitly specified
-    	if (stateFile==null) stateFile="";
-    	return new String[] {stateFile};
+    	return new String[] {(tool0!=null)?tool0.getStateFile(): ""};
     }
 }
