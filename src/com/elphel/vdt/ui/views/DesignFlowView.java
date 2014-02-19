@@ -719,7 +719,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                     	restoreSelectAction=new Action(){
                     		public void run(){
                     			System.out.println("*** Will restore selected state of "+fTool.getName());
-                    			String stateFileName=toolSequence.getSelectedStateFile(fTool, false);
+                    			String stateFileName=toolSequence.getSelectedStateFile(fTool, true);
                     			System.out.println("***Selected restore file: "+stateFileName);
                     			Tool restoreTool=fTool.getRestore();
                     			if ((stateFileName!=null) && (restoreTool!=null)){
