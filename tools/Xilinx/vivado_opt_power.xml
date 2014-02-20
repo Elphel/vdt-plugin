@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <vdt-project>
-	<interface name="VivadoBitstreamInterface" extends="VivadoInterface">
+	<interface name="VivadoOptPowerInterface" extends="VivadoInterface">
 	</interface>
 
-	<tool name="VivadoBitstream" label="Generate bitstream"
+	<tool name="VivadoOptPower" label="Power optimize design"
 	    project="FPGA_project"
-		interface="VivadoBitstreamInterface"
+		interface="VivadoOptPowerInterface"
 		package="FPGA_package"
 		shell="/bin/bash"
-		description="Generate bitstream"
+		description="Power optimize design"
+		result="SnapshotOptPower"
 		log-dir="VivadoLogDir"
 		state-dir="VivadoLocalDir"
-		disable="DisableVivadoBitsteam"
+		restore="RestoreVivadoOptPower"
+		disable="DisableVivadoOptPower"
+		autosave="AutosaveVivadoOptPower"
+		save="SaveVivadoOptPower"
 		>
 		<action-menu>
-			<action label="Generate bitstream" resource="" icon="bitstream.png" />
+			<action label="Power optimize" resource="" icon="fire.png" />
 		</action-menu>
-		<parameter id="SkipPreBitstream" label="Skip pre-bitstream" tooltip="Do not run pre bitstream TCL commands"
+		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="SkipPowerOptimization" label="skip power optimize" tooltip="Do not run power_opt_design"
 		           default="false" type= "Boolean" format="None"/>
 <!--   left from synthesis, may need update--> 
 		<parameter id="ShowWarnings" label="Parse warnings" tooltip="Parse warning messages"
@@ -36,34 +42,13 @@
                    default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
-                   
-		<parameter id="PreBitstreamTCL" label="Pre-bitstream TCL commands" tooltip="TCL commands to run before write_bitstream"
+		<parameter id="PreOptTCL" label="Pre-optimize TCL commands" tooltip="TCL commands to run before power_opt_design"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
 			readonly="false" visible="true" />
-                   
-  
-<!-- write_bitstream arguments -->
-        <parameter 	id="filename" label="Bitstream filename" tooltip= "Bitstream file name (will add *.bit extension)."
-        			default="%%ProjectName" visible="true" omit="" type="String" format="CopyValue"/>
-        <parameter 	id="force" label="Force (overwrite)" tooltip= "Overwrite existent files."
+<!-- power_opt_design arguments -->  
+        <parameter	id="quiet_pwr_opt" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="raw_bitfile" label="Write raw bitfile" tooltip= "Write bitfile in ASCII (*.rbt)."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="no_binary_bitfile" label="Do not write .bit" tooltip= "Do not write to binary bitfile (*.bit)."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="readback_file" label="Create readback file (.rbd, .msd)" tooltip= "Create file needed for readback."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="logic_location_file" label="Create logic location file (.ll)" tooltip= "Create ASCII logic location file showing locations of latches, FF, BRAM and I/O."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-
-        <parameter 	id="bin_file" label="Create .bin file" tooltip= "Create bitsteream without the header (.bin)."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-
-        <parameter 	id="reference_bitfile" label="Read reference bitfile" tooltip= "Read reference bitstream file."
-        			default="" visible="true" omit="" type="Filename" format="Dash"/>
-        <parameter	id="quiet_bit" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="verbose_bit" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
+        <parameter	id="verbose_pwr_opt" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
 <!-- parser parameters -->
@@ -78,17 +63,8 @@
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
         			default="true" visible="true" omit="false" type="Boolean" format="None"/>
-<!--  TODO: change to bitstream-specific problems -->        			
-        			
         <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Vivado_Tcl" label="Vivado_Tcl"  tooltip= "Enable problems with [Vivado_Tcl to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Route"     label="Route" tooltip= "Enable problems with [Route to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        			
-<!-- Other patterns copied from other commands, maybe not applicablwe here -->        			
-        			
         <parameter	id="Memdata"   label="Memdata" tooltip= "Enable problems with [Memdata to be reported"
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
         <parameter	id="Netlist"   label="Netlist" tooltip= "Enable problems with [Netlist to be reported"
@@ -101,116 +77,83 @@
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
         <parameter	id="Pwropt"    label="Pwropt"  tooltip= "Enable problems with [Pwropt to be reported"
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Vivado_Tcl" label="Vivado_Tcl"  tooltip= "Enable problems with [Vivado_Tcl to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
         <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
         			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
 
-
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			
-			   	   <parameter   id="VivadoBitstreamActionIndex" default="%%ChosenActionIndex"
+			   	   <parameter   id="VivadoOptPowerActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
-			
+					<!--  invisible/calculated parameters -->        			
+        <parameter	id="AutosaveVivadoOptPower" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotOptPower=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
 		<input>
 			<group name="General">
-				"SkipPreBitstream"
+				"SkipPreOptimization"
+				"SkipPowerOptimization"
+				"---"
+ 				"SnapshotOptPower" <!--  same as in project -->
 				"ShowWarnings"
 				"ShowInfo"
 				"GrepEWI"
 			</group>
-			<group name="Pre-bitstream commands">
-		        "PreBitstreamTCL"
+			<group name="Pre-optimization commands">
+		        "PreOptTCL"
 			</group>
-			<group name="Bitstream">
-       			"filename"
-       			"force"
-       			"raw_bitfile"
-       			"no_binary_bitfile"
-       			"readback_file"
-       			"logic_location_file"
-       			"bin_file"
-       			"reference_bitfile"
-       			"---"
-       			"quiet_bit"
-       			"verbose_bit"
+			<group name="Power Optimization">
+       			"quiet_pwr_opt"
+       			"verbose_pwr_opt"
 			</group>
 			<group name="Parser">
 				"NoFileProblem"
 		        "Drc"
-		        "Vivado_Tcl"
-				"Route"
 				"Memdata"
 		        "Netlist"
 		        "Opt"
 		        "Project"
 		        "Timing"
 		        "Pwropt"
+		        "Vivado_Tcl"
 		        "OtherProblems"
 				"---"
 				"PatternErrors"
 				"PatternWarnings"
  				"PatternInfo"
 			</group>
-			
 		</input>
-
 		<output>
-		<!-- mkdir -p vdt/npmtest-->
-		<!-- Now skipping completely pre_opt copying - maybe some will still be needed (custom tcl scripts), then move conditional inside block -->
-		<if-not reference_bitfile="">
-			<line name="vivado_copy_pre_opt">
-				"-c"
-				"rsync -avrR -e ssh"
-				<!--  from: (trying full name) -->
-				"%reference_bitfile"
-				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build"
-				";"
-			</line>
-		</if-not>	
-<!-- Set sep="", so all new lines should be specified as \n -->
-			<line name="vivado_run_bitstream"
+			<line name="vivado_run_opt_pwr"
 			      dest="VivadoConsole"
 			      mark="``" 
 			      sep=""
 			      prompt="@@FINISH@@"
-			      success="write_bitstream completed successfully"
+			      success="power_opt_design completed successfully"
 			      log=""
-			      stdout="parser_VivadoBitstream">
+			      stdout="parser_VivadoOptPwr">
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      "file mkdir $outputDir\n"
-		          <!-- Run pre-bitstream TCL commands (if specified) -->
-			      <if SkipPreBitstream="false">
-				      <if-not PreBitstreamTCL="">
-				      		"%PreBitstreamTCL\n"
+		          <!-- Run pre-optimization TCL commands (if specified) -->
+			      <if SkipPreOptimization="false">
+				      <if-not PreOptTCL="">
+				      		"%PreOptTCL\n"
 				      </if-not>
-				      <if PreBitstreamTCL="">
-				      		"puts \"No pre-bitstream TCL commands specified\"\n"'
+				      <if PreOptTCL="">
+				      		"puts \"No pre-optimization TCL commands specified\"\n"'
 				      </if>
 			      </if>
-			      <!-- Run routing -->
-			      "write_bitstream "
-			      "%filename"
-			      "%force"
-			      "%raw_bitfile"
-			      "%no_binary_bitfile"
-			      "%readback_file"
-			      "%logic_location_file"
-			      "%bin_file"
-			      "%reference_bitfile"
-			      "%quiet_bit"
-			      "%verbose_bit"
-			      "\n"
+			      <if SkipPowerOptimization="false">
+			      <!-- Run power optimization -->
+			          "power_opt_design"
+			          "%quiet_pwr_opt"
+			          "%verbose_pwr_opt"
+				      "\n"
+			      </if>
 				"puts \"@@FINISH@@\"\n"
 			</line>
-			<line name="vivado_copy_after_bitstream">
-				"-c"
-				"mkdir -p %VivadoLocalResultDir ;"
-				"rsync -avr -e ssh"
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build/%filename.*"
-				"%VivadoLocalResultDir/"
-			</line>
-			<line name="parser_VivadoBitstream"
+			<line name="parser_VivadoOptPwr"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
 				info=     "PatternInfo">
@@ -221,21 +164,34 @@
      				"| grep --line-buffered -v \"license\""
      			</if>
      			"%Drc"
-		        "%Vivado_Tcl"
-		        "%Route"
      			"%Memdata"
 		        "%Netlist"
 		        "%Opt"
 		        "%Project"
 		        "%Timing"
 		        "%Pwropt"
+		        "%Vivado_Tcl"
 		        "%OtherProblems"
-		        <!-- TODO: change Placement to Routing? or such -->
      			<if NoFileProblem="true">
 	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
-     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Bitstream:0000\]@'"
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Power:0000\]@'"
      			</if>
 			</line>
 		</output>
 	</tool>
+	
+	<!--  Restore tool for VivadoOptPlace -->
+	<tool name="RestoreVivadoOptPower"
+		project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		inherits="RestoreVivado"/>
+	<!--  Save tool for VivadoOptPlace -->
+
+	<tool name="SaveVivadoOptPower"
+		project="FPGA_project"
+		interface="VivadoInterface"
+		package="FPGA_package"
+		inherits="SaveVivado"/>
 </vdt-project>
+

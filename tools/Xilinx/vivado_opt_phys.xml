@@ -1,39 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <vdt-project>
-	<interface name="VivadoOptPlaceInterface" extends="VivadoInterface">
-	    <typedef name="OptDirectiveType">
-      		<paramtype kind= "enum" base="String">
-      			<item value="Explore"               label="Run multiple passes of optimization to improve results."/>
-      			<item value="ExploreArea"           label="Run multiple passes of optimization, with an emphasis on reducing area."/>
-      			<item value="ExploreSequentialArea" label="Run multiple passes of optimization, with an emphasis on reducing registers and related combinational logic."/>
-      			<item value="AddRemap"              label="Run the default optimization, and include LUT remapping to reduce logic levels."/>
-      			<item value="RuntimeOptimized"      label="Run the fewest iterations, trading optimization results for faster runtime."/>
-      			<item value="Default"               label=" Run the default optimization."/>
-      		</paramtype>
-    	</typedef>
-	    <typedef name="PlaceDirectiveType">
-      		<paramtype kind= "enum" base="String">
-      			<item value= "Explore"                label="Increased placer effort in detail placement and post-placement optimization."/>
-      			<item value= "WLDrivenBlockPlacement" label="Wirelength-driven placement of RAM and DSP blocks."/>
-      			<item value= "LateBlockPlacement"     label="Defer detailed placement of RAMB and DSP blocks to the final stages of placement."/>
-      			<item value= "ExtraNetDelay_high"     label="Increases estimated delay of high fanout and long-distance nets. High pessimism option"/>
-      			<item value= "ExtraNetDelay_medium"   label="Increases estimated delay of high fanout and long-distance nets. Medium pessimism option"/>
-      			<item value= "ExtraNetDelay_low"      label="Increases estimated delay of high fanout and long-distance nets. Low pessimism option"/>
-      			<item value= "SpreadLogic_high"       label="Distribute logic across the device - highest level of distribution."/>
-      			<item value= "SpreadLogic_medium"     label="Distribute logic across the device - medium level of distribution."/>
-      			<item value= "SpreadLogic_low"        label="Distribute logic across the device - lowest level of distribution."/>
-      			<item value= "ExtraPostPlacementOpt"  label="Increased placer effort in post-placement optimization."/>
-      			<item value= "SSI_ExtraTimingOpt"     label="Use an alternate algorithm for timing-driven partitioning across SLRs."/>
-      			<item value= "SSI_SpreadSLLs"         label="Partition across SLRs and allocate extra area for regions of higher connectivity."/>
-      			<item value= "SSI_BalanceSLLs"        label="Partition across SLRs while attempting to balance SLLs between SLRs."/>
-      			<item value= "SSI_BalanceSLRs"        label="Partition across SLRs to balance number of cells between SLRs."/>
-      			<item value= "SSI_HighUtilSLRs"       label="Direct the placer to attempt to place logic closer together in each SLR."/>
-      			<item value= "RuntimeOptimized"       label="Run fewest iterations, trade higher design performance for faster run time"/>
-      			<item value= "Quick "                 label="Fastest runtime, non-timing-driven, performs the minimum required placement for the design."/>
-      			<item value= "Default"                label="Run the default placement."/>
-      		</paramtype>
-    	</typedef>
+	<interface name="VivadoOptPhysInterface" extends="VivadoInterface">
 	    <typedef name="PhysOptDirectiveType">
       		<paramtype kind= "enum" base="String">
       			<item value= "Explore"                label="Run different algorithms in multiple passes of optimization, including replication for very high fanout nets."/>
@@ -48,36 +16,30 @@
     	</typedef>
 	</interface>
 
-	<tool name="VivadoOptPlace" label="Optimize and place design"
+	<tool name="VivadoOptPhys" label="Physical (post-placement) design optimization"
 	    project="FPGA_project"
-		interface="VivadoOptPlaceInterface"
+		interface="VivadoOptPhysInterface"
 		package="FPGA_package"
 		shell="/bin/bash"
-		description="Vivado optimize, power optimize, place and physical optimize design"
-		result="SnapshotOptPlace"
+		description="Vivado physical optimize design"
+		result="SnapshotOptPhys"
 		log-dir="VivadoLogDir"
 		state-dir="VivadoLocalDir"
-		restore="RestoreVivadoOptPlace"
-		disable="DisableVivadoOptPlace"
-		autosave="AutosaveVivadoOptPlace"
-		save="SaveVivadoOptPlace"
+		restore="RestoreVivadoOptPhys"
+		disable="DisableVivadoOptPhys"
+		autosave="AutosaveVivadoOptPhys"
+		save="SaveVivadoOptPhys"
 		
 		>
 		<action-menu>
-			<action label="Optimize and Place" resource="" icon="mondrian2x2.png" />
+			<action label="Post placement optimize" resource="" icon="opt_yellow.png" />
 		</action-menu>
 		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
-		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipOptimization" label="Skip optimize" tooltip="Do not run opt_design"
-		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipPowerOptimization" label="skip power optimize" tooltip="Do not run power_opt_design"
-		           default="false" type= "Boolean" format="None"/>
-		<parameter id="SkipPlacement" label="Skip place" tooltip="Do not run place_design"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPhysOpt" label="Skip physical optimize" tooltip="Do not run phys_opt_design"
 		           default="false" type= "Boolean" format="None"/>
 		           
-		<parameter id="SkipSnapshotPlace" label="Skip snapshot save" tooltip="Do not create snapshot after placement"
+		<parameter id="SkipSnapshotOptPhys" label="Skip snapshot save" tooltip="Do not create snapshot after physical optimization"
 		           default="false" type= "Boolean" format="None"/>
 
 <!--   left from synthesis, may need update--> 
@@ -102,50 +64,6 @@
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
 			readonly="false" visible="true" />
                    
-  
-<!-- opt_design arguments -->  
-
-        <parameter 	id="directive_opt" outid="directive" label="Directive" tooltip= "Mode of behaviour for opt_design command, not compatible with individual optimization settings."
-        			default="Default" visible="true" omit="Default" type="OptDirectiveType" format="Dash"/>
-        <parameter 	id="retarget"  label="Retarget" tooltip= "Retarget block types when using different part"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="propconst" label="Propagate constants" tooltip= "Propagate constants across leaf-level instances"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="sweep" label="Remove unconnected instances" tooltip= "Remove unconnected leaf-level instances"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="bram_power_opt" label="Optimize BRAM" tooltip= "Power optimization of BRAM cells - changes WRITE_MODE and clock gating"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="remap" label="Remap LUTs" tooltip= "Remap logic optimally in LUTs"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="resynth_area" label="Re-synthesis in area mode" tooltip= " Perform re-synthesis in area mode to reduce the number of LUTs."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="resynth_seq_area" label="Re-synthesis with sequential" tooltip= "Re-synthesis with both combinatorial and sequential optimizations)."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="quiet_opt" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="verbose_opt" outid="verbose" label="verbose" tooltip= "Temporarily override message limits set with set_msg_config"
-        			default="false" visible="true" omit="False" type="Boolean" format="DashName"/>
-<!-- power_opt_design arguments -->  
-        <parameter	id="quiet_pwr_opt" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="verbose_pwr_opt" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-<!-- place_design arguments -->
-        <!-- No support yet for "-cells" to limit placement to selected cells. Will require multiple runs with
-        different settings. Can probably create several pages of parameters alternatives for that purpose
-        and then run "placement - alt1", "placement - alt2", ... -->
-        <parameter 	id="directive_place"  outid="directive" label="Directive" tooltip= "Placement algorithm mode (not compatible with other specific options)"
-        			default="Default" visible="true" omit="Default" type="PlaceDirectiveType" format="Dash"/>
-        <parameter 	id="no_timing_driven" label="No timing-driven" tooltip= "Disables the default timing driven placement algorithm."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="unplace" label="Unplace" tooltip= "Unplace all the instances which are not locked by constraints."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter 	id="post_place_opt" label="Post-placement" tooltip= "Run optimization after placement to improve critical path timing."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="quiet_place" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
-        <parameter	id="verbose_place" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 <!-- phys_opt_design arguments -->
 <!--  TODO: Make a separate command with several different settings sets -->
         <parameter 	id="directive_phys_opt"  outid="directive" label="Directive" tooltip= "Placement algorithm mode (not compatible with other specific options)"
@@ -209,60 +127,27 @@
         <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
         			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
 
-
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			
-			   	   <parameter   id="VivadoOptPlaceActionIndex" default="%%ChosenActionIndex"
+			   	   <parameter   id="VivadoOptPhysActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
 					<!--  invisible/calculated parameters -->        			
-        <parameter	id="AutosaveVivadoOptPlace" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotOptPlace=false : true, false"
+        <parameter	id="AutosaveVivadoOptPhys" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotOptPhys=false : true, false"
                     visible="false" type="Boolean" format="None"/>
-					
-			
+		
 		<input>
 			<group name="General">
 				"SkipPreOptimization"
-				"SkipOptimization"
-				"SkipPowerOptimization"
-				"SkipPlacement"
 				"SkipPhysOpt"
-				"SkipSnapshotPlace"
+				"SkipSnapshotOptPhys"
 				"---"
- 				"SnapshotOptPlace" <!--  same as in project -->
+ 				"SnapshotOptPhys" <!--  same as in project -->
 				"ShowWarnings"
 				"ShowInfo"
 				"GrepEWI"
 			</group>
 			<group name="Pre-optimization commands">
 		        "PreOptTCL"
-			</group>
-			<group name="Optimization">
-       			"directive_opt"
-       			"---"
-				"retarget"
-				"propconst"
-       			"sweep"
-       			"bram_power_opt"
-				"remap"
-       			"resynth_area"
-       			"resynth_seq_area"
-       			"---"
-       			"quiet_opt"
-       			"verbose_opt"
-			</group>
-			<group name="Power Optimization">
-       			"quiet_pwr_opt"
-       			"verbose_pwr_opt"
-			</group>
-			<group name="Placement">
-       			"directive_place"
-       			"---"
-       			"no_timing_driven"
-       			"unplace"
-       			"post_place_opt"
-       			"---"
-       			"quiet_place"
-       			"verbose_place"
 			</group>
 			<group name="Physical Optimization">
        			"directive_phys_opt"
@@ -303,17 +188,15 @@
 		</input>
 
 		<output>
-<!-- Combining optimization and placement TCL commands in a single command block
-     May need to split if they will need different error parsers (external and/or Eclipse patterns)  -->
 <!-- Set sep="", so all new lines should be specified as \n -->
-			<line name="vivado_run_opt"
+			<line name="vivado_run_opt_phys"
 			      dest="VivadoConsole"
 			      mark="``" 
 			      sep=""
 			      prompt="@@FINISH@@"
 			      success="phys_opt_design completed successfully"
 			      log=""
-			      stdout="parser_VivadoOpt">
+			      stdout="parser_VivadoOptPhys">
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/build\n"
 			      "file mkdir $outputDir\n"
@@ -325,39 +208,6 @@
 				      <if PreOptTCL="">
 				      		"puts \"No pre-optimization TCL commands specified\"\n"'
 				      </if>
-			      </if>
-			      <if SkipOptimization="false">
-		          <!-- Run optimization -->
-			          "opt_design"
-			          "%retarget"
-			          "%propconst"
-			          "%sweep"
-			          "%bram_power_opt"
-			          "%remap"
-			          "%resynth_area"
-			          "%resynth_seq_area"
-			          "%directive_opt"
-			          "%quiet_opt"
-			          "%verbose_opt"
-				      "\n"
-			      </if>
-			      <if SkipPowerOptimization="false">
-			      <!-- Run power optimization -->
-			          "power_opt_design"
-			          "%quiet_pwr_opt"
-			          "%verbose_pwr_opt"
-				      "\n"
-			      </if>
-			      <if SkipPlacement="false">
-			      <!-- Run placement -->
-			          "place_design"
-			          "%directive_place"
-			          "%no_timing_driven"
-			          "%unplace"
-			          "%post_place_opt"
-			          "%quiet_place"
-			          "%verbose_place"
-				      "\n"
 			      </if>
 			      <if SkipPhysOpt="false">
 			      <!-- Run physical optimization -->
@@ -382,7 +232,7 @@
 			      </if>
 				"puts \"@@FINISH@@\"\n"
 			</line>
-			<line name="parser_VivadoOpt"
+			<line name="parser_VivadoOptPhys"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
 				info=     "PatternInfo">
@@ -403,21 +253,21 @@
 		        "%OtherProblems"
      			<if NoFileProblem="true">
 	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
-     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Placement:0000\]@'"
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[PhysOpt:0000\]@'"
      			</if>
 			</line>
 		</output>
 	</tool>
 	
 	<!--  Restore tool for VivadoOptPlace -->
-	<tool name="RestoreVivadoOptPlace"
+	<tool name="RestoreVivadoOptPhys"
 		project="FPGA_project"
 		interface="VivadoInterface"
 		package="FPGA_package"
 		inherits="RestoreVivado"/>
 	<!--  Save tool for VivadoOptPlace -->
 
-	<tool name="SaveVivadoOptPlace"
+	<tool name="SaveVivadoOptPhys"
 		project="FPGA_project"
 		interface="VivadoInterface"
 		package="FPGA_package"

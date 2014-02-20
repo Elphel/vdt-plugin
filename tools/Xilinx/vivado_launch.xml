@@ -8,13 +8,13 @@
 		shell="/bin/bash" interface="VivadoInterface" description="Launching remote Xilinx Vivado in console"> 
 		<action-menu>
 			<action label="Launch Vivado" resource="" icon="door_in.png" />
-			<action label="Generate public key" resource="" icon="gnu.png" />
+			<action label="Generate public key" resource="" icon="key.png" />
 			<action label="Setup connection to" resource="%RemoteUser@%RemoteHost"
-			check-extension="false" check-existence="false" icon="gnu.png" />
-			<action label="Launch shell on remote" resource="" icon="xilinx.png" />
+			check-extension="false" check-existence="false" icon="setup.png" />
+			<action label="Launch shell on remote" resource="" icon="shell.png" />
 		</action-menu>
  
-		<parameter   id="command" label="Shell command" default=""
+		<parameter   id="command" label="Shell command" default="bash"
 					type="String" format="CopyValue" visible="true" readonly="false"  />
 
 		<parameter   id="actionIndex" default="%%ChosenActionIndex"

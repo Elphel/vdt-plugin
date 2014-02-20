@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="VivadoReportTimingSummaryInterface" extends="VivadoInterface">
+	    <typedef name = "Cardinal_0_3">
+            <paramtype kind="number" lo="0" hi="3" format="%d" />
+        </typedef>
+	
+	    <typedef name="DelayTypeType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="min"     label="Analyse minimal times"/>
+      			<item value="max"     label="Analyze maximal times"/>
+      			<item value="min_max" label="Analyze both minimal and maximal times"/>
+      		</paramtype>
+    	</typedef>
+	    <typedef name="PathTypeType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="end"                 label="Shows the endpoint of the path only, with calculated timing values."/>
+      			<item value="summary"             label="Displays the startpoints and endpoints with slack calculation."/>
+      			<item value="short"               label="Displays the startpoints and endpoints with calculated timing values."/>
+      			<item value="full"                label="Displays the full timing path, including startpoints, through points, and endpoints."/>
+      			<item value="full_clock"          label="Displays full clock paths in addition to the full timing path."/>
+      			<item value="full_clock_expanded" label=" Displays full clock paths between a master clock and generated clocks in addition to the full_clock timing path."/>
+      		</paramtype>
+    	</typedef>
+	
+	</interface>
+
+	<tool name="VivadoReportTimingSummary" label="Report Timimg Summary"
+	    project="FPGA_project"
+		interface="VivadoReportTimingSummaryInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Report timing summary"
+		log-dir="VivadoLogDir"
+		state-dir="VivadoLocalDir"
+		abstract="true"
+		>
+		<action-menu>
+			<action label="Report timing summary" resource="" icon="clock.png" />
+		</action-menu>
+		
+		<parameter id="SkipTCL" label="Skip TCL commands" tooltip="Do not run pre-timing summary TCL commands"
+		           default="false" type= "Boolean" format="None"/>
+<!--   left from synthesis, may need update--> 
+		<parameter id="ShowWarnings" label="Parse warnings" tooltip="Parse warning messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+		<parameter id="ShowInfo" label="Parse info" tooltip="Parse info messages"
+		           default="true"
+		           type= "Boolean" format="None"/>
+        <parameter id="PreGrepW" visible="false"
+                   type="String" format="None"
+                   default="?%ShowWarnings=true: |WARNING, "/>
+        <parameter id="PreGrepI" visible="false"
+                   type="String" format="None"
+                   default="?%ShowInfo=true: |INFO, "/>
+        <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
+                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
+                   type="String" format="CopyValue"
+                   visible="true" readonly="true"/>
+                   
+		<parameter id="PreTCL" label="Pre timing summary TCL commands" tooltip="TCL commands to run before timing summary"
+			type="Stringlist" format="ProgramSyntax" default="" omit=""
+			readonly="false" visible="true" />
+  
+<!-- report_timing_summary arguments -->
+        <parameter 	id="check_timing_verbose" label="Verbose summary" tooltip= "Output a verbose timing summary report."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="delay_type" label="Delay type" tooltip= "Delay types to analyze."
+        			default="min_max" visible="true" omit="min_max" type="DelayTypeType" format="Dash"/>
+        <parameter 	id="no_detailed_paths" label="No detailed paths"
+                    tooltip= "Do not report the full timing path for each clock or path group analyzed."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="setup" label="Check for setup violations" tooltip= "Same as -delay_type max."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="hold" label="Check for hold violations" tooltip= "Same as -delay_type min."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="max_paths"  label="Number of paths per group"
+                    tooltip= "Maximal number of paths to report per group."
+        			default="1"  visible="true" omit="1" type="Cardinal_1" format="Dash"/>
+        <parameter	id="nworst" label="Number of paths" tooltip= "Maximal number of paths per endpoint."
+        			default="1"  visible="true" omit="1" type="Cardinal_1" format="Dash"/>
+        <parameter 	id="unique_pins" label="One path per unique set"
+                    tooltip= "Only report timing paths through each unique set of pins,  reporting one path per path group."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="path_type" label="Path type" tooltip= " Specify the path data to output in the timing summary report."
+        			default="full_clock_expanded" visible="true" omit="full_clock_expanded" type="PathTypeType" format="Dash"/>
+        <parameter 	id="slack_lesser_than" label="Slack lesser than"
+                    tooltip= " Report timing on paths with a calculated slack value less than the specified value."
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter 	id="slack_greater_than" label="Slack greater than"
+                    tooltip= " Report timing on paths with a calculated slack value greater than the specified value."
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter 	id="report_unconstrained" label="Report unconstrained paths"
+                    tooltip= "Report timing on unconstrained paths in the design."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="significant_digits" label="Number of digits" tooltip= "Number of significat digits ion the output."
+        			default="3"  visible="true" omit="1" type="Cardinal_0_3" format="Dash"/>
+        <parameter 	id="no_header" label="No header" tooltip= "Do not add header information to the report."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="file" label="Result filename" tooltip= "Write report to the specified file."
+        			default="%%ProjectName.timing_summary" visible="true" omit="" type="String" format="CopyValue"/>
+        <parameter 	id="append" label="Append to file" tooltip= "Append to the output file."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="return_string" label="Return string" tooltip= "Write result to TCL to be captured into variable."
+        			default="" visible="true" omit="" type="String" format="CopyValue"/>
+        <parameter 	id="datasheet" label="Datasheet info" tooltip= "Generate datasheet information for the report."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="quiet" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter	id="verbose" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+
+<!-- parser parameters -->
+        <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
+        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
+        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
+        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
+        			default="true" visible="true" omit="false" type="Boolean" format="None"/>
+        <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Vivado_Tcl" label="Vivado_Tcl"  tooltip= "Enable problems with [Vivado_Tcl to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Route"     label="Route" tooltip= "Enable problems with [Route to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+<!-- Other patterns copied from other commands, maybe not applicablwe here -->        			
+        <parameter	id="Memdata"   label="Memdata" tooltip= "Enable problems with [Memdata to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Netlist"   label="Netlist" tooltip= "Enable problems with [Netlist to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Opt"       label="Opt"     tooltip= "Enable problems with [Opt to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Project"   label="Project" tooltip= "Enable problems with [Project to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Timing"    label="Timing"  tooltip= "Enable problems with [Timing to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="Pwropt"    label="Pwropt"  tooltip= "Enable problems with [Pwropt to be reported"
+        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
+        <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
+        			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
+
+<!-- hidden (calculated) parameters -->
+<!--  not really used now, always "0" -->			
+			   	   <parameter   id="VivadoTimingSummaryActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+			
+		<input>
+			<group name="General">
+				"SkipTCL"
+				"ShowWarnings"
+				"ShowInfo"
+				"GrepEWI"
+			</group>
+			<group name="TCL commands">
+		        "PreTCL"
+			</group>
+			<group name="Timing Summary">
+				"check_timing_verbose"
+				"delay_type"
+				"no_detailed_paths"
+				"setup"
+				"hold"
+				"max_paths"
+				"nworst"
+				"unique_pins"
+				"path_type"
+				"slack_lesser_than"
+				"slack_greater_than"
+				"report_unconstrained"
+				"significant_digits"
+				"no_header"
+				"file"
+				"append"
+				"return_string"
+				"datasheet"
+       			"---"
+				"quiet"
+				"verbose"
+			</group>
+			<group name="Parser">
+				"NoFileProblem"
+		        "Drc"
+		        "Vivado_Tcl"
+				"Route"
+				"Memdata"
+		        "Netlist"
+		        "Opt"
+		        "Project"
+		        "Timing"
+		        "Pwropt"
+		        "OtherProblems"
+				"---"
+				"PatternErrors"
+				"PatternWarnings"
+ 				"PatternInfo"
+			</group>
+		</input>
+		<output>
+			<line name="vivado_run_timing_summary"
+			      dest="VivadoConsole"
+			      mark="``" 
+			      sep=""
+			      prompt="@@FINISH@@"
+			      success="report_timing_summary completed successfully"
+			      log=""
+			      stdout="parser_VivadoTimingSummary">
+			    "cd ~/%VivadoProjectRoot\n"
+			    "set outputDir ~/%VivadoProjectRoot/build\n"
+			    "file mkdir $outputDir\n"
+		        <!-- Run pre-bitstream TCL commands (if specified) -->
+			    <if SkipTCL="false">
+				      <if-not PreTCL="">
+				      		"%PreTCL\n"
+				      </if-not>
+				      <if PreTCL="">
+				      		"puts \"No TCL commands specified\"\n"'
+				      </if>
+			    </if>
+			    <!-- Run routing -->
+			    "report_timing_summary "
+			    "%check_timing_verbose"
+				"%delay_type"
+				"%no_detailed_paths"
+				"%setup"
+				"%hold"
+				"%max_paths"
+				"%nworst"
+				"%unique_pins"
+				"%path_type"
+				"%slack_lesser_than"
+				"%slack_greater_than"
+				"%report_unconstrained"
+				"%significant_digits"
+				"%no_header"
+				"%file"
+				"%append"
+				"%return_string"
+				"%datasheet"
+				"%quiet"
+				"%verbose"
+				"\n"
+				"puts \"@@FINISH@@\"\n"
+			</line>
+			<line name="vivado_copy_after_bitstream">
+				"-c"
+				"mkdir -p %VivadoLocalResultDir ;"
+				"rsync -avr -e ssh"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build/%file"
+				"%VivadoLocalResultDir/"
+			</line>
+			<line name="parser_VivadoTimingSummary"
+				errors=   "PatternErrors"
+				warnings= "PatternWarnings"
+				info=     "PatternInfo">
+				"-c"
+     			"%GrepEWI"
+     			"| %SedPaths"
+     			<if NoBabyTalk="true">
+     				"| grep --line-buffered -v \"license\""
+     			</if>
+     			"%Drc"
+		        "%Vivado_Tcl"
+		        "%Route"
+     			"%Memdata"
+		        "%Netlist"
+		        "%Opt"
+		        "%Project"
+		        "%Timing"
+		        "%Pwropt"
+		        "%OtherProblems"
+		        <!-- TODO: change Placement to Routing? or such -->
+     			<if NoFileProblem="true">
+	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[TimingSummary:0000\]@'"
+     			</if>
+			</line>
+		</output>
+	</tool>
+</vdt-project>

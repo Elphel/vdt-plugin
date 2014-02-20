@@ -133,7 +133,7 @@
         <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
         			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
 
-        <parameter	id="AutosaveVivadoRoute" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
+        <parameter	id="AutosaveVivadoRoute" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotRoute=false : true, false"
                     visible="false" type="Boolean" format="None"/>
 
 <!-- hidden (calculated) parameters -->
