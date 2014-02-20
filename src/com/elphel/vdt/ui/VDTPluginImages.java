@@ -74,14 +74,13 @@ public class VDTPluginImages {
     public static final ImageDescriptor DESC_PACKAGE_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"package_prop.gif", null);
     public static final ImageDescriptor DESC_PROJECT_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"project_prop.gif", null);
     public static final ImageDescriptor DESC_DESIGM_MENU = create(ICONS_PATH, "obj16"+File.separator+"design_menu.gif", null);
-
-    public static final ImageDescriptor DESC_TOOLS_LINKED = create(ICONS_PATH, "obj16"+File.separator+"link.png", null);
+    public static final ImageDescriptor DESC_TOOLS_LINKED =   create(ICONS_PATH, "obj16"+File.separator+"link.png", null);
     public static final ImageDescriptor DESC_TOOLS_UNLINKED = create(ICONS_PATH, "obj16"+File.separator+"broken_link.png", null);
-
+    public static final ImageDescriptor DESC_TOOLS_SAVE = create(ICONS_PATH, "obj16"+File.separator+"save.png", null);
+    public static final ImageDescriptor DESC_TOOLS_STOP = create(ICONS_PATH, "obj16"+File.separator+"stop.png", null);
     public static final ImageDescriptor DESC_TOOLS_PIN =            create(ICONS_PATH, "obj16"+File.separator+"pin.png", null);
     public static final ImageDescriptor DESC_TOOLS_RESTORE =        create(ICONS_PATH, "obj16"+File.separator+"restore.png", null);
     public static final ImageDescriptor DESC_TOOLS_RESTORE_SELECT = create(ICONS_PATH, "obj16"+File.separator+"restore_select.png", null);
-    
     public static final String ICON_TOOLSTATE_NEW      = "obj16"+File.separator+"white.png";
     public static final String ICON_TOOLSTATE_BAD      = "obj16"+File.separator+"cross.png";
     public static final String ICON_TOOLSTATE_BAD_OLD  = "obj16"+File.separator+"cross_dim.png";

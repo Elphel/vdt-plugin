@@ -115,7 +115,7 @@ public class ToolLogFile {
 	 * @param hasErr Has error  log (if no separate output log - no suffix
 	 * @param buildStamp if null - write log mode, "" - read link (latest) file, else - read that build stamp file 
 	 */
-	public ToolLogFile (
+	public ToolLogFile(
 			String logDir,
 			String logTool,
 			String logName,

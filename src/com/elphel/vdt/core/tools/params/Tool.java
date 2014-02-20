@@ -49,6 +49,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private static final String TAG_TOOL_PINNED = ".toolstate.pinned";
     private static final String TAG_TOOL_STATE =  ".toolstate.state";
     private static final String TAG_TOOL_TIMESTAMP =  ".toolstate.timeStamp";
+    private static final String TAG_TOOL_LASTRUNHASH =  ".toolstate.lastRunHash";
 
 
     private String baseToolName;
@@ -100,7 +101,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private boolean dirty=false;             // tool ran before its sources (runtime value)
     private boolean pinned=false;             // tool ran before its sources (runtime value)
     
-    private long runStamp=0;                 // timestamp of the tool last ran (0 - never)
+//    private long runStamp=0;                 // timestamp of the tool last ran (0 - never)
     private TOOL_STATE state=TOOL_STATE.NEW; // tool state (succ, fail,new, running)
 //    private boolean running=false;
 //    private long finishTimeStamp=0;
@@ -121,7 +122,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     private TOOL_MODE runMode;
     private TOOL_MODE lastRunMode;           // last running (not STOP) mode
-    
+    private int lastRunHash;                 // hash code of the last run
 
     public Tool(String name,
                 String controlInterfaceName,
@@ -222,7 +223,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         PLAYBACK
     }
    
-    public void setRunStamp(long runStamp) { this.runStamp=runStamp; }
+//    public void setRunStamp(long runStamp) { this.runStamp=runStamp; }
     public List<String> getDepends()       { return depends; }
     public boolean isDirty()               { return dirty; }
 //    public boolean isRunning()             { return running; }
@@ -231,7 +232,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public TOOL_MODE getLastMode()         { return lastRunMode; }
     
 
-    public long getRunStamp()              { return runStamp; }
+//    public long getRunStamp()              { return runStamp; }
     public TOOL_STATE getState()           { return state; }
     public boolean isPinned()              { return pinned; }
     public String getOpenState()           { return openState; }
@@ -240,13 +241,6 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public Tool getOpenTool()              { return openTool; }
     public void setOpenTool(Tool openTool) { this.openTool=openTool;}
     
-    public void setTimeStamp(){
-    	timeStamp=SelectedResourceManager.getDefault().getBuildStamp();
-    }
-    
-    public String getFinishTimeStamp(){
-    	return timeStamp;
-    }
     
     public void setDirty(boolean dirty) {
     	this.dirty=dirty;
@@ -262,12 +256,35 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     
     public void setMode(TOOL_MODE mode) {
+    	if ((runMode!=TOOL_MODE.STOP) && (mode==TOOL_MODE.STOP)){ // jsut stopped
+    		lastRunHash=getCurrentHash();
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+        		System.out.println(":::: Tool "+name+": lastRunHash="+lastRunHash);
+        	}
+    	}
     	runMode=mode;
     	if (mode!=TOOL_MODE.STOP)  lastRunMode=mode;
+    	if (mode == TOOL_MODE.RUN) { // Only RUN
+    		setTimeStamp(); // copy current time to tool timestamp
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+        		System.out.println(":::: Tool "+name+": setTimeStamp="+timeStamp);
+        	}
+
+    	}
     	//    	toolFinished();
     	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
     		System.out.println("--->> "+name+": setMode("+mode+"), lastRunMode="+lastRunMode);
     	}
+    }
+    
+    public boolean hashMatch(){
+    	return lastRunHash == getCurrentHash();
+    }
+    public int getLastRunHash(){
+    	return lastRunHash;
+    }
+    public void setLastRunHash(int hash){ // to restore from file
+    	lastRunHash=hash;
     }
     
     public void setState(TOOL_STATE state) {
@@ -284,18 +301,6 @@ public class Tool extends Context implements Cloneable, Inheritable {
 
     public void toolFinished(){
     	designFlowView.getToolSequence().toolFinished(this);
-/*    	
-System.out.println("Tool "+getName()+" FINISHED - add more stuff here");    	
-    	
-    	
-    	if (designFlowView!=null){
-        	Display.getDefault().syncExec(new Runnable() {
-        		public void run() {
-            		designFlowView.updateLaunchAction(); // Run from Display thread to prevent "invalid thread access" when called from Runner
-        		}
-        	});
-    	}
-*/    	
     }
     
     
@@ -659,13 +664,19 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
     	return null;
     }
 
-    public String getStateFile() {return getStateFile(true); } 
+    public String getStateFile() {return getStateFile(true); } // With timestamp or as specified in resultFile
     public String getStateFile(boolean first) {
     	if (resultFile!=null) return resultFile;
     	List<String> names=	getResultNames();
     	if (names!=null) {
         	if (names.size()==0) return null; 
-    		return ToolLogFile.insertTimeStamp(names.get(0),SelectedResourceManager.getDefault().getBuildStamp());
+//    		return ToolLogFile.insertTimeStamp(names.get(0),SelectedResourceManager.getDefault().getBuildStamp());
+        	String stamp=getTimeStamp();
+        	if (stamp==null){
+//        		System.out.println("*** Warning: no timestamp available in Tool.getStateFile() for tool "+getName()); // OK when dryRun
+        		return null;
+        	}
+    		return ToolLogFile.insertTimeStamp(names.get(0),getTimeStamp());
     	}
     	if (!first) return null ; // prevent loops
     	if (restoreMaster != null) return restoreMaster.getStateFile(false);
@@ -673,13 +684,42 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
     	return null;
     }
     
+    public void setTimeStamp(){
+    	timeStamp=SelectedResourceManager.getDefault().getBuildStamp();
+    }
+    public void setTimeStamp(String timeStamp){
+    	this.timeStamp=timeStamp;
+    }
+    
+    public String getTimeStamp() {return getTimeStamp(true); } // With timestamp or as specified in resultFile
+    public String getTimeStamp(boolean first){
+    	if (timeStamp!=null) return timeStamp;
+    	if (!first) return null ; // prevent loops
+    	if (restoreMaster != null) return restoreMaster.getTimeStamp(false);
+    	if (saveMaster != null)    return saveMaster.getTimeStamp(false);
+    	return null;
+    }
+    
+    
+    public String getStateLink() {return getStateLink(true); } // No timestamp, link name (or null)
+    public String getStateLink(boolean first) {
+    	List<String> names=	getResultNames();
+    	if (names!=null) {
+        	if (names.size()==0) return null; 
+    		return names.get(0);
+    	}
+    	if (!first) return null ; // prevent loops
+    	if (restoreMaster != null) return restoreMaster.getStateLink(false);
+    	if (saveMaster != null)    return saveMaster.getStateLink(false);
+    	return null;
+    }
     
     
     public void setResultFile(String filename){
     	resultFile=filename;
     }
 
-    public String getResultName(){
+    public String getResultName(){ // does not look at masters
     	List<String> names=	getResultNames();
     	if ((names==null) || (names.size()==0)) return null;
     	return names.get(0);
@@ -690,6 +730,8 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
         memento.putBoolean(name+TAG_TOOL_PINNED, new Boolean(pinned));
         memento.putString(name+TAG_TOOL_STATE, this.state.toString());
         if (timeStamp!=null) memento.putString(name+TAG_TOOL_TIMESTAMP, timeStamp);
+        if (lastRunHash!=0)  memento.putInteger(name+TAG_TOOL_LASTRUNHASH, lastRunHash);
+        
     }
     
     public void restoreState(IMemento memento) {
@@ -707,6 +749,8 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
     	}
     	String timestamp=memento.getString(name+TAG_TOOL_TIMESTAMP);
     	if (timestamp!=null) this.timeStamp=timestamp;
+    	Integer hc=memento.getInteger(name+TAG_TOOL_LASTRUNHASH);
+    	if (hc!=null) lastRunHash=hc;
     }
     
     
@@ -1011,6 +1055,7 @@ System.out.println("Tool "+getName()+" FINISHED - add more stuff here");
         
         return super.buildParams();
     }
+    
     
     protected List<String> buildCommandString(String paramStringTemplate)
         throws ToolException

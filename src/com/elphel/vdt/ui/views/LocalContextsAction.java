@@ -74,9 +74,6 @@ public class LocalContextsAction extends ContextsAction {
         dialog.setTitle(title);
         dialog.create();
         int result=dialog.open();
-//        if (result == Window.OK){
-//        	updateActions();
-//        }
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
 			System.out.println("LocalContextAction()->"+result);
 		}

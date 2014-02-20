@@ -48,18 +48,41 @@
                           label="Synthesize design"
                           icon="Retort.png"
                           call="VivadoSynthesis"/>
-                <menuitem name="VivadoOptPlace"
+<!--            <menuitem name="VivadoOptPlace"
                           label="Optimize and place design"
                           icon="mondrian2x2.png"
-                          call="VivadoOptPlace"/>
+                          call="VivadoOptPlace"/>  -->
+                          
+                <menuitem name="VivadoOpt"
+                          label="Optimize design"
+                          icon="opt_blue.png"
+                          call="VivadoOpt"/>
+                          
+                <menuitem name="VivadoOptPower"
+                          label="Reduce power"
+                          icon="fire.png"
+                          call="VivadoOptPower"/>
+                          
+                <menuitem name="VivadoPlace"
+                          label="Place design"
+                          icon="mondrian2x2.png"
+                          call="VivadoPlace"/>
+                          
+                <menuitem name="VivadoOptPhys"
+                          label="Post-placement optimize"
+                          icon="opt_yellow.png"
+                          call="VivadoOptPhys"/>
+                          
                 <menuitem name="VivadoRoute"
                           label="Route design"
                           icon="route66.png"
                           call="VivadoRoute"/>
+                          
                 <menuitem name="VivadoBitstream"
                           label="Generate bitstream"
                           icon="bitstream.png"
                           call="VivadoBitstream"/>
+                          
                 <menuitem name="Vivado Test"
                           label="Send a 'Hello World' command to the remote Vivado session"
                           icon="my_tool.gif"

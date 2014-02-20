@@ -86,6 +86,7 @@ public class ContextOptionsDialog extends Dialog {
                                  , new String[] {context.getLabel(), e.getMessage()})
                                  , e );
         }
+        context.recalcHashCodes(); 
         if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
         	System.out.println("ContexOptionsDialog.okPressed()");
         // Need to update Design menu as it uses calculated parameters

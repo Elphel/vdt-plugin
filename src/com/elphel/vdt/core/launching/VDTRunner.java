@@ -98,7 +98,7 @@ public class VDTRunner {
 		tool.setState(TOOL_STATE.FAILURE);
 //		tool.setRunning(false);
 		tool.setMode(TOOL_MODE.STOP);
-		tool.setTimeStamp();
+//		tool.setTimeStamp(); // will set at start
 		tool.toolFinished();
 		//removeConfiguration
 		runningBuilds.removeConfiguration(runConfig.getOriginalConsoleName());
@@ -270,7 +270,7 @@ public class VDTRunner {
 //		tool.setRunning(false);
 		tool.setMode(TOOL_MODE.STOP);
 
-		tool.setTimeStamp();
+// 		tool.setTimeStamp(); //will set at start
 		if ((tool.getState()==TOOL_STATE.SUCCESS) && runConfig.isKeptOpen()) {
 			tool.setState(TOOL_STATE.KEPT_OPEN);
 		} else { // failure on not

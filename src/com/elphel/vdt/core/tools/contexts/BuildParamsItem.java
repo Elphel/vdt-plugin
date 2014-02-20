@@ -139,6 +139,7 @@ public class BuildParamsItem implements Cloneable{
 	}
 
 	public String getNameAsParser() { return is_parser?name:null; }
+	public boolean isParser()       {return is_parser;}
 	public String getName()         { return name; }
 	public String getErrors()       { return toolErrors; }
 	public String getWarnings()     { return toolWarnings; }

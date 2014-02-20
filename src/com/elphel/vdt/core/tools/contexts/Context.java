@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.config.Config;
 import com.elphel.vdt.core.tools.config.ConfigException;
 import com.elphel.vdt.core.tools.config.xml.XMLConfig;
@@ -58,6 +59,7 @@ public abstract class Context {
     private String workingDirectory;
     private String version;
     private Context context=null;
+    private int currentHash; // calculated during buildparam from non-parser command blocks and command files.
     protected Context(String name,
                       String controlInterfaceName,
                       String label,
@@ -75,6 +77,17 @@ public abstract class Context {
         this.inputDialogLabel = inputDialogLabel;
         this.paramGroups = paramGroups;        
         this.paramContainer = new ParameterContainer(params);
+    }
+    
+    /**
+     * Generated hashcode for the last run of buildParams() - includes command files and non-parser command lines 
+     * @return generated hash code
+     */
+    public int getCurrentHash(){
+    	return currentHash; 
+    }
+    public void setCurrentHash(int hash){
+    	currentHash=hash; 
     }
     
     public void init(Config config) throws ConfigException {
@@ -217,16 +230,38 @@ public abstract class Context {
     	}
     	return consoleList;
     }
-    
-    
+      // currently - for all tools, skip generation of control files, ignore errors     
+      public void recalcHashCodes(){
+    	  System.out.println("Context.java(): RECALC HASH CODES");
+    	  // called from ContextOptionsDialog.okPressed() line: 89
+    	  // all context parameters are already recalculated (buildParams() ), so now we just go through all tool contexts,
+    	  // calling them with dryRun=true;
+  		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+  			try {
+				tool.buildParams(false);
+				if (tool.hashMatch()) System.out.println("recalcHashCodes(): "+tool.getName()+
+						" hashMatch()="+tool.hashMatch()+
+						" getCurrentHash()="+tool.getCurrentHash()+
+						" getLastRunHash()="+tool.getLastRunHash());
+			} catch (ToolException e) {
+				System.out.println("failed buildParams(false) on tool="+tool.getName()+", e="+e.toString());
+			}
+  		}
+
+
+      }
     
       public BuildParamsItem[] buildParams() throws ToolException {
+    	  return buildParams(false);
+      }
+      public BuildParamsItem[] buildParams(boolean dryRun) throws ToolException {
     	List<BuildParamsItem> buildParamItems = new ArrayList<BuildParamsItem>();
     	
  //       List<String> commandLineParams = new ArrayList<String>();
         Iterator<CommandLinesBlock> commandLinesBlockIter = commandLinesBlocks.iterator(); // command lines block is empty (yes, there is nothing in project output)
         
         createdControlFiles.clear();
+        currentHash=0;
         
         while(commandLinesBlockIter.hasNext()) {
             CommandLinesBlock commandLinesBlock = (CommandLinesBlock)commandLinesBlockIter.next();
@@ -281,6 +316,7 @@ public abstract class Context {
             	if (isConsoleName) {
  //           		System.out.println("TODO: Enable console command generation here");
             		printStringsToConsoleLine(commandLineParams, commandSequence,sep,mark);
+            		//if (name!=null) - it is a parser, do not include in hashcode generation
             		buildParamItems.add(
             				new BuildParamsItem (
             						(String[])commandLineParams.toArray(new String[commandLineParams.size()]),
@@ -313,12 +349,17 @@ public abstract class Context {
 
             		// write strings to control file
             		boolean controlFileExists = controlFileExists(controlFileName);
-
-            		printStringsToFile(controlFileName, controlFileExists, commandSequence, sep, mark);
-
-            		if(!controlFileExists)
-            			createdControlFiles.add(controlFileName);
-
+            		if (!dryRun) {
+            			printStringsToFile(controlFileName, controlFileExists, commandSequence, sep, mark);
+            			if(!controlFileExists)
+            				createdControlFiles.add(controlFileName);
+            		}
+            		// include hash codes for each segment of the command file content
+            		for (List<String> lStr:commandSequence){
+            			if (lStr!=null) for (String str:lStr){
+            				if (str!=null) currentHash += str.hashCode();
+            			}
+            		}
             	}
             } else { // processing command line
             	printStringsToCommandLine(commandLineParams, commandSequence, mark);
@@ -351,6 +392,27 @@ public abstract class Context {
         	BuildParamsItem buildParamsItem = (BuildParamsItem)buildParamItemsIter.next();
         	buildParamsItem.removeNonParser(buildParamItems);
         }
+		// include hash codes for each line in the command sequence if it is not a parser
+		for (BuildParamsItem item:buildParamItems){
+			if (!item.isParser()){
+				String [] params=item.getParams();
+				if (params!=null) for (int i=0;i<params.length;i++){
+					currentHash += params[i].hashCode();
+				}
+			}
+		}
+//		System.out.println("BildParam("+dryRun+"), name="+name+" currentHash="+currentHash);
+// Seems that during build it worked on a working copy of the tool, so calculated parameter did not get back
+		Tool proto=ToolsCore.getConfig().getContextManager().findTool(name);
+		if (proto!=null){
+			if (proto!=this){
+				System.out.println("++++ Updating tool's currentHas from working copy, name="+name);
+				proto.setCurrentHash(currentHash);
+			}
+			
+		}
+		
+		
         return (BuildParamsItem[])buildParamItems.toArray(new BuildParamsItem[buildParamItems.size()]);
     }
     

@@ -103,6 +103,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 //    private Action launchAction;
     
     private Action toggleLinkedTools;
+    private Action toggleSaveTools;
+    private Action toggleStopTools;
 
     private Action showInstallationPropertiesAction;
     private ClearAction clearInstallationPropertiesAction;
@@ -151,6 +153,12 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     }
     public ToolSequence getToolSequence(){
     	return toolSequence;
+    }
+    public void setToggleSaveTools(boolean checked){
+    	toggleSaveTools.setChecked(checked);
+    }
+    public void setToggleStopTools(boolean checked){
+    	toggleStopTools.setChecked(checked);
     }
 
     /* 
@@ -211,6 +219,25 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         if (memento != null)
             restoreState(memento);
         memento = null;
+        
+        tree.addListener(SWT.KeyUp, new Listener(){
+            @Override
+            public void handleEvent(Event event) {
+            	if (event.keyCode == SWT.SHIFT) {
+            		toolSequence.setShiftPressed(false);
+            	}
+            }
+        });
+        tree.addListener(SWT.KeyDown, new Listener(){
+            @Override
+            public void handleEvent(Event event) {
+            	if (event.keyCode == SWT.SHIFT) {
+            		toolSequence.setShiftPressed(true);
+            	}
+            }
+        });
+
+        
     } // createPartControl()
 
     private void doLoadDesignMenu() {
@@ -322,7 +349,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 //      drillDownAdapter.addNavigationActions(manager);
         manager.add(new Separator("toolbar-separator"));
         manager.add(toggleLinkedTools);
-        
+        manager.add(toggleSaveTools);
+        manager.add(toggleStopTools);
+        manager.add(new Separator());
         manager.add(showInstallationPropertiesAction);
         manager.add(showPackagePropertiesToolbarAction);
         manager.add(showProjectPropertiesToolbarAction);
@@ -351,6 +380,25 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         toggleLinkedTools.setToolTipText("Toggle tool dependency");
         toggleLinkedTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_LINKED);
         toggleLinkedTools.setChecked(!SelectedResourceManager.getDefault().isToolsLinked()); // normally happens before reading memento
+        
+
+        toggleSaveTools= new Action("Save tool state", Action.AS_CHECK_BOX) {
+            public void run() {
+            	toolSequence.setSave(isChecked());
+            }
+        };
+        toggleSaveTools.setToolTipText("Save tool state");
+        toggleSaveTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_SAVE);
+        
+
+        toggleStopTools= new Action("Stop tools", Action.AS_CHECK_BOX) {
+            public void run() {
+            	toolSequence.setStop(isChecked());
+            }
+        };
+        toggleStopTools.setToolTipText("Request tool sequence stop (when convenient), with <SHFT> - mark stopped (for debug)");
+        toggleStopTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_STOP);
+         
 		
         showInstallationPropertiesAction = new Action() {
             public void run() {
@@ -645,7 +693,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                         try {
                             launchTool(
                             		fTool, // tool, will get 
-//                            		fDesignFlowView, // to be able to launch update when build state of the tool changes
+                            		TOOL_MODE.RUN,
                             		finalI,
                             		fFullPath,
                             		fIgnoreFilter);
@@ -697,7 +745,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                                     try {
                                         launchTool(
                                         		restoreTool,
-//                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
+                                        		TOOL_MODE.RESTORE,
                                         		0,
                                         		fFullPath,
                                         		fIgnoreFilter);
@@ -727,7 +775,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                                     try {
                                         launchTool(
                                         		restoreTool,
-//                                        		fDesignFlowView, // to be able to launch update when build state of the tool changes
+                                        		TOOL_MODE.RESTORE,
                                         		0,
                                         		fFullPath,
                                         		fIgnoreFilter);
@@ -828,14 +876,15 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     private void launchTool(
     		Tool tool,
-//    		final DesignFlowView designFlowView,
+    		TOOL_MODE mode,
     		int choice,
     		String fullPath,
     		String ignoreFilter) throws CoreException {
     	if (tool != null) {
 //    		tool.setDesignFlowView(designFlowView);
     		tool.setDesignFlowView(this); // maybe will not be needed with ToolSequencing class
-    		tool.setMode(TOOL_MODE.RUN);
+    		if (!toolSequence.okToRun()) return;
+    		tool.setMode(mode) ; //TOOL_MODE.RUN);
     		tool.toolFinished();
     		tool.setChoice(0);
     		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
@@ -869,6 +918,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     			System.out.println("logBuildStamp="+logBuildStamp);
     		}
             tool.setDesignFlowView(designFlowView);
+    		if (!toolSequence.okToRun()) return;
+
 //            tool.setRunning(true);
     		tool.setMode(TOOL_MODE.PLAYBACK);
             tool.toolFinished();

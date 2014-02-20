@@ -102,7 +102,7 @@ public class RepeaterRecognizer implements Recognizer {
                                               String repSuffix,
                                               String separator) 
     {
-    	System.out.println("Ever get here? RepeaterRecognizer.java:findGenerator()");
+    	System.out.println("Ever get here? RepeaterRecognizer.java:findGenerator()"); // yes, sure
     	AbstractGenerator gen=new FilteredSourceListGenerator(repPrefix, repSuffix, separator);
     	if (genName.equals(gen.getName())) return gen;
     	gen=new SourceListGenerator(repPrefix, repSuffix, separator);

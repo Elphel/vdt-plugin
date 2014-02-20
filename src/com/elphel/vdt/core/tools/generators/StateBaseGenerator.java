@@ -20,19 +20,20 @@ package com.elphel.vdt.core.tools.generators;
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
-public class BuildStampGenerator extends AbstractGenerator {
-    public static final String NAME = VDT.GENERATOR_ID_BUILD_STAMP;
+
+/**
+ * Generates name of teh sate file without extension
+ *
+ */
+public class StateBaseGenerator extends AbstractGenerator {
+    public static final String NAME = VDT.GENERATOR_ID_STATE_FILE;
     public String getName() {
         return NAME;
     }
     
     protected String[] getStringValues() {
-//    	if (    	return new String[] {(tool0!=null)?tool0.getStateFile(): ""};
-//    	System.out.println("#### BuildStampGenerator(): tool0="+
-//((tool0!=null)?(tool0.getName()+" state="+tool0.getState()+" mode="+tool0.getMode()):"null"));
-    	String stamp=(tool0!=null)?tool0.getTimeStamp(): null;
-    	if (stamp==null) stamp=SelectedResourceManager.getDefault().getBuildStamp();
-    	return new String[] {stamp};
+    	String base=(tool0!=null)?tool0.getStateFile(): "";
+    	if (base.lastIndexOf('.')>=0) base=base.substring(0,base.lastIndexOf('.'));
+    	return new String[] {base};
     }
 }
- 

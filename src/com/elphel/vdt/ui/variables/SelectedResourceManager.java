@@ -294,7 +294,6 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     }
 
     public String getBuildStamp(){
-    	
     	return timestamp;
     }
     

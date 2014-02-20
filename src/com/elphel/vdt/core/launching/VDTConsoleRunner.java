@@ -198,6 +198,7 @@ public class VDTConsoleRunner{
         	System.out.println("Using success string: \""+buildParamsItem.getSuccessString()+"\"");
         	System.out.println("Using failure string: \""+buildParamsItem.getFailureString()+"\"");
         }
+        String timeStamp=ToolsCore.getTool(runConfig.getToolName()).getTimeStamp();
         toolLogFile=(((fSendOutputToStreamProxy!=null) || (fSendErrorsToStreamProxy!=null)))?
         		(new ToolLogFile (
         				runConfig.getLogDir(),
@@ -206,11 +207,7 @@ public class VDTConsoleRunner{
         				null,    // extension - use default
         				fHasStdout, // fSendOutputToStreamProxy!=null, //boolean useOut,
         				fHasStderr, // fSendErrorsToStreamProxy!=null, //boolean useErr, WRONG
-        				null)) : null;//String buildStamp
-        		
-        //final ToolLogFile fToolLogFile=toolLogFile;	
-        //errorListener=null;
-        //        if (fSendErrorsToStreamProxy!=null){
+        				timeStamp)) : null;//String buildStamp - use the one from the tool
 
         final IStreamMonitor consoleErrStreamMonitor=consoleInStreamProxy.getErrorStreamMonitor();
         errorListener=new IStreamListener(){
@@ -399,7 +396,10 @@ public class VDTConsoleRunner{
     		VDTLaunchUtil.getRunner().abortLaunch(runConfig.getOriginalConsoleName());    		
     		return;
     	}
-    	if (runConfig.gotGood()){
+    	if (runConfig.gotGood() || 
+    			((buildParamsItem.getFailureString()!=null) && // was only looking for bad, otherwise OK
+    			 (buildParamsItem.getSuccessString()==null))
+    			){
     		tool.setDirty(false);
     		tool.setState(TOOL_STATE.SUCCESS);
     	} else 	if (buildParamsItem.getSuccessString()!=null){

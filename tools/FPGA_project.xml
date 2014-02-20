@@ -110,6 +110,10 @@
 		<parameter id="VivadoLocalDir" label="Local Xilinx directory" tooltip="Local project subdirectroy for Xilinx Vivado generated files"
 			type="Pathname" default="vivado" format="CopyValue" readonly="false" />
 
+		<parameter id="VivadoLocalResultDir" label="Local Xilinx results directory"
+		    tooltip="Local project subdirectroy for Xilinx Vivado generated result files"
+			type="Pathname" default="vivado" format="CopyValue" readonly="false" />
+
 		<parameter id="VivadoLogDir" label="Local Vivado tool logsx directory" tooltip="Local project subdirectroy for Xilinx Vivado tools log files"
 			type="Pathname" default="vivado_logs" format="CopyValue" readonly="false" />
 
@@ -129,6 +133,25 @@
 	        default="%%ProjectName-opt-place.dcp"
 			type="Filename" format="CopyValue" />
 
+	 	    <parameter id="SnapshotOpt"
+	        label="Optimization snapshot" tooltip="Name of Vivado snapshot archive after optimization"
+	        default="%%ProjectName-opt.dcp"
+			type="Filename" format="CopyValue" />
+
+	 	    <parameter id="SnapshotOptPower"
+	        label="Power optimization snapshot" tooltip="Name of Vivado snapshot archive after power optimization"
+	        default="%%ProjectName-opt-power.dcp"
+			type="Filename" format="CopyValue" />
+
+	 	    <parameter id="SnapshotPlace"
+	        label="Placement snapshot" tooltip="Name of Vivado snapshot archive after placement"
+	        default="%%ProjectName-place.dcp"
+			type="Filename" format="CopyValue" />
+
+	 	    <parameter id="SnapshotOptPhys"
+	        label="Physical optimization snapshot" tooltip="Name of Vivado snapshot archive after physical optimization"
+	        default="%%ProjectName-opt-phys.dcp"
+			type="Filename" format="CopyValue" />
 
 	 	    <parameter id="SnapshotRoute"
 	        label="Routing snapshot" tooltip="Name of Vivado snapshot archive after routing"
@@ -145,6 +168,25 @@
 	        default="false"
 			type="Boolean" format="None" />
 
+	 	    <parameter id="DisableVivadoOpt"
+	        label="Disable Vivado optimization" tooltip="Disable tool Vivado Optimize"
+	        default="false"
+			type="Boolean" format="None" />
+
+	 	    <parameter id="DisableVivadoOptPower"
+	        label="Disable Vivado power optimization" tooltip="Disable reduction of power consumption"
+	        default="false"
+			type="Boolean" format="None" />
+
+	 	    <parameter id="DisableVivadoPlace"
+	        label="Disable placement" tooltip="Disable tool Vivado Place"
+	        default="false"
+			type="Boolean" format="None" />
+
+	 	    <parameter id="DisableVivadoOptPhys"
+	        label="Disable phys. optimization" tooltip="Disable tool Vivado Physical (post-placement) Optimization"
+	        default="false"
+			type="Boolean" format="None" />
 
 	 	    <parameter id="DisableVivadoRoute"
 	        label="Disable Vivado route" tooltip="Disable tool Vivado route"
@@ -176,20 +218,29 @@
 			    "part"
 				"VivadoProjectRoot"
 				"VivadoLocalDir"
+				"VivadoLocalResultDir"
 				"VivadoLogDir"
 				"VivadoIgnoreSource"
 				"SedPaths"
 			</group>
 			<group name="VivadoDisable" label="Selectively disable Vivado tools">
 			    "DisableVivadoSynth"
-			    "DisableVivadoOptPlace"
+<!-- 			"DisableVivadoOptPlace"  -->
+			    "DisableVivadoOpt"
+			    "DisableVivadoOptPower"
+			    "DisableVivadoPlace"
+			    "DisableVivadoOptPhys"
 			    "DisableVivadoRoute"
 			    "DisableVivadoBitsteam"
 			</group>
 			<!--  TODO: make time-stamped and "latest" for snapshots -->
 			<group name="VivadoSnapshots" label="Vivado snapshot archive names">
 				"SnapshotSynth"
-				"SnapshotOptPlace"
+<!-- 			"SnapshotOptPlace"  -->	
+				"SnapshotOpt"
+				"SnapshotOptPower"
+				"SnapshotPlace"
+				"SnapshotOptPhys"
 				"SnapshotRoute"
 			</group>
 		</input>

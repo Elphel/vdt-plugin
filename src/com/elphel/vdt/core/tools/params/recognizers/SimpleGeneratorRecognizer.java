@@ -38,7 +38,8 @@ public class SimpleGeneratorRecognizer implements Recognizer {
         new BuildStampGenerator(),
         new UserNameGenerator(),
         new StateDirGenerator(),
-        new StateFileGenerator()
+        new StateFileGenerator(),
+        new StateBaseGenerator()
     };
   
     public SimpleGeneratorRecognizer(){
