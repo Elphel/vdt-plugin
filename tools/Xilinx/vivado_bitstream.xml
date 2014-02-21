@@ -17,6 +17,9 @@
 		<action-menu>
 			<action label="Generate bitstream" resource="" icon="bitstream.png" />
 		</action-menu>
+		<depends-list>
+			<depends state="SnapshotRoute"/>
+		</depends-list>
 		<parameter id="SkipPreBitstream" label="Skip pre-bitstream" tooltip="Do not run pre bitstream TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 <!--   left from synthesis, may need update--> 
@@ -43,7 +46,7 @@
                    
   
 <!-- write_bitstream arguments -->
-        <parameter 	id="filename" label="Bitstream filename" tooltip= "Bitstream file name (will add *.bit extension)."
+        <parameter 	id="rawfile" label="Bitstream filename" tooltip= "Bitstream file name (will add *.bit extension)."
         			default="%%ProjectName" visible="true" omit="" type="String" format="CopyValue"/>
         <parameter 	id="force" label="Force (overwrite)" tooltip= "Overwrite existent files."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
@@ -60,7 +63,7 @@
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
         <parameter 	id="reference_bitfile" label="Read reference bitfile" tooltip= "Read reference bitstream file."
-        			default="" visible="true" omit="" type="Filename" format="Dash"/>
+        			default="" visible="true" omit="" type="Filename" format="CopyValue"/>
         <parameter	id="quiet_bit" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
         <parameter	id="verbose_bit" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
@@ -106,9 +109,11 @@
 
 
 <!-- hidden (calculated) parameters -->
+
 <!--  not really used now, always "0" -->			
 			   	   <parameter   id="VivadoBitstreamActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
+					
 			
 		<input>
 			<group name="General">
@@ -121,7 +126,7 @@
 		        "PreBitstreamTCL"
 			</group>
 			<group name="Bitstream">
-       			"filename"
+       			"rawfile"
        			"force"
        			"raw_bitfile"
        			"no_binary_bitfile"
@@ -161,9 +166,9 @@
 				"-c"
 				"rsync -avrR -e ssh"
 				<!--  from: (trying full name) -->
-				"%reference_bitfile"
+				"%VivadoLocalResultDir/%reference_bitfile"
 				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%VivadoRemoteDir"
 				";"
 			</line>
 		</if-not>	
@@ -171,13 +176,13 @@
 			<line name="vivado_run_bitstream"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="write_bitstream completed successfully"
 			      log=""
 			      stdout="parser_VivadoBitstream">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
 		          <!-- Run pre-bitstream TCL commands (if specified) -->
 			      <if SkipPreBitstream="false">
@@ -190,16 +195,18 @@
 			      </if>
 			      <!-- Run routing -->
 			      "write_bitstream "
-			      "%filename"
 			      "%force"
 			      "%raw_bitfile"
 			      "%no_binary_bitfile"
 			      "%readback_file"
 			      "%logic_location_file"
 			      "%bin_file"
-			      "%reference_bitfile"
+			      <if-not reference_bitfile="">
+				      "-reference_bitfile %VivadoRemoteDir/%reference_bitfile"
+				  </if-not>
 			      "%quiet_bit"
 			      "%verbose_bit"
+			      "%VivadoRemoteDir/%rawfile"
 			      "\n"
 				"puts \"@@FINISH@@\"\n"
 			</line>
@@ -207,7 +214,7 @@
 				"-c"
 				"mkdir -p %VivadoLocalResultDir ;"
 				"rsync -avr -e ssh"
-				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/build/%filename.*"
+				"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%VivadoRemoteDir/%rawfile.*"
 				"%VivadoLocalResultDir/"
 			</line>
 			<line name="parser_VivadoBitstream"

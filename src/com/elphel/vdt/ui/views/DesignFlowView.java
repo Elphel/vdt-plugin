@@ -798,7 +798,6 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                         public void run() {
                             try {
                             	playLogs(
-                                		fDesignFlowView, // to be able to launch update when build state of the tool changes
                                 		false,
                                 		fFullPath,
                                 		fIgnoreFilter);
@@ -813,7 +812,6 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                         public void run() {
                             try {
                             	playLogs(
-                                		fDesignFlowView, // to be able to launch update when build state of the tool changes
                                 		true,
                                 		fFullPath,
                                 		fIgnoreFilter);
@@ -881,20 +879,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     		String fullPath,
     		String ignoreFilter) throws CoreException {
     	if (tool != null) {
-//    		tool.setDesignFlowView(designFlowView);
-    		tool.setDesignFlowView(this); // maybe will not be needed with ToolSequencing class
-    		if (!toolSequence.okToRun()) return;
-    		tool.setMode(mode) ; //TOOL_MODE.RUN);
-    		tool.toolFinished();
-    		tool.setChoice(0);
-    		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
-    		SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
-    		// apply designFlowView to the tool itself
-    		LaunchCore.launch( tool,
-    				selectedResource.getProject(),
-    				fullPath,
-    				null); // run, not playback 
-
+    		toolSequence.launchToolSequence(tool,mode, choice, fullPath, ignoreFilter);
     	} else if (selectedItem.hasChildren()) {
     		if (viewer.getExpandedState(selectedItem))
     			viewer.collapseToLevel(selectedItem, AbstractTreeViewer.ALL_LEVELS);
@@ -903,10 +888,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     	}
     } // launchTool()
     
-    
-    
     private void playLogs(
-    		final DesignFlowView designFlowView,
     		boolean select, // select log file
     		String fullPath,
     		String ignoreFilter) throws CoreException {
@@ -917,21 +899,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
     			System.out.println("logBuildStamp="+logBuildStamp);
     		}
-            tool.setDesignFlowView(designFlowView);
-    		if (!toolSequence.okToRun()) return;
-
-//            tool.setRunning(true);
-    		tool.setMode(TOOL_MODE.PLAYBACK);
-            tool.toolFinished();
-        	tool.setChoice(0);
-        	SelectedResourceManager.getDefault().updateActionChoice(fullPath, 0, ignoreFilter); // Andrey
-        	SelectedResourceManager.getDefault().setBuildStamp(); // OK - even for log? Or use old/selected one?
-        	// apply designFlowView to the tool itself
-            LaunchCore.launch(tool,
-                              selectedResource.getProject(),
-                              fullPath,
-                              logBuildStamp); 
-// probably should not get here if not a tool
+        	toolSequence.playLogs(
+        			tool,
+            		fullPath,
+            		logBuildStamp);
         } else if (selectedItem.hasChildren()) {
             if (viewer.getExpandedState(selectedItem))
                 viewer.collapseToLevel(selectedItem, AbstractTreeViewer.ALL_LEVELS);

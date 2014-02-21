@@ -61,8 +61,6 @@
 			      sep=""
 			      success="Finished parsing RTL primitives"
 			      prompt="@@FINISH@@">
-<!--			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"-->
 				  "puts \"@@FINISH@@\"\n"
 			</line>
 				

@@ -29,11 +29,13 @@
 		disable="DisableVivadoOptPhys"
 		autosave="AutosaveVivadoOptPhys"
 		save="SaveVivadoOptPhys"
-		
 		>
 		<action-menu>
 			<action label="Post placement optimize" resource="" icon="opt_yellow.png" />
 		</action-menu>
+		<depends-list>
+			<depends state="SnapshotPlace"/>
+		</depends-list>
 		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPhysOpt" label="Skip physical optimize" tooltip="Do not run phys_opt_design"
@@ -192,13 +194,13 @@
 			<line name="vivado_run_opt_phys"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="phys_opt_design completed successfully"
 			      log=""
 			      stdout="parser_VivadoOptPhys">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
 		          <!-- Run pre-optimization TCL commands (if specified) -->
 			      <if SkipPreOptimization="false">

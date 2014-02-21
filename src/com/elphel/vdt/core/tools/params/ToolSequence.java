@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.swt.widgets.Display;
 
 import com.elphel.vdt.Txt;
@@ -54,9 +55,125 @@ public class ToolSequence {
 	private boolean stopOn; // Stop button is pressed
 	private boolean saveOn; // save button is on
 	
+	public ToolSequence(DesignFlowView designFlowView){
+		this.designFlowView=designFlowView;
+	}
+	public void toolFinished(Tool tool){
+		doToolFinished(tool);
+		if (designFlowView!=null){
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					designFlowView.updateLaunchAction(); // Run from Display thread to prevent "invalid thread access" when called from Runner
+				}
+			});
+		}
+	}	
+	public void doToolFinished(Tool tool){
+		if (tool.isRunning()) {
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
+				System.out.println("\nTool "+tool.getName()+" is still running");
+			return;
+		}
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
+			System.out.println("\nTool "+tool.getName()+" FINISHED , state="+tool.getState()+", mode="+tool.getLastMode());
+		if (tool.getState()==TOOL_STATE.SUCCESS){
+			// Update state of the session(s) - should be done after run or restore
+			if ((tool.getLastMode()==TOOL_MODE.RUN) ||	(tool.getLastMode()==TOOL_MODE.RESTORE)){
+				boolean sessionUpdated=updateSessionTools(tool); // Update state 
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
+					System.out.println("updateSessionTools("+tool.getName()+"tool)-> "+sessionUpdated);
+			}
+			if (tool.getLastMode()==TOOL_MODE.RESTORE){
+				restoreToolProperties(tool);// set last run hashcode and timestamp for the tool just restored 
+			}
+			// Check for stop here
+			if ((tool.getLastMode()==TOOL_MODE.RUN) || (tool.getLastMode()==TOOL_MODE.SAVE)){
+				updateLinkLatest(tool); // Do not update link if the session was just restored. Or should it be updated
+			}			
+			getToolsToSave(); // find if there are any sessions in unsaved state - returns list (not yet processed)
+			if (tryAutoSave(tool)) return;  // started autoSave that will trigger "toolFinished" again
+		} else if (tool.getState()==TOOL_STATE.KEPT_OPEN){ // Got here after launching a session
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
+				System.out.println("\nTool "+tool.getName()+" kept open , state="+tool.getState()+", mode="+tool.getLastMode());
+		} else { // Process failures here
+
+		}
+	}
+
+	/**
+	 * Find which tool to run to satisfy dependency of the specified tool (may be recursive - make sure no loops)
+	 * @param tool tool to satisfy dependency for
+	 * @return tool to run or null - failed to find any
+	 */
+	private Tool findToolToLaunch(Tool tool, boolean launchSessions){ 
+		List<Tool> consoleTools= getUsedConsoles(tool);
+		if (launchSessions) for (Tool consoleTool:consoleTools){ // or maybe do it after other dependencies?
+			if (consoleTool.getState()!=TOOL_STATE.KEPT_OPEN) {
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+					System.out.println("Need to launch tool"+consoleTool.getName()+" to satisfy dependencies of tool "+tool.getName());
+				}
+				return consoleTool;
+			}
+		}
+		// All session tools are running
+		return null;
+
+	}
+	
+	
+	public void launchToolSequence(
+			Tool tool,
+			TOOL_MODE mode,
+			int choice,
+			String fullPath,
+			String ignoreFilter) throws CoreException {
+		if (!okToRun()) return;
+		//    		tool.setDesignFlowView(designFlowView);
+		tool.setDesignFlowView(designFlowView); // maybe will not be needed with ToolSequencing class
+		tool.setMode(mode) ; //TOOL_MODE.RUN);
+		tool.toolFinished();
+		tool.setChoice(0);
+		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
+		SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
+		// apply designFlowView to the tool itself
+		LaunchCore.launch( tool,
+				SelectedResourceManager.getDefault().getSelectedProject(),
+				fullPath,
+				null); // run, not playback 
+	} // launchTool()
+
+	// TODO: restore "working copy" functionality here to be able to play back logs while tools are running
+	// It just should not touch the actual tool state
+	public void playLogs(// does immediately, no need of console (wait for console) - need the tool itself. So
+			Tool tool,
+			String fullPath,
+			String logBuildStamp) throws CoreException {
+		if (logBuildStamp==null) return; // cancelled selection
+		if (!okToRun()) return;
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+			System.out.println("logBuildStamp="+logBuildStamp);
+		}
+		tool.setDesignFlowView(designFlowView);
+		//            tool.setRunning(true);
+		tool.setMode(TOOL_MODE.PLAYBACK);
+		tool.toolFinished();
+		tool.setChoice(0);
+		SelectedResourceManager.getDefault().updateActionChoice(fullPath, 0, null); // Andrey
+		SelectedResourceManager.getDefault().setBuildStamp(); // OK - even for log? Or use old/selected one?
+		// apply designFlowView to the tool itself
+		LaunchCore.launch(tool,
+				SelectedResourceManager.getDefault().getSelectedProject(),
+				fullPath,
+				logBuildStamp); 
+	} // launchTool()
+
+    
+    
+    
+	
 	
 	public boolean okToRun(){
-		if (isAnyToolRunnig()){
+		if (isAnyToolRunnigOrWaiting()){
 			MessageUI.error("Some tool(s) are running, can not start another one. Press 'stop' button while holding"+
 		" 'Shift' key if it is an error. This is a debug feature - the tools will not be stopped (just marked as if stopped)");
 			return false;
@@ -77,9 +194,6 @@ public class ToolSequence {
 		return shiftPressed;
 	}
 	
-	public ToolSequence(DesignFlowView designFlowView){
-		this.designFlowView=designFlowView;
-	}
 	public void setStop(boolean pressed){
 		this.stopOn=pressed;
 		if (pressed && shiftPressed) {
@@ -180,11 +294,11 @@ public class ToolSequence {
 	}
 	
 	//TODO: make possible to run multiple tools async if they do not share common session
-	public boolean isAnyToolRunnig(){
+	public boolean isAnyToolRunnigOrWaiting(){
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		List<Tool> saveToolsList=new ArrayList<Tool>();
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
-			if (tool.isRunning()) return true;
+			if (tool.isRunning() || tool.isWaiting()) return true;
 		}
 		return false;
 	}
@@ -202,51 +316,6 @@ public class ToolSequence {
 	}
 
 	
-	public void toolFinished(Tool tool){
-		if (tool.isRunning()) {
-			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
-				System.out.println("\nTool "+tool.getName()+" is still running");
-			return;
-		}
-		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
-			System.out.println("\nTool "+tool.getName()+" FINISHED , state="+tool.getState()+", mode="+tool.getLastMode());
-		if (tool.getState()==TOOL_STATE.SUCCESS){
-			// Update state of the session(s) - should be done after run or restore
-			if (
-					(tool.getLastMode()==TOOL_MODE.RUN) ||
-					(tool.getLastMode()==TOOL_MODE.RESTORE)){
-				boolean sessionUpdated=updateSessionTools(tool); // Update state 
-				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
-					System.out.println("updateSessionTools("+tool.getName()+"tool)-> "+sessionUpdated);
-			}
-			if (tool.getLastMode()==TOOL_MODE.RESTORE){
-				restoreToolProperties(tool);// set last run hashcode and timestamp for the tool just restored 
-			}
-			// Check for stop here
-			if (
-					(tool.getLastMode()==TOOL_MODE.RUN) || // not needed, but won't harm. Update will be after save
-					(tool.getLastMode()==TOOL_MODE.SAVE)){
-				updateLinkLatest(tool); // Do not update link if the session was just restored. Or should it be updated
-//Currently hashcode/timestamp are set by the restore tool (at least when (by mistake) it was trying to save - it used it's own				
-			}			
-
-			getToolsToSave();
-			if (tryAutoSave(tool)) return;  // started autoSave that will trigger "toolFinished" again
-		} else if (tool.getState()==TOOL_STATE.KEPT_OPEN){
-			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
-				System.out.println("\nTool "+tool.getName()+" kept open , state="+tool.getState()+", mode="+tool.getLastMode());
-
-		} else {
-
-		}
-		if (designFlowView!=null){
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					designFlowView.updateLaunchAction(); // Run from Display thread to prevent "invalid thread access" when called from Runner
-				}
-			});
-		}
-	}
 	public boolean restoreToolProperties(Tool tool){
 		if (tool.getLastMode()!=TOOL_MODE.RESTORE) return false;
 		if (tool.getRestoreMaster()!=null) tool=tool.getRestoreMaster();
@@ -356,10 +425,11 @@ public class ToolSequence {
 				" stateDirString="+stateDirString+
 				" linkString ="+linkString+
 				" targetString="+targetString);
+		if ((stateDirString==null) || (targetString==null) || (linkString==null)) return;
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		IFolder stateDir= project.getFolder((stateDirString==null)?"":stateDirString);
 		// Create file for target and see if it actually exists
-		IFile target=  stateDir.getFile(targetString);
+		IFile target=  stateDir.getFile(targetString); // null pointer after error in copying files
 		// Eclipse does not know IFile exists until it refreshes. It is also possible to test File existence, not the IFile
 		try {
 			target.refreshLocal(0, null); // long-running
@@ -442,18 +512,7 @@ public class ToolSequence {
 						", no session will be updated");
 			return false;
 		}
-		List<Tool> sessionList=new ArrayList<Tool>();
-		List<String> consoleNames=tool.getSessionConsoles();
-		if (consoleNames!=null){
-			for(Iterator<String> iter = consoleNames.iterator(); iter.hasNext();) {
-				String consoleName=iter.next();
-				if (consoleName!=null) {
-					Tool consoleTool=ToolsCore.getContextManager().findTool(consoleName);
-					if (tool!=null) sessionList.add(consoleTool);
-
-				}
-			}
-		}
+		List<Tool> sessionList=getUsedConsoles(tool); // never null
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
 			System.out.println("Found "+sessionList.size()+" console sessions for this tool "+tool.getName());
 		if (sessionList.size()>0){
@@ -475,6 +534,23 @@ public class ToolSequence {
 		}
 		return true;
 	}
+	List<Tool> getUsedConsoles(Tool tool){
+		List<Tool> sessionList=new ArrayList<Tool>();
+		List<String> consoleNames=tool.getSessionConsoles(); // which consoles are used by this tool
+		if (consoleNames!=null){
+			for(Iterator<String> iter = consoleNames.iterator(); iter.hasNext();) {
+				String consoleName=iter.next();
+				if (consoleName!=null) {
+					Tool consoleTool=ToolsCore.getContextManager().findTool(consoleName);
+					if (tool!=null) sessionList.add(consoleTool);
+
+				}
+			}
+		}
+		return sessionList;
+	}
+	
+	
 	public  String getSelectedStateFile(Tool tool, boolean select){
 		String [] filter=splitResultName(tool);
 		String linkString=tool.getResultName();

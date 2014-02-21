@@ -44,40 +44,65 @@
                           label="Start remote Vivado session"
                           icon="door_in.png"
                           call="Vivado"/>
-                <menuitem name="VivadoSynthesis"
-                          label="Synthesize design"
-                          icon="Retort.png"
-                          call="VivadoSynthesis"/>
+                <menu name="VivadoSynthesisTools" 
+              			  label="Synthesis Tools"
+              			  icon="Retort.png">
+                	<menuitem name="VivadoSynthesis"
+                    	      label="Synthesize design"
+                        	  icon="Retort.png"
+                       		  call="VivadoSynthesis"/>
+                	<menuitem name="VivadoTimingReportSynthesis"
+                    	      label="Timing report"
+                        	  icon="clock.png"
+                       		  call="VivadoTimingReportSynthesis"/>
+                	<menuitem name="VivadoTimimgSummaryReportSynthesis"
+                    	      label="Timing summary"
+                        	  icon="clock_sum.png"
+                       		  call="VivadoTimimgSummaryReportSynthesis"/>
+                </menu>
 <!--            <menuitem name="VivadoOptPlace"
                           label="Optimize and place design"
                           icon="mondrian2x2.png"
                           call="VivadoOptPlace"/>  -->
+                <menu name="VivadoImplementationTools" 
+              			  label="Implementation tools"
+              			  icon="process.gif">
                           
-                <menuitem name="VivadoOpt"
-                          label="Optimize design"
-                          icon="opt_blue.png"
-                          call="VivadoOpt"/>
+                	<menuitem name="VivadoOpt"
+                    	      label="Optimize design"
+	                          icon="opt_blue.png"
+	                          call="VivadoOpt"/>
                           
-                <menuitem name="VivadoOptPower"
-                          label="Reduce power"
-                          icon="fire.png"
-                          call="VivadoOptPower"/>
+    	            <menuitem name="VivadoOptPower"
+	                          label="Reduce power"
+    	                      icon="fire.png"
+        	                  call="VivadoOptPower"/>
                           
-                <menuitem name="VivadoPlace"
-                          label="Place design"
-                          icon="mondrian2x2.png"
-                          call="VivadoPlace"/>
+            	    <menuitem name="VivadoPlace"
+	                          label="Place design"
+    	                      icon="mondrian2x2.png"
+        	                  call="VivadoPlace"/>
                           
-                <menuitem name="VivadoOptPhys"
-                          label="Post-placement optimize"
-                          icon="opt_yellow.png"
-                          call="VivadoOptPhys"/>
+	                <menuitem name="VivadoOptPhys"
+    	                      label="Post-placement optimize"
+        	                  icon="opt_yellow.png"
+            	              call="VivadoOptPhys"/>
                           
-                <menuitem name="VivadoRoute"
-                          label="Route design"
-                          icon="route66.png"
-                          call="VivadoRoute"/>
-                          
+	                <menuitem name="VivadoRoute"
+    	                      label="Route design"
+        	                  icon="route66.png"
+            	              call="VivadoRoute"/>
+            	              
+                	<menuitem name="VivadoTimingReportImplemented"
+                    	      label="Timing report"
+                        	  icon="clock.png"
+                       		  call="VivadoTimingReportImplemented"/>
+
+                	<menuitem name="VivadoTimimgSummaryReportImplemented"
+                    	      label="Timing summary"
+                        	  icon="clock_sum.png"
+                       		  call="VivadoTimimgSummaryReportImplemented"/>
+                </menu>
                 <menuitem name="VivadoBitstream"
                           label="Generate bitstream"
                           icon="bitstream.png"

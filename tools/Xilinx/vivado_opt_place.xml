@@ -66,6 +66,9 @@
 		<action-menu>
 			<action label="Optimize and Place" resource="" icon="mondrian2x2.png" />
 		</action-menu>
+		<depends-list>
+			<depends state="SnapshotSynth"/>
+		</depends-list>
 		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipOptimization" label="Skip optimize" tooltip="Do not run opt_design"
@@ -309,13 +312,13 @@
 			<line name="vivado_run_opt"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="phys_opt_design completed successfully"
 			      log=""
 			      stdout="parser_VivadoOpt">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
 		          <!-- Run pre-optimization TCL commands (if specified) -->
 			      <if SkipPreOptimization="false">

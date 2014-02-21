@@ -103,6 +103,7 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_SHELL_ATTR = "shell";
     static final String CONTEXT_TOOL_EXTENSIONS_LIST_TAG = "extensions-list";
     static final String CONTEXT_TOOL_EXTENSION_TAG = "extension";
+    static final String CONTEXT_TOOL_EXTENSION_MASK_ATTR = "mask";
     static final String CONTEXT_TOOL_ACTION_LIST_TAG = "action-menu";
     static final String CONTEXT_TOOL_ACTION_TAG = "action";
     static final String CONTEXT_TOOL_ACTION_LABEL = "label";
@@ -110,9 +111,9 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_ACTION_CHECK_EXTENSION = "check-extension";
     static final String CONTEXT_TOOL_ACTION_CHECK_EXISTENCE = "check-existence";
     static final String CONTEXT_TOOL_ACTION_ICON = "icon";
-    static final String CONTEXT_TOOL_DEPENDS_LIST_TAG = "depends-list";
-    static final String CONTEXT_TOOL_DEPENDS_TAG =      "depends";
-    static final String CONTEXT_TOOL_DEPENDS_TOOL_TAG = "tool";
+    static final String CONTEXT_TOOL_DEPENDS_LIST_TAG =  "depends-list";
+    static final String CONTEXT_TOOL_DEPENDS_TAG =       "depends";
+    static final String CONTEXT_TOOL_DEPENDS_STATE_TAG = "state";
 // TODO: May add other types of dependencies 
     
     static final String CONTEXT_TOOL_DFLT_ACTION_LABEL = "Run for";
@@ -120,7 +121,6 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_DFLT_ACTION_CHECK_EXTENSION = "true";
     static final String CONTEXT_TOOL_DFLT_ACTION_CHECK_EXISTENCE = "false";
     
-    static final String CONTEXT_TOOL_EXTENSION_MASK_ATTR = "mask";
     static final String CONTEXT_TOOL_SYNTAX_ERRORS =  "errors";
     static final String CONTEXT_TOOL_SYNTAX_WARNINGS= "warnings";
     static final String CONTEXT_TOOL_SYNTAX_INFO =    "info";
@@ -1066,9 +1066,9 @@ public class XMLConfig extends Config {
 // TODO: allow here other types of dependencies (conditionals(source files)            
             for(Iterator<Node> n = depNodes.iterator(); n.hasNext();) {
                 Node node = (Node)n.next();
-                String dep = getAttributeValue(node, CONTEXT_TOOL_DEPENDS_TOOL_TAG);
+                String dep = getAttributeValue(node, CONTEXT_TOOL_DEPENDS_STATE_TAG);
                 if(dep == null)
-                    throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_DEPENDS_TOOL_TAG + "' is absent");
+                    throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_DEPENDS_STATE_TAG + "' is absent");
                 depList.add(dep);
             }
             return depList;

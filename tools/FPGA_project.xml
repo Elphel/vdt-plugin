@@ -107,12 +107,15 @@
 		<parameter id="VivadoProjectRoot" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on Vivado server"
 			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
 
-		<parameter id="VivadoLocalDir" label="Local Xilinx directory" tooltip="Local project subdirectroy for Xilinx Vivado generated files"
-			type="Pathname" default="vivado" format="CopyValue" readonly="false" />
+		<parameter id="VivadoRemoteDir" label="Remote Vivado directory" tooltip="Remote Vivado output subdirectroy for snapshot and result files"
+			type="Pathname" default="vivado_build" format="CopyValue" readonly="false" />
 
-		<parameter id="VivadoLocalResultDir" label="Local Xilinx results directory"
+		<parameter id="VivadoLocalDir" label="Local Vivado directory" tooltip="Local project subdirectroy for Xilinx Vivado snapshot files"
+			type="Pathname" default="vivado_state" format="CopyValue" readonly="false" />
+
+		<parameter id="VivadoLocalResultDir" label="Local Vivado results directory"
 		    tooltip="Local project subdirectroy for Xilinx Vivado generated result files"
-			type="Pathname" default="vivado" format="CopyValue" readonly="false" />
+			type="Pathname" default="vivado_results" format="CopyValue" readonly="false" />
 
 		<parameter id="VivadoLogDir" label="Local Vivado tool logsx directory" tooltip="Local project subdirectroy for Xilinx Vivado tools log files"
 			type="Pathname" default="vivado_logs" format="CopyValue" readonly="false" />
@@ -217,6 +220,7 @@
 			<group name="Vivado" label="Vivado general properties">
 			    "part"
 				"VivadoProjectRoot"
+				"VivadoRemoteDir"
 				"VivadoLocalDir"
 				"VivadoLocalResultDir"
 				"VivadoLogDir"

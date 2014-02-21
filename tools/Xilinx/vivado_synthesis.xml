@@ -267,14 +267,14 @@
 			<line name="vivado_run_synth"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="synth_design completed successfully"
 			      log=""
 			      stdout="parser_VivadoSynth">
 			      <!-- synth_design completed successfully -->
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"
 			      <if ResetProject="true"> 
 			          "reset_project -quiet\n"
 			      </if>

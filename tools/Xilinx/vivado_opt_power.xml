@@ -21,6 +21,9 @@
 		<action-menu>
 			<action label="Power optimize" resource="" icon="fire.png" />
 		</action-menu>
+		<depends-list>
+			<depends state="SnapshotOpt"/>
+		</depends-list>
 		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPowerOptimization" label="skip power optimize" tooltip="Do not run power_opt_design"
@@ -127,13 +130,13 @@
 			<line name="vivado_run_opt_pwr"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="power_opt_design completed successfully"
 			      log=""
 			      stdout="parser_VivadoOptPwr">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
 		          <!-- Run pre-optimization TCL commands (if specified) -->
 			      <if SkipPreOptimization="false">

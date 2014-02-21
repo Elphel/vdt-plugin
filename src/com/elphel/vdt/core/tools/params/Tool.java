@@ -21,7 +21,6 @@ import java.util.*;
 import java.io.*;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 
 import com.elphel.vdt.VDT;
@@ -123,6 +122,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private TOOL_MODE runMode;
     private TOOL_MODE lastRunMode;           // last running (not STOP) mode
     private int lastRunHash;                 // hash code of the last run
+    private ToolWaitingArguments toolWaitingArguments; // save here launch parameters wjhen tool need to wait for other tools to run/get restored
 
     public Tool(String name,
                 String controlInterfaceName,
@@ -217,22 +217,51 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     public enum TOOL_MODE {
     	STOP,
+    	WAIT,
         RUN,
         RESTORE,
         SAVE,
         PLAYBACK
     }
+    
+    public class ToolWaitingArguments{
+		private TOOL_MODE mode;
+		private int choice;
+		private String fullPath;
+		private String ignoreFilter;
+    	public ToolWaitingArguments(
+    			TOOL_MODE mode,
+        		int choice,
+        		String fullPath,
+        		String ignoreFilter){
+    		this.mode=mode;
+    		this.choice=choice;
+    		this.fullPath=fullPath;
+    		this.ignoreFilter=ignoreFilter;
+    	}
+    	public TOOL_MODE getMode() { return mode;}
+    	public int getChoice()     { return choice;}
+    	public String getFullPath(){ return fullPath;}
+    	public String getIgnoreFilter(){ return ignoreFilter;}
+    }
    
-//    public void setRunStamp(long runStamp) { this.runStamp=runStamp; }
+    
+    
     public List<String> getDepends()       { return depends; }
     public boolean isDirty()               { return dirty; }
-//    public boolean isRunning()             { return running; }
-    public boolean isRunning()             { return runMode!=TOOL_MODE.STOP; }
+    public boolean isRunning()             { return (runMode!=TOOL_MODE.STOP) && ((runMode!=TOOL_MODE.WAIT)); }
+    public boolean isWaiting()             { return runMode==TOOL_MODE.WAIT; }
+    
+    public boolean isAlmostDone(){
+    	if (runMode!=TOOL_MODE.STOP) return false; 
+    	if ((getRestore()!=null) && (getRestore().isRunning())) return true;
+    	if ((getSave()!=null) && (getSave().isRunning())) return true;
+    	return false;
+    }
+    
     public TOOL_MODE getMode()             { return runMode; }
     public TOOL_MODE getLastMode()         { return lastRunMode; }
-    
 
-//    public long getRunStamp()              { return runStamp; }
     public TOOL_STATE getState()           { return state; }
     public boolean isPinned()              { return pinned; }
     public String getOpenState()           { return openState; }
@@ -255,8 +284,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	}
     }
     
+    public void setModeWait(ToolWaitingArguments toolWaitingArguments) {
+    	this.toolWaitingArguments = toolWaitingArguments;
+    	setMode(TOOL_MODE.WAIT);
+    }
+    
     public void setMode(TOOL_MODE mode) {
-    	if ((runMode!=TOOL_MODE.STOP) && (mode==TOOL_MODE.STOP)){ // jsut stopped
+    	if (mode !=TOOL_MODE.WAIT) this.toolWaitingArguments = null;
+    	if ((runMode!=TOOL_MODE.STOP) && (mode==TOOL_MODE.STOP)){ // just stopped
     		lastRunHash=getCurrentHash();
         	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
         		System.out.println(":::: Tool "+name+": lastRunHash="+lastRunHash);
@@ -294,7 +329,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		System.out.println("SetState("+state+")");
     	}
     }
-    
+
     public void setDesignFlowView (DesignFlowView designFlowView){
     	this.designFlowView =  designFlowView; // to be able to update actions and so the state icons
     }

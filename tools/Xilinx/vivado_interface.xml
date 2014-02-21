@@ -46,14 +46,14 @@
 			<line name="vivado_restore"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      failure="ERROR"
 			      prompt="@@FINISH@@"
 			      log="">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
-		          "open_checkpoint %%StateFile\n"
+		          "open_checkpoint %VivadoRemoteDir/%%StateFile\n"
 		          "puts \"@@FINISH@@\"\n"
 		    </line>
 		</output>
@@ -71,21 +71,21 @@
 			<line name="vivado_save"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      failure="ERROR"
 			      log="">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
-	      		  "write_checkpoint -force %%StateFile\n"
+	      		  "write_checkpoint -force %VivadoRemoteDir/%%StateFile\n"
 	      		  "puts \"@@FINISH@@\"\n"
 			</line>
 			<line name="vivado_copy_after_save">
 					"-c"
 					"mkdir -p %VivadoLocalDir ;"
 					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%%StateFile"
+					"%RemoteUser@%RemoteHost:%VivadoProjectRoot/%VivadoRemoteDir/%%StateFile"
 					"%%StateDir/"
 			</line>
 		</output>		

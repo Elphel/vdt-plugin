@@ -33,6 +33,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy2;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
@@ -264,20 +265,30 @@ public class VDTConsoleRunner{
         		outputListener);
         consoleOutStreamMonitor.addListener(outputListener );
         //       }
-        //Problems occurred when invoking code from plug-in: "org.eclipse.ui.console".
-        //Exception occurred during console property change notification.
-        outStream.setColor(new Color(null, 128, 128, 255)); // org.eclipse.swt.SWTException: Invalid thread access
-        try {
-        	for (int i=0;i<arguments.length;i++){
-        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
-        			outStream.write(arguments[i]+"\n"); // writes to console itself
-        			System.out.println("--->"+arguments[i]+"\n");
-        		}
-        		consoleInStreamProxy.write(arguments[i]+"\n");
-        	}
-        } catch (IOException e) {
-        	System.out.println("Can not write to outStream of console "+iCons.getName());
-        }
+        // Problems occurred when invoking code from plug-in: "org.eclipse.ui.console".
+        // Exception occurred during console property change notification.
+        // Trying to fix Illegal THread Access
+        
+        final String [] fArguments=arguments;
+        final IOConsoleOutputStream fOutStream=	outStream;
+        final IOConsole fICons=iCons;
+    	Display.getDefault().syncExec(new Runnable() {
+    		public void run() {
+    			fOutStream.setColor(new Color(null, 128, 128, 255)); // org.eclipse.swt.SWTException: Invalid thread access
+    	        try {
+    	        	for (int i=0;i<fArguments.length;i++){
+    	        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
+    	        			fOutStream.write(fArguments[i]+"\n"); // writes to console itself
+    	        			System.out.println("--->"+fArguments[i]+"\n");
+    	        		}
+    	        		consoleInStreamProxy.write(fArguments[i]+"\n");
+    	        	}
+    	        } catch (IOException e) {
+    	        	System.out.println("Can not write to outStream of console "+fICons.getName());
+    	        }
+    		}
+    	});
+        
         int timeout=buildParamsItem.getTimeout();
         if ((timeout==0) && (buildParamsItem.getPrompt()==null)) timeout=1;// should specify at least one of timeout or prompt
         timer=null;

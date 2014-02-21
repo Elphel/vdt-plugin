@@ -48,6 +48,7 @@ import com.elphel.vdt.core.tools.menu.DesignMenu;
 import com.elphel.vdt.core.tools.menu.DesignMenuItem;
 import com.elphel.vdt.core.tools.menu.DesignMenuToolItem;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
 import com.elphel.vdt.ui.VDTPluginImages;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
@@ -308,7 +309,15 @@ public class DesignMenuModel {
         	if (tool.isRunning()){
         		iconName=VDTPluginImages.ICON_TOOLSTATE_RUNNING;
         		key=     VDTPluginImages.KEY_TOOLSTATE_RUNNING;
-
+        	} else if (tool.isWaiting()){
+        		iconName=VDTPluginImages.ICON_TOOLSTATE_WAITING;
+        		key=     VDTPluginImages.KEY_TOOLSTATE_WAITING;
+        	} else if (tool.isAlmostDone()&& (tool.getState()==TOOL_STATE.SUCCESS )){
+        		iconName=VDTPluginImages.ICON_TOOLSTATE_ALMOST_GOOD;
+        		key=     VDTPluginImages.KEY_TOOLSTATE_ALMOST_GOOD;
+        	} else if (tool.isAlmostDone()&& (tool.getState()==TOOL_STATE.UNKNOWN )){
+        		iconName=VDTPluginImages.ICON_TOOLSTATE_ALMOST_WTF;
+        		key=     VDTPluginImages.KEY_TOOLSTATE_ALMOST_WTF;
         	} else {
         		switch (tool.getState()){
         		case NEW:

@@ -33,6 +33,9 @@
 		<action-menu>
 			<action label="Route" resource="" icon="route66.png" />
 		</action-menu>
+		<depends-list>
+			<depends state="SnapshotOptPhys"/>
+		</depends-list>
 		<parameter id="SkipPreRoute" label="Skip pre-route" tooltip="Do not run pre route TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipSnapshotRoute" label="Skip snapshot save" tooltip="Do not create snapshot after route"
@@ -197,13 +200,13 @@
 			<line name="vivado_run_route"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="route_design completed successfully"
 			      log=""
 			      stdout="parser_VivadoRoute">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
 		          <!-- Run pre-route TCL commands (if specified) -->
 			      <if SkipPreRoute="false">

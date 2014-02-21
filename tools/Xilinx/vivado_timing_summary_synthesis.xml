@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vdt-project>
+	<tool name="VivadoTimimgSummaryReportSynthesis"
+	    label="Report post-synthesis timimg summary"
+	    project="FPGA_project"
+		interface="VivadoReportTimingSummaryInterface"
+		package="FPGA_package"
+		inherits="VivadoReportTimingSummary" 
+		shell="/bin/bash"
+		description="Report post-synthesis timimg summary"
+		disable="DisableVivadoTimingSummary"
+		>
+		<depends-list>
+			<depends state="SnapshotSynth"/>
+		</depends-list>
+		
+		<action-menu>
+			<action label="Report post-synthesis timing summary" resource="" icon="clock_sum.png" />
+		</action-menu>
+		<parameter id="DisableVivadoTimingSummary" label="Disable" tooltip="Disable post-synthesis timing summary report"
+		           default="false" type= "Boolean" format="None"/>
+		
+		<!-- TODO Add (copy from proto) parameters that should be different for post and pre routing.
+		     Or add more derivative reports. -->
+        <parameter 	id="rawfile" label="Result filename" tooltip= "Write report to the specified file."
+        			default="%%ProjectName.timing_summary_synth" visible="true" omit="" type="String" format="CopyValue"/>
+        <parameter 	id="append" label="Append to file" tooltip= "Append to the output file."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        <parameter 	id="return_string" label="Return string" tooltip= "Write result to TCL to be captured into variable."
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter 	id="datasheet" label="Datasheet info" tooltip= "Generate datasheet information for the report."
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+
+		<!-- Invisible (calculated) parameters -->
+		<!--  same value as %file, but will appear withou "-file" prefix --> 
+        <parameter 	id="file" default="%VivadoRemoteDir/%rawfile" visible="false" omit="" type="String" format="Dash"/>
+		     
+	</tool>
+</vdt-project>

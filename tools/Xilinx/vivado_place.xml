@@ -43,6 +43,9 @@
 		<action-menu>
 			<action label="Place" resource="" icon="mondrian2x2.png" />
 		</action-menu>
+		<depends-list>
+			<depends state="SnapshotOptPower"/>
+		</depends-list>
 		<parameter id="SkipPreOptimization" label="Skip pre-optimization" tooltip="Do not run pre optimization TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipPlacement" label="Skip place" tooltip="Do not run place_design"
@@ -173,13 +176,13 @@
 			<line name="vivado_run_place"
 			      dest="VivadoConsole"
 			      mark="``" 
-			      sep=""
+			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="place_design completed successfully"
 			      log=""
 			      stdout="parser_VivadoPlace">
 			      "cd ~/%VivadoProjectRoot\n"
-			      "set outputDir ~/%VivadoProjectRoot/build\n"
+			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
 		          <!-- Run pre-optimization TCL commands (if specified) -->
 			      <if SkipPreOptimization="false">
