@@ -2,7 +2,7 @@
 
 <vdt-project>
 	<interface name="VivadoSynthesisInterface" extends="VivadoInterface">
-			<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" />
+ 		<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" />	
 	    <typedef name="FlattenHierarchyType">
       		<paramtype kind= "enum" base="String">
       			<item value="rebuilt" label="Attempt to rebuild hierarchy after synthesis is completed"/>
@@ -75,10 +75,17 @@
 			<action label="Check by Vivado Synthesis:" resource="%%SelectedFile"
 			        check-extension="true" check-existence="true" icon="IconTestTube.png" />
 		</action-menu>
-		
+<!--  TODO: find out, how to reset state and make a tool to depend on-->		
+		<depends-list>
+			<depends files="FilteredSourceListPar"/>
+			<depends files="ConstraintsFiles"/>
+		</depends-list>
+ 		
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
 			default="" label="Constraints files" tooltip="Select constraint files to load to Vivado" readonly="false"
 			visible="true" />
+			
+			
 		<parameter id="SkipSnapshotSynth" label="Skip snapshot" tooltip="Do not create snapshot after synthesis"
 		           default="false"
 		           type= "Boolean" format="None"/>
@@ -149,12 +156,19 @@
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
                    	           
 <!-- hidden (calculated) parameters -->			
-	   <parameter id="FilteredSourceList" type="Stringlist"
-			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />
+<!--    <parameter id="FilteredSourceList" type="Filelist"
+			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />  -->	
+	   <parameter id="FilteredSourceListPar" type="Filelist"
+			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />
+
 			
-	<!-- Parameter read_xdc just copies parameter ConstraintsFiles, but they have different syntax (output representation) -->		
-	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="" tooltip="read_xdc"
+	<!-- Parameter read_xdc just copies parameter ConstraintsFiles, but they have different syntax (output representation) -->	
+	
+		<parameter id="read_xdc" type="Filelist" format="read_xdc_syntax"
 			default="%ConstraintsFiles" visible="false" />
+		
+<!-- 	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="" tooltip="read_xdc"
+			default="%ConstraintsFiles" visible="false" />  -->
 <!--        <parameter	id="top"              label="" tooltip= "Top module of the design"
         			default="%%TopModule" visible="false" omit="" type="String" format="Dash"/> -->
    	   <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
@@ -190,7 +204,8 @@
 <!--  invisible/calculated parameters -->        			
         <parameter	id="AutosaveVivadoSynthesis" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
                     visible="false" type="Boolean" format="None"/>
-        			
+        <parameter id="condConstraintsFiles" default="?%%ChosenActionIndex=0 : %ConstraintsFiles, "
+                    visible="false" type="Filelist" format="None"/>			
 			
 		<input>
 			<group name="General">
@@ -257,7 +272,7 @@
 				"%VivadoProjectRoot"
 				"' ;"
 				"rsync -avrR -e ssh"
-				"%FilteredSourceList"
+				"%FilteredSourceListPar"
 			    <if VivadoSynthActionIndex="0">
 					"%ConstraintsFiles"
 				</if>
@@ -279,13 +294,14 @@
 			          "reset_project -quiet\n"
 			      </if>
 			      "file mkdir $outputDir\n"
-			      "read_verilog %FilteredSourceList\n"
+			      "read_verilog "
+			      "%FilteredSourceListPar\n"
 			      <if VivadoSynthActionIndex="0">
 				      <if ConstraintsFiles="">
 				          "puts \"No constraints files specified, skipping read_xdc command\";\n"
 				      </if>
 				      <if-not ConstraintsFiles="">
-	                          "%read_xdc\n"
+	                     "%read_xdc\n"
 				      </if-not>
 			      </if>
 			      "synth_design"

@@ -119,9 +119,11 @@
 		<parameter id="v" type="SwitchType" format="SwitchSyntax"
 			default="true" label="Verbose" />
 
-		<parameter id="Param_SourceList" label="Param_SourceList"
+<!-- 	<parameter id="Param_SourceList" label="Param_SourceList"
 			type="Stringlist" format="SourceListSyntax" default="" readonly="true"
-			visible="true" />
+			visible="true" />  -->
+		<parameter id="SourceListPar"  label="Param_SourceList" type="Filelist"
+			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />
 
 
 		<parameter id="ShowNoProblem" type="BoolYesNo" format="None"
@@ -199,8 +201,10 @@
 		<parameter id="IVerilogActionIndex" default="%%ChosenActionIndex"
 		 type="String" format="CopyValue" visible="false"  />
 
-		<parameter id="SourceList" format="SourceListSyntax"
-			type="Stringlist" default="" readonly="true" visible="false" />
+<!-- 	<parameter id="SourceList" format="SourceListSyntax"
+			type="Stringlist" default="" readonly="true" visible="false" /> -->
+		<parameter id="SourceListPar"  label="Param_SourceList" type="Filelist"
+			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />
 
 		<parameter id="iverilog_include_file" default="IVERILOG_INCLUDE.v"
 			type="Filename" format="CopyValue" visible="false" />
@@ -300,7 +304,7 @@
 				"%legacy_model"
 				"%no_specify"
 				"%v"
-				"%SourceList"
+				"%SourceListPar"
 				"%ExtraFiles"
 				<if ShowNoProblem="false">
 					"2&gt;&amp;1"

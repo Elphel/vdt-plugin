@@ -58,6 +58,7 @@ import com.elphel.vdt.core.tools.params.ToolSequence;
 import com.elphel.vdt.core.tools.params.types.RunFor;
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
+import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.ui.MessageUI;
@@ -94,7 +95,9 @@ import org.eclipse.debug.ui.DebugUITools;
 public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     // Persistance tags.
-    private static final String TAG_SELECTED_RESOURCE = "SelectedProject";
+    private static final String TAG_SELECTED_RESOURCE =   "SelectedProject";
+    private static final String TAG_SELECTED_HDL_FILE =   "SelectedHdlFile";
+    private static final String TAG_SELECTED_HDL_FILTER = "SelectedHdlFilter";
     private static final String TAG_LINKED_TOOLS = "LinkedTools";
 
     private TreeViewer viewer;
@@ -266,6 +269,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             setPartName(defaultPartName);
             setTitleToolTip(null);
         }
+    }
+    
+    public void changeMenuTitle(String title){
+    	setPartName(title);
     }
 
     private void hookContextMenu() {
@@ -973,6 +980,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             DesignMenu newDesignMenu = dialog.getSelectedDesignMenu();
             String newDesignMenuName = newDesignMenu == null ? null
                                                              : newDesignMenu.getName();
+            desigMenuName.setValue(newDesignMenuName); // ??? Andrey
             OptionsCore.doStoreOption(desigMenuName, project);
             doLoadDesignMenu(newDesignMenuName);
         }
@@ -1112,18 +1120,50 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
      * @since 2.0
      */
     protected void restoreState(IMemento memento) {
+        SelectedResourceManager.getDefault().setToolSequence(toolSequence); // to enable access through static method
     	Boolean linkedTools= memento.getBoolean(TAG_LINKED_TOOLS);
     	ToolsCore.restoreToolsState(memento);
+        String location = memento.getString(TAG_SELECTED_RESOURCE);
+        if (location == null) {
+        	System.out.println("No project selected");
+            return;
+        }
+        selectedResource = ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(location));
+        String HDLLocation=memento.getString(TAG_SELECTED_HDL_FILE);
+        if (HDLLocation!=null) {
+        	IResource HDLFile=ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(HDLLocation));
+        	SelectedResourceManager.getDefault().setChosenVerilogFile(HDLFile);
+        	System.out.println("Setting HDL file to "+HDLFile.toString());
+        }
+        String HDLFilter=memento.getString(TAG_SELECTED_HDL_FILTER); //SelectedResourceManager.getDefault().getFilter();
+        if (HDLFilter!=null){
+        	SelectedResourceManager.getDefault().setFilter(HDLFilter);
+        	System.out.println("Setting HDL filter to "+HDLFilter);
+        }
     	if (linkedTools==null) linkedTools=true;
     	SelectedResourceManager.getDefault().setToolsLinked(linkedTools);
         toggleLinkedTools.setChecked(!SelectedResourceManager.getDefault().isToolsLinked());
-        String location = memento.getString(TAG_SELECTED_RESOURCE);
-        if (location == null)
-            return;
-        selectedResource = ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(location));
+
+        // Initialize VEditor database build
+        
+   	    IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
+   	    if ((HDLFile!=null) && HDLFile.exists()){
+   	    	toolSequence.setUnfinishedBoot(memento);
+   	    	VerilogUtils.getTopModuleNames((IFile) HDLFile);
+   	    } else {
+   	    	toolSequence.setUnfinishedBoot(null);
+   	    	finalizeAfterVEditorDB(memento);
+   	    }
+    }
+    public void finalizeAfterVEditorDB(IMemento memento){
+        toolSequence.restoreCurrentStates(memento); // restore states and recalc "dirty" flags - should be after tools themselves
         doLoadDesignMenu();
         updateLaunchAction();
     }
+    
+    
+    
+    
     
 
     /** 
@@ -1139,9 +1179,19 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             String location = selectedResource.getFullPath().toPortableString();
             memento.putString(TAG_SELECTED_RESOURCE, location);
         }
+        IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
+        if (HDLFile!=null){
+        	memento.putString(TAG_SELECTED_HDL_FILE,HDLFile.getFullPath().toPortableString());
+        	System.out.println("memento.putString("+TAG_SELECTED_HDL_FILE+","+HDLFile.getFullPath().toPortableString()+")");
+        }
+        String HDLFilter=SelectedResourceManager.getDefault().getFilter();
+        if (HDLFilter!=null){
+        	memento.putString(TAG_SELECTED_HDL_FILTER,HDLFilter);
+        	System.out.println("memento.putString("+TAG_SELECTED_HDL_FILTER+","+HDLFilter+")");
+        }
         memento.putBoolean(TAG_LINKED_TOOLS, new Boolean(SelectedResourceManager.getDefault().isToolsLinked()));
         ToolsCore.saveToolsState(memento);
-
+        toolSequence.saveCurrentStates(memento);
     }
 
 } // class DesignFlowView

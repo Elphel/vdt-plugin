@@ -38,9 +38,25 @@ public class ParamRepeaterRecognizer extends RepeaterRecognizer {
                                               String repSuffix,
                                               String separator) 
     {
-        if(genName.equals(ParamFormatRecognizer.FORMAT_PARAM_VALUE_MARK))
-            return new ValueGenerator(param, repPrefix, repSuffix, separator);
-/* Trying to put these here */        
+    	// TODO make repetitor to accept several pattern generators with only one generating a list
+    	/*
+    	if(genName.equals(ParamFormatRecognizer.FORMAT_PARAM_NAME_MARK)) {
+    		return new AbstractGenerator() {
+    			public String getName() {
+    				return "ParamName (parameter '" + param.getID() + 
+    						"' of context '" + param.getContext().getName() +
+    						"')";
+    			}
+
+    			protected String[] getStringValues() {
+    				return new String[]{param.getOutID()};
+    			}
+    		};
+    	}
+    	*/
+    	if(genName.equals(ParamFormatRecognizer.FORMAT_PARAM_VALUE_MARK))
+    		return new ValueGenerator(param, repPrefix, repSuffix, separator);
+    	/* Trying to put these here */        
         if(genName.equals(FilteredSourceListGenerator.NAME))
             return new FilteredSourceListGenerator(repPrefix, repSuffix, separator);
         else if(genName.equals(SourceListGenerator.NAME))

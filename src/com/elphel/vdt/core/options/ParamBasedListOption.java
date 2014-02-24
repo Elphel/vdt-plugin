@@ -39,7 +39,7 @@ public class ParamBasedListOption extends ParamBasedOption {
     /**
      * Set the option value
      * 
-     * @param value the sequnce of the list items separated by SEPARATOR.
+     * @param value the sequence of the list items separated by SEPARATOR.
      */
     public void setValue(String value) {
         List<String> list = OptionsUtils.convertStringToList(value);

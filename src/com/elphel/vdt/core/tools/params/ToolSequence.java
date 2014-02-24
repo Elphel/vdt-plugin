@@ -22,13 +22,15 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
 
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
+import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.core.launching.LaunchCore;
 import com.elphel.vdt.core.launching.ToolLogFile;
 import com.elphel.vdt.core.tools.ToolsCore;
@@ -43,21 +45,64 @@ import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ToolSequence {
-    public static final QualifiedName OPTION_TOOL_HASHCODE  = new QualifiedName(VDT.ID_VDT, "OPTION_TOOL_HASHCODE");
+    public static final QualifiedName OPTION_TOOL_HASHCODE  =  new QualifiedName(VDT.ID_VDT, "OPTION_TOOL_HASHCODE");
     public static final QualifiedName OPTION_TOOL_TIMESTAMP  = new QualifiedName(VDT.ID_VDT, "OPTION_TOOL_TIMESTAMP");
+
+    // same state may be after different tools
+    public static final QualifiedName OPTION_TOOL_NAME  =           new QualifiedName(VDT.ID_VDT, "OPTION_TOOL_NAME");
+    public static final String TOOL_FILEDEPSTAMP  =   "OPTION_TOOL_FILEDEPSTAMP_";
+    public static final String TOOL_STATEDEPSTAMP  =  "OPTION_TOOL_STATEDEPSTAMP_";
     
+    private static final String TAG_CURRENTSTATE_TOOLNAME =  ".currentState.toolName.";
+    private static final String TAG_CURRENTSTATE_STATEFILE =  ".currentState.stateFile.";
+    private static final String TAG_CURRENTSTATE_TOOLSTAMP =  ".currentState.toolStamp.";
+    
+   
 	private boolean shiftPressed=false;
 	private DesignFlowView designFlowView;
 	private boolean stopOn; // Stop button is pressed
 	private boolean saveOn; // save button is on
+	private Map<String,Tool> stateProvides;
+	private Map<String,ToolStateStamp> currentStates;
+	private IMemento unfinishedMemento=null;
+	private String menuName=null;
+//	private IProgressMonitor monitor;
 	
 	public ToolSequence(DesignFlowView designFlowView){
 		this.designFlowView=designFlowView;
+		this.currentStates=new Hashtable<String,ToolStateStamp>();
 	}
+
+	public void setUnfinishedBoot(IMemento memento){
+		unfinishedMemento=memento;
+		if (memento!=null){
+			// Does not seem to work:
+			IActionBars bars = designFlowView.getViewSite().getActionBars();
+			bars.getStatusLineManager().setMessage("Waiting for VEditor database to be built...");
+			menuName=designFlowView.getPartName();
+			System.out.println("Menu name:"+menuName);
+			designFlowView.changeMenuTitle("Waiting for VEditor database...");
+		}
+	}
+	public void finalizeBootAfterVEditor(){
+		if (unfinishedMemento!=null) {
+			// Does not seem to work:
+			IActionBars bars = designFlowView.getViewSite().getActionBars();
+			bars.getStatusLineManager().setMessage("");
+//			designFlowView.changeMenuTitle(menuName);
+			designFlowView.finalizeAfterVEditorDB(unfinishedMemento);
+		}
+	}
+
+	
+	
 	public void toolFinished(Tool tool){
 		doToolFinished(tool);
 		if (designFlowView!=null){
@@ -84,8 +129,21 @@ public class ToolSequence {
 					System.out.println("updateSessionTools("+tool.getName()+"tool)-> "+sessionUpdated);
 			}
 			if (tool.getLastMode()==TOOL_MODE.RESTORE){
-				restoreToolProperties(tool);// set last run hashcode and timestamp for the tool just restored 
+				restoreToolProperties(tool);// set last run hashcode and timestamp for the tool just restored
+				if (tool.getRestoreMaster()!=null) tool.setPinned(true);
+				else {
+					System.out.println("Pribably a bug - tool.getRestoreMaster()==null for "+tool.getName()+", while state is "+tool.getState());
+					tool.setPinned(true); // restored state should be pinned?
+				}
 			}
+			// add/update current state produced by the finished tool
+			putCurrentState(tool);
+			// Set tool timestamps for states and source files
+			if (tool.getLastMode()==TOOL_MODE.RUN) {
+				setDependState(tool);
+			}
+			setToolsDirtyFlag(false); // no need to recalculate all parameters here 
+			
 			// Check for stop here
 			if ((tool.getLastMode()==TOOL_MODE.RUN) || (tool.getLastMode()==TOOL_MODE.SAVE)){
 				updateLinkLatest(tool); // Do not update link if the session was just restored. Or should it be updated
@@ -120,6 +178,40 @@ public class ToolSequence {
 
 	}
 	
+	/**
+	 * Setup what tools can provide needed states
+	 */
+	public void setStateProvides(){
+		stateProvides=new ConcurrentHashMap<String,Tool>();
+		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+			System.out.println("Looking for all states defined, tool= "+tool.getName());
+			if (!tool.isDisabled()){
+				String state=tool.getStateLink(); // some tools (like reports) do not change states 
+				if (state!=null) stateProvides.put(state,tool);
+			}
+		}
+		// Verify that each dependent state has a provider
+		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+//			System.out.println("Looking for all states defined, tool= "+tool.getName());
+			if (!tool.isDisabled()){
+				List<String> dependStates=tool.getDependStates();
+				if ((dependStates!=null) && (dependStates.size()>0)){
+					for (String state:dependStates){
+						if (!stateProvides.containsKey(state)){
+							MessageUI.error("No tool provide output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
+							System.out.println("No tool provide output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
+						}
+					}
+				}
+			}
+		}
+		
+		//    List<String> list = new ArrayList<String>(hashset);
+		System.out.println("Got "+stateProvides.keySet().size()+" different states, number of mappings="+stateProvides.keySet().size());
+		// For each state - find latest tool that made it
+		
+		
+	}
 	
 	public void launchToolSequence(
 			Tool tool,
@@ -128,6 +220,9 @@ public class ToolSequence {
 			String fullPath,
 			String ignoreFilter) throws CoreException {
 		if (!okToRun()) return;
+		
+		setStateProvides(); // just testing
+		
 		//    		tool.setDesignFlowView(designFlowView);
 		tool.setDesignFlowView(designFlowView); // maybe will not be needed with ToolSequencing class
 		tool.setMode(mode) ; //TOOL_MODE.RUN);
@@ -358,6 +453,41 @@ public class ToolSequence {
 			tool.setLastRunHash(hashCode);
 			System.out.println("Restored lastRunHashCode="+hashCode+" for tool"+tool.getName());
 		}
+		// restore dependencies
+		// 1. See if it was saved by the same tool
+		String stateToolName=null;
+		try {
+			stateToolName=target.getPersistentProperty(OPTION_TOOL_NAME);
+			System.out.println("Got stateToolName="+stateToolName+" in "+target.getLocation().toOSString());
+		} catch (CoreException e) {
+			System.out.println("No stateToolName in "+target.getLocation().toOSString());
+			return false;
+		}
+		if ((stateToolName==null) || !tool.getName().equals(stateToolName)){
+			System.out.println("State file "+target.getLocation().toOSString()+" was saved for tool "+stateToolName+
+					", while restoring tool is "+tool.getName()+" - ivalidating all dependencies timestamps.");
+			tool.clearDependStamps();
+			return false;
+		}
+		// 2. Read timestmaps for state file(s) and source files
+		tool.clearDependStamps(); // clear old dependency timestamps
+		Map<QualifiedName, String> properties=null;
+		try {
+			properties = target.getPersistentProperties();
+		} catch (CoreException e) {
+			System.out.println("Failed to get persisten properties from "+target.getLocation().toOSString());
+			return false;
+		}
+
+		for (QualifiedName qName: properties.keySet()){
+			if (qName.getLocalName().startsWith(TOOL_FILEDEPSTAMP)){
+    			String value=properties.get(qName);
+    			tool.setFileTimeStamp(qName.getLocalName().substring(TOOL_FILEDEPSTAMP.length()), value);
+			} else if (qName.getLocalName().startsWith(TOOL_STATEDEPSTAMP)){
+    			String value=properties.get(qName);
+    			tool.setStateTimeStamp(qName.getLocalName().substring(TOOL_STATEDEPSTAMP.length()), value);
+			} 
+		}
 		return (timestamp!=null) && (hashCode!=0);
 	}
 	
@@ -496,6 +626,42 @@ public class ToolSequence {
 			System.out.println("Failed to setPersistentProperty("+OPTION_TOOL_HASHCODE+","+sHash+
 					" on "+target.getLocation().toOSString());
 		}
+		// Save dependencies:
+		// Set toll name (same state may be result of running different tool (not yet used)
+		try {
+			target.setPersistentProperty(OPTION_TOOL_NAME, tool.getName());
+			System.out.println("setPersistentProperty("+OPTION_TOOL_NAME+","+tool.getName()+
+					" on "+target.getLocation().toOSString());			
+		} catch (CoreException e) {
+			System.out.println("Failed to setPersistentProperty("+OPTION_TOOL_NAME+","+tool.getName()+
+					" on "+target.getLocation().toOSString());
+		}
+		// Save dependencies on states (snapshot file names)
+        for(String state:tool.getDependStatesTimestamps().keySet()){
+        	String stamp=tool.getStateTimeStamp(state);
+        	QualifiedName qn=new QualifiedName(VDT.ID_VDT,TOOL_STATEDEPSTAMP+state);
+    		try {
+    			target.setPersistentProperty(qn, stamp);
+    			System.out.println("setPersistentProperty("+qn+","+tool.getName()+
+    					" on "+target.getLocation().toOSString());			
+    		} catch (CoreException e) {
+    			System.out.println("Failed to setPersistentProperty("+qn+","+tool.getName()+
+    					" on "+target.getLocation().toOSString());
+    		}
+        }
+		// Save dependencies on files (source file names)
+        for(String depfile:tool.getDependFilesTimestamps().keySet()){
+        	String stamp=tool.getFileTimeStamp(depfile);
+        	QualifiedName qn=new QualifiedName(VDT.ID_VDT,TOOL_FILEDEPSTAMP+depfile);
+    		try {
+    			target.setPersistentProperty(qn, stamp);
+    			System.out.println("setPersistentProperty("+qn+","+stamp+
+    					" on "+target.getLocation().toOSString());			
+    		} catch (CoreException e) {
+    			System.out.println("Failed to setPersistentProperty("+qn+","+stamp+
+    					" on "+target.getLocation().toOSString());
+    		}
+        }
 	}
 
 	/**
@@ -609,6 +775,216 @@ public class ToolSequence {
 		return result;
 	}
 	
+	public class ToolStateStamp{
+    	private String toolName;
+    	private String toolStateFile; // 
+    	private String toolStamp; // after restore differs from stamp in stateFile
+    	public ToolStateStamp(
+    			String toolName,
+    			String stateFile,
+    			String toolStamp
+    			){
+    		this.toolName=toolName;
+    		this.toolStateFile=stateFile;
+    		this.toolStamp=toolStamp;
+    	}
+    	public ToolStateStamp(Tool tool){
+    		this.toolName=  tool.getName();
+    		this.toolStateFile= tool.getStateFile();
+    		this.toolStamp= tool.getRestoreTimeStamp();
+    	}
+    	public String getToolName(){
+    		return toolName;
+    	}
+    	public String getToolStamp(){
+    		return toolStamp;
+    	}
+    	public String getToolStateFile(){
+    		return toolStateFile;
+    	}
+    	public boolean after(ToolStateStamp after, ToolStateStamp before){
+    		return SelectedResourceManager.afterStamp(after.getToolStamp(), before.getToolStamp());
+    	}
+    }
 	
+    public void saveCurrentStates(IMemento memento) {
+    	for (String state:currentStates.keySet()){
+    		ToolStateStamp tss=currentStates.get(state);
+            memento.putString(state+TAG_CURRENTSTATE_TOOLNAME, tss.getToolName());
+            memento.putString(state+TAG_CURRENTSTATE_STATEFILE, tss.getToolStateFile());
+            memento.putString(state+TAG_CURRENTSTATE_TOOLSTAMP, tss.getToolStamp());
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+        		System.out.println("Saving state  "+state+
+        				", toolName="+tss.getToolName()+
+        				", toolStateFile="+tss.getToolStateFile()+
+        				", toolStamp="+tss.getToolStamp());
+        	}
+
+    	}
+    }
+
+    /**
+     * Restore states (snaphot files status) from persistent storage
+     * Should be called after tools are restored
+     * @param memento
+     */
+	public void restoreCurrentStates(IMemento memento) {
+    	currentStates.clear();
+    	String[] mementoKeys=memento.getAttributeKeys();
+    	Map<String,String> mementoKeysMap=new Hashtable<String,String>();
+    	for (String key:mementoKeys){
+    		if (
+    				key.contains(TAG_CURRENTSTATE_TOOLNAME)||
+    				key.contains(TAG_CURRENTSTATE_STATEFILE)||
+    				key.contains(TAG_CURRENTSTATE_TOOLSTAMP)
+    				) mementoKeysMap.put(key,memento.getString(key));
+
+    	}
+   	    setStateProvides(); // Can be called just once - during initialization?
+   	    for (String state:stateProvides.keySet()){
+   	    	if ( mementoKeysMap.containsKey(state+TAG_CURRENTSTATE_TOOLNAME)) {
+   	    		currentStates.put(state,new ToolStateStamp(
+   	    	    		memento.getString(state+TAG_CURRENTSTATE_TOOLNAME),
+   	    	    		memento.getString(state+TAG_CURRENTSTATE_STATEFILE),
+   	    	    		memento.getString(state+TAG_CURRENTSTATE_TOOLSTAMP)
+   	    				));
+   	        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+   	        		System.out.println("Restoring state  "+state+
+   	        				", toolName="+memento.getString(state+TAG_CURRENTSTATE_TOOLNAME)+
+   	        				", toolStateFile="+memento.getString(state+TAG_CURRENTSTATE_STATEFILE)+
+   	        				", toolStamp="+memento.getString(state+TAG_CURRENTSTATE_TOOLSTAMP));
+   	        	}
+   	    	}
+   	    }
+   	    // Set all tool dirty flags according to restored states and tools dendencies
+   	    //        updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
+   	    // setToolsDirtyFlag(true) initiates Verilog database rebuild, let's trigger it intentionally
+   	    //VerilogUtils.getTopModuleNames((IFile)resource);
+   	    setToolsDirtyFlag(true); // recalculate each successful tool's parameters
+	}
+	
+    public void putCurrentState(Tool tool){
+		String linkString=tool.getStateLink(); // name of the state file w/o timestamp
+		if (linkString!=null) currentStates.put(linkString, new ToolStateStamp(tool));
+    }
+
+
+    /**
+     * Scan all succeeded tools and set "dirty" flag if their dependencies do not match stored ones 
+     * 
+     */
+    public void setToolsDirtyFlag(boolean update){
+		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
+		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+			if (tool.getState()==TOOL_STATE.SUCCESS){
+		        if (update){
+		        	// tool.updateContextOptions(project) recalculates parameters, but not the hashcodes
+		        	tool.updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
+		        	try {
+						tool.buildParams(true); // dryRun
+					} catch (ToolException e) {
+						System.out.println("setToolsDirtyFlag(): failed to buildParams() for tool "+tool.getName());
+					}
+		        }
+				tool.setDirty(!matchDependState(tool));
+			}
+		}
+    }
+    
+    /**
+     * Set state files (full names with timestamps) and source files timestamps for the tool
+     * so they can be compared later to determine if the tool state is current or "dirty" (will
+     * use parameters-defined hashcodes too
+     * @param tool Reference to a tool to process
+     */
+    public void setDependState(Tool tool){
+    	tool.clearDependStamps(); // is it needed?
+    	Map <String,String> depStates=makeDependStates(tool);
+    	for (String state:depStates.keySet()){
+			tool.setStateTimeStamp(state,depStates.get(state)); // name of the state file including timestamp
+    	}
+    	Map <String,String> depFiles=makeDependFiles(tool);
+    	for (String file:depFiles.keySet()){
+			tool.setFileTimeStamp(file,depFiles.get(file)); 
+    	}
+    }
+    
+    /**
+     * Compare current timestamps of the source files and state(s) filenames (that include timestamps)
+     * against ones stored for the tool (when it ran or was restored) 
+     * @param tool tool to process
+     * @return true if all timestamps matched, false otherwise
+     */
+    public boolean matchDependState(Tool tool){
+    	Map <String,String> depStates=makeDependStates(tool);
+    	Map <String,String> depFiles=makeDependFiles(tool);
+        Map <String,String> storedDepStates = tool.getDependStatesTimestamps();
+        Map <String,String> storedDepFiles =  tool.getDependFilesTimestamps();
+        if (depStates.size()!=storedDepStates.size()) {
+        	System.out.println("matchDependState("+tool.getName()+") :"+
+            " depStates.size()!=storedDepStates.size() - "+depStates.size()+"!="+storedDepStates.size());
+        	return false;  
+        }
+        if (depFiles.size()!=storedDepFiles.size()) {
+        	System.out.println("matchDependState("+tool.getName()+") :"+
+                    " depFiles.size()!=storedDepFiles.size() - "+depFiles.size()+"!="+storedDepFiles.size());
+
+        	return false; 
+        }
+        for (String state:depStates.keySet()){
+        	if (!storedDepStates.containsKey(state) || !depStates.get(state).equals(storedDepStates.get(state))){
+            	System.out.println("matchDependState("+tool.getName()+") :"+
+            			state+ ": "+depStates.get(state)+" <-> "+storedDepStates.get(state));
+        		return false;
+        	}
+        }
+        for (String file:depFiles.keySet()){
+        	if (!storedDepFiles.containsKey(file) || !depFiles.get(file).equals(storedDepFiles.get(file))){
+            	System.out.println("matchDependState("+tool.getName()+") :"+
+            			file+ ": "+depFiles.get(file)+" <-> "+storedDepFiles.get(file));
+        		
+        		return false;
+        	}
+        }
+    	System.out.println("matchDependState("+tool.getName()+") : full match!");
+    	return true;
+    }
+    
+    
+    private  Map <String,String> makeDependStates(Tool tool){
+    	Map <String,String> depStates=new Hashtable<String,String>();    	
+    	List<String> dependStates=tool.getDependStates();
+    	if (dependStates!=null) for (String state: dependStates){
+    		if (currentStates.containsKey(state)){
+    			ToolStateStamp tss=currentStates.get(state);
+    			depStates.put(state,tss.getToolStateFile()); // name of the state file including timestamp
+    		} else {
+    			System.out.println("Seems a BUG: no information for state "+state+" on which tool "+tool.getName()+" depends");
+    		}
+    	}
+    	return depStates;
+    }
+    private  Map <String,String> makeDependFiles(Tool tool){
+    	Map <String,String> depFiles=new Hashtable<String,String>();    	
+    	List<String> dependFileNames=tool.getDependFiles();
+    	if (dependFileNames!=null) {
+    		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
+    		for (String depFile: dependFileNames){
+    			if (depFile.length()==0){
+    				System.out.println("makeDependFiles(): depFile is empty");
+    				continue;
+    			}
+    			IFile sourceFile=project.getFile(depFile); //Path must include project and resource name: /npmtest
+    			if (sourceFile.exists()) {
+    				depFiles.put(depFile, String.format("%d",sourceFile.getModificationStamp()));
+    			} else {
+    				System.out.println("Seems a BUG:  source file "+sourceFile.getLocation()+" on which tool "+
+    						tool.getName()+" depends does not exist");
+    				depFiles.put(depFile, ""); // empty stamp for non-existent files?
+    			}
+    		}
+    	}
+    	return depFiles;
+    }
 }
 

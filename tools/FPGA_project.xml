@@ -2,8 +2,8 @@
 <vdt-project>
 	<interface name="FPGAPprojectInterface">
 		<syntax name="RemoteRootSyntax" format="%%ParamValue/%%ProjectName" />
-		<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
-		<syntax name="FilteredSourceListSyntax" format="%(%%FilteredSourceList%| %)" />
+<!-- 	<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
+		<syntax name="FilteredSourceListSyntax" format="%(%%FilteredSourceList%| %)" />  -->
 		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
 		<!-- typedef -->
 	</interface>
@@ -129,37 +129,37 @@
 	 	    <parameter id="SnapshotSynth"
 	        label="Synthesis snapshot" tooltip="Name of Vivado snapshot archive after synthesis"
 	        default="%%ProjectName-synth.dcp"
-			type="Filename" format="CopyValue" />
+			type="String" format="CopyValue" />
 
 	 	    <parameter id="SnapshotOptPlace"
 	        label="Placement snapshot" tooltip="Name of Vivado snapshot archive after optimization/placement"
 	        default="%%ProjectName-opt-place.dcp"
-			type="Filename" format="CopyValue" />
+			type="String" format="CopyValue" />
 
 	 	    <parameter id="SnapshotOpt"
 	        label="Optimization snapshot" tooltip="Name of Vivado snapshot archive after optimization"
 	        default="%%ProjectName-opt.dcp"
-			type="Filename" format="CopyValue" />
+			type="String" format="CopyValue" />
 
 	 	    <parameter id="SnapshotOptPower"
 	        label="Power optimization snapshot" tooltip="Name of Vivado snapshot archive after power optimization"
 	        default="%%ProjectName-opt-power.dcp"
-			type="Filename" format="CopyValue" />
+			type="String" format="CopyValue" />
 
 	 	    <parameter id="SnapshotPlace"
 	        label="Placement snapshot" tooltip="Name of Vivado snapshot archive after placement"
 	        default="%%ProjectName-place.dcp"
-			type="Filename" format="CopyValue" />
+			type="String" format="CopyValue" />
 
 	 	    <parameter id="SnapshotOptPhys"
 	        label="Physical optimization snapshot" tooltip="Name of Vivado snapshot archive after physical optimization"
 	        default="%%ProjectName-opt-phys.dcp"
-			type="Filename" format="CopyValue" />
+			type="String" format="CopyValue" />
 
 	 	    <parameter id="SnapshotRoute"
 	        label="Routing snapshot" tooltip="Name of Vivado snapshot archive after routing"
 	        default="%%ProjectName-route.dcp"
-			type="Filename" format="CopyValue" />
+			type="String" format="CopyValue" />
 
 	 	    <parameter id="DisableVivadoSynth"
 	        label="Disable Vivado synthesis" tooltip="Disable tool Vivado Synthesis"

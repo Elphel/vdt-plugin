@@ -114,6 +114,7 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_DEPENDS_LIST_TAG =  "depends-list";
     static final String CONTEXT_TOOL_DEPENDS_TAG =       "depends";
     static final String CONTEXT_TOOL_DEPENDS_STATE_TAG = "state";
+    static final String CONTEXT_TOOL_DEPENDS_FILES_TAG = "files";
 // TODO: May add other types of dependencies 
     
     static final String CONTEXT_TOOL_DFLT_ACTION_LABEL = "Run for";
@@ -663,7 +664,8 @@ public class XMLConfig extends Config {
                     
                 List<String> toolExtensionsList = readToolExtensionsList(contextNode, contextName);
                 List<RunFor> toolRunfor=  readToolRunForList(contextNode, contextName);
-                List<String> toolDepends= readToolDependsList(contextNode, contextName);
+                List<String> toolDependsStates= readToolDependsList(contextNode, contextName,false);
+                List<String> toolDependsFiles=  readToolDependsList(contextNode, contextName,true);
                 
                 if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
                 	System.out.println("contextNode.getNodeValue()="+contextNode.getNodeValue());
@@ -692,7 +694,8 @@ public class XMLConfig extends Config {
                                    toolInfo,
                                    toolRunfor,
                                    ignoreFilter,
-                                   toolDepends,
+                                   toolDependsStates,
+                                   toolDependsFiles,
                                    logDir,
                                    stateDir,
                                    disabled,
@@ -1045,9 +1048,12 @@ public class XMLConfig extends Config {
         return extList;
     }
     
-    private List<String> readToolDependsList(Node toolNode, String toolName)
+    private List<String> readToolDependsList(Node toolNode, String toolName, boolean filesNotStates)
             throws ConfigException 
         {
+    	    String filesStateTag=   filesNotStates?CONTEXT_TOOL_DEPENDS_FILES_TAG:CONTEXT_TOOL_DEPENDS_STATE_TAG;
+    	    String otherTag=     (!filesNotStates)?CONTEXT_TOOL_DEPENDS_FILES_TAG:CONTEXT_TOOL_DEPENDS_STATE_TAG;
+    	
             String toolInfo = "Tool '" + toolName + "'";
             
             List<String> depList = new ArrayList<String>();
@@ -1066,10 +1072,14 @@ public class XMLConfig extends Config {
 // TODO: allow here other types of dependencies (conditionals(source files)            
             for(Iterator<Node> n = depNodes.iterator(); n.hasNext();) {
                 Node node = (Node)n.next();
-                String dep = getAttributeValue(node, CONTEXT_TOOL_DEPENDS_STATE_TAG);
-                if(dep == null)
-                    throw new ConfigException(toolInfo + ": Attribute '" + CONTEXT_TOOL_DEPENDS_STATE_TAG + "' is absent");
-                depList.add(dep);
+                String dep = getAttributeValue(node, filesStateTag);
+                if (dep != null) {
+                	depList.add(dep);
+                } else if (getAttributeValue(node, otherTag)==null){
+                    throw new ConfigException(toolInfo + ": Both alternative attributes '" + CONTEXT_TOOL_DEPENDS_FILES_TAG +
+                    		" and '"+CONTEXT_TOOL_DEPENDS_STATE_TAG +"' are absent");
+                	
+                }
             }
             return depList;
         }

@@ -24,8 +24,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.document.HdlDocument;
+import com.elphel.vdt.veditor.document.VerilogDocument;
 import com.elphel.vdt.veditor.parser.OutlineContainer;
 import com.elphel.vdt.veditor.parser.OutlineDatabase;
 //import com.elphel.vdt.veditor.parser.vhdl.VhdlOutlineElementFactory.PackageDeclElement;
@@ -67,7 +69,9 @@ public class VerilogUtils {
 			e.printStackTrace();
 		}
 		if (hdlDocument!=null) return hdlDocument.getOutlineDatabase(); /* will create a new one if does not exist */
-		return null;
+		// Create HdlDocument from selected/restored HDLfile
+		hdlDocument=new VerilogDocument(project, (IFile) SelectedResourceManager.getDefault().getChosenVerilogFile());
+		return hdlDocument.getOutlineDatabase(); /* will create a new one if does not exist */
 	}
 	
 	public static String [] getExtList(String str){

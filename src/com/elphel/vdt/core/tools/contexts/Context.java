@@ -262,6 +262,9 @@ public abstract class Context {
         
         createdControlFiles.clear();
         currentHash=0;
+//		if (name.equals("VivadoSynthesis")){
+//			System.out.println("1. Check here: VivadoSynthesis");
+//		}
         
         while(commandLinesBlockIter.hasNext()) {
             CommandLinesBlock commandLinesBlock = (CommandLinesBlock)commandLinesBlockIter.next();
@@ -398,15 +401,23 @@ public abstract class Context {
 				String [] params=item.getParams();
 				if (params!=null) for (int i=0;i<params.length;i++){
 					currentHash += params[i].hashCode();
+//					if (name.equals("VivadoSynthesis")){
+//						System.out.println(params[i]+": "+currentHash);
+//					}
+
 				}
 			}
 		}
 //		System.out.println("BildParam("+dryRun+"), name="+name+" currentHash="+currentHash);
 // Seems that during build it worked on a working copy of the tool, so calculated parameter did not get back
 		Tool proto=ToolsCore.getConfig().getContextManager().findTool(name);
+//		System.out.println("Calculated currentHash for "+name+"="+currentHash);
+//		if (name.equals("VivadoSynthesis")){
+//			System.out.println("Check here: VivadoSynthesis");
+//		}
 		if (proto!=null){
 			if (proto!=this){
-				System.out.println("++++ Updating tool's currentHas from working copy, name="+name);
+				System.out.println("++++ Updating tool's currentHash from working copy, name="+name);
 				proto.setCurrentHash(currentHash);
 			}
 			

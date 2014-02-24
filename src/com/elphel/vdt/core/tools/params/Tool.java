@@ -49,6 +49,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private static final String TAG_TOOL_STATE =  ".toolstate.state";
     private static final String TAG_TOOL_TIMESTAMP =  ".toolstate.timeStamp";
     private static final String TAG_TOOL_LASTRUNHASH =  ".toolstate.lastRunHash";
+    private static final String TAG_TOOL_FILEDEPSTAMP =  ".toolstate.fileDependency.";
+    private static final String TAG_TOOL_STATEDEPSTAMP =  ".toolstate.stateDependency.";
 
 
     private String baseToolName;
@@ -76,26 +78,31 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private boolean initialized = false;
     private String [] imageKeysActions = null;
     
-    private List<String> depends=null;       // list of tools this one depends on -> list of files (states) and strings (name of sessions)
-    private String logDirString=null;              // directory to store this tool log files
-    private String stateDirString=null;            // directory to store this tool log files
-    private Parameter logDir=null;              // directory to store this tool log files
-    private Parameter stateDir=null;            // directory to store this tool log files
-    private String disabledString=null;          // to disable tools from automatic running
-    private String resultString=null;              // parameter name of kind of file that represents state after running this tool
-    private String restoreString=null;             // name of tool that restores the state of this tool ran (has own dependencies)
-    private String saveString=null;             // name of tool that saves the state of this tool run 
-    private String autoSaveString=null;         // name of boolean that turns on/off auto-save after the tool run
-    private boolean abstractTool;               // abstract tools can only be used for inheritance, not directly (so they will not be
-                                                // considered when looking for solution to run
+    private List<String> dependStateNames=null;    // list of tools this one depends on -> list of files (source files) and strings (name state files)
+    private List<String> dependFileNames=null;      // list of tools this one depends on -> list of files (source files) and strings (name state files)
+    
+    private String logDirString=null;        // directory to store this tool log files
+    private String stateDirString=null;      // directory to store this tool log files
+    private Parameter logDir=null;           // directory to store this tool log files
+    private Parameter stateDir=null;         // directory to store this tool log files
+    private String disabledString=null;      // to disable tools from automatic running
+    private String resultString=null;        // parameter name of kind of file that represents state after running this tool
+    private String restoreString=null;       // name of tool that restores the state of this tool ran (has own dependencies)
+    private String saveString=null;          // name of tool that saves the state of this tool run 
+    private String autoSaveString=null;      // name of boolean that turns on/off auto-save after the tool run
+    private boolean abstractTool;            // abstract tools can only be used for inheritance, not directly (so they will not be
+                                             // considered when looking for solution to run
  
     private Parameter disabled;
     private Tool restoreTool;
     private Parameter result;
     
     // TODO: Compare dependFiles with literary result of other tools, if match - these are states, not files
-    private List<Parameter> dependSessions;
+    private List<Parameter> dependStates; // snapshot names
     private List<Parameter> dependFiles;
+    
+    private Map <String,String> dependStatesTimestamps;
+    private Map <String,String> dependFilesTimestamps;
 //    private boolean toolIsRestore;           // this tool is referenced by other as restore="this-tool"
     private boolean dirty=false;             // tool ran before its sources (runtime value)
     private boolean pinned=false;             // tool ran before its sources (runtime value)
@@ -105,6 +112,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
 //    private boolean running=false;
 //    private long finishTimeStamp=0;
     private String timeStamp=null;
+    private String restoreTimeStamp=null;
     private DesignFlowView designFlowView;
     
     private String resultFile;               // used to overwrite name of the default result file that normally
@@ -122,7 +130,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private TOOL_MODE runMode;
     private TOOL_MODE lastRunMode;           // last running (not STOP) mode
     private int lastRunHash;                 // hash code of the last run
-    private ToolWaitingArguments toolWaitingArguments; // save here launch parameters wjhen tool need to wait for other tools to run/get restored
+    private ToolWaitingArguments toolWaitingArguments; // save here launch parameters when tool need to wait for other tools to run/get restored
 
     public Tool(String name,
                 String controlInterfaceName,
@@ -140,7 +148,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 String toolInfo,
                 List<RunFor> runfor,
                 String ignoreFilter,
-                List<String> depends,
+                List<String> toolDependsStates,
+                List<String> toolDependsFiles,
                 String logDirString,
                 String stateDirString,
                 String disabledString,          // to disable tools from automatic running
@@ -174,7 +183,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.toolErrors   = toolErrors;
         this.toolWarnings = toolWarnings;
         this.toolInfo     = toolInfo;
-        this.depends=       depends;
+        
+        this.dependStateNames=toolDependsStates;    // list of tools this one depends on -> list of files (source files) and strings (name state files)
+        this.dependFileNames= toolDependsFiles;      // list of tools this one depends on -> list of files (source files) and strings (name state files)
+        
+//        this.depends=       depends;
         this.logDirString=        logDirString;
         this.stateDirString=      stateDirString;
         
@@ -188,7 +201,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         disabled=null;
         restoreTool=null;
         result=null;
-        dependSessions=null;
+        dependStates=null;
         dependFiles=null;
 
         pinned=false;
@@ -197,6 +210,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         choice=0;
         designFlowView =null;
         timeStamp=null;
+        restoreTimeStamp=null;
         logDir=null;
         stateDir=null;
         resultFile=null;
@@ -206,6 +220,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
         autoSave=null;
         runMode=TOOL_MODE.STOP;
         lastRunMode=TOOL_MODE.STOP;
+        dependStatesTimestamps=new Hashtable<String,String>();
+        dependFilesTimestamps= new Hashtable<String,String>();
+
     }
     public enum TOOL_STATE {
         NEW,
@@ -245,10 +262,42 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	public String getIgnoreFilter(){ return ignoreFilter;}
     }
    
+
+    public void clearDependStamps(){
+    	dependStatesTimestamps.clear();
+    	dependFilesTimestamps.clear();
+    }
+    
+    public void setStateTimeStamp(String state, String stamp){
+    	dependStatesTimestamps.put(state,stamp);
+    }
+    public void setFileTimeStamp(String file, String stamp){
+    	dependFilesTimestamps.put(file,stamp);
+    }
+    
+    public String getStateTimeStamp(String state){
+    	return dependStatesTimestamps.get(state);
+    }
+    public String getFileTimeStamp(String state){
+    	return dependFilesTimestamps.get(state);
+    }
+    
+    public Map <String,String> getDependStatesTimestamps(){
+    	return	dependStatesTimestamps;
+    }
+    
+    public Map <String,String> getDependFilesTimestamps(){
+        return	dependFilesTimestamps;
+    }
+
     
     
-    public List<String> getDepends()       { return depends; }
-    public boolean isDirty()               { return dirty; }
+    public List<String> getDependStateNames()    { return dependStateNames; }
+    public List<String> getDependFileNames()     { return dependFileNames; }
+    public boolean isDirty()               { return dirty || !hashMatch(); }
+    public boolean isDirtyOrChanged()      {
+    	return isDirty() || !hashMatch();
+    }
     public boolean isRunning()             { return (runMode!=TOOL_MODE.STOP) && ((runMode!=TOOL_MODE.WAIT)); }
     public boolean isWaiting()             { return runMode==TOOL_MODE.WAIT; }
     
@@ -301,10 +350,16 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (mode!=TOOL_MODE.STOP)  lastRunMode=mode;
     	if (mode == TOOL_MODE.RUN) { // Only RUN
     		setTimeStamp(); // copy current time to tool timestamp
+    		restoreTimeStamp=null; 
         	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
         		System.out.println(":::: Tool "+name+": setTimeStamp="+timeStamp);
         	}
-
+    	} else if (mode == TOOL_MODE.RESTORE){
+    		if (restoreMaster!=null){
+    			restoreMaster.setRestoreTimeStamp(); // copy current time to tool restore timestamp will be used when calculating dependencies
+    		} else {
+        		System.out.println("Restore mode, but no restoreMaster for "+name);
+    		}
     	}
     	//    	toolFinished();
     	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
@@ -426,7 +481,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (toolInfo==       null) toolInfo =       baseTool.toolInfo;
     	if (runfor==         null) runfor =         baseTool.runfor;
     	if (ignoreFilter==   null) ignoreFilter =   baseTool.ignoreFilter;
-    	if (depends==        null) depends =        baseTool.depends;
+    	
+    	if (dependStateNames== null) dependStateNames = baseTool.dependStateNames;
+    	if (dependStateNames== null) dependStateNames = baseTool.dependStateNames;
+    	
     	if (logDirString==   null) logDirString =   baseTool.logDirString;
     	if (stateDirString== null) stateDirString = baseTool.stateDirString;
     	if (disabledString== null) disabledString = baseTool.disabledString;
@@ -460,35 +518,62 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     
     public void initDepends() throws ConfigException{
-    	if (depends==null) return;
-        dependSessions=new ArrayList<Parameter>();
-        dependFiles=   new ArrayList<Parameter>();
-    	for(Iterator<String> iter = depends.iterator(); iter.hasNext();) {
-    		String paramID=iter.next();
+    	// Verify definitions for state dependency
+    	if (dependStateNames!=null) {
+    		dependStates=new ArrayList<Parameter>();
+    		for(Iterator<String> iter = dependStateNames.iterator(); iter.hasNext();) {
+    			String paramID=iter.next();
 
-    		Parameter param=findParam(paramID);
-    		if(param == null) {
-    			throw new ConfigException("Parameter depends='" + paramID + 
-    					"' used for tool '" + name + 
-    					"' is absent");
-    		} else if(!(param.getType() instanceof ParamTypeString)) {
-    			throw new ConfigException("Parameter depends='" + paramID + 
-        				"' defined in "+param.getSourceXML()+" used for tool '" + name + 
-    					"' must be of type '" + ParamTypeString.NAME + 
-    					"'");                    
-    		} else {
-    			KIND kind=((ParamTypeString)param.getType()).getKind();
-    			if (kind == ParamTypeString.KIND.FILE) {
-    				dependFiles.add(param);
-    			} else if (kind == ParamTypeString.KIND.TEXT) {
-    				dependSessions.add(param);
-    			} else {
-    				throw new ConfigException("Parameter depends='" + paramID + 
-    						"' of type '" + ParamTypeString.NAME +
+    			Parameter param=findParam(paramID);
+    			if(param == null) {
+    				throw new ConfigException("Parameter dependStateNames='" + paramID + 
+    						"' used for tool '" + name + 
+    						"' is absent");
+    			} else if(!(param.getType() instanceof ParamTypeString)) {
+    				throw new ConfigException("Parameter dependStateNames='" + paramID + 
     						"' defined in "+param.getSourceXML()+" used for tool '" + name + 
-    						"' must be of kind '" + ParamTypeString.KIND_FILE_ID + "' (for snapshot fiels) "+
-    						" or '" + ParamTypeString.KIND_TEXT_ID + "' (for tool name of the open session)"+
-        				", it is '"+kind+"'");                   
+    						"' must be of type '" + ParamTypeString.NAME + 
+    						"'");                    
+    			} else {
+    				KIND kind=((ParamTypeString)param.getType()).getKind();
+    				if (kind == ParamTypeString.KIND.TEXT) {
+    					dependStates.add(param);
+    				} else {
+    					throw new ConfigException("Parameter dependStateNames='" + paramID + 
+    							"' of type '" + ParamTypeString.NAME +
+    							"' defined in "+param.getSourceXML()+" used for tool '" + name + 
+    							"' must be of kind '" + ParamTypeString.KIND_TEXT_ID + "', it is '"+kind+"'");                   
+    				}
+    			}
+    		}
+    	}
+    	// Verify definitions for source file dependency
+
+    	if (dependFileNames!=null) {
+    		dependFiles= new ArrayList<Parameter>();
+    		for(Iterator<String> iter = dependFileNames.iterator(); iter.hasNext();) {
+    			String paramID=iter.next();
+
+    			Parameter param=findParam(paramID);
+    			if(param == null) {
+    				throw new ConfigException("Parameter dependFileNames='" + paramID + 
+    						"' used for tool '" + name + 
+    						"' is absent");
+    			} else if(!(param.getType() instanceof ParamTypeString)) {
+    				throw new ConfigException("Parameter dependFileNames='" + paramID + 
+    						"' defined in "+param.getSourceXML()+" used for tool '" + name + 
+    						"' must be of type '" + ParamTypeString.NAME + 
+    						"'");                    
+    			} else {
+    				KIND kind=((ParamTypeString)param.getType()).getKind();
+    				if (kind == ParamTypeString.KIND.FILE) {
+    					dependFiles.add(param);
+    				} else {
+    					throw new ConfigException("Parameter depends='" + paramID + 
+    							"' of type '" + ParamTypeString.NAME +
+    							"' defined in "+param.getSourceXML()+" used for tool '" + name + 
+    							"' must be of kind '" + ParamTypeString.KIND_FILE_ID + "', it is '"+kind+"'");                   
+    				}
     			}
     		}
     	}
@@ -498,17 +583,29 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	List<String> list = new ArrayList<String>();
     	for (Iterator<Parameter> iter= dependFiles.iterator(); iter.hasNext();) {
     		List<String> vList=iter.next().getValue();
-    		if (vList!=null) list.addAll(vList);
+    		if (vList!=null) {
+    			for (String item:vList){
+    				if ((item!=null) && (item.trim().length()>0)){
+    					list.add(item.trim());
+    				}
+    			}
+//    			list.addAll(vList);
+    		}
     	}
     	return list;
     }
 
-    public List<String> getDependSessions(){
-    	if ((dependSessions == null) || (dependSessions.size()==0)) return null;
+    public List<String> getDependStates(){
+    	if ((dependStates == null) || (dependStates.size()==0)) return null;
     	List<String> list = new ArrayList<String>();
-    	for (Iterator<Parameter> iter= dependSessions.iterator(); iter.hasNext();) {
+    	for (Iterator<Parameter> iter= dependStates.iterator(); iter.hasNext();) {
     		List<String> vList=iter.next().getValue();
-    		if (vList!=null) list.addAll(vList);
+			for (String item:vList){
+				if ((item!=null) && (item.trim().length()>0)){
+					list.add(item.trim());
+				}
+			}
+//    		if (vList!=null) list.addAll(vList);
     	}
     	return list;
     }
@@ -528,11 +625,13 @@ public class Tool extends Context implements Cloneable, Inheritable {
                                       "'");
         } else {
         	KIND kind=((ParamTypeString)result.getType()).getKind();
-        	if(kind != ParamTypeString.KIND.FILE) {
+//        	if(kind != ParamTypeString.KIND.FILE) {
+           	if(kind != ParamTypeString.KIND.TEXT) {
         		throw new ConfigException("Parameter result='" + resultString + 
         				"' of type '" + ParamTypeString.NAME +
         				"' defined in "+result.getSourceXML()+" used for tool '" + name + 
-        				"' must be of kind '" + ParamTypeString.KIND_FILE_ID + "'"+
+//        				"' must be of kind '" + ParamTypeString.KIND_FILE_ID + "'"+
+        				"' must be of kind '" + ParamTypeString.KIND_TEXT_ID + "'"+
         				" (it is '"+kind+"')");                    
         	}
         }
@@ -719,9 +818,13 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	return null;
     }
     
-    public void setTimeStamp(){
+	public void setTimeStamp(){
     	timeStamp=SelectedResourceManager.getDefault().getBuildStamp();
     }
+	public void setRestoreTimeStamp(){
+    	restoreTimeStamp=SelectedResourceManager.getDefault().getBuildStamp();
+    }
+	
     public void setTimeStamp(String timeStamp){
     	this.timeStamp=timeStamp;
     }
@@ -734,7 +837,21 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (saveMaster != null)    return saveMaster.getTimeStamp(false);
     	return null;
     }
+
     
+    /**
+     * Use to compare dependencies, when the snapshot is restored, it will have have restore time (latest),
+     * and the timeStamp (and getStateFile) will still use original one (for hash calculation)
+     * @return restore time stamp (if available), otherwise just a timestamp. Will look at restoreMaster.
+     */
+    public String getRestoreTimeStamp() {return getRestoreTimeStamp(true); } // With timestamp or as specified in resultFile
+    public String getRestoreTimeStamp(boolean first){
+    	if (first && (restoreMaster != null)) return restoreMaster.getRestoreTimeStamp(false);
+    	if (restoreTimeStamp!=null) return restoreTimeStamp;
+    	if (timeStamp!=null) return timeStamp;
+    	return null;
+    }
+
     
     public String getStateLink() {return getStateLink(true); } // No timestamp, link name (or null)
     public String getStateLink(boolean first) {
@@ -766,7 +883,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
         memento.putString(name+TAG_TOOL_STATE, this.state.toString());
         if (timeStamp!=null) memento.putString(name+TAG_TOOL_TIMESTAMP, timeStamp);
         if (lastRunHash!=0)  memento.putInteger(name+TAG_TOOL_LASTRUNHASH, lastRunHash);
-        
+        for(String state:dependStatesTimestamps.keySet()){
+        	String stamp=dependStatesTimestamps.get(state);
+        	memento.putString(name+TAG_TOOL_STATEDEPSTAMP+state, stamp);
+        }
+        for(String file:dependFilesTimestamps.keySet()){
+        	String stamp=dependFilesTimestamps.get(file);
+        	memento.putString(name+TAG_TOOL_FILEDEPSTAMP+file, stamp);
+        }
     }
     
     public void restoreState(IMemento memento) {
@@ -786,6 +910,22 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (timestamp!=null) this.timeStamp=timestamp;
     	Integer hc=memento.getInteger(name+TAG_TOOL_LASTRUNHASH);
     	if (hc!=null) lastRunHash=hc;
+    	clearDependStamps();
+    	String[] mementoKeys=memento.getAttributeKeys();
+    	String prefix=name+TAG_TOOL_STATEDEPSTAMP;
+    	for (String key:mementoKeys){
+    		if (key.startsWith(prefix)) {
+    			String value=memento.getString(key);
+    			setStateTimeStamp(key.substring(prefix.length()), value);
+    		}
+    	}
+    	prefix=name+TAG_TOOL_FILEDEPSTAMP;
+    	for (String key:mementoKeys){
+    		if (key.startsWith(prefix)) {
+    			String value=memento.getString(key);
+    			setFileTimeStamp(key.substring(prefix.length()), value);
+    		}
+    	}
     }
     
     
@@ -971,7 +1111,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	return results.get(0);
     }
     
-    private void updateContextOptions (IProject project){
+//    private void updateContextOptions (IProject project){
+    public void updateContextOptions (IProject project){ // public to be able to update parameters before setting "dirty" flags
         PackageContext packageContext = getParentPackage();
         if (packageContext != null) {
             OptionsCore.doLoadContextOptions(packageContext);
@@ -1077,6 +1218,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
 //    public String[] buildParams() throws ToolException {
     public BuildParamsItem[] buildParams() throws ToolException {
+    	return buildParams(false);
+    }
+    
+      public BuildParamsItem[] buildParams(boolean dryRun) throws ToolException {
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+    		System.out.println("tool "+getName()+" state="+getState()+" dirty="+isDirty()+" pinned="+isPinned()+" dryRun="+dryRun);
+    	}
+    	
         if(parentPackage != null)
             parentPackage.buildParams();
 
@@ -1088,7 +1237,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         if(installation != null)
             installation.buildParams();
         
-        return super.buildParams();
+        return super.buildParams(dryRun);
     }
     
     

@@ -17,12 +17,15 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.variables;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Stack;
 
+import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.core.tools.params.Tool;
+import com.elphel.vdt.core.tools.params.ToolSequence;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
@@ -39,6 +42,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
@@ -59,9 +63,9 @@ import org.eclipse.ui.PlatformUI;
  */
 
 public class SelectedResourceManager implements IWindowListener, ISelectionListener {
+
     // singleton
     private static SelectedResourceManager fgDefault = new SelectedResourceManager();
-    
     private IResource fSelectedResource    = null;
     private IResource fSelectedVerilogFile = null;
     private ITextSelection fSelectedText = null;
@@ -76,6 +80,7 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     private String timestamp;
     private String ignoreFilter=null;
     private boolean toolsLinked=true;
+    private ToolSequence toolSequence=null; // to be able to reach toolSequence instance from VEditor
     
 //    private Tool selectedTool=null; // last selected tool
  //   
@@ -115,6 +120,14 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     }
     public boolean isToolsLinked(){
     	return toolsLinked;
+    }
+    
+    public void setToolSequence (ToolSequence toolSequence){
+    	this.toolSequence=toolSequence;
+    }
+
+    public ToolSequence getToolSequence(){
+    	return toolSequence;
     }
     
     /**
@@ -161,7 +174,7 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
 
     /**
      * Returns the currently selected resource in the active workbench window,
-     * or <code>null</code> if none. If an editor is active, the resource adapater
+     * or <code>null</code> if none. If an editor is active, the resource adapter
      * associated with the editor is returned.
      * 
      * @return selected resource or <code>null</code>
@@ -181,7 +194,7 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
         return fSelectedVerilogFile;
     }
 
-    /**
+     /**
      * Returns resource by selection in the active workbench window,
      * or <code>null</code> if none. If an editor is active, the resource adapater
      * associated with the editor is returned.
@@ -286,17 +299,37 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     	}
     }
     
+    
+    // Build stamp/date methods
     public String setBuildStamp(){
-//    	timestamp=System.nanoTime();
-    	//String fileName = new SimpleDateFormat("yyyyMMddHHmmssSSS'.txt'").format(new Date()));
-    	timestamp= new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+    	timestamp=getBuildStamp(new Date());
     	return getBuildStamp();
     }
 
     public String getBuildStamp(){
     	return timestamp;
     }
+
+    public static String getBuildStamp(Date date){
+    	return new SimpleDateFormat(VDT.TIME_STAMP_FORMAT).format(date);
+    }
     
+    public static Date parseStamp(String stamp){
+    	Date d;
+		try {
+			d = new SimpleDateFormat(VDT.TIME_STAMP_FORMAT).parse(stamp);
+		} catch (ParseException e) {
+			d=new Date(0);
+			System.out.println("Date format '"+stamp+"' not recognized, using beginning of all of times: "+
+					new SimpleDateFormat(VDT.TIME_STAMP_FORMAT).format(d));
+			return d; // 1970
+		}
+    	return d;
+    }
+    
+    public static boolean afterStamp(String after, String before){
+    	return  parseStamp(before).after(parseStamp(after));
+    }
     
     public String getChosenTarget() {
         return fChosenTarget;
@@ -304,10 +337,17 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     public String getChosenShort() {
         return fChosenShort;
     }
-
+    
     public IResource getChosenVerilogFile() {
         return (fChosenVerilogFile!=null)?fChosenVerilogFile:fSelectedVerilogFile;
     }
+
+    // Used when restoring from memento
+    public void setChosenVerilogFile(IResource file) {
+    	fChosenVerilogFile=file;
+    	if (fSelectedResource==null) fSelectedResource=file;
+    }
+
     
     public int getChosenAction() {
         return fChosenAction;
@@ -319,6 +359,9 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     
     public String getFilter(){
     	return ignoreFilter;
+    }
+    public void setFilter(String  filter){
+    	ignoreFilter=filter;
     }
 
 

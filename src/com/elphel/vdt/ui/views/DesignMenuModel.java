@@ -303,7 +303,6 @@ public class DesignMenuModel {
         
         public void measureItem (Event event){
         	super.measureItem (event);
-        	boolean dirty=tool.isDirty();
         	boolean pinned=tool.isPinned() || !SelectedResourceManager.getDefault().isToolsLinked();
         	String iconName,key;
         	if (tool.isRunning()){
@@ -325,7 +324,7 @@ public class DesignMenuModel {
         			key= VDTPluginImages.KEY_TOOLSTATE_NEW;
         			break;
         		case FAILURE:
-        			if (dirty){
+        			if (tool.isDirtyOrChanged()){
         				iconName=VDTPluginImages.ICON_TOOLSTATE_BAD_OLD;
         				key= VDTPluginImages.KEY_TOOLSTATE_BAD_OLD;
         			} else {
@@ -338,7 +337,7 @@ public class DesignMenuModel {
     					iconName=VDTPluginImages.ICON_TOOLSTATE_PINNED;
     					key= VDTPluginImages.KEY_TOOLSTATE_PINNED;
         			} else {
-        				if (dirty){
+        				if (tool.isDirtyOrChanged()){
         					iconName=VDTPluginImages.ICON_TOOLSTATE_GOOD_OLD;
         					key= VDTPluginImages.KEY_TOOLSTATE_GOOD_OLD;
         				} else {
@@ -352,7 +351,7 @@ public class DesignMenuModel {
         				key= VDTPluginImages.KEY_TOOLSTATE_KEPT_OPEN;
         			break;
         		default:
-        			if (dirty){
+        			if (tool.isDirtyOrChanged()){
         				iconName=VDTPluginImages.ICON_TOOLSTATE_WTF_OLD;
         				key= VDTPluginImages.KEY_TOOLSTATE_WTF_OLD;
         			} else {

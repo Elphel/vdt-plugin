@@ -94,6 +94,11 @@
 	<syntax name="DashListIndividual"  format="%(-%%ParamName %%ParamValue%| %)" />
 	<syntax name="DashListCommon"      format="-%%ParamName %(%%ParamValue%| %)" />
 	<syntax name="DashName"            format=" -%%ParamName" />
+<!--
+Does not work according to 2.2.1. "Inside text-repetitor, one and only one pattern-generator is mandatory".
+	
+	<syntax name="RepeatCommandSyntax" format="%(%%ParamName %%ParamValue%|\n%)" /> -->
+	
 
   </interface>
 
