@@ -224,7 +224,7 @@ public abstract class Context {
     		CommandLinesBlock commandLinesBlock = (CommandLinesBlock)commandLinesBlockIter.next();
     		if (commandLinesBlock.isConsoleKind()){
     			Parameter parName = findParam(commandLinesBlock.getDestination());  // command file or console name
-    			String consoleName = (parName != null)?	parName.getValue().get(0).trim() : null;
+    			String consoleName = (parName != null)?	parName.getValue(null).get(0).trim() : null;
     			if (consoleName!=null) consoleList.add(consoleName);
     		}
     	}
@@ -282,8 +282,9 @@ public abstract class Context {
         	String toolInfo=    subsitutePattern(commandLinesBlock.getInfo());
         	String stderr=commandLinesBlock.getStderr();
         	String stdout=commandLinesBlock.getStdout();
-        	String prompt=  buildSimpleString(commandLinesBlock.getPrompt()); // evaluate string
-        	String sTimeout=buildSimpleString(commandLinesBlock.getTimeout());
+        	// the result will not be used as some other parameter value, so topProcessor is null in the next 2 lines /Andrey
+        	String prompt=  buildSimpleString(commandLinesBlock.getPrompt(), null); // evaluate string
+        	String sTimeout=buildSimpleString(commandLinesBlock.getTimeout(),null);
         	int timeout=0;
         	try{
         		timeout=Integer.parseInt(sTimeout);
@@ -307,7 +308,8 @@ public abstract class Context {
             List<List<String>> commandSequence = new ArrayList<List<String>>();
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
             	String line = (String)lineIter.next();
-            	commandSequence.add(buildCommandString(line));  // TODO: parses them here? VERIFY               
+            	// the result will not be used as some other parameter value, so topProcessor is null in the next line /Andrey
+            	commandSequence.add(buildCommandString(line,null));  // TODO: parses them here? VERIFY               
             }
             
             // Here - already resolved to empty            
@@ -315,7 +317,7 @@ public abstract class Context {
             if(destName != null) {
                 Parameter parName = findParam(destName);  // command file or console name
                 String controlFileName = parName != null? 
-                		parName.getValue().get(0).trim() : null;
+                		parName.getValue(null).get(0).trim() : null;
             	if (isConsoleName) {
  //           		System.out.println("TODO: Enable console command generation here");
             		printStringsToConsoleLine(commandLineParams, commandSequence,sep,mark);
@@ -427,7 +429,7 @@ public abstract class Context {
         return (BuildParamsItem[])buildParamItems.toArray(new BuildParamsItem[buildParamItems.size()]);
     }
     
-    protected List<String> buildCommandString(String paramStringTemplate)
+    protected List<String> buildCommandString(String paramStringTemplate, FormatProcessor topProcessor)
         throws ToolException
     {
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
@@ -435,26 +437,26 @@ public abstract class Context {
                                                             new RepeaterRecognizer()
                                                             // new ContextParamRecognizer(this),
                                                             // new ContextParamRepeaterRecognizer(this)
-                                                        });
+                                                        },topProcessor);
                             
         return processor.process(paramStringTemplate);
     }
     
     // recognizes parameter name (just %name), or simple generators
-    protected String buildSimpleString(String stringTemplate)
+    protected String buildSimpleString(String stringTemplate, FormatProcessor topProcessor)
             throws ToolException
         {
     	    if (stringTemplate==null) return null;
     	    Parameter parName=findParam(stringTemplate);
     	    if (parName!=null){
-    	    	return parName.getValue().get(0).trim(); // get parameter
+    	    	return parName.getValue(topProcessor).get(0).trim(); // get parameter
     	    }
             FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                                 new SimpleGeneratorRecognizer(),
                                                                 new RepeaterRecognizer()
                                                                 // new ContextParamRecognizer(this),
                                                                 // new ContextParamRepeaterRecognizer(this)
-                                                            });
+                                                            },topProcessor);
             
             List<String> result= processor.process(stringTemplate);                    
             if (result.size()==0) return "";

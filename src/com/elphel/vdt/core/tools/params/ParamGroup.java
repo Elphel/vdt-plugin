@@ -95,7 +95,7 @@ public class ParamGroup extends UpdateableStringsContainer
     }
     
     public boolean isRelevant() {
-        return relevant == null || relevant.isTrue();
+        return relevant == null || relevant.isTrue(null); // null for topFormatProcessor (this value will not be used for other parameter value)
     }
 
     public List<String> getParams() {
@@ -111,7 +111,7 @@ public class ParamGroup extends UpdateableStringsContainer
         if(label == null)
             label = paramGroup.label;
 
-        super.update(from);
+        super.update(from,null);// null for topFormatProcessor (this value will not be used for other parameter value)
     }
 
 }

@@ -19,6 +19,7 @@ package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.Utils;
 import com.elphel.vdt.core.tools.generators.*;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Tool;
 
 
@@ -66,7 +67,7 @@ public class SimpleGeneratorRecognizer implements Recognizer {
     		generators[i].setTool(tool);
     	}
     }
-	public RecognizerResult recognize(String template, int startPos) {
+	public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor) {
         RecognizerResult result = new RecognizerResult(); 
                 
         // first see if there is the control sequence
@@ -78,7 +79,7 @@ public class SimpleGeneratorRecognizer implements Recognizer {
 
             String genName = template.substring(startPos, newPos);
 
-            result.set(findGenerator(genName), newPos);        
+            result.set(findGenerator(genName), newPos, topProcessor);        
         }
         
         return result;

@@ -18,14 +18,17 @@
 package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 
 public class RecognizerResult {
     private AbstractGenerator generator = null;
     private int newPos = -1;
+    private FormatProcessor topProcessor=null;
     
-    public void set(AbstractGenerator generator, int newPos) {
+    public void set(AbstractGenerator generator, int newPos, FormatProcessor topProcessor) {
         this.generator = generator;
         this.newPos = newPos;
+        this.topProcessor=topProcessor;
     }
     
     public AbstractGenerator getGenerator() {
@@ -38,4 +41,5 @@ public class RecognizerResult {
         
         return newPos;
     }
+    public FormatProcessor getTopProcessor() {return topProcessor;}
 }

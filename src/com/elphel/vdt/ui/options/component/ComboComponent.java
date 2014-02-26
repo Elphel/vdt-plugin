@@ -84,7 +84,7 @@ public class ComboComponent extends GeneralComponent {
     
     public void setSelection(String value) {
         ParamTypeEnum type = (ParamTypeEnum)param.getType();
-        int pos = type.getValueIndex(param.getValue().get(0));
+        int pos = type.getValueIndex(param.getValue(null).get(0)); // null for topFormatProcessor
 
         if(pos < 0)
             pos = 0;
@@ -96,7 +96,7 @@ public class ComboComponent extends GeneralComponent {
         String item = comboField.getText();
         
         if (item.length() == 0)
-            item = param.getDefaultValue().get(0);
+            item = param.getDefaultValue(null).get(0); // null for topFormatProcessor
 
         ParamTypeEnum type = (ParamTypeEnum)param.getType();
         int pos = type.getLabelIndex(item);

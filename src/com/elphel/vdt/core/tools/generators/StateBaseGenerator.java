@@ -22,11 +22,16 @@ import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 
 /**
- * Generates name of teh sate file without extension
+ * Generates name of the sate file without extension
  *
  */
 public class StateBaseGenerator extends AbstractGenerator {
     public static final String NAME = VDT.GENERATOR_ID_STATE_FILE;
+    public StateBaseGenerator()
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
+
     public String getName() {
         return NAME;
     }

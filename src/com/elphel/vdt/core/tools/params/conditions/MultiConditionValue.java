@@ -19,6 +19,8 @@ package com.elphel.vdt.core.tools.params.conditions;
 
 import java.util.*;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
+
 public class MultiConditionValue implements AbstractConditonValue {
     private List<ConditionValue> conditionValues;
     private String defaultString;
@@ -33,9 +35,9 @@ public class MultiConditionValue implements AbstractConditonValue {
         this.defaultString = defaultString;
     }
     
-    public String getValue() {
+    public String getValue(FormatProcessor topProcessor) {
         for(Iterator<ConditionValue> i = conditionValues.iterator(); i.hasNext();) {
-            String value = ((ConditionValue)i.next()).getValue();
+            String value = ((ConditionValue)i.next()).getValue(topProcessor);
             
             if(value != null)
                 return value;

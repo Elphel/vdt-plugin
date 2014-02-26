@@ -19,12 +19,15 @@ package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.Utils;
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.ToolException;
 
 
 public abstract class ParamRecognizer implements Recognizer {
-    public RecognizerResult recognize(String template, int startPos) throws ToolException {
+	//, FormatProcessor topProcessor - not yet used?
+	protected FormatProcessor topProcessor=null;
+    public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor) throws ToolException {
         RecognizerResult result = new RecognizerResult();
                 
         int newPos = Utils.findBoundary(template, startPos);
@@ -33,7 +36,8 @@ public abstract class ParamRecognizer implements Recognizer {
         Parameter param = findParam(paramID);
 
         if(param != null)
-            result.set(getGenerator(param), newPos);        
+            result.set(getGenerator(param), newPos,topProcessor);
+        this.topProcessor=topProcessor;
 
         return result;
     }

@@ -59,7 +59,7 @@ public class ParamBasedListOption extends ParamBasedOption {
     }
 
     public List<String> getValueList() {
-        return param.getValue();
+        return param.getValue(null); // null for topFormatProcessor
     }
     
     public List<String> doLoadList() {
@@ -83,7 +83,7 @@ public class ParamBasedListOption extends ParamBasedOption {
     }
     
     public List<String> doLoadDefaultList() {
-        List<String> list = param.getDefaultValue();
+        List<String> list = param.getDefaultValue(null); // null for topFormatProcessor
         doClear();
         return list;
     }
@@ -109,7 +109,7 @@ public class ParamBasedListOption extends ParamBasedOption {
             super.doClear();
             return true;
         } else
-            return super.doStore(OptionsUtils.convertListToString(param.getValue()));
+            return super.doStore(OptionsUtils.convertListToString(param.getValue(null))); // null for topFormatProcessor
     }
 
 } // class ParamBasedOption

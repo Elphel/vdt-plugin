@@ -19,6 +19,7 @@ package com.elphel.vdt.core.tools.generators;
 
 import java.util.*;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Parameter;
 
 public class ValueGenerator extends AbstractGenerator {
@@ -27,9 +28,10 @@ public class ValueGenerator extends AbstractGenerator {
     public ValueGenerator(Parameter param, 
                           String prefix, 
                           String suffix, 
-                          String separator) 
+                          String separator,
+                          FormatProcessor topProcessor) 
     {
-        super(prefix, suffix, separator);
+        super(prefix, suffix, separator, topProcessor);
          
         this.param = param;
     }
@@ -41,14 +43,22 @@ public class ValueGenerator extends AbstractGenerator {
     }
      
     protected String[] getStringValues() {
-        List<String> values = param.getValue();
+        List<String> values = param.getValue(topProcessor);
         
         return values.toArray(new String[values.size()]);
     }
 
     public String[] generate() {
-        if (!param.getType().isList()) 
-            return new String[]{prefix + param.getValue().get(0) + suffix};
+        if (!param.getType().isList()) {
+        	List<String> rslt=param.getValue(topProcessor);
+        	if (rslt.isEmpty()){
+        		System.out.println("BUG in ValueGenerator.java#generate: param.getValue() isEmpty for "+param.getID());
+        		return new String[]{prefix + "" + suffix};
+        	} else {
+        		return new String[]{prefix + rslt.get(0) + suffix};
+        	}
+//            return new String[]{prefix + param.getValue(topProcessor).get(0) + suffix};
+        }
         else
             return super.generate();
     }

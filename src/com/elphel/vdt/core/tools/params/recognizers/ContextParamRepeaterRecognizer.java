@@ -20,6 +20,7 @@ package com.elphel.vdt.core.tools.params.recognizers;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.generators.ValueGenerator;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Parameter;
 
 
@@ -33,12 +34,13 @@ public class ContextParamRepeaterRecognizer extends RepeaterRecognizer {
     protected AbstractGenerator findGenerator(String paramID, 
                                               String repPrefix, 
                                               String repSuffix,
-                                              String separator) 
+                                              String separator,
+                                              FormatProcessor topProcessor) 
     {
         Parameter param = context.findParam(paramID);
         
         if(param != null)
-            return new ValueGenerator(param, repPrefix, repSuffix, separator);
+            return new ValueGenerator(param, repPrefix, repSuffix, separator,topProcessor);
             
         return null;
     }

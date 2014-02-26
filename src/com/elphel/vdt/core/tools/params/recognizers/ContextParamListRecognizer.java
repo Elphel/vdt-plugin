@@ -17,6 +17,7 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.params.recognizers;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.ToolException;
 import com.elphel.vdt.core.tools.contexts.Context;
@@ -27,8 +28,9 @@ import com.elphel.vdt.core.tools.generators.ValueGenerator;
 public class ContextParamListRecognizer extends ParamRecognizer {
     private Context context;
     
-    public ContextParamListRecognizer(Context context) {
+    public ContextParamListRecognizer(Context context,FormatProcessor topProcessor) {
         this.context = context;
+        this.topProcessor=topProcessor;
     }
     
     protected Parameter findParam(String paramID) {
@@ -36,6 +38,6 @@ public class ContextParamListRecognizer extends ParamRecognizer {
     }
 
     protected AbstractGenerator getGenerator(Parameter param) throws ToolException {
-        return new ValueGenerator(param, "", "", null); // will return list value of the parameter
+        return new ValueGenerator(param, "", "", null, topProcessor); // will return list value of the parameter
     }
 }

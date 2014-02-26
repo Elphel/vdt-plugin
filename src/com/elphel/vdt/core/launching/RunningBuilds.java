@@ -186,17 +186,19 @@ public class RunningBuilds {
 	}
 
 	public void removeConfiguration(String consoleName){
-		System.out.println("VDTRunnerConfiguration#removeConfiguration("+consoleName+")");
 		unfinishedBuilds.remove(consoleName);
-		System.out.println("Running consoles:");
-		listConfigurations();
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+			System.out.println("VDTRunnerConfiguration#removeConfiguration("+consoleName+"), running consoles:");
+			listConfigurations();
+		}
 	}
 
 	public void saveUnfinished(String consoleName, VDTRunnerConfiguration configuration ){
-		System.out.println("VDTRunnerConfiguration#saveUnfinished("+consoleName+", configuration)");
 		unfinishedBuilds.put(consoleName, configuration);
-		System.out.println("Running consoles:");
-		listConfigurations();
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+			System.out.println("VDTRunnerConfiguration#saveUnfinished("+consoleName+", configuration), running consoles:");
+			listConfigurations();
+		}
 	}
 	
 	public void listConfigurations(){

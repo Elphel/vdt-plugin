@@ -30,9 +30,13 @@ public class OSNameGenerator extends AbstractGenerator {
     public String getName() {
         return NAME;
     }
-    
+    public OSNameGenerator()
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
+
     protected String[] getStringValues() {
-        String osName = System.getProperty("os.name");
+    	String osName = System.getProperty("os.name");
 
         if(osName.indexOf(OS_WINDOWS) >= 0) {
             return new String[] { OS_WINDOWS };

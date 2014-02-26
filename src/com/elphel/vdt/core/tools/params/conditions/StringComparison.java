@@ -31,7 +31,9 @@ import com.elphel.vdt.ui.MessageUI;
 public class StringComparison extends Comparison {
     private Context context;
     private String left, right;
+    private FormatProcessor topProcessor;
     
+    // constructor should not reference topProcessor (it is only used at startup)
     public StringComparison(COMPARE_OP op, String left, String right) {
         this(op, null, left, right);
     }
@@ -59,16 +61,17 @@ public class StringComparison extends Comparison {
                right.equals(otherComparison.right);
     }
     
-    public boolean isTrue() {
+    public boolean isTrue(FormatProcessor topProcessor) {
         String actualLeft = left;
         String actualRight = right;
 
         if(context != null) {
+            if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
             FormatProcessor processor = 
                 new FormatProcessor(new Recognizer[] {
-                    new ContextParamRecognizer(context),
+                    new ContextParamRecognizer(context,topProcessor),
                     new SimpleGeneratorRecognizer()
-                });
+                },topProcessor);
                     
             try {
                 actualLeft = processor.process(left).get(0);            

@@ -62,7 +62,7 @@ public abstract class GeneralComponent extends Component {
             value = null;
         } else if (isDefault) {
             option.doClear();
-            value = param.getDefaultValue().get(0);
+            value = param.getDefaultValue(null).get(0); // null for topFormatProcessor
         } else {   
             value = getSelection();
             option.doStore(value);
@@ -84,7 +84,7 @@ public abstract class GeneralComponent extends Component {
         super.setDefault(defaulted);
         if (defaulted) {
             param.setToDefault();
-            setSelection(param.getDefaultValue().get(0));
+            setSelection(param.getDefaultValue(null).get(0)); // null for topFormatProcessor
         }
 //        switchState(defaulted);
         addListeners();

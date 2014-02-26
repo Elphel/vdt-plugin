@@ -18,6 +18,7 @@
 package com.elphel.vdt.core.tools.generators;
 
 import com.elphel.vdt.core.Utils;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.ui.MessageUI;
 
@@ -34,26 +35,29 @@ public abstract class AbstractGenerator {
     private final boolean forcedMultiline;
     private boolean menuMode=false; // managing menu items, not running tool. Ignore Generator errors
     protected Tool tool0; // "tool" was already used in ToolParamRecognizer / Andrey
+    protected FormatProcessor topProcessor; // to protect from cycles in recursion, replacing static in FormatProcessor / Andrey
 
-    public AbstractGenerator() {
-        this(false);
+    public AbstractGenerator(FormatProcessor processor) {
+        this(false, processor);
     }
     
     public AbstractGenerator(String prefix, 
                              String suffix, 
-                             String separator) 
+                             String separator,
+                             FormatProcessor processor) 
     {
-        this(prefix, suffix, separator, false);
+        this(prefix, suffix, separator, false,processor);
     }
     
-    protected AbstractGenerator(boolean forcedMultiline) {
-        this("", "", "", forcedMultiline);
+    protected AbstractGenerator(boolean forcedMultiline, FormatProcessor processor) {
+        this("", "", "", forcedMultiline, processor);
     }
 
     protected AbstractGenerator(String prefix, 
                                 String suffix, 
                                 String sep,
-                                boolean forcedMultiline) 
+                                boolean forcedMultiline,
+                                FormatProcessor processor) 
     {
         this.prefix = prefix;
         this.suffix = suffix;
@@ -63,6 +67,7 @@ public abstract class AbstractGenerator {
         	separator = separator.replace("\\n", "\n");
         	separator = separator.replace("\\t", "\t");
         }
+        topProcessor=processor;
     }
     public void setMenuMode(boolean menuMode){
     	this.menuMode=menuMode;
@@ -73,6 +78,7 @@ public abstract class AbstractGenerator {
     public void setTool(Tool tool){
     	this.tool0=tool;
     }
+    protected FormatProcessor getTopProcessor(){return topProcessor;}
 
     
     public abstract String getName();

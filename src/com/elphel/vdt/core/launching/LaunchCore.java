@@ -129,9 +129,9 @@ public class LaunchCore {
             String valueAttrName = LaunchCore.getValueAttributeName(param);
 
             if(param.getType().isList())
-                workingCopy.setAttribute(valueAttrName, param.getValue());
+                workingCopy.setAttribute(valueAttrName, param.getValue(null)); // null for topFormatProcessor
             else
-                workingCopy.setAttribute(valueAttrName, param.getValue().get(0));
+                workingCopy.setAttribute(valueAttrName, param.getValue(null).get(0)); // null for topFormatProcessor
         }
 
         setToolToLaunch(workingCopy, tool);
@@ -227,6 +227,8 @@ public class LaunchCore {
     		IProject project,
     		String resource,
     		String logBuildStamp) throws CoreException {
+//    	System.out.println("1.DebugUITools.launch() tool="+tool+" project="+project+" resource="+resource+" logBuildStamp="+logBuildStamp);
+//    	System.out.println("2.DebugUITools.launch() tool="+tool.getName()+" project="+project.getName()+" resource="+resource.toString()+" logBuildStamp="+logBuildStamp); //Unhandled event loop exception
         if (!saveAllEditors(true))  return; // Andrey: added it here
 
         try {
@@ -236,13 +238,18 @@ public class LaunchCore {
             		resource,
             		logBuildStamp);
             if (VDTLaunchUtil.getRunner().getRunningBuilds().isAlreadyOpen(tool.getName())){
-            	return;
+//           	System.out.println("LaunchCore:launch() tool="+tool.getName()+" was already open! Ignoring... ");
+//            	return;
             }
+//        	System.out.println("DebugUITools.launch() tool="+tool.getName()+" project="+project.getName()+" resource="+resource.toString()+" logBuildStamp="+logBuildStamp);
             DebugUITools.launch(launchConfig, ILaunchManager.RUN_MODE);
         } catch (CoreException e) {
             IStatus status = e.getStatus();
             if (status.getSeverity() != IStatus.CANCEL)
                 throw e; 
+        } finally {
+//        	System.out.println("3.DebugUITools.launch() tool="+tool.getName()+" project="+project.getName()+" resource="+resource.toString()+" logBuildStamp="+logBuildStamp);
+        	
         }
     } // launch()
 
@@ -378,7 +385,8 @@ public class LaunchCore {
      */
     protected static boolean saveAllEditors(boolean confirm) {
         if (VerilogPlugin.getActiveWorkbenchWindow() == null) {
-            return false;
+        	System.out.println("VerilogPlugin.getActiveWorkbenchWindow() == null");
+            return true; // false;
         }
         return PlatformUI.getWorkbench().saveAllEditors(confirm);
     }       

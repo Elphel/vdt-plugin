@@ -19,6 +19,8 @@ package com.elphel.vdt.core.tools.params.conditions;
 
 import java.util.List;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
+
 public abstract class ConditionValue implements AbstractConditonValue {
     protected Condition condition;
     
@@ -26,6 +28,6 @@ public abstract class ConditionValue implements AbstractConditonValue {
         this.condition = condition;
     }
     
-    public abstract String getValue();
+    public abstract String getValue(FormatProcessor topProcessor);
     public abstract List<String> getDependencies();
 }

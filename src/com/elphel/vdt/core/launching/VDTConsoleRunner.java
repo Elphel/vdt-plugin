@@ -279,7 +279,7 @@ public class VDTConsoleRunner{
     	        	for (int i=0;i<fArguments.length;i++){
     	        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.LOCAL_ECHO)) {
     	        			fOutStream.write(fArguments[i]+"\n"); // writes to console itself
-    	        			System.out.println("--->"+fArguments[i]+"\n");
+//    	        			System.out.println("--->"+fArguments[i]+"\n");
     	        		}
     	        		consoleInStreamProxy.write(fArguments[i]+"\n");
     	        	}

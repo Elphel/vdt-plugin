@@ -18,6 +18,7 @@
 package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.Utils;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 
@@ -40,7 +41,7 @@ public class ParamFormatRecognizer implements Recognizer {
         this.param = param;
     }
     
-    public RecognizerResult recognize(String template, int startPos) {
+    public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor) {
         RecognizerResult result = new RecognizerResult();
         String genName;
         int newPos = -1;
@@ -67,7 +68,7 @@ public class ParamFormatRecognizer implements Recognizer {
         assert newPos >= 0; 
                 
         if(genName.equals(FORMAT_PARAM_NAME_MARK)) {
-            result.set(new AbstractGenerator() {
+            result.set(new AbstractGenerator(topProcessor) {
                            public String getName() {
                                return "ParamName (parameter '" + param.getID() + 
                                       "' of context '" + param.getContext().getName() +
@@ -79,9 +80,9 @@ public class ParamFormatRecognizer implements Recognizer {
                            }
                        },
             
-                       newPos);
+                       newPos, topProcessor);
         } else if(genName.equals(FORMAT_PARAM_VALUE_MARK)) {
-            result.set(new AbstractGenerator() {
+            result.set(new AbstractGenerator(topProcessor) {
                            public String getName() {
                                return "ParamValue (parameter '" + param.getID() +
                                       "' of context '" + param.getContext().getName() +
@@ -89,11 +90,11 @@ public class ParamFormatRecognizer implements Recognizer {
                            }
                 
                            protected String[] getStringValues() {
-                               return new String[]{param.getExternalValueForm().get(0)};
+                               return new String[]{param.getExternalValueForm(topProcessor).get(0)};
                            }
                        },
             
-                       newPos);
+                       newPos, topProcessor);
         }
         
         return result;

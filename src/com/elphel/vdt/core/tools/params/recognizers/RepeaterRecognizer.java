@@ -18,6 +18,7 @@
 package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.Utils;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.ToolException;
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.generators.FileListGenerator;
@@ -39,7 +40,7 @@ public class RepeaterRecognizer implements Recognizer {
     private static final int FORMAT_REPEATER_SEP_LEN = FORMAT_REPEATER_SEP.length(); 
     private static final int FORMAT_REPEATER_CLOSE_LEN = FORMAT_REPEATER_CLOSE.length(); 
     
-    public RecognizerResult recognize(String template, int startPos)
+    public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor)
         throws ToolException
     {
         RecognizerResult result = new RecognizerResult();
@@ -88,8 +89,8 @@ public class RepeaterRecognizer implements Recognizer {
  //                          "', sepBody: '" + sepBody + 
  //                          "'");
         
-        result.set(findGenerator(genName, repPrefix, repSuffix, sepBody),     /* Why did it miss FileListGenerator here? */   
-                   closePos + FORMAT_REPEATER_CLOSE_LEN);
+        result.set(findGenerator(genName, repPrefix, repSuffix, sepBody, topProcessor),     /* Why did it miss FileListGenerator here? */   
+                   closePos + FORMAT_REPEATER_CLOSE_LEN, topProcessor);
         
         if(result.getGenerator() == null)
             throw new ToolException("Unknown generator '" + genName + "'");
@@ -100,7 +101,8 @@ public class RepeaterRecognizer implements Recognizer {
     protected AbstractGenerator findGenerator(String genName, 
                                               String repPrefix, 
                                               String repSuffix,
-                                              String separator) 
+                                              String separator,
+                                              FormatProcessor topProcessor) 
     {
     	System.out.println("Ever get here? RepeaterRecognizer.java:findGenerator()"); // yes, sure
     	AbstractGenerator gen=new FilteredSourceListGenerator(repPrefix, repSuffix, separator);

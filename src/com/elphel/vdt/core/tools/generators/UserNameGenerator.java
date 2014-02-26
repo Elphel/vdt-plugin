@@ -20,12 +20,17 @@ package com.elphel.vdt.core.tools.generators;
 import com.elphel.vdt.VDT;
 
 public class UserNameGenerator extends AbstractGenerator {
-    public static final String NAME = VDT.GENERATOR_ID_USERNAME;
-    public String getName() {
-        return NAME;
-    }
-    
-    protected String[] getStringValues() {
-    	return new String[] {System.getProperty("user.name")};
-    }
+	public static final String NAME = VDT.GENERATOR_ID_USERNAME;
+	public UserNameGenerator()
+	{
+		super(null); // null for topFormatProcessor - this generator can not reference other parameters
+	}
+
+	public String getName() {
+		return NAME;
+	}
+
+	protected String[] getStringValues() {
+		return new String[] {System.getProperty("user.name")};
+	}
 } //UserNameGenerator

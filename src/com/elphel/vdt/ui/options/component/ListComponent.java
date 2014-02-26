@@ -107,7 +107,7 @@ public abstract class ListComponent extends Component {
         super.setDefault(defaulted);
         if (defaulted) {
             param.setToDefault();
-            promptField.setList(param.getDefaultValue());
+            promptField.setList(param.getDefaultValue(null)); // null for topFormatProcessor
         }
 //        switchState(defaulted);
         addListeners();

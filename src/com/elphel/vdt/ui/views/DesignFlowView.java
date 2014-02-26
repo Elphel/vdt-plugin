@@ -382,6 +382,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             	} else {
             		toggleLinkedTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_LINKED);
             	}
+            	toolSequence.setToolsDirtyFlag(false); //boolean update) - recalculate dirty flags
             }
         };
         toggleLinkedTools.setToolTipText("Toggle tool dependency");

@@ -23,6 +23,7 @@ import com.elphel.vdt.core.tools.generators.FilteredSourceListGenerator;
 import com.elphel.vdt.core.tools.generators.SourceListGenerator;
 import com.elphel.vdt.core.tools.generators.TopModulesNameGenerator;
 import com.elphel.vdt.core.tools.generators.ValueGenerator;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Parameter;
 
 
@@ -36,7 +37,8 @@ public class ParamRepeaterRecognizer extends RepeaterRecognizer {
     protected AbstractGenerator findGenerator(String genName, 
                                               String repPrefix, 
                                               String repSuffix,
-                                              String separator) 
+                                              String separator,
+                                              FormatProcessor topProcessor) 
     {
     	// TODO make repetitor to accept several pattern generators with only one generating a list
     	/*
@@ -55,7 +57,7 @@ public class ParamRepeaterRecognizer extends RepeaterRecognizer {
     	}
     	*/
     	if(genName.equals(ParamFormatRecognizer.FORMAT_PARAM_VALUE_MARK))
-    		return new ValueGenerator(param, repPrefix, repSuffix, separator);
+    		return new ValueGenerator(param, repPrefix, repSuffix, separator, topProcessor);
     	/* Trying to put these here */        
         if(genName.equals(FilteredSourceListGenerator.NAME))
             return new FilteredSourceListGenerator(repPrefix, repSuffix, separator);

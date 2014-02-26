@@ -37,6 +37,11 @@ public class ProjectNameGenerator extends AbstractGenerator {
         return NAME;
     }
 
+    public ProjectNameGenerator()
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
+
     protected String[] getStringValues() {
         String[] value = null;
         IResource resource = SelectedResourceManager.getDefault().getSelectedResource();

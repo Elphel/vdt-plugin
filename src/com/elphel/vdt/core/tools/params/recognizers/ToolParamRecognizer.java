@@ -19,6 +19,7 @@ package com.elphel.vdt.core.tools.params.recognizers;
 
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.generators.StringsGenerator;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.ToolException;
@@ -27,8 +28,9 @@ import com.elphel.vdt.core.tools.params.ToolException;
 public class ToolParamRecognizer extends ParamRecognizer {
     private Tool tool;
     
-    public ToolParamRecognizer(Tool tool) {
+    public ToolParamRecognizer(Tool tool, FormatProcessor topProcessor) {
         this.tool = tool;
+        this.topProcessor=topProcessor;
     }
     
     protected Parameter findParam(String paramID) {
@@ -36,7 +38,7 @@ public class ToolParamRecognizer extends ParamRecognizer {
     }
     
     protected AbstractGenerator getGenerator(final Parameter param) throws ToolException {
-        return new StringsGenerator(param.getCommandLine()) {
+        return new StringsGenerator(param.getCommandLine(topProcessor),topProcessor) {
         	String toolName=(tool==null)?"<null>":tool.getName();
             public String getName() {
                 return "Param '" + param + 

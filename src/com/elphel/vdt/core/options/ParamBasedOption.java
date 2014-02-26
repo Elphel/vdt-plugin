@@ -49,7 +49,7 @@ public class ParamBasedOption extends Option {
     }
     
     public String getValue() {
-        return param.getValue().get(0);
+        return param.getValue(null).get(0); // null for topFormatProcessor
     }
     
     public Parameter getParam() {
@@ -73,13 +73,13 @@ public class ParamBasedOption extends Option {
     }
     
     public String doLoadDefault() {
-        String value = param.getDefaultValue(true).get(0); // Andrey: ignore faults in TopModuleName generator
+        String value = param.getDefaultValue(true, null).get(0); // Andrey: ignore faults in TopModuleName generator // null for topFormatProcessor
         doClear();
         return value;
     }
 
     public String doLoadDefault(boolean menuMode) {
-        String value = param.getDefaultValue(menuMode).get(0);
+        String value = param.getDefaultValue(menuMode,null).get(0);
         doClear();
         return value;
     }

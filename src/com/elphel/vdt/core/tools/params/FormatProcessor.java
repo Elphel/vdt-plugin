@@ -18,6 +18,7 @@
 package com.elphel.vdt.core.tools.params;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.params.recognizers.Recognizer;
@@ -28,26 +29,40 @@ public class FormatProcessor {
     private static final String CONTROL_SEQ = "%"; 
     private static final int CONTROL_SEQ_LEN = CONTROL_SEQ.length(); 
     
-    private static List<String> expandedGenerators = new ArrayList<String>();
-    private static int callCount = 0;
+//    private static List<String> expandedGenerators = new ArrayList<String>();
+    
+// TODO: Get rid of this static list used to verify cycles - does not work in multi-threaded environment    
+    
+//    private static List<String> expandedGenerators = new CopyOnWriteArrayList<String>();
+    private List<String> expandedGenerators = null;
     
     private final boolean recursive = true;
     private final boolean multiline;
     private final Recognizer[] recognizers;
     
     private String initialTemplate;
+    private FormatProcessor topProcessor=null;
+//    private static int callCount = 0;
+    private int callCount = 0; // only valid for topProcessor
     
-    public FormatProcessor(Recognizer[] recognizers, boolean multiline) {
+    public FormatProcessor(Recognizer[] recognizers, boolean multiline, FormatProcessor processor) {
         this.recognizers = recognizers;
         this.multiline = multiline;
+        this.topProcessor=processor;
+        if (topProcessor==null){
+        	topProcessor=this;
+        	expandedGenerators=new ArrayList<String>();
+        } else {
+        	expandedGenerators=topProcessor.expandedGenerators;
+        }
     }
     
-    public FormatProcessor(Recognizer[] recognizers) {
-        this(recognizers, true);
+    public FormatProcessor(Recognizer[] recognizers,FormatProcessor processor) {
+        this(recognizers, true, processor);
     }
     
     public List<String> process(String template) throws ToolException {
-        if(callCount++ == 0)
+        if(topProcessor.callCount++ == 0)
             expandedGenerators.clear();
         
         initialTemplate = template;
@@ -57,7 +72,7 @@ public class FormatProcessor {
         try {
             outputLines = processTemplate(template); // echo %SimulationTopFile %%SelectedFile ; -> null
         } finally {
-            callCount--;
+        	topProcessor.callCount--;
         }
         
         if(!multiline) {
@@ -80,7 +95,7 @@ public class FormatProcessor {
             if(template.startsWith(CONTROL_SEQ, pos)) {
                 pos += CONTROL_SEQ_LEN;
                 // got different instance of ToolParamRecognizer with tool==null
-                RecognizerResult result = recognize(template, pos); // Already skipped blank lines (and spaces in each line, added separators - no, on deifferent level
+                RecognizerResult result = recognize(template, pos, topProcessor); // Already skipped blank lines (and spaces in each line, added separators - no, on different level
                 
                 if(result != null && result.getGenerator() != null) {
                     assert result.getNewPos() > pos;
@@ -111,9 +126,9 @@ public class FormatProcessor {
         return outputLines;
     }
     
-    private RecognizerResult recognize(String template, int pos) throws ToolException {
+    private RecognizerResult recognize(String template, int pos, FormatProcessor topProcessor) throws ToolException {
         for(int i = 0; i < recognizers.length; i++) {
-            RecognizerResult result = recognizers[i].recognize(template, pos);
+            RecognizerResult result = recognizers[i].recognize(template, pos, topProcessor);
             
             assert result != null;
             
@@ -215,11 +230,19 @@ public class FormatProcessor {
                     "and try to detect the cyclic dependency by successively removing them.");
     }
 
-    private static void pushGen(String genName) {
+//    private static void pushGen(String genName) {
+    private void pushGen(String genName) {
+    	if (expandedGenerators.size()>5) System.out.println(">>PushGen("+genName+"):"+expandedGenerators.size());
         expandedGenerators.add(genName);
     }
 
-    private static void popGen() {
-        expandedGenerators.remove(expandedGenerators.size()-1);
+//    private static void popGen() {
+   private void popGen() {
+	   try {
+		   if (expandedGenerators.size()>6) System.out.println(">>PopGen():"+expandedGenerators.size());
+		   expandedGenerators.remove(expandedGenerators.size()-1); // got -1
+	   } catch (Exception e){
+		   System.out.println("Failed to expandedGenerators.remove(expandedGenerators.size()-1), e="+e); // Andrey where does this concurrency come from? SOLVED: got rid of static 
+	   }
     }
 }

@@ -144,10 +144,10 @@ public class VDTLaunchUtil {
             try {
                 if(param.getType().isList()) {
                     List<String> value = 
-                        configuration.getAttribute(valueAttrName, param.getDefaultValue());
+                        configuration.getAttribute(valueAttrName, param.getDefaultValue(null)); // null for topFormatProcessor
                     param.setCurrentValue(value);
                 } else {
-                    String value = configuration.getAttribute(valueAttrName, param.getDefaultValue().get(0));
+                    String value = configuration.getAttribute(valueAttrName, param.getDefaultValue(null).get(0));  // null for topFormatProcessor
                     param.setCurrentValue(value);
                 }
             } catch(ToolException e) {

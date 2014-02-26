@@ -20,6 +20,7 @@ package com.elphel.vdt.core.tools.params.conditions;
 import java.util.*;
 
 import com.elphel.vdt.core.tools.contexts.Context;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.ui.MessageUI;
 
 public class ConditionUtils {
@@ -33,7 +34,7 @@ public class ConditionUtils {
             Condition relevant = entry.getCondition();
             List<String> strings = entry.getStrings();
             
-            if(relevant == null || relevant.isTrue())
+            if(relevant == null || relevant.isTrue(null))
                 relevantStrings.addAll(strings);                
         }
         
@@ -68,11 +69,11 @@ public class ConditionUtils {
         return condValue;
     }
 
-    public static String resolveContextCondition(Context context, String condString) {
+    public static String resolveContextCondition(Context context, String condString, FormatProcessor topProcessor) {
         MultiConditionValue condValue = getContextCondition(context, condString);
         
         if(condValue != null) 
-            return condValue.getValue();
+            return condValue.getValue(topProcessor);
                 
         return condString;
     }

@@ -19,6 +19,8 @@ package com.elphel.vdt.core.tools.params.conditions;
 
 import java.util.*;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
+
 public class ConditionString extends ConditionValue {
     private String value;
     
@@ -28,8 +30,8 @@ public class ConditionString extends ConditionValue {
         this.value = value;
     }
     
-    public String getValue() {
-        return condition.isTrue()? value : null;
+    public String getValue(FormatProcessor topProcessor) {
+        return condition.isTrue(topProcessor)? value : null;
     }
 
     public List<String> getDependencies() {

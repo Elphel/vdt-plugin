@@ -26,7 +26,11 @@ public class CurrentFileBaseGenerator extends AbstractGenerator {
     public String getName() {
         return NAME;
     }
-    
+    public CurrentFileBaseGenerator() 
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
+
     protected String[] getStringValues() {
         String name=SelectedResourceManager.getDefault().getChosenShort(); // last segment of the file name
         if (name!=null){

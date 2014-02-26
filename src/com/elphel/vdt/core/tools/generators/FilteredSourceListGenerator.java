@@ -54,7 +54,7 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
                                String suffix, 
                                String separator) 
     {
-        super(prefix, suffix, separator);
+        super(prefix, suffix, separator, null ); // null for topFormatProcessor - this generator can not reference other parameters
     }
     
     public String getName() {

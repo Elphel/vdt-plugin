@@ -83,7 +83,7 @@ public abstract class AbstractTabComponent implements ITabComponent {
      * component.
      */ 
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-    	setAttributes(configuration, component.getParam().getDefaultValue().get(0));
+    	setAttributes(configuration, component.getParam().getDefaultValue(null).get(0)); // null for topFormatProcessor
     }
     
     /**

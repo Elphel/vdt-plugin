@@ -26,6 +26,11 @@ public class BuildStampGenerator extends AbstractGenerator {
         return NAME;
     }
     
+    public BuildStampGenerator() 
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
+
     protected String[] getStringValues() {
 //    	if (    	return new String[] {(tool0!=null)?tool0.getStateFile(): ""};
 //    	System.out.println("#### BuildStampGenerator(): tool0="+

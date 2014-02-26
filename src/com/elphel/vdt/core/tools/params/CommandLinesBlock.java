@@ -44,7 +44,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     // for commands being sent to opened remote console:
     private String prompt;       // relevant for commands sent to remote console - double prompt means "done" (extra separator on input) 
     private String stderr;       // name of the command to (command line block) to launch in a separate process/console
-                                 // and connect to stderr of the terminakl session 
+                                 // and connect to stderr of the terminal session 
     private String stdout;       // name of the command to (command line block) to launch in a separate process/console
                                  // and connect to stderr of the terminal session
     // If both are specified and pointing to the same command block - two instances/consoles will be launched.
@@ -229,7 +229,7 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         return !destination.equals("");
     }
     
-    public void update(Updateable from) throws ConfigException {
+    public void update(Updateable from, FormatProcessor topProcessor) throws ConfigException {
         CommandLinesBlock block = (CommandLinesBlock)from;
         
         if(name == null) 
@@ -241,6 +241,11 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         if(separator == null)
             separator = block.separator;
 
-        super.update(from);
+        super.update(from, topProcessor);
     }
+    public void update(Updateable from) throws ConfigException {
+    	update(from,null);
+    	System.out.println("CommandLinesBlock#update(from,null)");
+    }
+
 }

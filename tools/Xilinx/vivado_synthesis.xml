@@ -84,6 +84,9 @@
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
 			default="" label="Constraints files" tooltip="Select constraint files to load to Vivado" readonly="false"
 			visible="true" />
+		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
+			default="%" label="Constraints files" tooltip="Select constraint files to load to Vivado" readonly="false"
+			visible="true" />
 			
 			
 		<parameter id="SkipSnapshotSynth" label="Skip snapshot" tooltip="Do not create snapshot after synthesis"
@@ -206,9 +209,19 @@
                     visible="false" type="Boolean" format="None"/>
         <parameter id="condConstraintsFiles" default="?%%ChosenActionIndex=0 : %ConstraintsFiles, "
                     visible="false" type="Filelist" format="None"/>			
+<!-- 
+        <parameter	id="blabla1"   label="blabla1" tooltip= "blabla1"
+        			default="%blabla2"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="blabla2"   label="blabla2" tooltip= "blabla2"
+        			default="%blabla1"
+        			visible="true"  type="String" format="CopyValue"/>
+ -->
 			
 		<input>
 			<group name="General">
+		<!--"blabla1"
+			"blabla2" -->
 				"ConstraintsFiles"
 				"SkipSnapshotSynth"
  				"SnapshotSynth" <!--  same as in project -->

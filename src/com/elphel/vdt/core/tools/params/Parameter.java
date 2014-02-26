@@ -229,18 +229,18 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     public boolean isVisible() {
-        return resolveBooleanFieldValue(visible, "visible");
+        return resolveBooleanFieldValue(visible, "visible", null); // the value will not be used in other parameters, null is OK
     }
 
     public boolean isReadOnly() {
-        return resolveBooleanFieldValue(readonly, "readonly");
+        return resolveBooleanFieldValue(readonly, "readonly", null); // the value will not be used in other parameters, null is OK
     }
     
     // checks whether the passed id belongs to this param's id 
     // it is only proper way to resolve parameter relevantness!  
     public boolean isSame(String paramID) {
         if(paramID.equals(id)) {
-            if(relevant == null || relevant.isTrue())
+            if(relevant == null || relevant.isTrue(null))
                 return true;
         }
             
@@ -335,24 +335,24 @@ public class Parameter implements Cloneable, Updateable {
         
         return currentValue;
     }
-    public List<String> getDefaultValue() {
-    	return getDefaultValue(false);
+    public List<String> getDefaultValue(FormatProcessor topProcessor) {
+    	return getDefaultValue(false,topProcessor);
     }
     
-    public List<String> getDefaultValue(boolean menuMode) {
-        String resolvedDefaultValue = ConditionUtils.resolveContextCondition(context, defaultValue);
+    public List<String> getDefaultValue(boolean menuMode,FormatProcessor topProcessor) {
+        String resolvedDefaultValue = ConditionUtils.resolveContextCondition(context, defaultValue, topProcessor);
         String errmsg = "Parameter '" + id + 
                         "' of context '" + context.getName() + 
                         "' - error processing default value: ";
 
         List<String> processedDefaultValue = null;        
-        
+        if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             //new RepeaterRecognizer(),
                                                             new SimpleGeneratorRecognizer(menuMode),
-                                                            new ContextParamListRecognizer(context) // Andrey: returning list as the source parameter 
+                                                            new ContextParamListRecognizer(context, topProcessor) // Andrey: returning list as the source parameter 
 //                                                            new ContextParamRecognizer(context)
-                                                        });
+                                                        }, topProcessor);
 
         try {
             processedDefaultValue = processor.process(resolvedDefaultValue);
@@ -482,19 +482,19 @@ public class Parameter implements Cloneable, Updateable {
     
     // returns current value if it is set 
     // otherwise returns default value 
-    public List<String> getValue() {
+    public List<String> getValue(FormatProcessor topProcessor) {
         if(!currentValue.isEmpty())
             return currentValue;
         
-        return getDefaultValue();
+        return getDefaultValue(topProcessor);
     }
 
     // returns external form of the current value unless it equals null; 
     // otherwise returns external form of the default value 
-    public List<String> getExternalValueForm() {
+    public List<String> getExternalValueForm(FormatProcessor topProcessor) {
         List<String> externalFormValue = new ArrayList<String>();
         
-        for(Iterator<String> i = getValue().iterator(); i.hasNext();) {
+        for(Iterator<String> i = getValue(topProcessor).iterator(); i.hasNext();) {
             String elem = type.toExternalForm((String)i.next());
             
             if(elem == null)
@@ -514,9 +514,9 @@ public class Parameter implements Cloneable, Updateable {
         currentValue.clear();
     }
     
-    public String[] getCommandLine() throws ToolException {
-        String omit = getOmitValue();
-        List<String> value = getValue();
+    public String[] getCommandLine(FormatProcessor topProcessor) throws ToolException {
+        String omit = getOmitValue(topProcessor);
+        List<String> value = getValue(topProcessor);
                 
         if(value.size() == 1) {
             if(omit != null && type.equal(omit, value.get(0)))
@@ -524,13 +524,13 @@ public class Parameter implements Cloneable, Updateable {
         }
         
         String format = syntax.getFormat();
-        
+        if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             new ParamFormatRecognizer(this),
                                                             new ParamRepeaterRecognizer(this),
                                                             new SimpleGeneratorRecognizer(),
                                                             new RepeaterRecognizer(),
-                                                        });
+                                                        },topProcessor);
         
         List<String> commandLine = processor.process(format);
         
@@ -628,14 +628,14 @@ public class Parameter implements Cloneable, Updateable {
     // private stuff below
     //
     
-    private String getOmitValue() {        
+    private String getOmitValue(FormatProcessor topProcessor) {
+        if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
-                                                            new ContextParamRecognizer(context),
+                                                            new ContextParamRecognizer(context, topProcessor),
                                                             new SimpleGeneratorRecognizer()
-                                                        },
-                                                        false);
+                                                        }, false,topProcessor);
 
-        String resolvedOmitValue = ConditionUtils.resolveContextCondition(context, omitValue);
+        String resolvedOmitValue = ConditionUtils.resolveContextCondition(context, omitValue, topProcessor);
         String result = null;
         
         if(resolvedOmitValue != null) {
@@ -649,8 +649,8 @@ public class Parameter implements Cloneable, Updateable {
         return result;
     }
     
-    private boolean resolveBooleanFieldValue(String field, String fieldName) {
-        String fieldValue = ConditionUtils.resolveContextCondition(context, field);
+    private boolean resolveBooleanFieldValue(String field, String fieldName, FormatProcessor topProcessor) {
+        String fieldValue = ConditionUtils.resolveContextCondition(context, field, topProcessor);
         
         if(!field.equals(fieldValue)) {
             try {

@@ -19,6 +19,8 @@ package com.elphel.vdt.core.tools.params.conditions;
 
 import java.util.*;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
+
 public class Condition {
     private Condition left, right;
     private BOOL_OP op;
@@ -60,8 +62,8 @@ public class Condition {
                right.equals(otherCondition.right);
     }
     
-    public boolean isTrue() {
-        return op.isTrue(left.isTrue(), right.isTrue());
+    public boolean isTrue(FormatProcessor topProcessor) {
+        return op.isTrue(left.isTrue(topProcessor), right.isTrue(topProcessor));
     }
     
     public List<String> getDependencies() {

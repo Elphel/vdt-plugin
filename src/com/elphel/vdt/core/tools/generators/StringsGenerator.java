@@ -17,11 +17,13 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.generators;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
+
 public abstract class StringsGenerator extends AbstractGenerator {
     private final String[] paramStrings;
     
-    public StringsGenerator(String[] paramStrings) {
-        super(true);
+    public StringsGenerator(String[] paramStrings, FormatProcessor topProcessor) {
+        super(true, topProcessor);
         
         this.paramStrings = paramStrings;
     }

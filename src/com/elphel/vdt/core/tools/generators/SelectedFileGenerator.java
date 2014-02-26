@@ -27,6 +27,10 @@ import com.elphel.vdt.ui.variables.SelectedResourceManager;
 public class SelectedFileGenerator extends AbstractGenerator {
     private static final String NAME = VDT.GENERATOR_ID_SELECTED_FILE;
 //    private boolean menuMode=false; // managing menu items, not running tool
+    public SelectedFileGenerator()
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
 
     public String getName() {
         return NAME;

@@ -22,6 +22,7 @@ import java.util.List;
 
 import com.elphel.vdt.core.tools.Updateable;
 import com.elphel.vdt.core.tools.config.ConfigException;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 
 public abstract class UpdateableStringsContainer implements Updateable {
     private final static String FIRST_MARK = "first";
@@ -42,7 +43,7 @@ public abstract class UpdateableStringsContainer implements Updateable {
     public abstract boolean matches(Updateable other);
     public abstract Object clone();
 
-    public void update(Updateable from) throws ConfigException {
+    public void update(Updateable from, FormatProcessor topProcessor) throws ConfigException {
         UpdateableStringsContainer container = (UpdateableStringsContainer)from;
         
         ConditionalStringsList oldStrings = 
@@ -53,11 +54,11 @@ public abstract class UpdateableStringsContainer implements Updateable {
 
         strings = oldStrings; 
         
-        insertSpecifiedStrings();
+        insertSpecifiedStrings(topProcessor);
         deleteSpecifiedStrings();        
     }
     
-    private void insertSpecifiedStrings() throws ConfigException {
+    private void insertSpecifiedStrings(FormatProcessor topProcessor) throws ConfigException {
         if(insertStrings == null)
             return;
         
@@ -83,7 +84,7 @@ public abstract class UpdateableStringsContainer implements Updateable {
                                                             
                     Condition cond = entry.getCondition();
                     
-                    if(cond != null && !cond.isTrue())
+                    if(cond != null && !cond.isTrue(topProcessor))
                         continue;
 
                     // okay, entry found, and the condition is met

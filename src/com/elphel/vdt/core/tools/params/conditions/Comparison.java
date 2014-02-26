@@ -19,6 +19,8 @@ package com.elphel.vdt.core.tools.params.conditions;
 
 import java.util.List;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
+
 public abstract class Comparison extends Condition {
     protected COMPARE_OP op;
     
@@ -41,6 +43,6 @@ public abstract class Comparison extends Condition {
     }
 
     public abstract boolean equals(Object other);
-    public abstract boolean isTrue();
+    public abstract boolean isTrue(FormatProcessor topProcessor);
     public abstract List<String> getDependencies();
 }

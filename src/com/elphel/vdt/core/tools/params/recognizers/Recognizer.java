@@ -17,9 +17,10 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.params.recognizers;
 
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.ToolException;
 
 
 public interface Recognizer {
-    public RecognizerResult recognize(String template, int startPos) throws ToolException;
+    public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor) throws ToolException;
 }

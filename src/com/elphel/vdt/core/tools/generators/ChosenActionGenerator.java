@@ -25,7 +25,11 @@ public class ChosenActionGenerator extends AbstractGenerator {
     public String getName() {
         return NAME;
     }
-    
+    public ChosenActionGenerator() 
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
+
     protected String[] getStringValues() {
         int choice=SelectedResourceManager.getDefault().getChosenAction();
         return new String[] { ""+choice };

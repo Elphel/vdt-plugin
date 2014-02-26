@@ -118,7 +118,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private String resultFile;               // used to overwrite name of the default result file that normally
                                              // is calculated from result and timestamp;
     
-    private String openState=null;           // (only for open sessions) - last successful result ran in this session
+    private String [] openState=null;        // (only for open sessions) - last successful [name,result] ran in this session
     private Tool openTool=null;              // (only for open sessions) - tool last successful result ran in this session (null if none/failed)
     private Tool restoreMaster;              // Tool, for which this one is restore (or null if for none). Same restore for
     										 // multiple masters is not allowed
@@ -294,7 +294,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     public List<String> getDependStateNames()    { return dependStateNames; }
     public List<String> getDependFileNames()     { return dependFileNames; }
-    public boolean isDirty()               { return dirty || !hashMatch(); }
+    public boolean isDirty()               { return dirty; }
     public boolean isDirtyOrChanged()      {
     	return isDirty() || !hashMatch();
     }
@@ -313,8 +313,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
 
     public TOOL_STATE getState()           { return state; }
     public boolean isPinned()              { return pinned; }
-    public String getOpenState()           { return openState; }
-    public void setOpenState(String stateName) { openState=stateName;}
+    public String getOpenStateName()           { return (openState!=null)?openState[0]:null; }
+    public String getOpenStateFile()           { return (openState!=null)?openState[1]:null; }
+    public void setOpenState(String stateName, String stateFile) {
+    	if ((stateName!=null) && (stateFile!=null)) {
+    		String [] pair={stateName, stateFile};
+    		openState=pair;
+    	}
+    }
 
     public Tool getOpenTool()              { return openTool; }
     public void setOpenTool(Tool openTool) { this.openTool=openTool;}
@@ -323,7 +329,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public void setDirty(boolean dirty) {
     	this.dirty=dirty;
 //    	toolFinished();
-    	System.out.println("SetDirty("+dirty+")");
+    	System.out.println("SetDirty("+dirty+") tool:"+getName());
     }
     public void setPinned(boolean pinned) {
     	this.pinned=pinned;
@@ -333,10 +339,28 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	}
     }
     
+    public void setModeWait(
+    		TOOL_MODE mode,
+    		int choice,
+    		String fullPath,
+    		String ignoreFilter) {
+    	setModeWait(new ToolWaitingArguments(
+    			mode,
+        		choice,
+        		fullPath,
+        		ignoreFilter));
+    }
+
     public void setModeWait(ToolWaitingArguments toolWaitingArguments) {
     	this.toolWaitingArguments = toolWaitingArguments;
     	setMode(TOOL_MODE.WAIT);
     }
+
+    
+    public ToolWaitingArguments getToolWaitingArguments(){
+    	return toolWaitingArguments;
+    }
+    
     
     public void setMode(TOOL_MODE mode) {
     	if (mode !=TOOL_MODE.WAIT) this.toolWaitingArguments = null;
@@ -352,7 +376,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		setTimeStamp(); // copy current time to tool timestamp
     		restoreTimeStamp=null; 
         	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-        		System.out.println(":::: Tool "+name+": setTimeStamp="+timeStamp);
+        		System.out.println("::::: Tool "+name+": setTimeStamp="+timeStamp);
+        		if (name.equals("VivadoTimingReportSynthesis")){
+        			System.out.println("Tool.setMode()");
+        		}
         	}
     	} else if (mode == TOOL_MODE.RESTORE){
     		if (restoreMaster!=null){
@@ -381,7 +408,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	this.state=state;
 //    	toolFinished();
     	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-    		System.out.println("SetState("+state+")");
+    		System.out.println("SetState("+state+") for tool "+getName());
     	}
     }
 
@@ -512,7 +539,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public boolean isDisabled(){
     	if (abstractTool) return true; // abstract are always disabled
     	if (disabled==null) return false;
-    	List<String> values=disabled.getValue();
+    	List<String> values=disabled.getValue(null); // null for topFormatProcessor
     	if ((values==null) || (values.size()==0)) return false;
     	return (!values.get(0).equals("true"));
     }
@@ -582,7 +609,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if ((dependFiles == null) || (dependFiles.size()==0)) return null;
     	List<String> list = new ArrayList<String>();
     	for (Iterator<Parameter> iter= dependFiles.iterator(); iter.hasNext();) {
-    		List<String> vList=iter.next().getValue();
+    		List<String> vList=iter.next().getValue(null); // null for topFormatProcessor
     		if (vList!=null) {
     			for (String item:vList){
     				if ((item!=null) && (item.trim().length()>0)){
@@ -599,7 +626,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if ((dependStates == null) || (dependStates.size()==0)) return null;
     	List<String> list = new ArrayList<String>();
     	for (Iterator<Parameter> iter= dependStates.iterator(); iter.hasNext();) {
-    		List<String> vList=iter.next().getValue();
+    		List<String> vList=iter.next().getValue(null); // null for topFormatProcessor
 			for (String item:vList){
 				if ((item!=null) && (item.trim().length()>0)){
 					list.add(item.trim());
@@ -647,7 +674,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
                                       "' is absent");
         } else if(!(autoSave.getType() instanceof ParamTypeBool)) {
             throw new ConfigException("Parameter autoSave='" + autoSaveString +
-            		"' defined in "+result.getSourceXML()+" used for tool '" + name + 
+            		"' defined in "+autoSave.getSourceXML()+" used for tool '" + name + 
                                       "' must be of type '" + ParamTypeBool.NAME + 
                                       "'");
         }
@@ -655,14 +682,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
 
     public boolean getAutoSave(){
     	if (autoSave==null) return false;
-    	List<String>result=autoSave.getValue();
+    	List<String>result=autoSave.getValue(null); // null for topFormatProcessor
     	if (!result.isEmpty()) return result.get(0).equals("true");
     	return false;
     }
     
     public List<String> getResultNames(){
     	if (result==null) return null;
-    	return result.getValue();
+    	return result.getValue(null); // null for topFormatProcessor
     }
     
     public void initRestore() throws ConfigException{
@@ -716,9 +743,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	return saveTool;
     }
     public Tool getSaveMaster(){
-		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-			System.out.println("getSaveMaster("+name+")-> "+((saveMaster==null)?"null":"NOT null"));
-		}
+//		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+//			System.out.println("getSaveMaster("+name+")-> "+((saveMaster==null)?"null":"NOT null"));
+//		}
     	return saveMaster;
     }
     
@@ -775,7 +802,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public String getLogDir() {return getLogDir(true); } 
     public String getLogDir(boolean first) {
     	if (logDir!=null) { // has logDir specified, but may be empty
-        	List<String> value=logDir.getValue();
+        	List<String> value=logDir.getValue(null); // null for topFormatProcessor
         	if (value.size()==0) return null; // overwrites with empty
         	return value.get(0);
     	}
@@ -788,7 +815,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public String getStateDir() {return getStateDir(true); } 
     public String getStateDir(boolean first) {
     	if (stateDir!=null) { // has stateDir specified, but may be empty
-        	List<String> value=stateDir.getValue();
+        	List<String> value=stateDir.getValue(null); // null for topFormatProcessor
         	if (value.size()==0) return null; // overwrites with empty
         	return value.get(0);
     	}
@@ -1021,12 +1048,12 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public String[] getExtensions() {
         if(extensions == null)
             return null;
-        
+    	FormatProcessor topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(
                                             new Recognizer[] {
-                                            		new ContextParamRecognizer(this),
+                                            		new ContextParamRecognizer(this,topProcessor),
 //                                                    new SimpleGeneratorRecognizer() // Andrey: Trying
-                                            		});
+                                            		},topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
 
         String[] actualExtensions = new String[extensions.size()];
         
@@ -1054,13 +1081,13 @@ public class Tool extends Context implements Cloneable, Inheritable {
 // Can be two different processors for labels and resources 
         
 //SimpleGeneratorRecognizer(true) may be not needed, as current file is already set here
-        
+    	FormatProcessor topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(
                                             new Recognizer[] {
-                                            		new ContextParamRecognizer(this),
+                                            		new ContextParamRecognizer(this,topProcessor),
                                                     new SimpleGeneratorRecognizer(true) // in menuMode
 //                                                    new SimpleGeneratorRecognizer(false) // in menuMode
-                                            		});
+                                            		},topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
 
         RunFor[] actualActions = new RunFor[runfor.size()];
         
@@ -1095,12 +1122,13 @@ public class Tool extends Context implements Cloneable, Inheritable {
     // Should be called after getMenuActions to have updateContextOptions() already ran
     public String getIgnoreFilter(){ // calculate and get
     	if (ignoreFilter==null) return null;
+    	FormatProcessor topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(
                 new Recognizer[] {
-                		new ContextParamRecognizer(this),
+                		new ContextParamRecognizer(this,topProcessor),
                         new SimpleGeneratorRecognizer(true) // in menuMode
 //                        new SimpleGeneratorRecognizer(false) // in menuMode
-                		});
+                		},topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
         List<String> results=null;
         try {
 			results=processor.process(ignoreFilter);
@@ -1223,7 +1251,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
       public BuildParamsItem[] buildParams(boolean dryRun) throws ToolException {
     	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-    		System.out.println("tool "+getName()+" state="+getState()+" dirty="+isDirty()+" pinned="+isPinned()+" dryRun="+dryRun);
+    		System.out.println("buildParams("+dryRun+"): tool "+getName()+" state="+getState()+" dirty="+isDirty()+" hashMatch()="+hashMatch()+" pinned="+isPinned());
     	}
     	
         if(parentPackage != null)
@@ -1241,17 +1269,18 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     
     
-    protected List<String> buildCommandString(String paramStringTemplate)
+    protected List<String> buildCommandString(String paramStringTemplate, FormatProcessor topProcessor)
         throws ToolException
     {
+    	if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
-                                                            new ToolParamRecognizer(this),
+                                                            new ToolParamRecognizer(this,topProcessor),
 //                                                            new SimpleGeneratorRecognizer(),
                                                             new SimpleGeneratorRecognizer(this),
                                                             new RepeaterRecognizer(),
-                                                            new ContextParamRecognizer(this),
+                                                            new ContextParamRecognizer(this,topProcessor),
                                                             new ContextParamRepeaterRecognizer(this)
-                                                        });
+                                                        }, topProcessor); // topFormatProcessor=null: this value will not be used as other parameter value
                             
         return processor.process(paramStringTemplate);
     }
@@ -1397,7 +1426,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     //
     
     private String getResolvedExeName() {
-        return ConditionUtils.resolveContextCondition(this, exeName);
+        return ConditionUtils.resolveContextCondition(this, exeName, null); // null for topFormatProcessor 
     }
 /*    
     private String getResolvedShellName() {

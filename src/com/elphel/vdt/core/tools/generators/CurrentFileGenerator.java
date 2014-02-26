@@ -29,6 +29,11 @@ public class CurrentFileGenerator extends AbstractGenerator {
     public String getName() {
         return NAME;
     }
+    public CurrentFileGenerator() 
+    {
+    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    }
+
     protected String[] getStringValues() {
     	IResource resource;
     	if (getMenuMode()) {

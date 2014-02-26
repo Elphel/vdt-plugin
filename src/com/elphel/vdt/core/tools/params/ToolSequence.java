@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
@@ -30,12 +29,12 @@ import org.eclipse.ui.IMemento;
 
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
-import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.core.launching.LaunchCore;
 import com.elphel.vdt.core.launching.ToolLogFile;
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
+import com.elphel.vdt.core.tools.params.Tool.ToolWaitingArguments;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.options.FilteredFileSelector;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
@@ -45,10 +44,12 @@ import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ToolSequence {
@@ -64,12 +65,13 @@ public class ToolSequence {
     private static final String TAG_CURRENTSTATE_STATEFILE =  ".currentState.stateFile.";
     private static final String TAG_CURRENTSTATE_TOOLSTAMP =  ".currentState.toolStamp.";
     
+//    private static final int MAX_TOOLS_TO_RUN=100;
    
 	private boolean shiftPressed=false;
 	private DesignFlowView designFlowView;
 	private boolean stopOn; // Stop button is pressed
 	private boolean saveOn; // save button is on
-	private Map<String,Tool> stateProvides;
+	private Map<String,Set<Tool>> stateProviders;
 	private Map<String,ToolStateStamp> currentStates;
 	private IMemento unfinishedMemento=null;
 	private String menuName=null;
@@ -100,8 +102,6 @@ public class ToolSequence {
 			designFlowView.finalizeAfterVEditorDB(unfinishedMemento);
 		}
 	}
-
-	
 	
 	public void toolFinished(Tool tool){
 		doToolFinished(tool);
@@ -121,7 +121,7 @@ public class ToolSequence {
 		}
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
 			System.out.println("\nTool "+tool.getName()+" FINISHED , state="+tool.getState()+", mode="+tool.getLastMode());
-		if (tool.getState()==TOOL_STATE.SUCCESS){
+		if ((tool.getState()==TOOL_STATE.SUCCESS) || (tool.getState()==TOOL_STATE.KEPT_OPEN)){
 			// Update state of the session(s) - should be done after run or restore
 			if ((tool.getLastMode()==TOOL_MODE.RUN) ||	(tool.getLastMode()==TOOL_MODE.RESTORE)){
 				boolean sessionUpdated=updateSessionTools(tool); // Update state 
@@ -132,7 +132,7 @@ public class ToolSequence {
 				restoreToolProperties(tool);// set last run hashcode and timestamp for the tool just restored
 				if (tool.getRestoreMaster()!=null) tool.setPinned(true);
 				else {
-					System.out.println("Pribably a bug - tool.getRestoreMaster()==null for "+tool.getName()+", while state is "+tool.getState());
+					System.out.println("Probably a bug - tool.getRestoreMaster()==null for "+tool.getName()+", while state is "+tool.getState());
 					tool.setPinned(true); // restored state should be pinned?
 				}
 			}
@@ -142,7 +142,16 @@ public class ToolSequence {
 			if (tool.getLastMode()==TOOL_MODE.RUN) {
 				setDependState(tool);
 			}
-			setToolsDirtyFlag(false); // no need to recalculate all parameters here 
+			setToolsDirtyFlag(false); // no need to recalculate all parameters here
+//			if (SelectedResourceManager.getDefault().isToolsLinked()) {
+//				System.out.println("===Propagating 'dirty' flags to dependent non-pinned tools");
+//				propagateDirty();
+//			}
+			if (isStop()){
+				releaseStop();
+				System.out.println("Stop was ctivated");
+				return; // do nothing more
+			}
 			
 			// Check for stop here
 			if ((tool.getLastMode()==TOOL_MODE.RUN) || (tool.getLastMode()==TOOL_MODE.SAVE)){
@@ -150,44 +159,269 @@ public class ToolSequence {
 			}			
 			getToolsToSave(); // find if there are any sessions in unsaved state - returns list (not yet processed)
 			if (tryAutoSave(tool)) return;  // started autoSave that will trigger "toolFinished" again
-		} else if (tool.getState()==TOOL_STATE.KEPT_OPEN){ // Got here after launching a session
-			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
-				System.out.println("\nTool "+tool.getName()+" kept open , state="+tool.getState()+", mode="+tool.getLastMode());
+			if (continueRunningTools()) return; // started next needed tool
+			// will get here if no more tools to run or failed to find one
+			Tool waitingTool=findWaitingTool();
+			if (waitingTool==null){
+				System.out.println("No tool is waiting to run, all done.");
+				return;
+			} else {
+				waitingTool.setState(TOOL_STATE.FAILURE); // should state be set to FAILURE?
+				waitingTool.setMode(TOOL_MODE.STOP);
+				String msg="Failed to find a tool to run for "+waitingTool.getName();
+				System.out.println(msg);
+				MessageUI.error(msg);
+			}
+			
+//		} else if (tool.getState()==TOOL_STATE.KEPT_OPEN){ // Got here after launching a session
+//			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
+//				System.out.println("\nTool "+tool.getName()+" kept open , state="+tool.getState()+", mode="+tool.getLastMode());
 		} else { // Process failures here
-
+			//Turn off any Waiting tool
+			Tool waitingTool=findWaitingTool();
+			if (waitingTool!=null){
+				waitingTool.setState(TOOL_STATE.FAILURE); // should state be set to FAILURE?
+				waitingTool.setMode(TOOL_MODE.STOP);
+			}
+		}
+	}
+	
+	private boolean continueRunningTools(){
+		if (SelectedResourceManager.getDefault().isToolsLinked()){
+			Tool reportTool=findReportTool();
+			if (reportTool!=null){
+				// Launch report tool that can be ran from the current state
+				try {
+					launchNextTool(reportTool);
+				} catch (CoreException e) {
+					String msg="Failed to launch reportTool "+reportTool.getName()+" e="+e;
+					System.out.println(msg);
+					MessageUI.error(msg);
+					return false;
+				}
+				return true; // launched report tool
+			}
+			Tool waitingTool=findWaitingTool();
+			if (waitingTool!=null){
+				// prevent recursion - limit number of steps to the total number of tools (each should run once at most ?) 
+				Tool nextTool=findToolToLaunch(waitingTool,ToolsCore.getConfig().getContextManager().getToolList().size());
+				if (nextTool!=null){
+					try {
+						launchNextTool(nextTool);
+					} catch (CoreException e) {
+						String msg="Failed to launch next tool "+nextTool.getName()+" e="+e;
+						System.out.println(msg);
+						MessageUI.error(msg);
+						return false;
+					}
+					return true; // launched next tool
+				}
+				return false; // failed to find tool to launch
+			}
+			return false; // nothing to do - no tool was waiting
+		} else {
+			return false; // tools are not linked
 		}
 	}
 
+	public void launchNextTool(Tool tool) throws CoreException {
+//		if (!okToRun()) return;
+//		setStateProvides(); // just testing
+		tool.setDesignFlowView(designFlowView); // maybe will not be needed with ToolSequencing class
+		if (tool.isWaiting()){
+			ToolWaitingArguments twa=tool.getToolWaitingArguments();
+			if (twa!=null){
+				SelectedResourceManager.getDefault().updateActionChoice(
+						twa.getFullPath(), //fullPath,
+						twa.getChoice(), // choice,
+						twa.getIgnoreFilter()); //ignoreFilter);
+				tool.setMode(twa.getMode()) ; //TOOL_MODE.RUN);
+				tool.setChoice(twa.getChoice());
+
+				LaunchCore.launch( tool,
+						SelectedResourceManager.getDefault().getSelectedProject(),
+						twa.getFullPath(),
+						null); // run, not playback 
+				return;
+			}
+		}
+		tool.setMode(TOOL_MODE.RUN) ; //TOOL_MODE.RUN);
+//		tool.toolFinished();
+		tool.setChoice(0);
+//		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
+//		SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
+		// apply designFlowView to the tool itself
+		LaunchCore.launch( tool,
+				SelectedResourceManager.getDefault().getSelectedProject(),
+				SelectedResourceManager.getDefault().getChosenTarget(),
+				null); // run, not playback 
+	} // launchTool()
+
+	
+	
+	
 	/**
 	 * Find which tool to run to satisfy dependency of the specified tool (may be recursive - make sure no loops)
 	 * @param tool tool to satisfy dependency for
+	 * @param numSteps Maximal number of tools to run automatically (to prevent recursion)
 	 * @return tool to run or null - failed to find any
 	 */
-	private Tool findToolToLaunch(Tool tool, boolean launchSessions){ 
+	// TODO: support session-less states
+	private Tool findToolToLaunch(Tool tool, int numSteps){
+		if (numSteps<0){
+			MessageUI.error("Maximal number of tool steps exceeded");
+			return null;
+		}
+		// get list of states of the open sessions
+		List<Tool> sessions=getOpenSessions();
+		Map<String,String> openStates=new ConcurrentHashMap<String,String>();
+		for (Tool session:sessions){
+			if (session.getOpenStateName() != null) openStates.put(session.getOpenStateName(),session.getOpenStateFile());
+		}
+		
+		// First see if all the state dependencies are met
+		List<String> depStates=tool.getDependStates();
+		
+		// restore tools should not have any dependencies but console, check it here just in case
+		if (!tool.isPinned() && (depStates!=null) && (tool.getRestoreMaster()==null)) for (String state:depStates){
+			// see if the state is available, good and not dirty
+			System.out.println("findToolToLaunch("+tool.getName()+" state= "+state);
+			ToolStateStamp tss=currentStates.get(state);
+			// Check that this state provider
+			if (tss!=null){
+				System.out.println("State "+state+" tss.toolName="+tss.toolName+" tss.toolStateFile="+tss.toolStateFile+" tss.toolStamp="+tss.toolStamp );
+				if ((tss.getToolName()!=null) ){
+					Tool depTool=ToolsCore.getContextManager().findTool(tss.getToolName());
+					if ((depTool.getState()==TOOL_STATE.SUCCESS) &&
+							(depTool.isPinned() || !depTool.isDirtyOrChanged())){
+						System.out.println("depTool= "+depTool.getName());
+						// dependency satisfied, but is this state current for some session?
+						for (String osn:openStates.keySet()){
+							System.out.println("-- openStateName="+osn+" state="+state); // openState - with ts, state - link
+						}
+						if (openStates.keySet().contains(state)){
+							continue; // dependency satisfied and the state is open
+						} else {
+							// The state was achieved, but it is not current. Try restore tool if possible
+							System.out.println("State "+state+" was previously achieved, but it is not current - will need to restore/re-run");
+							// just do nothing here and fall through to tss be set to null ?
+						}
+					}
+				}
+				tss=null; // missing or dirty tool - will need to re-run
+			}
+			if (tss==null){
+				System.out.println("State "+state+" is not available");
+				if (stateProviders.containsKey(state)){
+					Set<Tool> providersSet=stateProviders.get(state);
+					for (Tool provider:providersSet){
+						if (!provider.isDisabled()){
+							System.out.println("For wanted tool "+tool.getName()+
+									" using tool "+provider.getName()+
+									" to get needed state "+state);
+							return findToolToLaunch(provider, numSteps-1);
+						}
+					}
+					MessageUI.error("Could not find enabled tool to provide state "+state);
+					System.out.println("Could not find enabled tool to provide state "+state);
+					return null;
+				} else {
+					MessageUI.error("No tool provide state "+state);
+					System.out.println("No tool provide state "+state);
+					return null;
+				}
+			}
+		}
+		// Got here if all state dependencies are met (or there are none)
+		// Does the tool need a console that needs to be started?
 		List<Tool> consoleTools= getUsedConsoles(tool);
-		if (launchSessions) for (Tool consoleTool:consoleTools){ // or maybe do it after other dependencies?
+		for (Tool consoleTool:consoleTools){ // or maybe do it after other dependencies?
 			if (consoleTool.getState()!=TOOL_STATE.KEPT_OPEN) {
 				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
 					System.out.println("Need to launch tool"+consoleTool.getName()+" to satisfy dependencies of tool "+tool.getName());
 				}
-				return consoleTool;
+				return consoleTool; // start the console session
 			}
 		}
-		// All session tools are running
-		return null;
-
+		// everything is met to run this tool. Can we just restore it instead (only if it is not in WAIT state)
+		if (tool.isWaiting()){
+			System.out.println("OK to run waiting tool "+tool.getName());
+			return tool;
+		}
+		if ((tool.getRestore()!=null) &&
+			(tool.isPinned() || !tool.isDirtyOrChanged()) &&
+			(tool.getState() == TOOL_STATE.SUCCESS)){
+			System.out.println("Try to restore tool "+tool.getName()+" using "+tool.getRestore());
+			return tool.getRestore();
+		}
+		System.out.println("All cleared to run "+tool.getName());
+		return tool;
+	}
+	
+	
+	/**
+	 * Find enabled tool that can be ran from the current state without changing it (such as various reports)
+	 * and is "dirty" or never ran
+	 * @return found tool to launch or null
+	 */
+	private Tool findReportTool(){
+		// get open session(s)
+		List<Tool> sessions=getOpenSessions();
+		if (sessions.size()==0) return null;
+		Map<String,String> openStates=new ConcurrentHashMap<String,String>();
+		for (Tool session:sessions){
+			if (session.getOpenStateName() != null) openStates.put(session.getOpenStateName(),session.getOpenStateFile());
+		}
+		if (openStates.size()==0) return null;
+		for (Tool tool:ToolsCore.getConfig().getContextManager().getToolList()){
+			if (
+				tool.isDisabled() ||                // disabled tool (or abstract)
+				(tool.getSaveMaster()!=null) ||     // Is Save tool
+				(tool.getRestoreMaster()!=null) ||  // or is Restore tool
+				(tool.getStateLink()!=null)) {      // or changes output state(s)
+				continue;
+			}
+			// already good and nothing changed?
+			if (
+					(tool.getState()==TOOL_STATE.SUCCESS) && !tool.isDirtyOrChanged()){
+				continue;
+			}
+			// dependencies met (and do exist)?
+			List<String> depStates=tool.getDependStates();
+			if ((depStates==null) || (depStates.size()==0)){
+				continue; // no dependencies at all;
+			}
+			boolean met=true;
+			for (String state:depStates){
+				if (!openStates.keySet().contains(state)){
+					met=false;
+					break;
+				}
+			}
+			if (!met) {
+				continue; // dependencies not among open session states (TODO: what about non-session states?
+			}
+			return tool; // All checks passed, return this tool
+		}
+		return null; // Nothing found
 	}
 	
 	/**
 	 * Setup what tools can provide needed states
 	 */
 	public void setStateProvides(){
-		stateProvides=new ConcurrentHashMap<String,Tool>();
+		stateProviders=new ConcurrentHashMap<String,Set<Tool>>();
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
 			System.out.println("Looking for all states defined, tool= "+tool.getName());
 			if (!tool.isDisabled()){
 				String state=tool.getStateLink(); // some tools (like reports) do not change states 
-				if (state!=null) stateProvides.put(state,tool);
+				if (state!=null) {
+//					stateProviders.putIfAbsent(state,(Set<Tool>) new HashSet<Tool>());
+					if (!stateProviders.containsKey(state)){
+						stateProviders.put(state,(Set<Tool>) new HashSet<Tool>());
+					}
+					stateProviders.get(state).add(tool);
+				}
 			}
 		}
 		// Verify that each dependent state has a provider
@@ -197,7 +431,7 @@ public class ToolSequence {
 				List<String> dependStates=tool.getDependStates();
 				if ((dependStates!=null) && (dependStates.size()>0)){
 					for (String state:dependStates){
-						if (!stateProvides.containsKey(state)){
+						if (!stateProviders.containsKey(state)){
 							MessageUI.error("No tool provide output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
 							System.out.println("No tool provide output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
 						}
@@ -207,7 +441,7 @@ public class ToolSequence {
 		}
 		
 		//    List<String> list = new ArrayList<String>(hashset);
-		System.out.println("Got "+stateProvides.keySet().size()+" different states, number of mappings="+stateProvides.keySet().size());
+		System.out.println("Got "+stateProviders.keySet().size()+" different states, number of mappings="+stateProviders.keySet().size());
 		// For each state - find latest tool that made it
 		
 		
@@ -230,11 +464,21 @@ public class ToolSequence {
 		tool.setChoice(0);
 		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
 		SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
-		// apply designFlowView to the tool itself
-		LaunchCore.launch( tool,
-				SelectedResourceManager.getDefault().getSelectedProject(),
-				fullPath,
-				null); // run, not playback 
+		if (((mode==TOOL_MODE.RUN) || (mode==TOOL_MODE.RESTORE)) && SelectedResourceManager.getDefault().isToolsLinked()){
+			tool.setModeWait(
+	    			mode,
+	        		choice,
+	        		fullPath,
+	        		ignoreFilter);
+			if (!continueRunningTools()){
+				System.out.println("Failed to initiate continueRunningTools() for tool="+tool.getName());
+			}
+		} else {
+			LaunchCore.launch( tool,
+					SelectedResourceManager.getDefault().getSelectedProject(),
+					fullPath,
+					null); // run, not playback
+		}
 	} // launchTool()
 
 	// TODO: restore "working copy" functionality here to be able to play back logs while tools are running
@@ -296,9 +540,30 @@ public class ToolSequence {
 			stopAllRunnig();
 		}
 	}
+	public void releaseStop(){
+		this.stopOn=false;
+		designFlowView.setToggleStopTools(false);
+	}
+	
+	
 	public void setSave(boolean pressed){
 		this.saveOn=pressed;
+		if (saveOn){
+			List<Tool> toolsToSave=getToolsToSave(); // find if there are any sessions in unsaved state - returns list (not yet processed)
+			if ((toolsToSave==null) || (toolsToSave.size()==0)){
+				System.out.println("Nothing to save - how was the button pressed?");
+				releaseSave();
+				return;
+			}
+			tryAutoSave(toolsToSave.get(0)); // launch autosave and trigger toolFinished() when done
+		}
 	}
+	public void releaseSave(){
+		this.saveOn=false;
+		designFlowView.setToggleSaveTools(false);
+	}
+	
+	
 	public boolean isStop(){
 		return stopOn;
 	}
@@ -313,12 +578,11 @@ public class ToolSequence {
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		List<Tool> sessionList=new ArrayList<Tool>();
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
-			System.out.println("Looking for open console: "+tool.getName()+
-					" state="+tool.getState());
+//			System.out.println("Looking for open console: "+tool.getName()+	" state="+tool.getState());
 			if (
 					(tool.getState()==TOOL_STATE.KEPT_OPEN) &&
 					(tool.getOpenTool()!=null) &&
-					(tool.getOpenState()!=null)){
+					(tool.getOpenStateFile()!=null)){
 				// See if state file is not saved
 				Tool ranTool=tool.getOpenTool();
 				String stateDirString=ranTool.getStateDir();
@@ -333,9 +597,20 @@ public class ToolSequence {
 				}
 				IFolder stateDir= project.getFolder((stateDirString==null)?"":stateDirString);
 				IFile link=   stateDir.getFile(linkString); // null
-				IFile target= stateDir.getFile(tool.getOpenState());
-				System.out.println("****link.getRawLocation()=  "+link.getRawLocation().toString());
-				System.out.println("****target.getLocation()=  "+target.getLocation().toString());
+				IFile target= stateDir.getFile(tool.getOpenStateFile());
+				System.out.println("*****link.getRawLocation()=  "+link.getRawLocation().toString());
+				System.out.println("******target.getLocation()=  "+target.getLocation().toString());
+				// Debug
+				try {
+					Map<QualifiedName,String> allPP=	target.getPersistentProperties();
+					System.out.println("1. Getting persistent properties from properties from "+target.getLocation().toOSString()+" / "+tool.getOpenStateFile());
+					for (QualifiedName qn:allPP.keySet()){
+						System.out.println("... "+qn.toString()+": "+allPP.get(qn));
+					}
+				} catch (CoreException e2) {
+					System.out.println("Failed to get persistent properties from "+target.getLocation().toOSString());
+				} 
+
 				sessionList.add(tool);
 			}
 		}
@@ -361,7 +636,7 @@ public class ToolSequence {
 			if (
 					(tool.getState()==TOOL_STATE.KEPT_OPEN) &&
 					(tool.getOpenTool()!=null) &&
-					(tool.getOpenState()!=null)){
+					(tool.getOpenStateFile()!=null)){
 				// See if state file is not saved
 				Tool ranTool=tool.getOpenTool();
 				String stateDirString=ranTool.getStateDir();
@@ -376,13 +651,24 @@ public class ToolSequence {
 				}
 				IFolder stateDir= project.getFolder((stateDirString==null)?"":stateDirString);
 				IFile link=   stateDir.getFile(linkString); // null
-				IFile target= stateDir.getFile(tool.getOpenState());
-				System.out.println("****link.getRawLocation()=  "+link.getRawLocation().toString());
-				System.out.println("****target.getLocation()=  "+target.getLocation().toString());
+				IFile target= stateDir.getFile(tool.getOpenStateFile());
+				System.out.println("**link.getRawLocation()=  "+link.getRawLocation().toString());
+				System.out.println("***target.getLocation()=  "+target.getLocation().toString());
 				if (!link.getRawLocation().toString().equals(target.getLocation().toString())){
 					saveToolsList.add(ranTool);
 					System.out.println("****Adding=  "+ranTool.getName());
 				}
+				// Debug
+				try {
+					Map<QualifiedName,String> allPP=	target.getPersistentProperties();
+					System.out.println("2. Getting persistent properties from properties from "+target.getLocation().toOSString()+" / "+tool.getOpenStateFile());
+					for (QualifiedName qn:allPP.keySet()){
+						System.out.println("... "+qn.toString()+": "+allPP.get(qn));
+					}
+				} catch (CoreException e2) {
+					System.out.println("Failed to get persistent properties from "+target.getLocation().toOSString());
+				} 
+
 			}
 		}
 		return saveToolsList;
@@ -390,20 +676,29 @@ public class ToolSequence {
 	
 	//TODO: make possible to run multiple tools async if they do not share common session
 	public boolean isAnyToolRunnigOrWaiting(){
-		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
-		List<Tool> saveToolsList=new ArrayList<Tool>();
+//		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
+//		List<Tool> saveToolsList=new ArrayList<Tool>();
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
 			if (tool.isRunning() || tool.isWaiting()) return true;
 		}
 		return false;
 	}
+	
+	private Tool findWaitingTool(){
+		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+			if (tool.isWaiting()) return tool;
+		}
+		return null;
+		
+	}
+	
 
 // call when double-click on stop?	
 	public void stopAllRunnig(){ // does not actually stop - just marks as if stopped for debug purposes
-		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
-		List<Tool> saveToolsList=new ArrayList<Tool>();
+//		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
+//		List<Tool> saveToolsList=new ArrayList<Tool>();
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
-			if (tool.isRunning()) {
+			if (tool.isRunning() || tool.isWaiting()) {
 				tool.setState(TOOL_STATE.FAILURE);
 				tool.setMode(TOOL_MODE.STOP);
 			}
@@ -413,22 +708,40 @@ public class ToolSequence {
 	
 	public boolean restoreToolProperties(Tool tool){
 		if (tool.getLastMode()!=TOOL_MODE.RESTORE) return false;
-		if (tool.getRestoreMaster()!=null) tool=tool.getRestoreMaster();
+		String targetString=tool.getStateFile(); // With timestamp or specifically set through selection
+
+		if (tool.getRestoreMaster()!=null) {
+//			System.out.println("restoreToolProperties("+tool.getName()+") tool.getRestoreMaster()="+tool.getRestoreMaster().getName()+" tool.getStateFile()="+tool.getStateFile());
+//			System.out.println("tool.getRestoreMaster().getStateFile()="+tool.getRestoreMaster().getStateFile());
+//			targetString=tool.getResultName(); // after restore this is the actual file name
+			targetString=tool.getStateFile();
+			System.out.println("targetString="+targetString+" tool.getName()="+tool.getName()+"tool.getRestoreMaster().getName()="+tool.getRestoreMaster().getName());
+			tool=tool.getRestoreMaster();
+		}
 		else {
 			System.out.println("Tool "+tool.getName()+" does not have restoreMaster, but it came with getLastMode()!=TOOL_MODE.RESTORE");
 		}
 		String stateDirString=tool.getStateDir();
-//		String linkString=tool.getStateLink();
-		String targetString=tool.getStateFile(); // With timestamp or specifically set through selection
+		System.out.println("Tool "+tool.getName()+" getStateDir()="+tool.getStateDir());
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		IFolder stateDir= project.getFolder((stateDirString==null)?"":stateDirString);
 		// Create file for target and see if it actually exists
-		IFile target=  stateDir.getFile(targetString);
+		IFile target=  stateDir.getFile(targetString); //null po
 		if (!target.exists()){
 			System.out.println("BUG: file that was just restored does not exist: "+
 					target.getLocation().toOSString());
 			return false;
 		}
+		// Debug
+		try {
+			Map<QualifiedName,String> allPP=	target.getPersistentProperties();
+			System.out.println("3. Getting persistent properties from properties from "+target.getLocation().toOSString()+" / "+targetString);
+			for (QualifiedName qn:allPP.keySet()){
+				System.out.println("... "+qn.toString()+": "+allPP.get(qn));
+			}
+		} catch (CoreException e2) {
+			System.out.println("Failed to get persistent properties from "+target.getLocation().toOSString());
+		} 
 		String timestamp=null;
 		String sHashCode=null;
 		int hashCode=0;
@@ -444,6 +757,8 @@ public class ToolSequence {
 			System.out.println("Got hashcode="+hashCode+" ("+sHashCode+") in "+target.getLocation().toOSString());
 		} catch (CoreException e) {
 			System.out.println("No hashcode in "+target.getLocation().toOSString());
+		} catch (NumberFormatException e1){
+			System.out.println("Bad hashcode "+sHashCode+" in "+target.getLocation().toOSString());
 		}
 		if (timestamp!=null) {
 			tool.setTimeStamp(timestamp);
@@ -465,7 +780,7 @@ public class ToolSequence {
 		}
 		if ((stateToolName==null) || !tool.getName().equals(stateToolName)){
 			System.out.println("State file "+target.getLocation().toOSString()+" was saved for tool "+stateToolName+
-					", while restoring tool is "+tool.getName()+" - ivalidating all dependencies timestamps.");
+					", while restoring tool is "+tool.getName()+" - invalidating all dependencies timestamps.");
 			tool.clearDependStamps();
 			return false;
 		}
@@ -495,7 +810,7 @@ public class ToolSequence {
 	
 	private boolean tryAutoSave(Tool tool){
 		if  ((tool.getSave()!=null) && // save tool exists
-				tool.getAutoSave() &&  // autosave enabled
+				(tool.getAutoSave() || isSave())&&  // autosave enabled or save button pressed
 				(designFlowView!=null) && // not needed anymore?
 				(tool.getLastMode()==TOOL_MODE.RUN)) { // it was not playback of logs
 			final Tool fTool=tool.getSave();
@@ -530,8 +845,21 @@ public class ToolSequence {
     		tool=tool.getSaveMaster();
     		tool.setMode(TOOL_MODE.STOP);
 			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-				System.out.println("Finished autosave tool "+tool.getName()+" for "+tool.getName());
+				System.out.println("Finished (auto)save tool "+tool.getName()+" for "+tool.getName());
 			}
+			if (isSave()) { // more to save?
+				List<Tool> toolsToSave=getToolsToSave(); // find if there are any sessions in unsaved state - returns list (not yet processed)
+				if ((toolsToSave!=null) && (toolsToSave.size()>=0)){
+					if (toolsToSave.get(0).getSaveMaster()!=null){
+						System.out.println("Seems to be a BUG that might cause infinite attempts to save while processing tool "+
+								tool.getName()+", first save tool "+toolsToSave.get(0).getName()+
+								", saveMaster()="+toolsToSave.get(0).getSaveMaster().getName());
+						return false;
+					}
+					if (tryAutoSave(toolsToSave.get(0))) return true;
+				}
+			}
+			releaseSave();
 		}
 		return false;
 	}
@@ -551,7 +879,7 @@ public class ToolSequence {
 		String linkString=tool.getStateLink();
 		String targetString=tool.getStateFile(); // With timestamp or specifically set through selection
 		
-		System.out.println("Tool:"+tool.getName()+
+		System.out.println("updateLinkLatest("+tool.getName()+")"+
 				" stateDirString="+stateDirString+
 				" linkString ="+linkString+
 				" targetString="+targetString);
@@ -577,11 +905,17 @@ public class ToolSequence {
 					" in "+stateDirString+": "+target.getLocation());
 			return; // No link created as there was no snapshot, but the console state is valid.
 		}
-		if (linkString==null){
-			System.out.println("No link name available for "+tool.getName());
-			return;
-		}
-		
+		// Debug
+		try {
+			Map<QualifiedName,String> allPP=	target.getPersistentProperties();
+			System.out.println("4. Getting persistent properties from properties from "+target.getLocation().toOSString());
+			for (QualifiedName qn:allPP.keySet()){
+				System.out.println("... "+qn.toString()+": "+allPP.get(qn));
+			}
+		} catch (CoreException e2) {
+			System.out.println("Failed to get persistent properties from "+target.getLocation().toOSString());
+		} 
+
 		IFile link=   stateDir.getFile(linkString);
 		
 		try {
@@ -662,6 +996,24 @@ public class ToolSequence {
     					" on "+target.getLocation().toOSString());
     		}
         }
+        // debug - readback:
+		try {
+			target.refreshLocal(0, null); // long-running
+		} catch (CoreException e1) {
+			System.out.println("Failed to refreshLocal "+target.getLocation().toOSString()+" e="+e1.toString());
+		}
+
+		try {
+			Map<QualifiedName,String> allPP=	target.getPersistentProperties();
+			System.out.println("5. Getting persistent properties from properties from "+target.getLocation().toOSString());
+			for (QualifiedName qn:allPP.keySet()){
+				System.out.println("... "+qn.toString()+": "+allPP.get(qn));
+			}
+		} catch (CoreException e2) {
+			System.out.println("Failed to get persistent properties from "+target.getLocation().toOSString());
+		} 
+        
+        
 	}
 
 	/**
@@ -671,6 +1023,8 @@ public class ToolSequence {
 	 */
 	private boolean updateSessionTools(Tool tool){
 		String targetString=tool.getStateFile();
+		String linkString=  tool.getStateLink();
+
 		// after restore this may be a non-timestamp file - use current timestamp instead of the restored?
 		if (targetString==null){
 			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
@@ -684,7 +1038,7 @@ public class ToolSequence {
 		if (sessionList.size()>0){
 			for(Iterator<Tool> iter = sessionList.iterator(); iter.hasNext();) {
 				Tool consoleTool=iter.next();
-				consoleTool.setOpenState(targetString);
+				consoleTool.setOpenState(linkString,targetString);
 				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE))
 					System.out.println("Set openState of "+consoleTool.getName()+" to "+targetString);
 				if (tool.getRestoreMaster()!=null) { // after restore save master tool
@@ -841,7 +1195,7 @@ public class ToolSequence {
 
     	}
    	    setStateProvides(); // Can be called just once - during initialization?
-   	    for (String state:stateProvides.keySet()){
+   	    for (String state:stateProviders.keySet()){
    	    	if ( mementoKeysMap.containsKey(state+TAG_CURRENTSTATE_TOOLNAME)) {
    	    		currentStates.put(state,new ToolStateStamp(
    	    	    		memento.getString(state+TAG_CURRENTSTATE_TOOLNAME),
@@ -864,6 +1218,8 @@ public class ToolSequence {
 	}
 	
     public void putCurrentState(Tool tool){
+    	if (tool.getRestoreMaster()!=null) tool.getRestoreMaster();
+    	else if (tool.getSaveMaster()!=null) tool.getSaveMaster();
 		String linkString=tool.getStateLink(); // name of the state file w/o timestamp
 		if (linkString!=null) currentStates.put(linkString, new ToolStateStamp(tool));
     }
@@ -889,6 +1245,63 @@ public class ToolSequence {
 				tool.setDirty(!matchDependState(tool));
 			}
 		}
+		// why did it fail?
+		if (SelectedResourceManager.getDefault().isToolsLinked()) {
+			System.out.println("====Propagating 'dirty' flags to dependent non-pinned tools");
+			propagateDirty();
+		}
+    }
+    
+    private void propagateDirty(){
+    	boolean newDirty=false;
+    	//	private Map<String,ToolStateStamp> currentStates;
+
+		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+			if (
+					tool.isDisabled() ||                // disabled tool (or abstract)
+					(tool.getSaveMaster()!=null) ||     // Is Save tool
+					(tool.getRestoreMaster()!=null)){   // or is Restore tool
+					continue;
+				}
+
+			if (!tool.isDirty()){
+				List<String> depStates=tool.getDependStates();
+				if ((depStates==null) || (depStates.size()==0)){
+					continue; // no dependencies at all;
+				}
+				boolean met=true;
+				if (currentStates!=null) for (String state:depStates){
+					Tool provider=(currentStates.get(state)==null)?null: ToolsCore.getTool(currentStates.get(state).getToolName());
+					if (provider==null){
+						met=false;
+						System.out.println("No providers for depend state "+state);
+						break;
+					}
+					if (provider.getRestoreMaster()!=null){
+						System.out.println("propagateDirty(): should not happen: tool "+
+								provider.getName()+".getRestoreMaster()="+
+								provider.getRestoreMaster().getName());
+						provider=provider.getRestoreMaster();
+					} else if (provider.getSaveMaster()!=null){
+						System.out.println("propagateDirty(): should not happen: tool "+
+								provider.getName()+".getSaveMaster()="+
+								provider.getSaveMaster().getName());
+						provider=provider.getSaveMaster();
+					}
+					if (provider.isDirty() && !provider.isPinned()){
+						met=false;
+						System.out.println("Provider for depend state "+state+" - "+provider.getName()+" : isDirty()="+
+								provider.isDirty()+", provider.isPinned()="+provider.isPinned());
+						break;
+					}
+				}
+				if (!met) {
+					tool.setDirty(true);
+					newDirty=true;
+				}
+			}
+		}
+		if (newDirty) propagateDirty(); // recursive call until no more new tools are marked dirty 
     }
     
     /**
