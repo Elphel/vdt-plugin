@@ -156,6 +156,7 @@ public class DesignMenuModel {
         	int imageHeight = frameImage.getBounds().height;
         	int y = event.y + (itemHeight - imageHeight) / 2;
     		event.gc.drawImage(frameImage, x, y);
+//    		System.out.println("showStateIcon(): "+imageKeyState);
         	if (isAnimation){
             	animBounds=frameImage.getBounds();
             	frameImage.dispose();
@@ -317,6 +318,9 @@ public class DesignMenuModel {
         	} else if (tool.isAlmostDone()&& (tool.getState()==TOOL_STATE.UNKNOWN )){
         		iconName=VDTPluginImages.ICON_TOOLSTATE_ALMOST_WTF;
         		key=     VDTPluginImages.KEY_TOOLSTATE_ALMOST_WTF;
+        	} else if (tool.isAlmostDone()){ // restoring state, current state new (erased) or failure
+        		iconName=VDTPluginImages.ICON_TOOLSTATE_ALMOST_GOOD;
+        		key=     VDTPluginImages.KEY_TOOLSTATE_ALMOST_GOOD;
         	} else {
         		switch (tool.getState()){
         		case NEW:

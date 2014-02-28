@@ -46,6 +46,7 @@ import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.contexts.PackageContext;
@@ -360,7 +361,7 @@ public class LaunchCore {
         DebugPlugin.getDefault().getLaunchManager().addLaunch(launch);                                       
 //        VDTRunner runner = VDTLaunchUtil.getRunner();
         VDTProgramRunner runner = configuration.getProgramRunner();
-		int numItem=configuration.getBuildStep();
+		int numItem=configuration.getPrevBuildStep();
 		//getProgramRunner
 		
 // Probably wrong thing to launch - what if it starts with console?
@@ -385,7 +386,8 @@ public class LaunchCore {
      */
     protected static boolean saveAllEditors(boolean confirm) {
         if (VerilogPlugin.getActiveWorkbenchWindow() == null) {
-        	System.out.println("VerilogPlugin.getActiveWorkbenchWindow() == null");
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+				System.out.println("VerilogPlugin.getActiveWorkbenchWindow() == null");
             return true; // false;
         }
         return PlatformUI.getWorkbench().saveAllEditors(confirm);

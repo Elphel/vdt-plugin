@@ -178,7 +178,7 @@
 			      mark="``" 
 			      sep=" "
 			      prompt="@@FINISH@@"
-			      success="write_bitstream completed successfully"
+			      failure="ERROR"
 			      log=""
 			      stdout="parser_VivadoBitstream">
 			      "cd ~/%VivadoProjectRoot\n"

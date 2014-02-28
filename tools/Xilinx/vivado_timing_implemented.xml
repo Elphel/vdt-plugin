@@ -11,7 +11,7 @@
 		disable="DisableVivadoTiming"
 		>
 		<depends-list>
-			<depends state="SnapshotOptPhys"/>
+			<depends state="SnapshotRoute"/>
 		</depends-list>
 		
 		<action-menu>

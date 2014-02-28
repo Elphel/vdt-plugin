@@ -87,7 +87,7 @@ public class VDTConsoleRunner{
         final boolean debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
     	VDTRunner runner = VDTLaunchUtil.getRunner();
     	VDTProgramRunner programRunner = runConfig.getProgramRunner();
-		int numItem=runConfig.getBuildStep();
+		int numItem=runConfig.getPrevBuildStep();
 		
 		// TODO: process - null- normal run, "" - playback latest log, or timestamp - play selected log file(s)
 		String playBackStamp=runConfig.getPlayBackStamp();
@@ -128,7 +128,7 @@ public class VDTConsoleRunner{
         	}
         }
         runner.log("Writing to console "+iCons.getName()+":", arguments, null, false, true); // Appears in the console of the target Eclipse (may be immediately erased)
-        runner.log("Writing to console "+iCons.getName()+":", arguments, null, false, false); // Appears in the console of the parent Eclipse
+        if (debugPrint) runner.log("Writing to console "+iCons.getName()+":", arguments, null, false, false); // Appears in the console of the parent Eclipse
         IOConsoleOutputStream 	outStream= iCons.newOutputStream();
         IProcess process=((ProcessConsole)iCons).getProcess();
         consoleInStreamProxy= (IStreamsProxy2)process.getStreamsProxy();
@@ -191,7 +191,7 @@ public class VDTConsoleRunner{
         boolean keepOpen=     buildParamsItem.keepOpen();
         if (keepOpen){
         	// TODO: Reuse keepOpen for other meaning?
-        	MessageUI.error("keep-open is not supported for termonal scripts (it always keeps it open, ignoring");
+        	MessageUI.error("keep-open is not supported for terminal scripts (it always keeps it open, ignoring");
         }
 
         if (debugPrint) {
@@ -389,7 +389,8 @@ public class VDTConsoleRunner{
 			}
     	}
 
-    	int thisStep=runConfig.getBuildStep();
+//    	int thisStep=runConfig.getAndIncBuildStep(); // points to current, increments pointer
+    	int thisStep=runConfig.getPrevBuildStep(); // points to current, increments pointer
     	if (debugPrint) System.out.println("Finished console task, step was "+thisStep);
     	// Update tool status - until it is running there will be no actual changes on the icon view - will still spin
     	Tool tool=ToolsCore.getTool(runConfig.getToolName());
@@ -419,10 +420,11 @@ public class VDTConsoleRunner{
     	}
     	// Go on, continue with the sequence (maybe nothing is left
     	
-    	runConfig.setBuildStep(thisStep+1); // next task to run
+//    	runConfig.setBuildStep(thisStep+1); // next task to run
+//    	runConfig.updateBuildStep(); // set buildstep to incremented AtomicInteger, enable continuation;
     	VDTLaunchUtil.getRunner().getRunningBuilds().saveUnfinished(runConfig.getOriginalConsoleName(), runConfig );
     	try {
-    		VDTLaunchUtil.getRunner().resumeLaunch(runConfig.getOriginalConsoleName()); // replace with console
+    		VDTLaunchUtil.getRunner().resumeLaunch(runConfig.getOriginalConsoleName(),thisStep+1); // replace with console
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

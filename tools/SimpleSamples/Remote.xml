@@ -32,7 +32,7 @@
 			format="CopyValue" default="-c" readonly="false" visible="true" />
 
 		<parameter id="TerminalMode" type="BoolYesNo" format="None"
-			default="false" label="Force termonal mode for remote program" />
+			default="false" label="Force terminal mode for remote program" />
 
 		<parameter id="SSHSwitches" label="Other ssh switches"
 			type="String" format="CopyValue" default="" readonly="false" visible="true" />

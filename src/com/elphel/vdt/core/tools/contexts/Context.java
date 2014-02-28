@@ -230,26 +230,28 @@ public abstract class Context {
     	}
     	return consoleList;
     }
-      // currently - for all tools, skip generation of control files, ignore errors     
-      public void recalcHashCodes(){
-    	  System.out.println("Context.java(): RECALC HASH CODES");
-    	  // called from ContextOptionsDialog.okPressed() line: 89
-    	  // all context parameters are already recalculated (buildParams() ), so now we just go through all tool contexts,
-    	  // calling them with dryRun=true;
-  		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
-  			try {
-				tool.buildParams(false);
-				if (tool.hashMatch()) System.out.println("recalcHashCodes(): "+tool.getName()+
-						" hashMatch()="+tool.hashMatch()+
-						" getCurrentHash()="+tool.getCurrentHash()+
-						" getLastRunHash()="+tool.getLastRunHash());
-			} catch (ToolException e) {
-				System.out.println("failed buildParams(false) on tool="+tool.getName()+", e="+e.toString());
-			}
-  		}
-
-
-      }
+    // currently - for all tools, skip generation of control files, ignore errors     
+    public void recalcHashCodes(){
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+    		System.out.println("Context.java(): RECALC HASH CODES");
+    	}
+    	// called from ContextOptionsDialog.okPressed() line: 89
+    	// all context parameters are already recalculated (buildParams() ), so now we just go through all tool contexts,
+    	// calling them with dryRun=true;
+    	for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+    		try {
+    			tool.buildParams(false);
+    	    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+    			if (tool.hashMatch()) System.out.println("recalcHashCodes(): "+tool.getName()+
+    					" hashMatch()="+tool.hashMatch()+
+    					" getCurrentHash()="+tool.getCurrentHash()+
+    					" getLastRunHash()="+tool.getLastRunHash());
+    	    	}
+    		} catch (ToolException e) {
+    			System.out.println("failed buildParams(false) on tool="+tool.getName()+", e="+e.toString());
+    		}
+    	}
+    }
     
       public BuildParamsItem[] buildParams() throws ToolException {
     	  return buildParams(false);
@@ -419,7 +421,9 @@ public abstract class Context {
 //		}
 		if (proto!=null){
 			if (proto!=this){
-				System.out.println("++++ Updating tool's currentHash from working copy, name="+name);
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+					System.out.println("++++ Updating tool's currentHash from working copy, name="+name);
+				}
 				proto.setCurrentHash(currentHash);
 			}
 			

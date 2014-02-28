@@ -20,6 +20,7 @@ package com.elphel.vdt.ui.views;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -124,6 +125,11 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     private ClearAction clearToolPropertiesAction;
 
     private Action selectDesignMenuAction;
+    private ClearToolStates clearToolStatesAction;
+    private ClearStateFiles clearStateFilesAction;
+    private ClearLogFiles clearLogFilesAction;
+
+    
     
     private IResource selectedResource;
     
@@ -146,7 +152,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     IDoubleClickListener doubleClickListener=null;
     private Action [] launchActions;
     private ToolSequence toolSequence=null;
-
+    private Composite compositeParent;
     /**
      * The constructor.
      */
@@ -190,6 +196,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
      * to create the viewer and initialize it.
      */
     public void createPartControl(Composite parent) {
+    	compositeParent=parent; // will it help to re-draw
         viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
         drillDownAdapter = new DrillDownAdapter(viewer);
 
@@ -274,6 +281,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     public void changeMenuTitle(String title){
     	setPartName(title);
     }
+    public String getMenuTitle(){
+    	return getPartName();
+    }
 
     private void hookContextMenu() {
         MenuManager menuMgr = new MenuManager("#PopupMenu");
@@ -301,6 +311,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(clearPackagePropertiesAction);
         manager.add(clearProjectPropertiesAction);
         manager.add(clearToolPropertiesAction);
+        manager.add(new Separator());
+        manager.add(clearToolStatesAction);
+        manager.add(clearStateFilesAction);
+        manager.add(clearLogFilesAction);
         manager.add(new Separator());
         manager.add(selectDesignMenuAction);
     }
@@ -499,14 +513,13 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         showPropertiesAction.setToolTipText("Set tool parameters");
         showPropertiesAction.setImageDescriptor(VDTPluginImages.DESC_TOOL_PROPERTIES);
 
-        clearToolPropertiesAction = new ClearAction("Do you wish to delete values of tool parameters?") {
+        clearToolPropertiesAction = new ClearAction("Do you wish to delete values of the tool parameters?") {
             public void clear() {
                 OptionsCore.doClearContextOptions(selectedItem.getTool(), selectedResource.getProject());
             }
         };
         clearToolPropertiesAction.setText("Clear Tool Parameters");
         clearToolPropertiesAction.setImageDescriptor(VDTPluginImages.DESC_TOOL_PROPERTIES);
-        
         selectDesignMenuAction = new Action() {
             public void run() {
                 openDesignMenuSelectionDialog(selectedResource.getProject());
@@ -514,7 +527,19 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         };
         selectDesignMenuAction.setText("Change Design Menu");
         selectDesignMenuAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
-            
+
+        clearToolStatesAction = new ClearToolStates("Do you wish to reset all tool states (as if they never ran)?",toolSequence);
+        clearToolStatesAction.setText("Clear tool states");
+        clearToolStatesAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
+
+        clearStateFilesAction = new ClearStateFiles("Do you wisth to remove all state files (snapshots), but the current ones?",toolSequence);
+        clearStateFilesAction.setText("Clear all but latest snapshot files");
+        clearStateFilesAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
+
+        clearLogFilesAction = new ClearLogFiles("Do you wisth to remove all log files, but the most recent?",toolSequence);
+        clearLogFilesAction.setText("Clear all but latest log files");
+        clearLogFilesAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
+        
         showLaunchConfigAction = new Action() {
             public void run() {
                 try {
@@ -740,13 +765,16 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                 	pinAction.setText("Pin "+tool.getName());
                 	pinAction.setToolTipText("Do not automatically re-run "+tool.getName()+" when its dependency changes");
                 	pinAction.setEnabled((tool.getState()==TOOL_STATE.SUCCESS) || (tool.isPinned()));
+                	pinAction.setChecked(tool.isPinned());
                 	pinAction.setImageDescriptor(VDTPluginImages.DESC_TOOLS_PIN);
                 	if (tool.getRestore()!=null){
                 		restoreAction=new Action(){
                     		public void run(){
-                    			System.out.println("*** Will restore latest state of "+fTool.getName());
                     			String stateFileName=toolSequence.getSelectedStateFile(fTool, false);
-                    			System.out.println("***Selected restore file: "+stateFileName);
+                    			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) { 
+                    				System.out.println("*** Will restore latest state of "+fTool.getName());
+                    				System.out.println("***Selected restore file: "+stateFileName);
+                    			}
                     			Tool restoreTool=fTool.getRestore();
                     			if ((stateFileName!=null) && (restoreTool!=null)){
                     				restoreTool.setResultFile(stateFileName);
@@ -878,6 +906,36 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                && (selectedItem.getTool() != null);
         showPropertiesAction.setEnabled(enabled);
         clearToolPropertiesAction.setEnabled(enabled);
+        ((ViewLabelProvider) viewer.getLabelProvider()).fireChanged();
+/*        
+        
+        viewer.getTree().update();
+        viewer.refresh();
+        System.out.println("DesignFlowView: should update now");
+//        Display.update(); 
+        compositeParent.getDisplay().update(); 
+        String menuTitle=getMenuTitle();
+        if (menuTitle.endsWith("*")){
+        	changeMenuTitle(menuTitle.substring(0,menuTitle.length()-1));
+        }else {
+        	changeMenuTitle(menuTitle+"*");
+        }
+//        changeMenuTitle(menuTitle+"***");
+        compositeParent.redraw(); // widget is disposed
+        compositeParent.update();
+ //       changeMenuTitle(menuTitle+"");
+//Well you need to determine the row position range for the child rows you want to refresh and then fire a RowVisualChangeEvent.
+//        That should do the trick.      
+//        System.out.println("count="+viewer.get)
+        Tree tree=viewer.getTree();
+        System.out.println("count="+tree.getItemCount());
+        TreeItem [] items=tree.getItems();
+        for (TreeItem ti:items){
+        	System.out.println("--- "+ti.getText());
+        }
+//       ((BaseLabelProvider) viewer.getLabelProvider()).fireLabelProviderChanged(new LabelProviderChangedEvent( null));
+        ((ViewLabelProvider) viewer.getLabelProvider()).fireChanged();
+        */
     } // updateLaunchAction()
 
     private void launchTool(
@@ -1093,10 +1151,15 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     
     //-------------------------------------------------------------------------
     class ViewLabelProvider extends LabelProvider {
+    	
+    	public void fireChanged(){
+    		fireLabelProviderChanged(new LabelProviderChangedEvent(this));
+    	}
 
         public String getText(Object obj) {
             return obj.toString();
         }
+        
 
         public Image getImage(Object obj) {
             String imageKey = ((DesignMenuModel.Item)obj).getImageKey();
@@ -1134,12 +1197,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         if (HDLLocation!=null) {
         	IResource HDLFile=ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(HDLLocation));
         	SelectedResourceManager.getDefault().setChosenVerilogFile(HDLFile);
-        	System.out.println("Setting HDL file to "+HDLFile.toString());
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("Setting HDL file to "+HDLFile.toString());
         }
         String HDLFilter=memento.getString(TAG_SELECTED_HDL_FILTER); //SelectedResourceManager.getDefault().getFilter();
         if (HDLFilter!=null){
         	SelectedResourceManager.getDefault().setFilter(HDLFilter);
-        	System.out.println("Setting HDL filter to "+HDLFilter);
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("Setting HDL filter to "+HDLFilter);
         }
     	if (linkedTools==null) linkedTools=true;
     	SelectedResourceManager.getDefault().setToolsLinked(linkedTools);
@@ -1183,12 +1248,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
         if (HDLFile!=null){
         	memento.putString(TAG_SELECTED_HDL_FILE,HDLFile.getFullPath().toPortableString());
-        	System.out.println("memento.putString("+TAG_SELECTED_HDL_FILE+","+HDLFile.getFullPath().toPortableString()+")");
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("memento.putString("+TAG_SELECTED_HDL_FILE+","+HDLFile.getFullPath().toPortableString()+")");
         }
         String HDLFilter=SelectedResourceManager.getDefault().getFilter();
         if (HDLFilter!=null){
         	memento.putString(TAG_SELECTED_HDL_FILTER,HDLFilter);
-        	System.out.println("memento.putString("+TAG_SELECTED_HDL_FILTER+","+HDLFilter+")");
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("memento.putString("+TAG_SELECTED_HDL_FILTER+","+HDLFilter+")");
         }
         memento.putBoolean(TAG_LINKED_TOOLS, new Boolean(SelectedResourceManager.getDefault().isToolsLinked()));
         ToolsCore.saveToolsState(memento);

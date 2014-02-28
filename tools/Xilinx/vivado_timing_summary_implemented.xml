@@ -11,7 +11,7 @@
 		disable="DisableVivadoTimingSummary"
 		>
 		<depends-list>
-			<depends state="SnapshotSynth"/>
+			<depends state="SnapshotRoute"/>
 		</depends-list>
 		
 		<action-menu>

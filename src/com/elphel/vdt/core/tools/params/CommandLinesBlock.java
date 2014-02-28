@@ -27,6 +27,8 @@ import com.elphel.vdt.core.tools.config.ConfigException;
 import com.elphel.vdt.core.tools.params.conditions.*;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString.KIND;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
    
 public class CommandLinesBlock extends UpdateableStringsContainer 
                                implements Cloneable 
@@ -245,7 +247,8 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     }
     public void update(Updateable from) throws ConfigException {
     	update(from,null);
-    	System.out.println("CommandLinesBlock#update(from,null)");
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+    		System.out.println("CommandLinesBlock#update(from,null)");
     }
 
 }

@@ -22,6 +22,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.List;
 
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
+
 public class BuildParamsItem implements Cloneable{
 	private String [] params;
 	private String consoleName;  // null for external tools running in a new console
@@ -161,7 +164,8 @@ public class BuildParamsItem implements Cloneable{
 	public Timer getTimer(){
 		if (timer==null){
 			timer=new Timer();
-        	System.out.println("BuildParamsitem(): : making new timer");
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+				System.out.println("BuildParamsitem(): : making new timer");
 		}
 		return timer;
 	}
@@ -169,7 +173,8 @@ public class BuildParamsItem implements Cloneable{
 		if (timer==null) return;
 		timer.cancel();
 		timer=null;
-    	System.out.println("BuildParamsitem(): canceled and nulled timer");
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+			System.out.println("BuildParamsitem(): canceled and nulled timer");
 	}
 	
 	public void finalize() throws Throwable{

@@ -71,6 +71,8 @@ import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 
+
+
 //import com.elphel.vdt.core.Utils;
 import org.eclipse.ui.console.IConsoleListener;
 
@@ -97,6 +99,7 @@ public class VDTRunner {
 		tool.setDirty(false);
 		tool.setState(TOOL_STATE.FAILURE);
 //		tool.setRunning(false);
+		System.out.println("VDTRunner#abortLaunch("+consoleName+"), tool="+tool.getName()+" "+tool.toString()+"  state="+tool.getState()+" threadID="+Thread.currentThread().getId());
 		tool.setMode(TOOL_MODE.STOP);
 //		tool.setTimeStamp(); // will set at start
 		tool.toolFinished();
@@ -104,9 +107,11 @@ public class VDTRunner {
 		runningBuilds.removeConfiguration(runConfig.getOriginalConsoleName());
 	}
 
-    public void resumeLaunch(String consoleName) throws CoreException  {
+    public void resumeLaunch(String consoleName, int expectedStep) throws CoreException {
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+			System.out.println("VDTRunner#resumeLaunch("+consoleName+"), threadID="+Thread.currentThread().getId());
     	try {
-    		doResumeLaunch(consoleName);
+    		doResumeLaunch(consoleName, expectedStep);
     	} catch(Exception e) {
     		MessageUI.error(e);
 
@@ -115,33 +120,44 @@ public class VDTRunner {
     	}
     }
 	    // make call it when console is closed
-	private void doResumeLaunch(String consoleName ) throws CoreException {
+	private void doResumeLaunch(String consoleName, int numItem) throws CoreException {
 		final VDTRunnerConfiguration runConfig=runningBuilds.resumeConfiguration(consoleName);
-        final boolean debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
-
 		if (runConfig==null){
 			System.out.println("Turned out nothing to do. Probably a bug");
+			MessageUI.error("Turned out nothing to do. Probably a bug");
     		abortLaunch(consoleName);    		
 			return;
 		}
-		
+		if (!runConfig.isStepValid()){
+			System.out.println("Invalid build step (probably configuration is for console playback)");
+			MessageUI.error("Invalid build step (probably configuration is for console playback)");
+    		abortLaunch(consoleName);    		
+			return;
+			
+		}
+		if (!runConfig.acquireBuildStep(numItem)){
+			System.out.println("Missed a lock on runConfig for "+consoleName+" expected step was "+
+					numItem+", current step="+(runConfig.getPrevBuildStep()+1));
+			return;
+			
+		}
+        final boolean debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
 		String playBackStamp=runConfig.getPlayBackStamp();
 		if (playBackStamp!=null){
 			System.out.println("doResumeLaunch(): wrong, it should be playback, not run, as playBackStamp = "+playBackStamp+ "(not null)");
     		abortLaunch(consoleName);    		
 			return;
 		}
-
-		
 		
 		BuildParamsItem[] argumentsItemsArray = runConfig.getArgumentsItemsArray(); // uses already calculated
 		runConfig.canceTimers(); // If some timers were set, but a task finished earlier
-		int numItem=runConfig.getBuildStep();
+////		int numItem=runConfig.getBuildStep();
 		if (debugPrint) System.out.println("--------- resuming "+ consoleName+", numItem="+numItem+" ------------");
 		ILaunch launch=runConfig.getLaunch();
 		IProgressMonitor monitor=runConfig.getMonitor();
-		for (;numItem<argumentsItemsArray.length;numItem++){
-			runConfig.setBuildStep(numItem); // was not updated if was not sleeping
+//		for (;numItem<argumentsItemsArray.length;numItem++){
+		for (;numItem<argumentsItemsArray.length;numItem=runConfig.getAndIncBuildStep()){
+//			runConfig.setBuildStep(numItem); // was not updated if was not sleeping
 			List<String> toolArguments = new ArrayList<String>();
 			List<String> arguments=argumentsItemsArray[numItem].getParamsAsList();
 			if (arguments != null)
@@ -191,8 +207,10 @@ public class VDTRunner {
 				continue; // proceed with the next item without pausing
 			}
 			/* Prepare to postpone next commands to be resumed by event*/
-			runConfig.setBuildStep(numItem+1);
+////			runConfig.setBuildStep(numItem+1); // already incremented
+			
 			runningBuilds.saveUnfinished(consoleName, runConfig );
+			final int fExpectedStep=numItem+1;
 
 			final IPropertyChangeListener fListener =new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
@@ -200,7 +218,9 @@ public class VDTRunner {
 						fiCons.removePropertyChangeListener(this);
 						if (debugPrint) System.out.println(">>> "+fConsoleName+" -> "+fiCons.getName());
 						try {
-							resumeLaunch(fConsoleName); //, fiCons, this); // replace with console
+							if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+								System.out.println("VDTRunner#doResumeLaunch(), IPropertyChangeListener: "+fConsoleName+", threadID="+Thread.currentThread().getId());
+							resumeLaunch(fConsoleName,fExpectedStep); //, fiCons, this); // replace with console
 						} catch (CoreException e) {
 							System.out.println ("Failed to resume launch sequence");
 						}
@@ -230,7 +250,8 @@ public class VDTRunner {
 					final int fTimeout = timeout;
 					final IProcess fProcess=process;
 					// new Timer().schedule(new TimerTask() {
-		        	System.out.println("VDTRunner(): setting old timer "+fTimeout*1000);
+					if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+						System.out.println("VDTRunner(): setting old timer "+fTimeout*1000);
 					argumentsItemsArray[numItem].getTimer().schedule(new TimerTask() {
 						@Override
 						public void run() {
@@ -241,7 +262,9 @@ public class VDTRunner {
 					        	Display.getDefault().syncExec(new Runnable() {
 					        		public void run() {
 										try {
-											resumeLaunch(fConsoleName);
+											if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+												System.out.println("VDTRunner#doResumeLaunch(), Timeout: "+fConsoleName+", threadID="+Thread.currentThread().getId());
+											resumeLaunch(fConsoleName,fExpectedStep);
 										} catch (CoreException e) {
 											System.out.println("Failed to resumeLaunch after timer"+fConsoleName);
 										} //, fiCons, this); // replace with console
@@ -268,13 +291,17 @@ public class VDTRunner {
 		monitor.done();
 		Tool tool=ToolsCore.getTool(runConfig.getToolName());
 //		tool.setRunning(false);
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+			System.out.println("VDTRunner#doResumeLaunch("+consoleName+"), tool="+tool.getName()+" "+tool.toString()+"  state="+tool.getState()+" threadID="+Thread.currentThread().getId());
 		tool.setMode(TOOL_MODE.STOP);
-
 // 		tool.setTimeStamp(); //will set at start
 		if ((tool.getState()==TOOL_STATE.SUCCESS) && runConfig.isKeptOpen()) {
 			tool.setState(TOOL_STATE.KEPT_OPEN);
 		} else { // failure on not
-			runningBuilds.removeConfiguration(consoleName); 
+			runningBuilds.removeConfiguration(consoleName);
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+				System.out.println("VDTRunner#doResumeLaunch("+consoleName+") - removed configuartion, tool="+tool.getName()+" "+tool.toString()+"  state="+tool.getState()+" threadID="+Thread.currentThread().getId());
+			
 		}
 		tool.toolFinished();
 	}
@@ -310,12 +337,13 @@ public class VDTRunner {
 //		int numItem=runConfig.getBuildStep();
 		// made buildStep for logs negative (it does not need to sleep and does everything in one call)
 		// to catch stray resumes
+		runConfig.resetBuildStep();
 		int numItem=0; //runConfig.getBuildStep();
 		if (debugPrint) System.out.println("--------- re-playing log from "+ consoleName+", numItem="+numItem+" ------------");
 		ILaunch launch=runConfig.getLaunch();
 		IProgressMonitor monitor=runConfig.getMonitor();
-		for (;numItem<argumentsItemsArray.length;numItem++){
-			runConfig.setBuildStep(numItem); // was not updated if was not sleeping
+		for (;numItem<argumentsItemsArray.length;numItem=runConfig.getAndIncBuildStep()){
+//			runConfig.setBuildStep(numItem); // was not updated if was not sleeping
 			List<String> toolArguments = new ArrayList<String>();
 			List<String> arguments=argumentsItemsArray[numItem].getParamsAsList();
 			if (arguments != null)
@@ -334,7 +362,7 @@ public class VDTRunner {
 			}
 			if (debugPrint) System.out.println("Skipping program runner as playback is not implemented, arguments were "+argumentsItemsArray[numItem].getNameAsParser());
 		} //for (;numItem<argumentsItemsArray.length;numItem++){
-		System.out.println("All playbacks finished");
+		if (debugPrint) System.out.println("All playbacks finished");
 		monitor.done();
 //		ToolsCore.getTool(runConfig.getToolName()).setRunning(false);
 		ToolsCore.getTool(runConfig.getToolName()).setMode(TOOL_MODE.STOP);

@@ -32,6 +32,8 @@ import org.eclipse.swt.widgets.Display;
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.ui.MessageUI;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 /**
@@ -98,7 +100,7 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         monitor.worked(3);  
 
         // resolve arguments, save them
-		runConfig.setArgumentsItemsArray(VDTLaunchUtil.getArguments(configuration));  // calculates all parameters
+		runConfig.setArgumentsItemsArray(VDTLaunchUtil.getArguments(configuration));  // calculates all parameters modifies the tool parameters!
     	runConfig.setIsShell(VDTLaunchUtil.getIsShell(configuration));
     	runConfig.setPatternErrors(VDTLaunchUtil.getPatternErrors(configuration));
     	runConfig.setToolName(VDTLaunchUtil.getToolName(configuration));
@@ -107,7 +109,10 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
     	runConfig.setToolLogDir(VDTLaunchUtil.getToolLogDir(configuration));
     	
     	runConfig.setToolProjectPath(VDTLaunchUtil.getToolProjectPath(configuration));
-    	runConfig.setBuildStep(0);
+
+    	//    	runConfig.setBuildStep(0);
+    	runConfig.resetBuildStep();
+
     	List<String> controlFiles = VDTLaunchUtil.getControlFiles(configuration);
     	runConfig.setControlFiles((String[])controlFiles.toArray(new String[controlFiles.size()]));
 //        String consoleName=VDTRunner.renderProcessLabel(runConfig.getToolName());
@@ -125,7 +130,9 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
 					try {
-						VDTLaunchUtil.getRunner().resumeLaunch(consoleName);
+						if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+							System.out.println("VDTLaunchConfigurationDelegate#doLaunch("+consoleName+"), threadID="+Thread.currentThread().getId());
+						VDTLaunchUtil.getRunner().resumeLaunch(consoleName,0);
 					} catch (CoreException e) {
 						System.out.println("Failed to resumeLaunch");
 					} //, fiCons, this); // replace with console
@@ -133,7 +140,8 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
         	});
         	
         } else {
-        	runConfig.setBuildStep(-1); // to cause errors if will try to continue
+        	runConfig.invalidateBuildStep();
+//        	runConfig.setBuildStep(-1); // to cause errors if will try to continue
         	runner.logPlaybackLaunch(consoleName); // tool logs playback with parsing
         }
         return;

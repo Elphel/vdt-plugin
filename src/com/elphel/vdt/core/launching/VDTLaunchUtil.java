@@ -136,11 +136,13 @@ public class VDTLaunchUtil {
 //     public static List<String> getArguments(ILaunchConfiguration configuration) throws CoreException {
        public static BuildParamsItem[] getArguments(ILaunchConfiguration configuration) throws CoreException {
         Tool tool = obtainTool(configuration);
+
+        // Replaces tool parameter values with the ones passed through configuration, then uses tool.buildParams;
+        // that causes conflicts in multi-threaded operation. Or is it just a working copy?
         
         for (Iterator i = tool.getParams().iterator(); i.hasNext(); ) {
             Parameter param = (Parameter)i.next();
-            String valueAttrName = LaunchCore.getValueAttributeName(param);
-            
+            String valueAttrName = LaunchCore.getValueAttributeName(param); // "ATTR_VALUE_" + toolParameter.getID();     
             try {
                 if(param.getType().isList()) {
                     List<String> value = 

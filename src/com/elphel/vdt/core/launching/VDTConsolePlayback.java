@@ -58,7 +58,7 @@ public class VDTConsolePlayback{
 			) throws CoreException{
         final boolean debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
     	VDTProgramRunner programRunner = runConfig.getProgramRunner();
-		int numItem=runConfig.getBuildStep();
+		int numItem=runConfig.getPrevBuildStep(); // current is already icremented
 		
 		// TODO: process - null- normal run, "" - playback latest log, or timestamp - play selected log file(s)
 		String playBackStamp=runConfig.getPlayBackStamp();
@@ -126,7 +126,7 @@ public class VDTConsolePlayback{
     			((buildParamsItem.getLogName()!=null)?(" ("+buildParamsItem.getLogName()+")"):"")+
     			((playBackStamp.length()>0)?(" timestamp: "+playBackStamp):"");
         runner.log(msg, null, null, false, true); // Appears in the console of the target Eclipse (may be immediately erased)
-        runner.log(msg, null, null, false, false); // Appears in the console of the parent Eclipse
+        if (debugPrint) runner.log(msg, null, null, false, false); // Appears in the console of the parent Eclipse
 
         IProcess processErr=null;
         IProcess processOut=null;

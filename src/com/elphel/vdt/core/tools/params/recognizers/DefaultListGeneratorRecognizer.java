@@ -23,45 +23,33 @@ import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.core.tools.params.Tool;
 
 
-public class SimpleGeneratorRecognizer implements Recognizer {
+public class DefaultListGeneratorRecognizer implements Recognizer {
     private static final String CONTROL_SEQ = "%"; 
     private static final int CONTROL_SEQ_LEN = CONTROL_SEQ.length();
    
     private static AbstractGenerator[] generators = new AbstractGenerator[] {
-        new OSNameGenerator(),
-        new ProjectNameGenerator(),
-        new ProjectPathGenerator(),
-        new TopModuleNameGenerator(),
-        new SelectedFileGenerator(),
-        new CurrentFileGenerator(),
-        new CurrentFileBaseGenerator(),
-        new ChosenActionGenerator(),
-        new BuildStampGenerator(),
-        new UserNameGenerator(),
-        new StateDirGenerator(),
-        new StateFileGenerator(),
-        new StateBaseGenerator()
-//        new SourceListGenerator("","",""),
-//        new FilteredSourceListGenerator("","","")
+       new SourceListGenerator("","",null),
+       new FilteredSourceListGenerator("","",null),
+       new FileListGenerator("","",null)
     };
   
-    public SimpleGeneratorRecognizer(){
+    public DefaultListGeneratorRecognizer(){
     	super();
     }
-    public SimpleGeneratorRecognizer(boolean menuMode){
+    public DefaultListGeneratorRecognizer(boolean menuMode){
     	super();
     	for (int i=0;i<generators.length;i++){
     		generators[i].setMenuMode(menuMode);
     	}
     }
-    public SimpleGeneratorRecognizer(boolean menuMode, Tool tool){
+    public DefaultListGeneratorRecognizer(boolean menuMode, Tool tool){
     	super();
     	for (int i=0;i<generators.length;i++){
     		generators[i].setMenuMode(menuMode);
     		generators[i].setTool(tool);
     	}
     }
-    public SimpleGeneratorRecognizer(Tool tool){
+    public DefaultListGeneratorRecognizer(Tool tool){
     	super();
     	for (int i=0;i<generators.length;i++){
     		generators[i].setTool(tool);

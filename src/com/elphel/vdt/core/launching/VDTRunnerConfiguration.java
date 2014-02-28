@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -36,6 +37,8 @@ import org.eclipse.ui.console.IConsole;
 import com.elphel.vdt.Txt;
 import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.ui.MessageUI;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 /**
@@ -88,7 +91,9 @@ public class VDTRunnerConfiguration {
     private String toolInfo;
     private String toolLogDir;
     
-    private int    buildStep;
+//    private int    buildStep;
+    private AtomicInteger nextBuildStep;
+    private int prevBuildStep=0;
     private ILaunchConfiguration configuration;
     private  ILaunch launch;
     private  IProgressMonitor monitor;
@@ -136,7 +141,8 @@ public class VDTRunnerConfiguration {
     }
     
     public void canceTimers(){
-    	if (argumentsItemsArray!=null) for (int i=0;i<buildStep;i++){
+//    	if (argumentsItemsArray!=null) for (int i=0;i<buildStep;i++){
+       	if (argumentsItemsArray!=null) for (int i=0;i<getPrevBuildStep();i++){
     		argumentsItemsArray[i].cancelTimer();
     	}
     }
@@ -171,7 +177,63 @@ public class VDTRunnerConfiguration {
 		this.consolePlayback=new VDTConsolePlayback(this);
 		this.keptOpen=false;
 		this.iConsole=null;
+		this.nextBuildStep=new AtomicInteger(0);
+		prevBuildStep=0;
 	}
+	public int getPrevBuildStep(){
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+			System.out.println("getPrevBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get());
+		return prevBuildStep;
+	}
+
+	
+	public int getAndIncBuildStep(){
+		prevBuildStep=nextBuildStep.getAndIncrement();
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+			System.out.println("getAndIncBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get());
+		return prevBuildStep;
+	}
+
+	public void resetBuildStep(){
+		nextBuildStep=new AtomicInteger(0);
+		prevBuildStep=0;
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+			System.out.println("resetBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get());
+//		updateBuildStep();
+	}
+	
+	public void invalidateBuildStep(){
+		nextBuildStep=null;
+	}
+	
+	public boolean acquireBuildStep (int expected){
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
+			System.out.println("acquireBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get()+" expected="+expected);
+		if (nextBuildStep.compareAndSet(expected, expected+1)){
+			prevBuildStep=expected;
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isStepValid(){
+		return (nextBuildStep!=null);
+	}
+	
+	/**
+	 * Verify to have a lock on the runner
+	 * @return true if got a lock, false (normally should not happen) - duplicate (i.e. timeout+listener)
+	 */
+//	public boolean gotFirst(){
+//		return (nextBuildStep.compareAndSet(buildStep, buildStep+1));
+//	}
+	
+	/**
+	 *  Called before exiting - enables next step
+	 */
+//	public void updateBuildStep(){
+//		buildStep=nextBuildStep.get();
+//	}
 	public void setKeptOpen(boolean keepOpen){
 		this.keptOpen=keepOpen;
 	}
@@ -378,13 +440,6 @@ public class VDTRunnerConfiguration {
 		toolArgs= args;
 	}
 	
-	public void setBuildStep(int buildStep){
-		this.buildStep=buildStep;
-	}
-
-	public int getBuildStep(){
-		return buildStep;
-	}
 
 	
 	public void setIsShell(boolean isShell) {

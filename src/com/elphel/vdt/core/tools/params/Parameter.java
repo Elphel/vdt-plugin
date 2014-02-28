@@ -344,25 +344,30 @@ public class Parameter implements Cloneable, Updateable {
         String errmsg = "Parameter '" + id + 
                         "' of context '" + context.getName() + 
                         "' - error processing default value: ";
+        
+//        if (id.startsWith("read_xdc")){
+//        	System.out.println(errmsg);
+//        }
 
         List<String> processedDefaultValue = null;        
         if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
-                                                            //new RepeaterRecognizer(),
-                                                            new SimpleGeneratorRecognizer(menuMode),
-                                                            new ContextParamListRecognizer(context, topProcessor) // Andrey: returning list as the source parameter 
-//                                                            new ContextParamRecognizer(context)
-                                                        }, topProcessor);
+        		//new RepeaterRecognizer(),
+        		new SimpleGeneratorRecognizer(menuMode),
+        		new ContextParamListRecognizer(context, topProcessor), // Andrey: returning list as the source parameter 
+        		//                                                            new ContextParamRecognizer(context)
+        		new DefaultListGeneratorRecognizer(menuMode)
+        }, topProcessor);
 
         try {
-            processedDefaultValue = processor.process(resolvedDefaultValue);
-            
-            for(Iterator<String> i = processedDefaultValue.iterator(); i.hasNext();)
-                type.checkValue(i.next());
+        	processedDefaultValue = processor.process(resolvedDefaultValue);
+
+        	for(Iterator<String> i = processedDefaultValue.iterator(); i.hasNext();)
+        		type.checkValue(i.next());
         } catch(ToolException e) {
-            MessageUI.error(errmsg + e.getMessage(), e);
+        	MessageUI.error(errmsg + e.getMessage(), e);
         } catch(ConfigException e) {
-            MessageUI.error(errmsg + e.getMessage(), e);
+        	MessageUI.error(errmsg + e.getMessage(), e);
         }
 
         canonicalizeValue(processedDefaultValue);

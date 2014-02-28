@@ -161,14 +161,14 @@
 <!-- hidden (calculated) parameters -->			
 <!--    <parameter id="FilteredSourceList" type="Filelist"
 			format="FilteredSourceListSyntax" default="" readonly="true" visible="false" />  -->	
-	   <parameter id="FilteredSourceListPar" type="Filelist"
-			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />
 
 			
 	<!-- Parameter read_xdc just copies parameter ConstraintsFiles, but they have different syntax (output representation) -->	
 	
-		<parameter id="read_xdc" type="Filelist" format="read_xdc_syntax"
-			default="%ConstraintsFiles" visible="false" />
+ 		<parameter id="read_xdc" type="Filelist"
+			 format="read_xdc_syntax" default="%ConstraintsFiles" visible="false" />
+	   <parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
+			 format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true" />
 		
 <!-- 	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="" tooltip="read_xdc"
 			default="%ConstraintsFiles" visible="false" />  -->
@@ -220,8 +220,7 @@
 			
 		<input>
 			<group name="General">
-		<!--"blabla1"
-			"blabla2" -->
+			    "FilteredSourceListPar"
 				"ConstraintsFiles"
 				"SkipSnapshotSynth"
  				"SnapshotSynth" <!--  same as in project -->

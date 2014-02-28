@@ -174,7 +174,9 @@ public class RunningBuilds {
 	}
 	
 	public VDTRunnerConfiguration resumeConfiguration(String consoleName){
-		System.out.println("VDTRunnerConfiguration#resumeConfiguration("+consoleName+")");
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+			System.out.println("VDTRunnerConfiguration#resumeConfiguration("+consoleName+")");
+		}
 		VDTRunnerConfiguration conf=unfinishedBuilds.get(consoleName);
 //		unfinishedBuilds.remove(consoleName); // 
 		return conf;
@@ -293,6 +295,7 @@ public class RunningBuilds {
 			if (toolName.equals(runConfig.getToolName())){
 				Tool tool=ToolsCore.getTool(runConfig.getToolName());
 //				tool.setRunning(false);
+	    		System.out.println("RunningBuilds#isAlreadyOpen("+toolName+"), state="+tool.getState()+" threadID="+Thread.currentThread().getId());
 	    		tool.setMode(TOOL_MODE.STOP);
 				tool.toolFinished();
 				if (tool.getState()==TOOL_STATE.KEPT_OPEN) {

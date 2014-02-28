@@ -161,7 +161,7 @@ public class VDTProgramRunner {
         }
         String[] controlFiles = runConfig.getControlFiles();
         runner.log(null,cmdLine, controlFiles, false, true); /* Appears in the console of the target Eclipse (immediately erased) */
-        runner.log(null,cmdLine, controlFiles, false, false); /* Appears in the console of the parent Eclipse */
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) runner.log(null,cmdLine, controlFiles, false, false); /* Appears in the console of the parent Eclipse */
 
         String[] envp = runConfig.getEnvironment();
         

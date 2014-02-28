@@ -51,6 +51,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private static final String TAG_TOOL_LASTRUNHASH =  ".toolstate.lastRunHash";
     private static final String TAG_TOOL_FILEDEPSTAMP =  ".toolstate.fileDependency.";
     private static final String TAG_TOOL_STATEDEPSTAMP =  ".toolstate.stateDependency.";
+    private static final String MEMENTO_TOOL_TYPE =  VDT.ID_VDT+".tool";
+    private static final String MEMENTO_TOOL_PINNED = "pinned";
+    private static final String MEMENTO_TOOL_STATE =  "state";
+    private static final String MEMENTO_TOOL_TIMESTAMP =  "timeStamp";
+    private static final String MEMENTO_TOOL_LASTRUNHASH =  "lastRunHash";
+    private static final String MEMENTO_TOOL_DEPNAME =       "name";
+    private static final String MEMENTO_TOOL_FILEDEPSTAMP =  "fileDependency";
+    private static final String MEMENTO_TOOL_STATEDEPSTAMP = "stateDependency";
 
 
     private String baseToolName;
@@ -112,6 +120,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
 //    private boolean running=false;
 //    private long finishTimeStamp=0;
     private String timeStamp=null;
+    private String timeStampRan=null;
     private String restoreTimeStamp=null;
     private DesignFlowView designFlowView;
     
@@ -131,7 +140,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private TOOL_MODE lastRunMode;           // last running (not STOP) mode
     private int lastRunHash;                 // hash code of the last run
     private ToolWaitingArguments toolWaitingArguments; // save here launch parameters when tool need to wait for other tools to run/get restored
-
+	private static void DEBUG_PRINT(String msg){
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+			System.out.println(msg);
+		}
+	}
     public Tool(String name,
                 String controlInterfaceName,
                 String label,
@@ -210,6 +223,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         choice=0;
         designFlowView =null;
         timeStamp=null;
+        timeStampRan=null;
         restoreTimeStamp=null;
         logDir=null;
         stateDir=null;
@@ -272,6 +286,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	dependStatesTimestamps.put(state,stamp);
     }
     public void setFileTimeStamp(String file, String stamp){
+    	DEBUG_PRINT("setFileTimeStamp("+file+","+stamp+") for tool "+name);
     	dependFilesTimestamps.put(file,stamp);
     }
     
@@ -328,15 +343,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     public void setDirty(boolean dirty) {
     	this.dirty=dirty;
-//    	toolFinished();
-    	System.out.println("SetDirty("+dirty+") tool:"+getName());
+    	DEBUG_PRINT("SetDirty("+dirty+") tool:"+getName());
     }
     public void setPinned(boolean pinned) {
     	this.pinned=pinned;
-//    	toolFinished();
-    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-    		System.out.println("SetPinned("+pinned+")");
-    	}
+    	DEBUG_PRINT("SetPinned("+pinned+")");
     }
     
     public void setModeWait(
@@ -363,12 +374,12 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     
     public void setMode(TOOL_MODE mode) {
+    	DEBUG_PRINT(">>--- "+name+": setMode("+mode+"), runMode="+runMode+", lastRunMode="+lastRunMode+" "+this.toString()+" threadID="+Thread.currentThread().getId());
     	if (mode !=TOOL_MODE.WAIT) this.toolWaitingArguments = null;
     	if ((runMode!=TOOL_MODE.STOP) && (mode==TOOL_MODE.STOP)){ // just stopped
+    		timeStampRan=timeStamp; // to determine that the tool is tried for the second time in a launch (loop) 
     		lastRunHash=getCurrentHash();
-        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-        		System.out.println(":::: Tool "+name+": lastRunHash="+lastRunHash);
-        	}
+    		DEBUG_PRINT(":::: Tool "+name+": lastRunHash="+lastRunHash);
     	}
     	runMode=mode;
     	if (mode!=TOOL_MODE.STOP)  lastRunMode=mode;
@@ -376,9 +387,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		setTimeStamp(); // copy current time to tool timestamp
     		restoreTimeStamp=null; 
         	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-        		System.out.println("::::: Tool "+name+": setTimeStamp="+timeStamp);
+        		DEBUG_PRINT("::::: Tool "+name+": setTimeStamp="+timeStamp);
         		if (name.equals("VivadoTimingReportSynthesis")){
-        			System.out.println("Tool.setMode()");
+        			DEBUG_PRINT("Tool.setMode()");
         		}
         	}
     	} else if (mode == TOOL_MODE.RESTORE){
@@ -388,10 +399,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         		System.out.println("Restore mode, but no restoreMaster for "+name);
     		}
     	}
-    	//    	toolFinished();
-    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-    		System.out.println("--->> "+name+": setMode("+mode+"), lastRunMode="+lastRunMode);
-    	}
+    	DEBUG_PRINT("--->> "+name+": setMode("+mode+"), lastRunMode="+lastRunMode+" "+this.toString()+" threadID="+Thread.currentThread().getId());
     }
     
     public boolean hashMatch(){
@@ -406,9 +414,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     public void setState(TOOL_STATE state) {
     	this.state=state;
-//    	toolFinished();
-    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-    		System.out.println("SetState("+state+") for tool "+getName());
+    	DEBUG_PRINT("SetState("+state+") for tool "+getName()+" threadID="+Thread.currentThread().getId());
+    	if (getRestoreMaster()!=null){
+    		getRestoreMaster().setState(state); // TODO: Should it be always or just for SUCCESS ?
     	}
     }
 
@@ -735,7 +743,6 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		throw new ConfigException("Tool "+getName()+" has save='"+saveTool.getName()+
     				"' defined, but does not have the result attribute.");
     	}
-    	//saveMaster
     	saveTool.saveMaster=this;
     }
 
@@ -743,9 +750,6 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	return saveTool;
     }
     public Tool getSaveMaster(){
-//		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-//			System.out.println("getSaveMaster("+name+")-> "+((saveMaster==null)?"null":"NOT null"));
-//		}
     	return saveMaster;
     }
     
@@ -831,10 +835,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	List<String> names=	getResultNames();
     	if (names!=null) {
         	if (names.size()==0) return null; 
-//    		return ToolLogFile.insertTimeStamp(names.get(0),SelectedResourceManager.getDefault().getBuildStamp());
         	String stamp=getTimeStamp();
         	if (stamp==null){
-//        		System.out.println("*** Warning: no timestamp available in Tool.getStateFile() for tool "+getName()); // OK when dryRun
         		return null;
         	}
     		return ToolLogFile.insertTimeStamp(names.get(0),getTimeStamp());
@@ -845,9 +847,17 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	return null;
     }
     
+	/**
+	 * Set tool timestamp from the command timestamp (set when user launches the sequence)
+	 */
 	public void setTimeStamp(){
     	timeStamp=SelectedResourceManager.getDefault().getBuildStamp();
     }
+	
+	public boolean alreadyRan(){
+		return (timeStampRan!=null) && (timeStampRan.equals(SelectedResourceManager.getDefault().getBuildStamp()));
+	}
+	
 	public void setRestoreTimeStamp(){
     	restoreTimeStamp=SelectedResourceManager.getDefault().getBuildStamp();
     }
@@ -906,24 +916,45 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     
     public void saveState(IMemento memento) {
-        memento.putBoolean(name+TAG_TOOL_PINNED, new Boolean(pinned));
-        memento.putString(name+TAG_TOOL_STATE, this.state.toString());
-        if (timeStamp!=null) memento.putString(name+TAG_TOOL_TIMESTAMP, timeStamp);
-        if (lastRunHash!=0)  memento.putInteger(name+TAG_TOOL_LASTRUNHASH, lastRunHash);
+    	IMemento toolMemento= memento.createChild(MEMENTO_TOOL_TYPE,name);
+    	toolMemento.putBoolean(MEMENTO_TOOL_PINNED, new Boolean(pinned));
+    	toolMemento.putString(MEMENTO_TOOL_STATE,  this.state.toString());
+        if (timeStamp!=null) toolMemento.putString(MEMENTO_TOOL_TIMESTAMP, timeStamp);
+        if (lastRunHash!=0)  toolMemento.putInteger(MEMENTO_TOOL_LASTRUNHASH, lastRunHash);
+        IMemento depMemento;
         for(String state:dependStatesTimestamps.keySet()){
-        	String stamp=dependStatesTimestamps.get(state);
-        	memento.putString(name+TAG_TOOL_STATEDEPSTAMP+state, stamp);
+        	depMemento=toolMemento.createChild(MEMENTO_TOOL_STATEDEPSTAMP);
+        	depMemento.putString(MEMENTO_TOOL_DEPNAME, state);
+        	depMemento.putString(MEMENTO_TOOL_TIMESTAMP, dependStatesTimestamps.get(state));
+//        	DEBUG_PRINT("state="+state+" depMemento="+ depMemento.toString());
         }
         for(String file:dependFilesTimestamps.keySet()){
-        	String stamp=dependFilesTimestamps.get(file);
-        	memento.putString(name+TAG_TOOL_FILEDEPSTAMP+file, stamp);
+        	depMemento=toolMemento.createChild(MEMENTO_TOOL_FILEDEPSTAMP);
+        	depMemento.putString(MEMENTO_TOOL_DEPNAME, file);
+        	depMemento.putString(MEMENTO_TOOL_TIMESTAMP, dependFilesTimestamps.get(file));
+//        	DEBUG_PRINT("file="+file+" depMemento="+ depMemento.toString());
         }
+//        DEBUG_PRINT("*** Updated memento for tool "+name+ "  memento="+toolMemento.toString());
+        
     }
-    
+
     public void restoreState(IMemento memento) {
-    	Boolean pinned=memento.getBoolean(name+TAG_TOOL_PINNED);
+    	IMemento[] toolMementos=memento.getChildren(MEMENTO_TOOL_TYPE);
+    	IMemento toolMemento=null;
+    	for (IMemento tm:toolMementos){
+    		if (tm.getID().equals(name)){
+    			toolMemento=tm;
+    			break;
+    		}
+    	}
+    	if (toolMemento==null){
+    		System.out.println("No memento data for tool "+name);
+    		return;
+    	}
+//    	System.out.println("Got memento for "+name+": "+toolMemento.toString());
+    	Boolean pinned=toolMemento.getBoolean(MEMENTO_TOOL_PINNED);
     	if (pinned!=null) this.pinned=pinned;
-    	String state=memento.getString(name+TAG_TOOL_STATE);
+    	String state=toolMemento.getString(MEMENTO_TOOL_STATE);
     	if (state!=null){
     		try {
     			this.state=TOOL_STATE.valueOf(state);
@@ -933,28 +964,37 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		if (this.state==TOOL_STATE.KEPT_OPEN)
     			this.state=TOOL_STATE.NEW;
     	}
-    	String timestamp=memento.getString(name+TAG_TOOL_TIMESTAMP);
+    	String timestamp=toolMemento.getString(MEMENTO_TOOL_TIMESTAMP);
     	if (timestamp!=null) this.timeStamp=timestamp;
-    	Integer hc=memento.getInteger(name+TAG_TOOL_LASTRUNHASH);
+    	Integer hc=toolMemento.getInteger(MEMENTO_TOOL_LASTRUNHASH);
     	if (hc!=null) lastRunHash=hc;
     	clearDependStamps();
-    	String[] mementoKeys=memento.getAttributeKeys();
-    	String prefix=name+TAG_TOOL_STATEDEPSTAMP;
-    	for (String key:mementoKeys){
-    		if (key.startsWith(prefix)) {
-    			String value=memento.getString(key);
-    			setStateTimeStamp(key.substring(prefix.length()), value);
+    	IMemento[] mementoStates=toolMemento.getChildren(MEMENTO_TOOL_STATEDEPSTAMP);
+    	for (IMemento ms:mementoStates){
+    		String depName=ms.getString(MEMENTO_TOOL_DEPNAME);
+    		String value=ms.getString(MEMENTO_TOOL_TIMESTAMP);
+    		if ((depName==null) || (value==null)){
+    			System.out.println("problem reading memento data for "+name+":" +
+    					MEMENTO_TOOL_STATEDEPSTAMP+": got name="+depName+" stamp="+value);
+    		} else {
+    			setStateTimeStamp(depName, value);
+  //  			DEBUG_PRINT("Got memento data for "+name+":" +	MEMENTO_TOOL_STATEDEPSTAMP+": name="+depName+" stamp="+value);
     		}
     	}
-    	prefix=name+TAG_TOOL_FILEDEPSTAMP;
-    	for (String key:mementoKeys){
-    		if (key.startsWith(prefix)) {
-    			String value=memento.getString(key);
-    			setFileTimeStamp(key.substring(prefix.length()), value);
-    		}
-    	}
+    	
+    	 mementoStates=toolMemento.getChildren(MEMENTO_TOOL_FILEDEPSTAMP);
+     	for (IMemento ms:mementoStates){
+     		String depName=ms.getString(MEMENTO_TOOL_DEPNAME);
+     		String value=ms.getString(MEMENTO_TOOL_TIMESTAMP);
+     		if ((depName==null) || (value==null)){
+     			System.out.println("problem reading memento data for "+name+":" +
+     					MEMENTO_TOOL_FILEDEPSTAMP+": got name="+depName+" stamp="+value);
+     		} else {
+     			setFileTimeStamp(depName, value);
+//    			DEBUG_PRINT("Got memento data for "+name+":" + MEMENTO_TOOL_FILEDEPSTAMP+": name="+depName+" stamp="+value);
+     		}
+     	}
     }
-    
     
     public void checkBaseTool() throws ConfigException {
         if(baseToolName != null) {
@@ -1008,11 +1048,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public boolean getIsShell() {
     	return isShell;
     }
-/*    
-    public void setIsShell(boolean isShell) {
-    	this.isShell=isShell;
-    }
-*/    
+
     public String getToolProjectPath() {
     	return projectPath;
     }
@@ -1250,9 +1286,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     
       public BuildParamsItem[] buildParams(boolean dryRun) throws ToolException {
-    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
-    		System.out.println("buildParams("+dryRun+"): tool "+getName()+" state="+getState()+" dirty="+isDirty()+" hashMatch()="+hashMatch()+" pinned="+isPinned());
-    	}
+    	  DEBUG_PRINT("buildParams("+dryRun+"): tool "+getName()+" state="+getState()+" dirty="+isDirty()+" hashMatch()="+hashMatch()+" pinned="+isPinned());
     	
         if(parentPackage != null)
             parentPackage.buildParams();
