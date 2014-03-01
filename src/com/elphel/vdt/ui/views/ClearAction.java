@@ -28,7 +28,7 @@ abstract public class ClearAction extends Action {
     
     private String message;
 
-    private static final String[] buttonText = new String[]{"Delete", "Cancel"}; 
+    protected static final String[] buttonText = new String[]{"Delete", "Cancel"}; 
     
     public ClearAction(String message) {
         this.message = message;

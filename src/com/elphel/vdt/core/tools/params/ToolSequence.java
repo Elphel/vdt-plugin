@@ -102,12 +102,75 @@ public class ToolSequence {
 		}
 		toolFinished(null);
 	}
-	public void clearStateFiles(){
-		MessageUI.error("TODO: implement clearStateFiles()");
+
+	public Set<IFile> getOldFiles(Set<String> dirs){
+		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
+		Set<String> linkFilesTargets=new HashSet<String>();
+		Set<IFile> nonLinkFiles=new HashSet<IFile>();
+		for (String dir:dirs){
+			IFolder stateDir= project.getFolder(dir);
+			if (stateDir.exists()){
+				IResource [] files;
+				try {
+					files=stateDir.members();
+				} catch (CoreException e) {
+					System.out.println("Error getting member resources in directory "+stateDir.getLocation().toOSString());
+					continue;
+				}
+				for (IResource file:files){
+					if (file.getType()==IResource.FILE) {
+						if (file.isLinked()){
+//							System.out.println("Got linked file: "+file.getLocation().toOSString());
+							linkFilesTargets.add(file.getRawLocation().toString());
+						} else {
+//							System.out.println("Got non=link file: "+file.getLocation().toOSString());
+							nonLinkFiles.add((IFile) file);
+						}
+					}
+				}
+			}
+		}
+		DEBUG_PRINT("Got "+linkFilesTargets.size()+" links, "+nonLinkFiles.size()+" regular files");
+		Set<IFile> fileToRemove=new HashSet<IFile>(nonLinkFiles);
+		for (IFile file:nonLinkFiles){
+			String fileString=file.getLocation().toString();
+			for (String linkTarget:linkFilesTargets){
+				if (linkTarget.equals(fileString)){
+					fileToRemove.remove(file);
+					break;
+				}
+			}
+		}
+		DEBUG_PRINT("Left "+fileToRemove.size()+" to remove:");
+		for (IFile file:fileToRemove){
+			DEBUG_PRINT("---- "+file.getLocation().toOSString());
+		}
+		return fileToRemove;
 	}
-	public void clearLogFiles(){
-		MessageUI.error("TODO: implement clearLogFiles()");
-	}
+	
+	
+	public Set<String> getStateDirs(){
+		Set <String> dirs = new HashSet<String>();
+		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+			String dir=tool.getStateDir();
+			if (dir!=null){
+				dirs.add(dir);
+			}
+		}
+		return dirs;
+	}	
+	
+	public Set<String> getLogDirs(){
+		Set <String> dirs = new HashSet<String>();
+		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
+			String dir=tool.getLogDir();
+			if (dir!=null){
+				dirs.add(dir);
+			}
+		}
+		return dirs;
+	}	
+	
 	
 	
 	public void setUnfinishedBoot(IMemento memento){

@@ -66,6 +66,13 @@ public class ToolLogFile {
 		return project.getFolder((logDir==null)?DEFAULT_LOG_FOLDER:logDir);
 	}
 
+	public static String getLinkOutName(String logTool, String logName){
+		return getBaseLogName(logTool, logName)+OUTPUT_LOG_SUFFIX+"."+LOG_EXTENSION;
+	}
+	public static String getLinkErrName(String logTool, String logName){
+		return getBaseLogName(logTool, logName)+ERROR_LOG_SUFFIX+"."+LOG_EXTENSION;
+	}
+	
 	public static String getBaseLogName(String logTool, String logName){
 		String baseName=logTool;
 		if ((logName!=null) && (logName.length()>0))baseName+=TOOL_TO_LINE_SEPARATOR+logName;
@@ -78,6 +85,8 @@ public class ToolLogFile {
 		return logTool+REGEX_SEP_TO_END;
 	}
 
+	
+	
 	public static String getTimeStamp(String logTool, String name){
 		if (name==null) return null;
 		// remove prefix
