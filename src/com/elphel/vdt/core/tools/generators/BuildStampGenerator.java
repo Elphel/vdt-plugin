@@ -18,6 +18,7 @@
 package com.elphel.vdt.core.tools.generators;
 
 import com.elphel.vdt.VDT;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 public class BuildStampGenerator extends AbstractGenerator {
@@ -26,16 +27,16 @@ public class BuildStampGenerator extends AbstractGenerator {
         return NAME;
     }
     
-    public BuildStampGenerator() 
+    public BuildStampGenerator(FormatProcessor topProcessor) 
     {
-    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    	super(topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
     }
 
     protected String[] getStringValues() {
 //    	if (    	return new String[] {(tool0!=null)?tool0.getStateFile(): ""};
 //    	System.out.println("#### BuildStampGenerator(): tool0="+
 //((tool0!=null)?(tool0.getName()+" state="+tool0.getState()+" mode="+tool0.getMode()):"null"));
-    	String stamp=(tool0!=null)?tool0.getTimeStamp(): null;
+    	String stamp=(getCurrentTool()!=null)?getCurrentTool().getTimeStamp(): null;
     	if (stamp==null) stamp=SelectedResourceManager.getDefault().getBuildStamp();
     	return new String[] {stamp};
     }

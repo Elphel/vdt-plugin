@@ -397,6 +397,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             		toggleLinkedTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_LINKED);
             	}
             	toolSequence.setToolsDirtyFlag(false); //boolean update) - recalculate dirty flags
+            	fDesignFlowView.updateLaunchAction();
             }
         };
         toggleLinkedTools.setToolTipText("Toggle tool dependency");
@@ -411,6 +412,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         };
         toggleSaveTools.setToolTipText("Save tool state");
         toggleSaveTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_SAVE);
+        
+        //isSaveEnabled()
         
 
         toggleStopTools= new Action("Stop tools", Action.AS_CHECK_BOX) {
@@ -906,36 +909,10 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
                && (selectedItem.getTool() != null);
         showPropertiesAction.setEnabled(enabled);
         clearToolPropertiesAction.setEnabled(enabled);
-        ((ViewLabelProvider) viewer.getLabelProvider()).fireChanged();
-/*        
         
-        viewer.getTree().update();
-        viewer.refresh();
-        System.out.println("DesignFlowView: should update now");
-//        Display.update(); 
-        compositeParent.getDisplay().update(); 
-        String menuTitle=getMenuTitle();
-        if (menuTitle.endsWith("*")){
-        	changeMenuTitle(menuTitle.substring(0,menuTitle.length()-1));
-        }else {
-        	changeMenuTitle(menuTitle+"*");
-        }
-//        changeMenuTitle(menuTitle+"***");
-        compositeParent.redraw(); // widget is disposed
-        compositeParent.update();
- //       changeMenuTitle(menuTitle+"");
-//Well you need to determine the row position range for the child rows you want to refresh and then fire a RowVisualChangeEvent.
-//        That should do the trick.      
-//        System.out.println("count="+viewer.get)
-        Tree tree=viewer.getTree();
-        System.out.println("count="+tree.getItemCount());
-        TreeItem [] items=tree.getItems();
-        for (TreeItem ti:items){
-        	System.out.println("--- "+ti.getText());
-        }
-//       ((BaseLabelProvider) viewer.getLabelProvider()).fireLabelProviderChanged(new LabelProviderChangedEvent( null));
+        toggleSaveTools.setEnabled(toolSequence.isSaveEnabled());
+        
         ((ViewLabelProvider) viewer.getLabelProvider()).fireChanged();
-        */
     } // updateLaunchAction()
 
     private void launchTool(

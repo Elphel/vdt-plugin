@@ -153,6 +153,8 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
                       , IProgressMonitor monitor
                       ) throws CoreException 
     {
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
+			System.out.println("-=-=-=- launch: "+VDTLaunchUtil.getToolName(configuration)+" threadID="+Thread.currentThread().getId());
         try {
             doLaunch(configuration, mode, launch, monitor);
         } catch(Exception e) {

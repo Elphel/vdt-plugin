@@ -302,12 +302,15 @@ public class Parameter implements Cloneable, Updateable {
         if(type.isList())
             throw new ToolException("Assigning a non-list value to list parameter");
         
+        
         checkValue(value);
-        
-        currentValue.clear();
-        currentValue.add(value);
-        
-        canonicalizeValue(currentValue);
+//        currentValue.clear();
+//        currentValue.add(value);
+//        canonicalizeValue(currentValue);
+        List<String> newValue=new ArrayList<String>();
+        newValue.add(value);
+        canonicalizeValue(newValue);
+        currentValue = newValue;
     }
     
     public void setCurrentValue(List<String> value) throws ToolException {
@@ -318,11 +321,14 @@ public class Parameter implements Cloneable, Updateable {
         if(!type.isList())
             throw new ToolException("Assigning a list value to non-list parameter");
 
-        checkValue(value);
-        
-        currentValue = new ArrayList<String>(value);
-        
-        canonicalizeValue(currentValue);
+//        checkValue(value);
+//        currentValue = new ArrayList<String>(value);
+//        canonicalizeValue(currentValue);
+
+        List<String> copyValue=new ArrayList<String>(value);
+        checkValue(copyValue);
+        canonicalizeValue(copyValue);
+        currentValue = copyValue;
     }
     
     public List<String> getCurrentValue() {
@@ -350,13 +356,14 @@ public class Parameter implements Cloneable, Updateable {
 //        }
 
         List<String> processedDefaultValue = null;        
-        if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
+        if (topProcessor==null) topProcessor=new FormatProcessor(context);
+        else topProcessor.setCurrentTool(context);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
         		//new RepeaterRecognizer(),
-        		new SimpleGeneratorRecognizer(menuMode),
+        		new SimpleGeneratorRecognizer(menuMode,topProcessor),
         		new ContextParamListRecognizer(context, topProcessor), // Andrey: returning list as the source parameter 
         		//                                                            new ContextParamRecognizer(context)
-        		new DefaultListGeneratorRecognizer(menuMode)
+        		new DefaultListGeneratorRecognizer(menuMode, topProcessor)
         }, topProcessor);
 
         try {
@@ -529,11 +536,12 @@ public class Parameter implements Cloneable, Updateable {
         }
         
         String format = syntax.getFormat();
-        if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
+        if (topProcessor==null) topProcessor=new FormatProcessor(context);
+        else topProcessor.setCurrentTool(context);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             new ParamFormatRecognizer(this),
                                                             new ParamRepeaterRecognizer(this),
-                                                            new SimpleGeneratorRecognizer(),
+                                                            new SimpleGeneratorRecognizer(topProcessor),
                                                             new RepeaterRecognizer(),
                                                         },topProcessor);
         
@@ -634,10 +642,11 @@ public class Parameter implements Cloneable, Updateable {
     //
     
     private String getOmitValue(FormatProcessor topProcessor) {
-        if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
+        if (topProcessor==null) topProcessor=new FormatProcessor(context);
+        else topProcessor.setCurrentTool(context);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             new ContextParamRecognizer(context, topProcessor),
-                                                            new SimpleGeneratorRecognizer()
+                                                            new SimpleGeneratorRecognizer(topProcessor)
                                                         }, false,topProcessor);
 
         String resolvedOmitValue = ConditionUtils.resolveContextCondition(context, omitValue, topProcessor);
@@ -669,8 +678,16 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     private void canonicalizeValue(List<String> value) {
-        for(int i = 0; i < value.size(); i++)
+    	int oldSize=value.size();
+        for(int i = 0; i < value.size(); i++) {
+        	try { // just catching a BUG, normally not needed
             value.set(i, type.canonicalizeValue(value.get(i)));
+        	} catch (Exception e){
+        		MessageUI.error("Catching a bug in Parameter.jave, value.size="+value.size()+" oldSize="+oldSize+" threadID="+Thread.currentThread().getId());
+        		System.out.println("Catching a bug, value.size="+value.size()+" oldSize="+oldSize+" threadID="+Thread.currentThread().getId());
+        		System.out.println("value="+value.toString());
+        	}
+        }
     }
     
     private void checkBoolInitialValue(String boolAttr, String attrName)

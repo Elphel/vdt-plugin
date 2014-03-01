@@ -18,13 +18,14 @@
 package com.elphel.vdt.core.tools.generators;
 
 import com.elphel.vdt.VDT;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 public class StateFileGenerator extends AbstractGenerator {
     public static final String NAME = VDT.GENERATOR_ID_STATE_FILE;
-    public StateFileGenerator()
+    public StateFileGenerator(FormatProcessor topProcessor)
     {
-    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    	super(topProcessor);
     }
     
     public String getName() {
@@ -32,6 +33,7 @@ public class StateFileGenerator extends AbstractGenerator {
     }
     
     protected String[] getStringValues() {
-    	return new String[] {(tool0!=null)?tool0.getStateFile(): ""};
+//    	return new String[] {(tool0!=null)?tool0.getStateFile(): ""};
+    	return new String[] {(getCurrentTool()!=null)?getCurrentTool().getStateFile(): ""};
     }
 }

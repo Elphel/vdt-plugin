@@ -1084,7 +1084,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public String[] getExtensions() {
         if(extensions == null)
             return null;
-    	FormatProcessor topProcessor=new FormatProcessor(null,null);
+    	FormatProcessor topProcessor=new FormatProcessor(this);
         FormatProcessor processor = new FormatProcessor(
                                             new Recognizer[] {
                                             		new ContextParamRecognizer(this,topProcessor),
@@ -1117,11 +1117,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
 // Can be two different processors for labels and resources 
         
 //SimpleGeneratorRecognizer(true) may be not needed, as current file is already set here
-    	FormatProcessor topProcessor=new FormatProcessor(null,null);
+    	FormatProcessor topProcessor=new FormatProcessor(this);
         FormatProcessor processor = new FormatProcessor(
                                             new Recognizer[] {
                                             		new ContextParamRecognizer(this,topProcessor),
-                                                    new SimpleGeneratorRecognizer(true) // in menuMode
+                                                    new SimpleGeneratorRecognizer(true,topProcessor) // in menuMode
 //                                                    new SimpleGeneratorRecognizer(false) // in menuMode
                                             		},topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
 
@@ -1158,11 +1158,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
     // Should be called after getMenuActions to have updateContextOptions() already ran
     public String getIgnoreFilter(){ // calculate and get
     	if (ignoreFilter==null) return null;
-    	FormatProcessor topProcessor=new FormatProcessor(null,null);
+    	FormatProcessor topProcessor=new FormatProcessor(this);
         FormatProcessor processor = new FormatProcessor(
                 new Recognizer[] {
                 		new ContextParamRecognizer(this,topProcessor),
-                        new SimpleGeneratorRecognizer(true) // in menuMode
+                        new SimpleGeneratorRecognizer(true,topProcessor) // in menuMode
 //                        new SimpleGeneratorRecognizer(false) // in menuMode
                 		},topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
         List<String> results=null;
@@ -1306,11 +1306,13 @@ public class Tool extends Context implements Cloneable, Inheritable {
     protected List<String> buildCommandString(String paramStringTemplate, FormatProcessor topProcessor)
         throws ToolException
     {
-    	if (topProcessor==null) topProcessor=new FormatProcessor(null,null);
+        if (topProcessor==null) topProcessor=new FormatProcessor(this);
+        else topProcessor.setCurrentTool(this);
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
                                                             new ToolParamRecognizer(this,topProcessor),
 //                                                            new SimpleGeneratorRecognizer(),
-                                                            new SimpleGeneratorRecognizer(this),
+//                                                            new SimpleGeneratorRecognizer(this),
+                                                            new SimpleGeneratorRecognizer(topProcessor),
                                                             new RepeaterRecognizer(),
                                                             new ContextParamRecognizer(this,topProcessor),
                                                             new ContextParamRepeaterRecognizer(this)

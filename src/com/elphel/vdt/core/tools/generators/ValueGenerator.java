@@ -51,7 +51,8 @@ public class ValueGenerator extends AbstractGenerator {
 
     public String[] generate() {
         if (!param.getType().isList()) {
-        	List<String> rslt=param.getValue(topProcessor);
+//        	List<String> rslt=param.getValue(topProcessor);
+        	List<String> rslt=new ArrayList<String>(param.getValue(topProcessor));
         	if (rslt.isEmpty()){
         		System.out.println("BUG in ValueGenerator.java#generate: param.getValue() isEmpty for "+param.getID());
         		return new String[]{prefix + "" + suffix};

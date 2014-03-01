@@ -27,44 +27,36 @@ public class SimpleGeneratorRecognizer implements Recognizer {
     private static final String CONTROL_SEQ = "%"; 
     private static final int CONTROL_SEQ_LEN = CONTROL_SEQ.length();
    
-    private static AbstractGenerator[] generators = new AbstractGenerator[] {
-        new OSNameGenerator(),
-        new ProjectNameGenerator(),
-        new ProjectPathGenerator(),
-        new TopModuleNameGenerator(),
-        new SelectedFileGenerator(),
-        new CurrentFileGenerator(),
-        new CurrentFileBaseGenerator(),
-        new ChosenActionGenerator(),
-        new BuildStampGenerator(),
-        new UserNameGenerator(),
-        new StateDirGenerator(),
-        new StateFileGenerator(),
-        new StateBaseGenerator()
-//        new SourceListGenerator("","",""),
-//        new FilteredSourceListGenerator("","","")
-    };
+    private AbstractGenerator[] generators;
   
-    public SimpleGeneratorRecognizer(){
+    public SimpleGeneratorRecognizer(FormatProcessor processor){
     	super();
-    }
-    public SimpleGeneratorRecognizer(boolean menuMode){
-    	super();
+        AbstractGenerator[] templateGenerators = new AbstractGenerator[] {
+            new OSNameGenerator(),
+            new ProjectNameGenerator(),
+            new ProjectPathGenerator(),
+            new TopModuleNameGenerator(),
+            new SelectedFileGenerator(),
+            new CurrentFileGenerator(),
+            new CurrentFileBaseGenerator(),
+            new ChosenActionGenerator(),
+            new BuildStampGenerator(processor),
+            new UserNameGenerator(),
+            new StateDirGenerator(processor),
+            new StateFileGenerator(processor),
+            new StateBaseGenerator(processor)
+//            new SourceListGenerator("","",""),
+//            new FilteredSourceListGenerator("","","")
+        };
+    	generators=templateGenerators;
     	for (int i=0;i<generators.length;i++){
-    		generators[i].setMenuMode(menuMode);
+    		generators[i].setTopProcessor(processor);
     	}
     }
-    public SimpleGeneratorRecognizer(boolean menuMode, Tool tool){
-    	super();
+    public SimpleGeneratorRecognizer(boolean menuMode, FormatProcessor processor){
+    	this(processor);
     	for (int i=0;i<generators.length;i++){
     		generators[i].setMenuMode(menuMode);
-    		generators[i].setTool(tool);
-    	}
-    }
-    public SimpleGeneratorRecognizer(Tool tool){
-    	super();
-    	for (int i=0;i<generators.length;i++){
-    		generators[i].setTool(tool);
     	}
     }
 	public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor) {

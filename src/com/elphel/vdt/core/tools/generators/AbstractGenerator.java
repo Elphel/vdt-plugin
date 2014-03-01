@@ -34,7 +34,7 @@ public abstract class AbstractGenerator {
     protected String separator;
     private final boolean forcedMultiline;
     private boolean menuMode=false; // managing menu items, not running tool. Ignore Generator errors
-    protected Tool tool0; // "tool" was already used in ToolParamRecognizer / Andrey
+//    protected Tool tool0; // "tool" was already used in ToolParamRecognizer / Andrey
     protected FormatProcessor topProcessor; // to protect from cycles in recursion, replacing static in FormatProcessor / Andrey
 
     public AbstractGenerator(FormatProcessor processor) {
@@ -69,14 +69,23 @@ public abstract class AbstractGenerator {
         }
         topProcessor=processor;
     }
+    public void setTopProcessor(FormatProcessor processor){
+    	topProcessor=processor;
+    }
+    
     public void setMenuMode(boolean menuMode){
     	this.menuMode=menuMode;
     }
     public boolean getMenuMode(){
     	return menuMode;
     }
-    public void setTool(Tool tool){
-    	this.tool0=tool;
+ //   public void setTool(Tool tool){
+ //   	this.tool0=tool;
+ //   }
+    
+    public Tool getCurrentTool(){
+    	if (topProcessor==null) return null;
+    	return topProcessor.getCurrentTool();
     }
     protected FormatProcessor getTopProcessor(){return topProcessor;}
 

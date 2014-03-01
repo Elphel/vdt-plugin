@@ -26,35 +26,31 @@ import com.elphel.vdt.core.tools.params.Tool;
 public class DefaultListGeneratorRecognizer implements Recognizer {
     private static final String CONTROL_SEQ = "%"; 
     private static final int CONTROL_SEQ_LEN = CONTROL_SEQ.length();
-   
-    private static AbstractGenerator[] generators = new AbstractGenerator[] {
-       new SourceListGenerator("","",null),
-       new FilteredSourceListGenerator("","",null),
-       new FileListGenerator("","",null)
-    };
-  
-    public DefaultListGeneratorRecognizer(){
+    private AbstractGenerator[] generators;
+//    public DefaultListGeneratorRecognizer(boolean menuMode, Tool tool,FormatProcessor topProcessor){
+    public DefaultListGeneratorRecognizer(boolean menuMode, FormatProcessor topProcessor){
     	super();
-    }
-    public DefaultListGeneratorRecognizer(boolean menuMode){
-    	super();
+    	AbstractGenerator[] generators=  new AbstractGenerator[]{
+    			new SourceListGenerator("","",null),
+    			new FilteredSourceListGenerator("","",null, topProcessor),
+    			new FileListGenerator("","",null)
+    	};
+    	this.generators=generators;
     	for (int i=0;i<generators.length;i++){
     		generators[i].setMenuMode(menuMode);
+//    		generators[i].setTool(tool);
     	}
     }
-    public DefaultListGeneratorRecognizer(boolean menuMode, Tool tool){
-    	super();
-    	for (int i=0;i<generators.length;i++){
-    		generators[i].setMenuMode(menuMode);
-    		generators[i].setTool(tool);
-    	}
+    public DefaultListGeneratorRecognizer(FormatProcessor topProcessor){
+    	this(false,topProcessor);
     }
-    public DefaultListGeneratorRecognizer(Tool tool){
-    	super();
-    	for (int i=0;i<generators.length;i++){
-    		generators[i].setTool(tool);
-    	}
-    }
+//    public DefaultListGeneratorRecognizer(boolean menuMode,FormatProcessor topProcessor){
+//    	this(menuMode,null,topProcessor);
+//    }
+//    public DefaultListGeneratorRecognizer(Tool tool, FormatProcessor topProcessor){
+//        public DefaultListGeneratorRecognizer(Tool tool, FormatProcessor topProcessor){
+//    	this(false,tool,topProcessor);
+//    }
 	public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor) {
         RecognizerResult result = new RecognizerResult(); 
                 

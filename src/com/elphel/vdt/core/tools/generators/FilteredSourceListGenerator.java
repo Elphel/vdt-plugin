@@ -31,8 +31,12 @@ import org.eclipse.core.resources.IResource;
 
 
 
+
+
 //import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
+import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.core.verilog.VerilogUtils;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
@@ -52,9 +56,10 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
     
     public FilteredSourceListGenerator(String prefix, 
                                String suffix, 
-                               String separator) 
+                               String separator,
+                               FormatProcessor topProcessor) 
     {
-        super(prefix, suffix, separator, null ); // null for topFormatProcessor - this generator can not reference other parameters
+        super(prefix, suffix, separator, topProcessor ); 
     }
     
     public String getName() {
@@ -62,9 +67,25 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
     }
 
     protected String[] getStringValues() {
+        String ignoreFilter= SelectedResourceManager.getDefault().getFilter(); // old version
+    	
+//    	System.out.println("FilteredSourceListGenerator(), tool0="+((tool0==null)?null:(tool0.getName()+tool0.getIgnoreFilter())));
+//    	System.out.print("FilteredSourceListGenerator(): ");
+    	if (topProcessor!=null){
+    		Tool tool=topProcessor.getCurrentTool();
+//    		System.out.println(", tool="+tool+" tool name="+((tool!=null)?tool.getName():null));
+    		if (tool != null) {
+    			ignoreFilter=tool.getIgnoreFilter();
+//        		System.out.println(" tool="+tool.getName()+", ignoreFilter="+ignoreFilter);
+
+    		} else {
+    			System.out.println("FilteredSourceListGenerator():  topProcessor.getCurrentTool() is null");
+    		}
+    	} else {
+    		System.out.println("FilteredSourceListGenerator():  topProcessor is null");
+    	}
         String[] file_names = null;
         IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
-        String ignoreFilter= SelectedResourceManager.getDefault().getFilter();
         Pattern ignorePattern = null;
         if (ignoreFilter!=null){
         	try {

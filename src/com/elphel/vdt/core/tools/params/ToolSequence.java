@@ -31,6 +31,7 @@ import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.core.launching.LaunchCore;
 import com.elphel.vdt.core.launching.ToolLogFile;
+import com.elphel.vdt.core.launching.VDTLaunchUtil;
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
@@ -133,9 +134,11 @@ public class ToolSequence {
 	public void toolFinished(Tool tool){
 		if (tool!=null) doToolFinished(tool);
 		if (designFlowView!=null){
+//			System.out.print("1.designFlowView.updateLaunchAction() threadID="+Thread.currentThread().getId());
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					designFlowView.updateLaunchAction(); // Run from Display thread to prevent "invalid thread access" when called from Runner
+//					System.out.println("  2.designFlowView.updateLaunchAction() threadID="+Thread.currentThread().getId());
 				}
 			});
 		}
@@ -179,7 +182,7 @@ public class ToolSequence {
 			if (isStop()){
 				Tool waitingTool=findWaitingTool();
 				if (waitingTool!=null){
-					waitingTool.setState(TOOL_STATE.FAILURE);
+//					waitingTool.setState(TOOL_STATE.FAILURE);
 					DEBUG_PRINT("doToolFinished("+tool.getName()+") "+tool.toString()+"  state="+tool.getState()+" threadID="+Thread.currentThread().getId());
 					waitingTool.setMode(TOOL_MODE.STOP);
 				}
@@ -275,7 +278,8 @@ public class ToolSequence {
 						twa.getIgnoreFilter()); //ignoreFilter);
 				tool.setMode(twa.getMode()) ; //TOOL_MODE.RUN);
 				tool.setChoice(twa.getChoice());
-
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
+					System.out.println(">>>>>>>> launching: "+tool.getName()+" threadID="+Thread.currentThread().getId());
 				LaunchCore.launch( tool,
 						SelectedResourceManager.getDefault().getSelectedProject(),
 						twa.getFullPath(),
@@ -289,6 +293,8 @@ public class ToolSequence {
 //		SelectedResourceManager.getDefault().updateActionChoice(fullPath, choice, ignoreFilter); // Andrey
 //		SelectedResourceManager.getDefault().setBuildStamp(); // Andrey
 		// apply designFlowView to the tool itself
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
+			System.out.println(">>>>>>>> launching 2: "+tool.getName()+" threadID="+Thread.currentThread().getId());
 		LaunchCore.launch( tool,
 				SelectedResourceManager.getDefault().getSelectedProject(),
 				SelectedResourceManager.getDefault().getChosenTarget(),
@@ -534,6 +540,8 @@ public class ToolSequence {
 				System.out.println("Failed to initiate continueRunningTools() for tool="+tool.getName());
 			}
 		} else {
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
+				System.out.println(">>>>>>>> launching 3: "+tool.getName()+" threadID="+Thread.currentThread().getId());
 			LaunchCore.launch( tool,
 					SelectedResourceManager.getDefault().getSelectedProject(),
 					fullPath,
@@ -557,6 +565,8 @@ public class ToolSequence {
 		tool.setChoice(0);
 		SelectedResourceManager.getDefault().updateActionChoice(fullPath, 0, null); // Andrey
 		SelectedResourceManager.getDefault().setBuildStamp(); // OK - even for log? Or use old/selected one?
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
+			System.out.println(">>>>>>>> launching 4: "+tool.getName()+" threadID="+Thread.currentThread().getId());
 		// apply designFlowView to the tool itself
 		LaunchCore.launch(tool,
 				SelectedResourceManager.getDefault().getSelectedProject(),
@@ -614,6 +624,7 @@ public class ToolSequence {
 				return;
 			}
 			tryAutoSave(toolsToSave.get(0)); // launch autosave and trigger toolFinished() when done
+			releaseSave();
 		}
 	}
 	public void releaseSave(){
@@ -629,6 +640,7 @@ public class ToolSequence {
 		return saveOn;
 	}
 	public boolean isSaveEnabled(){
+//		System.out.println("isSaveEnabled(): "+!getToolsToSave().isEmpty());
 		return !getToolsToSave().isEmpty();
 	}
 	
@@ -861,6 +873,8 @@ public class ToolSequence {
     		// apply designFlowView to the tool itself
 			Display.getDefault().asyncExec(new Runnable() { 
 				public void run() {
+					if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
+						System.out.println(">>>>>>>> launching 5: "+fTool.getName()+" threadID="+Thread.currentThread().getId());
 		    		try {
 						LaunchCore.launch( fTool,
 								fProject,
@@ -881,7 +895,7 @@ public class ToolSequence {
     		DEBUG_PRINT("Finished (auto)save tool "+tool.getName()+" for "+tool.getName());
 			if (isSave()) { // more to save?
 				List<Tool> toolsToSave=getToolsToSave(); // find if there are any sessions in unsaved state - returns list (not yet processed)
-				if ((toolsToSave!=null) && (toolsToSave.size()>=0)){
+				if ((toolsToSave!=null) && !toolsToSave.isEmpty()){
 					if (toolsToSave.get(0).getSaveMaster()!=null){
 						System.out.println("Seems to be a BUG that might cause infinite attempts to save while processing tool "+
 								tool.getName()+", first save tool "+toolsToSave.get(0).getName()+

@@ -436,8 +436,10 @@ public abstract class Context {
     protected List<String> buildCommandString(String paramStringTemplate, FormatProcessor topProcessor)
         throws ToolException
     {
+        if (topProcessor==null) topProcessor=new FormatProcessor(this); // or use "context" 
+        else topProcessor.setCurrentTool(this); // or use "context"
         FormatProcessor processor = new FormatProcessor(new Recognizer[] {
-                                                            new SimpleGeneratorRecognizer(),
+                                                            new SimpleGeneratorRecognizer(topProcessor),
                                                             new RepeaterRecognizer()
                                                             // new ContextParamRecognizer(this),
                                                             // new ContextParamRepeaterRecognizer(this)
@@ -451,12 +453,16 @@ public abstract class Context {
             throws ToolException
         {
     	    if (stringTemplate==null) return null;
+    	    
+            if (topProcessor==null) topProcessor=new FormatProcessor(this); // or use "context" 
+            else topProcessor.setCurrentTool(this); // or use "context"
+
     	    Parameter parName=findParam(stringTemplate);
     	    if (parName!=null){
     	    	return parName.getValue(topProcessor).get(0).trim(); // get parameter
     	    }
             FormatProcessor processor = new FormatProcessor(new Recognizer[] {
-                                                                new SimpleGeneratorRecognizer(),
+                                                                new SimpleGeneratorRecognizer(topProcessor),
                                                                 new RepeaterRecognizer()
                                                                 // new ContextParamRecognizer(this),
                                                                 // new ContextParamRepeaterRecognizer(this)

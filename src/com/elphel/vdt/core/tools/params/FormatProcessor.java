@@ -20,6 +20,7 @@ package com.elphel.vdt.core.tools.params;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.params.recognizers.Recognizer;
 import com.elphel.vdt.core.tools.params.recognizers.RecognizerResult;
@@ -42,6 +43,7 @@ public class FormatProcessor {
     
     private String initialTemplate;
     private FormatProcessor topProcessor=null;
+    private Tool currentTool; //current tool - used for FilteredSourceListGenerator();
 //    private static int callCount = 0;
     private int callCount = 0; // only valid for topProcessor
     
@@ -83,6 +85,31 @@ public class FormatProcessor {
         }
 
         return outputLines;
+    }
+    
+    public FormatProcessor(Context context){
+    	this (null,null);
+    	 setCurrentTool(context);
+    	//else if (context instanceof Tool)
+    }
+    
+    
+    public Tool getCurrentTool(){
+    	if (!topProcessor.equals(this)){
+    		System.out.println("Warning: trying to get tool not from the topProcessor");
+    		return topProcessor.getCurrentTool();
+    	}
+    	return currentTool;
+    }
+    public void setCurrentTool(Context context){
+    	if (context instanceof Tool) {
+        	if (!topProcessor.equals(this)){
+        		System.out.println("Warning: trying to set tool not on the topProcessor");
+        		topProcessor.setCurrentTool(context);
+        		return;
+        	}
+    		currentTool=(Tool) context;
+    	}
     }
 
     private List<String> processTemplate(String template)

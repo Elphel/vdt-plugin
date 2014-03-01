@@ -18,6 +18,7 @@
 package com.elphel.vdt.core.tools.generators;
 
 import com.elphel.vdt.VDT;
+import com.elphel.vdt.core.tools.params.FormatProcessor;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 
@@ -27,9 +28,9 @@ import com.elphel.vdt.ui.variables.SelectedResourceManager;
  */
 public class StateBaseGenerator extends AbstractGenerator {
     public static final String NAME = VDT.GENERATOR_ID_STATE_FILE;
-    public StateBaseGenerator()
+    public StateBaseGenerator(FormatProcessor topProcessor)
     {
-    	super(null); // null for topFormatProcessor - this generator can not reference other parameters
+    	super(topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
     }
 
     public String getName() {
@@ -37,7 +38,8 @@ public class StateBaseGenerator extends AbstractGenerator {
     }
     
     protected String[] getStringValues() {
-    	String base=(tool0!=null)?tool0.getStateFile(): "";
+//    	String base=(tool0!=null)?tool0.getStateFile(): "";
+    	String base=(getCurrentTool()!=null)?getCurrentTool().getStateFile(): "";
     	if (base.lastIndexOf('.')>=0) base=base.substring(0,base.lastIndexOf('.'));
     	return new String[] {base};
     }

@@ -105,7 +105,7 @@ public class RepeaterRecognizer implements Recognizer {
                                               FormatProcessor topProcessor) 
     {
     	System.out.println("Ever get here? RepeaterRecognizer.java:findGenerator()"); // yes, sure
-    	AbstractGenerator gen=new FilteredSourceListGenerator(repPrefix, repSuffix, separator);
+    	AbstractGenerator gen=new FilteredSourceListGenerator(repPrefix, repSuffix, separator,topProcessor);
     	if (genName.equals(gen.getName())) return gen;
     	gen=new SourceListGenerator(repPrefix, repSuffix, separator);
     	if (genName.equals(gen.getName())) return gen;

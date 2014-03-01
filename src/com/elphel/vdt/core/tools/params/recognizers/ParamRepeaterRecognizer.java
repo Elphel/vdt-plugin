@@ -60,7 +60,7 @@ public class ParamRepeaterRecognizer extends RepeaterRecognizer {
     		return new ValueGenerator(param, repPrefix, repSuffix, separator, topProcessor);
     	/* Trying to put these here */        
         if(genName.equals(FilteredSourceListGenerator.NAME))
-            return new FilteredSourceListGenerator(repPrefix, repSuffix, separator);
+            return new FilteredSourceListGenerator(repPrefix, repSuffix, separator, topProcessor);
         else if(genName.equals(SourceListGenerator.NAME))
             return new SourceListGenerator(repPrefix, repSuffix, separator);
         else if(genName.equals(FileListGenerator.NAME))
