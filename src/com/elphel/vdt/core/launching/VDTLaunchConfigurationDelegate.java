@@ -118,7 +118,7 @@ public class VDTLaunchConfigurationDelegate implements ILaunchConfigurationDeleg
 //        String consoleName=VDTRunner.renderProcessLabel(runConfig.getToolName());
     	
         final String consoleName=runConfig.getOriginalConsoleName();
-        runner.getRunningBuilds().saveUnfinished(consoleName, runConfig );
+        runner.getRunningBuilds().saveUnfinished(consoleName, runConfig ); // has to remove it after playback!!! (others are removed by closing consoles)
         
         String playBackStamp=VDTLaunchUtil.getLogBuildStamp(configuration); // got null
         runConfig.setPlayBackStamp(playBackStamp); // null

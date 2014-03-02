@@ -207,12 +207,15 @@ public class ToolSequence {
 		}
 	}	
 	public void doToolFinished(Tool tool){
-		if (tool.isRunning()) {
+		if (tool.isRunning()) { // PLAYBACK is also isRunning()
 			DEBUG_PRINT("\nTool "+tool.getName()+" is (still) running");
 			return;
 		}
 		DEBUG_PRINT("\n-----> Tool "+tool.getName()+" FINISHED , state="+tool.getState()+", mode="+tool.getLastMode()+" threadID="+Thread.currentThread().getId());
-		
+		if (tool.getLastMode()==TOOL_MODE.PLAYBACK) { // Stopped after finishing playback
+			DEBUG_PRINT("\nTool "+tool.getName()+" finished playback");
+			return;
+		}
 // Restore tool in Run mode - same as RESTORE_MODE ? Change it to tool.setMode?		
 		// RESTORE - only manual command "restore", automatic runs with RUN
 		if ((tool.getState()==TOOL_STATE.SUCCESS) || (tool.getState()==TOOL_STATE.KEPT_OPEN)){
@@ -752,6 +755,7 @@ public class ToolSequence {
 	 * @return never null, may be empty list
 	 */
 	public List<Tool> getToolsToSave(){
+		DEBUG_PRINT("getToolsToSave():");
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		List<Tool> saveToolsList=new ArrayList<Tool>();
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){

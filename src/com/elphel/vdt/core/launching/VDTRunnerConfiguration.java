@@ -182,7 +182,8 @@ public class VDTRunnerConfiguration {
 	}
 	public int getPrevBuildStep(){
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
-			System.out.println("getPrevBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get());
+			System.out.println("getPrevBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +
+					((nextBuildStep==null)?null:nextBuildStep.get()));
 		return prevBuildStep;
 	}
 
@@ -190,7 +191,8 @@ public class VDTRunnerConfiguration {
 	public int getAndIncBuildStep(){
 		prevBuildStep=nextBuildStep.getAndIncrement();
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
-			System.out.println("getAndIncBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get());
+			System.out.println("getAndIncBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +
+					((nextBuildStep==null)?null:nextBuildStep.get()));
 		return prevBuildStep;
 	}
 
@@ -198,7 +200,8 @@ public class VDTRunnerConfiguration {
 		nextBuildStep=new AtomicInteger(0);
 		prevBuildStep=0;
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
-			System.out.println("resetBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get());
+			System.out.println("resetBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +
+					((nextBuildStep==null)?null:nextBuildStep.get()));
 //		updateBuildStep();
 	}
 	
@@ -208,8 +211,10 @@ public class VDTRunnerConfiguration {
 	
 	public boolean acquireBuildStep (int expected){
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
-			System.out.println("acquireBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +nextBuildStep.get()+" expected="+expected);
-		if (nextBuildStep.compareAndSet(expected, expected+1)){
+			System.out.println("acquireBuildStep(): prevBuildStep=" +prevBuildStep+ ", nextBuildStep=" +
+					((nextBuildStep==null)?null:nextBuildStep.get())+
+					" expected="+expected);
+		if ((nextBuildStep!=null) && nextBuildStep.compareAndSet(expected, expected+1)){
 			prevBuildStep=expected;
 			return true;
 		}

@@ -125,6 +125,7 @@ public class ToolLogFile {
 	 * @param buildStamp if null - write log mode, "" - read link (latest) file, else - read that build stamp file 
 	 */
 	public ToolLogFile(
+			boolean writeMode,
 			String logDir,
 			String logTool,
 			String logName,
@@ -141,7 +142,7 @@ public class ToolLogFile {
 		targetOutIFile=null;
 		targetErrIFile=null;
         debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
-		boolean writeMode=(buildStamp==null);
+//		boolean writeMode=(buildStamp==null);
 		if (!hasOut && !hasErr){
 			return; // nothing to do
 		}
@@ -181,7 +182,7 @@ public class ToolLogFile {
 		targetErrIFile = singleFile? targetOutIFile : iLogFolder.getFile(baseNameErr+buildStampWithSep+ext);
 		
 		if (writeMode) {
-			outBytes=0; // jsut for debugging
+			outBytes=0; // just for debugging
 			errBytes=0;
 			byte [] emptyBA={};
 

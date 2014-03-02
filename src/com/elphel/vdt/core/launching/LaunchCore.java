@@ -240,7 +240,7 @@ public class LaunchCore {
             		logBuildStamp);
             if (VDTLaunchUtil.getRunner().getRunningBuilds().isAlreadyOpen(tool.getName())){
 //           	System.out.println("LaunchCore:launch() tool="+tool.getName()+" was already open! Ignoring... ");
-//            	return;
+            	return;
             }
 //        	System.out.println("DebugUITools.launch() tool="+tool.getName()+" project="+project.getName()+" resource="+resource.toString()+" logBuildStamp="+logBuildStamp);
             DebugUITools.launch(launchConfig, ILaunchManager.RUN_MODE);

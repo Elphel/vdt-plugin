@@ -202,6 +202,7 @@ public class VDTConsoleRunner{
         String timeStamp=ToolsCore.getTool(runConfig.getToolName()).getTimeStamp();
         toolLogFile=(((fSendOutputToStreamProxy!=null) || (fSendErrorsToStreamProxy!=null)))?
         		(new ToolLogFile (
+        				true,
         				runConfig.getLogDir(),
         				runConfig.getToolName(),
         				buildParamsItem.getLogName(),
@@ -259,11 +260,12 @@ public class VDTConsoleRunner{
         		}
         	}
         };
-        if (processOut!=null) VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated
+        if (processOut!=null) VDTLaunchUtil.getRunner().getRunningBuilds().addMonListener( // to remove listener when parser is terminated null pointer
         		DebugUITools.getConsole(processOut), //IConsole parserConsole,
         		consoleOutStreamMonitor,
         		outputListener);
-        consoleOutStreamMonitor.addListener(outputListener );
+        
+        consoleOutStreamMonitor.addListener(outputListener ); // got frozen here
         //       }
         // Problems occurred when invoking code from plug-in: "org.eclipse.ui.console".
         // Exception occurred during console property change notification.
@@ -375,6 +377,7 @@ public class VDTConsoleRunner{
             	try {
 					Thread.sleep(VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY);
 				} catch (InterruptedException e) {
+					System.out.println("Failed Thread.sleep  for "+ VDTLaunchUtil.CLOSE_INPUT_STREAM_DELAY);
 				}
     			stdoutStreamProxy.closeInputStream();
 			} catch (IOException e) {

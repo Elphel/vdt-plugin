@@ -99,9 +99,14 @@ public class RunningBuilds {
 	}
 	
 	public void addMonListener(IConsole parserConsole, IStreamMonitor monitor, IStreamListener listener){
-		synchronized (parserListeners){
-			parserListeners.put(parserConsole, new MonListener(monitor, listener));
+		if (parserListeners==null){
+			MessageUI.error("BUG in addMonListener(): parserListeners=null - enable breakpoints");
+			System.out.println("BUG in addMonListener(): parserListeners=null");
+			return;
 		}
+//		synchronized (parserListeners){
+			parserListeners.put(parserConsole, new MonListener(monitor, listener)); // java.lang.NullPointerException
+//		}
 	}
 	private void removeMonListener(IConsole parserConsole){
 		MonListener monListener;
@@ -209,7 +214,7 @@ public class RunningBuilds {
 		while (iter.hasNext()) {
 			String consoleName=iter.next();
 			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
-				System.out.print(i+": "+consoleName);
+				System.out.println((i++)+": "+consoleName);
 			}
 		
 		}		
@@ -295,13 +300,30 @@ public class RunningBuilds {
 			if (toolName.equals(runConfig.getToolName())){
 				Tool tool=ToolsCore.getTool(runConfig.getToolName());
 //				tool.setRunning(false);
-	    		System.out.println("RunningBuilds#isAlreadyOpen("+toolName+"), state="+tool.getState()+" threadID="+Thread.currentThread().getId());
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) { 
+					System.out.println("RunningBuilds#isAlreadyOpen("+toolName+"), state="+tool.getState()+" consoleName="+
+							consoleName+" threadID="+Thread.currentThread().getId()); // Reused old VDTRunner()
+					for (String key:unfinishedBuilds.keySet()){
+						System.out.println("Unfinished build: "+key);
+					}
+				}
 	    		tool.setMode(TOOL_MODE.STOP);
 				tool.toolFinished();
 				if (tool.getState()==TOOL_STATE.KEPT_OPEN) {
-					MessageUI.error("Termninal that starts by this tool ("+toolName+") is already open in console \""+consoleName+"\"");
+					MessageUI.error("Termninal that starts by this tool ("+toolName+") is already open in console \""+consoleName+"\". You may close it manually.");
+					tool.toolFinished();
 					return true;
 				}
+	    		MessageUI.error("Something is wrong in RunningBuilds#isAlreadyOpen as the console for the specified tool "+tool.getName()+" is already open");
+	    		tool.setState(TOOL_STATE.FAILURE);
+				tool.toolFinished();
+	    		return true;
+			}
+		}
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+			System.out.println("RunningBuilds#isAlreadyOpen("+toolName+"), no match threadID="+Thread.currentThread().getId()); 
+			for (String key:unfinishedBuilds.keySet()){
+				System.out.println("Unfinished build: "+key+" tool "+unfinishedBuilds.get(key).getToolName());
 			}
 		}
 		return false;

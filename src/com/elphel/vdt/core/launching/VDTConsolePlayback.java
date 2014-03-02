@@ -95,6 +95,7 @@ public class VDTConsolePlayback{
         // Open logfiles for reading (if available)        
         boolean twoFiles=(stdoutParser!=null) && (stderrParser!=null); 
         ToolLogFile toolLogFile=new ToolLogFile (
+        		        false,
         				runConfig.getLogDir(),
         				runConfig.getToolName(),
         				buildParamsItem.getLogName(),

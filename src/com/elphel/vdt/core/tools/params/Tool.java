@@ -376,7 +376,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public void setMode(TOOL_MODE mode) {
     	DEBUG_PRINT(">>--- "+name+": setMode("+mode+"), runMode="+runMode+", lastRunMode="+lastRunMode+" "+this.toString()+" threadID="+Thread.currentThread().getId());
     	if (mode !=TOOL_MODE.WAIT) this.toolWaitingArguments = null;
-    	if ((runMode!=TOOL_MODE.STOP) && (mode==TOOL_MODE.STOP)){ // just stopped
+    	if ((runMode!=TOOL_MODE.PLAYBACK) && (runMode!=TOOL_MODE.STOP) && (mode==TOOL_MODE.STOP)){ // just stopped, but not from PLAYBACK
     		timeStampRan=timeStamp; // to determine that the tool is tried for the second time in a launch (loop) 
     		lastRunHash=getCurrentHash();
     		DEBUG_PRINT(":::: Tool "+name+": lastRunHash="+lastRunHash);

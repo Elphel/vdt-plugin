@@ -297,7 +297,7 @@ public class VDTRunner {
 // 		tool.setTimeStamp(); //will set at start
 		if ((tool.getState()==TOOL_STATE.SUCCESS) && runConfig.isKeptOpen()) {
 			tool.setState(TOOL_STATE.KEPT_OPEN);
-		} else { // failure on not
+		} else { // failure or not
 			runningBuilds.removeConfiguration(consoleName);
 			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING))
 				System.out.println("VDTRunner#doResumeLaunch("+consoleName+") - removed configuartion, tool="+tool.getName()+" "+tool.toString()+"  state="+tool.getState()+" threadID="+Thread.currentThread().getId());
@@ -362,8 +362,10 @@ public class VDTRunner {
 			}
 			if (debugPrint) System.out.println("Skipping program runner as playback is not implemented, arguments were "+argumentsItemsArray[numItem].getNameAsParser());
 		} //for (;numItem<argumentsItemsArray.length;numItem++){
+		getRunningBuilds().removeConfiguration(consoleName); // normal tool launch removes it by console listener (when console is closed)
 		if (debugPrint) System.out.println("All playbacks finished");
 		monitor.done();
+		// remove configuration!!
 //		ToolsCore.getTool(runConfig.getToolName()).setRunning(false);
 		ToolsCore.getTool(runConfig.getToolName()).setMode(TOOL_MODE.STOP);
 		ToolsCore.getTool(runConfig.getToolName()).toolFinished();
@@ -423,11 +425,13 @@ public class VDTRunner {
     }
     
     public static String renderProcessLabel(String[] commandLine) {
-        String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(new Date(System.currentTimeMillis()));
+//        String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(new Date(System.currentTimeMillis()));
+        String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG).format(new Date(System.currentTimeMillis()));
         return Txt.s("Launch.Process.LabelFormat", new String[] {commandLine[0], timestamp});
     }
     public static String renderProcessLabel(String toolName) {
-        String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(new Date(System.currentTimeMillis()));
+//        String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(new Date(System.currentTimeMillis()));
+        String timestamp= DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG).format(new Date(System.currentTimeMillis()));
         return Txt.s("Launch.Process.LabelFormat", new String[] {toolName, timestamp});
     }
 } // class VDTRunner
