@@ -30,10 +30,12 @@ public class ParamGroup extends UpdateableStringsContainer
     private String label;
     private boolean visible;
     private Condition relevant;
+    private double weight; // heigher the weight, later the group
         
     public ParamGroup(String name,
                       String label,
                       boolean visible,
+                      double weight,
                       ConditionalStringsList params,
                       ConditionalStringsList deleteParams,
                       List<NamedConditionalStringsList> insertParams,
@@ -55,12 +57,14 @@ public class ParamGroup extends UpdateableStringsContainer
 
         this.visible = visible;
         this.relevant = relevant;
+        this.weight=weight;
     }
 
     public ParamGroup(ParamGroup paramGroup) {
         this(paramGroup.name,
              paramGroup.label,
              paramGroup.visible,
+             paramGroup.weight,
              paramGroup.strings != null? 
                      (ConditionalStringsList)paramGroup.strings.clone() : null,
              paramGroup.deleteStrings != null? 
@@ -92,6 +96,10 @@ public class ParamGroup extends UpdateableStringsContainer
     
     public boolean isVisible() {
         return visible;
+    }
+    
+    public double getWeight(){
+    	return weight;
     }
     
     public boolean isRelevant() {

@@ -55,6 +55,9 @@ public class ParamGroupNodeReader extends AbstractConditionNodeReader {
         String name    = XMLConfig.getAttributeValue(node, XMLConfig.PARAMGROUP_NAME_ATTR);
         String label   = XMLConfig.getAttributeValue(node, XMLConfig.PARAMGROUP_LABEL_ATTR);
         String visible = XMLConfig.getAttributeValue(node, XMLConfig.PARAMGROUP_VISIBLE_ATTR);
+        String weightString = XMLConfig.getAttributeValue(node, XMLConfig.PARAMGROUP_WEIGHT_ATTR);
+        
+        
         
         if(name == null && label == null)
             throw new ConfigException("Parameter group in context '" + context.getName() + 
@@ -68,6 +71,15 @@ public class ParamGroupNodeReader extends AbstractConditionNodeReader {
         } else {
             isVisible = true;
         }
+        double weight=1.0;
+        if (weightString!=null){
+        	try {
+        		weight=Double.parseDouble(weightString);
+        	} catch (Exception e){
+                throw new ConfigException("Parameter group in context '" + context.getName() + 
+                        "' has invalid weight string '"+weightString+"' - floating point value is expected.");        
+        	}
+        }
         
         ConditionalStringsList params = 
             config.readConditionalStringsNode(node, context, condition);
@@ -79,6 +91,7 @@ public class ParamGroupNodeReader extends AbstractConditionNodeReader {
         return new ParamGroup(name, 
                               label,
                               isVisible,
+                              weight,
                               params,
                               deleteParams,
                               insertParams,

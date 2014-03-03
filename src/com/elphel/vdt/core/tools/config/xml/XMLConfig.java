@@ -65,6 +65,7 @@ public class XMLConfig extends Config {
     static final String PARAMGROUP_NAME_ATTR = "name";
     static final String PARAMGROUP_LABEL_ATTR = "label";
     static final String PARAMGROUP_VISIBLE_ATTR = "visible";
+    static final String PARAMGROUP_WEIGHT_ATTR = "weight";
     public static final String PARAMGROUP_SEPARATOR = "---";
     
     static final String PARAMETER_TAG = "parameter";

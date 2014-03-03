@@ -17,10 +17,13 @@
 package com.elphel.vdt.ui.views;
 
 import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+
 import com.elphel.vdt.core.tools.params.ToolSequence;
 import com.elphel.vdt.veditor.VerilogPlugin;
 
@@ -60,9 +63,10 @@ public class ClearLogFiles extends ClearAction {
         if (messageBox.getReturnCode() == 0) {
     		for (IFile file:toRemove){
     			try {
-					file.delete(0,null);
+//					file.delete(IResource.ALWAYS_DELETE_PROJECT_CONTENT ,null);
+					file.delete(true ,null);
 				} catch (CoreException e) {
-					System.out.println("Could not delete "+file.getLocation().toOSString());
+					System.out.println("Could not delete "+file.getLocation().toOSString()+", exception:"+e);
 				}
     		}
         }

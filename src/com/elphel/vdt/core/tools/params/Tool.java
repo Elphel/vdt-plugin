@@ -35,6 +35,7 @@ import com.elphel.vdt.core.tools.params.types.ParamTypeBool;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString.KIND;
 import com.elphel.vdt.core.tools.params.types.RunFor;
+import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.VDTPluginImages;
 import com.elphel.vdt.ui.views.DesignFlowView;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
@@ -45,12 +46,12 @@ import com.elphel.vdt.veditor.preference.PreferenceStrings;
 public class Tool extends Context implements Cloneable, Inheritable {
     private static final String ICON_ID_PREFIX = VDT.ID_VDT + ".Tool.Image.";
     private static final String ICON_ID_ACTION = ".action.";
-    private static final String TAG_TOOL_PINNED = ".toolstate.pinned";
-    private static final String TAG_TOOL_STATE =  ".toolstate.state";
-    private static final String TAG_TOOL_TIMESTAMP =  ".toolstate.timeStamp";
-    private static final String TAG_TOOL_LASTRUNHASH =  ".toolstate.lastRunHash";
-    private static final String TAG_TOOL_FILEDEPSTAMP =  ".toolstate.fileDependency.";
-    private static final String TAG_TOOL_STATEDEPSTAMP =  ".toolstate.stateDependency.";
+//    private static final String TAG_TOOL_PINNED = ".toolstate.pinned";
+//    private static final String TAG_TOOL_STATE =  ".toolstate.state";
+//    private static final String TAG_TOOL_TIMESTAMP =  ".toolstate.timeStamp";
+//    private static final String TAG_TOOL_LASTRUNHASH =  ".toolstate.lastRunHash";
+//    private static final String TAG_TOOL_FILEDEPSTAMP =  ".toolstate.fileDependency.";
+//    private static final String TAG_TOOL_STATEDEPSTAMP =  ".toolstate.stateDependency.";
     private static final String MEMENTO_TOOL_TYPE =  VDT.ID_VDT+".tool";
     private static final String MEMENTO_TOOL_PINNED = "pinned";
     private static final String MEMENTO_TOOL_STATE =  "state";
@@ -527,6 +528,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (restoreString==  null) restoreString =  baseTool.restoreString;
     	if (saveString==     null) saveString =     baseTool.saveString;
     	if (autoSaveString== null) autoSaveString = baseTool.autoSaveString;
+//  What about output lines attributes?  	
+    	
+    	
+    	
     }
     
     public void initDisabled() throws ConfigException{
@@ -1440,9 +1445,24 @@ public class Tool extends Context implements Cloneable, Inheritable {
 
     private void inheritParamGroups() throws ConfigException {
         EntityUtils.update(baseTool.paramGroups, paramGroups);
+// Sort  paramGroups according to weight
+        boolean inOrder=false;
+        while (!inOrder){
+        	inOrder=true;
+        	for (int i=0;i<(paramGroups.size()-1);i++){
+        		if (paramGroups.get(i).getWeight()>paramGroups.get(i+1).getWeight()){
+        			paramGroups.add(i,paramGroups.remove(i+1));
+        			inOrder=false;
+        		}
+        	}
+        }
     }
 
     private void inheritCommandLines() throws ConfigException {
+    	DEBUG_PRINT("inheritCommandLines(), baseTool="+baseTool.getName()+", this="+getName());
+    	if (getName().equals("VivadoSynthesis")){
+//    		MessageUI.error("inheritCommandLines() for "+getName());
+    	}
         EntityUtils.update(baseTool.commandLinesBlocks, commandLinesBlocks);
     }
     

@@ -62,7 +62,9 @@
 		restore="RestoreVivadoSynthesis"
 		disable="DisableVivadoSynth"
 		autosave="AutosaveVivadoSynthesis"
-		save="SaveVivadoSynthesis"	>
+		save="SaveVivadoSynthesis"
+		inherits="VivadoToolPrototype"
+		>
 		
 		<extensions-list>
 			<extension mask="v" />
@@ -178,6 +180,7 @@
 					type="String" format="CopyValue" visible="false"  />
         			
 <!-- parser parameters -->
+<!-- 
         <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
         			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
@@ -203,7 +206,7 @@
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
         <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
         			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
-        			
+        			 -->
 <!--  invisible/calculated parameters -->        			
         <parameter	id="AutosaveVivadoSynthesis" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
                     visible="false" type="Boolean" format="None"/>
@@ -255,6 +258,7 @@
 		        "quiet"
 		        "verbose"
 			</group>
+<!-- 			
 			<group name="Parser">
 				"NoFileProblem"
 				"Memdata"
@@ -264,12 +268,11 @@
 		        "Project"
 		        "Timing"
 		        "OtherProblems"
-				"---"
 				"PatternErrors"
 				"PatternWarnings"
  				"PatternInfo"
-				 				 
 			</group>
+			 -->
 		</input>
 
 		<output>
@@ -298,7 +301,7 @@
 			      prompt="@@FINISH@@"
 			      success="synth_design completed successfully"
 			      log=""
-			      stdout="parser_VivadoSynth">
+			      stdout="parser_Vivado">
 			      <!-- synth_design completed successfully -->
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"
@@ -344,6 +347,7 @@
 			      "\n"
 				"puts \"@@FINISH@@\"\n"
 			</line>
+<!-- 			
 			<line name="parser_VivadoSynth"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
@@ -352,9 +356,8 @@
      			"%GrepEWI"
      			"| %SedPaths"
      			<if NoBabyTalk="true">
-     				"| grep --line-buffered -v \"license\""
+     				"| grep - -line-buffered -v \"license\""
      			</if>
-				<!-- Various grep filters -->
 				"%Memdata"
 		        "%Synth"
 		        "%Netlist"
@@ -363,10 +366,12 @@
 		        "%Timing"
 		        "%OtherProblems"
      			<if NoFileProblem="true">
-     			   	<!-- Add  [Synthesis:0000] to lines that do not have [file:line] - then "Synthesis" will appear in "Problems" location-->
      				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Synthesis:0000\]@'"
      			</if>
 			</line>
+ -->
+      			   	<!-- Add  [Synthesis:0000] to lines that do not have [file:line] - then "Synthesis" will appear in "Problems" location-->
+ 			
 		</output>
 	</tool>
 	

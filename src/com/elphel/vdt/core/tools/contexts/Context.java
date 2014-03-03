@@ -206,7 +206,8 @@ public abstract class Context {
     	if ((pattern==null) || (pattern.length()==0)) return pattern;
     	Parameter param=findParam(pattern);
     	if (param==null) return pattern;
-    	List<String> lv=param.getCurrentValue();
+//    	List<String> lv=param.getCurrentValue();
+    	List<String> lv=param.getValue(null); // null - topFormatProcessor
     	if ((lv==null) || (lv.size()==0)) return null;
     	return lv.get(0);
     }
