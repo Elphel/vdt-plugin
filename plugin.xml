@@ -5,7 +5,7 @@
     <extension point="org.eclipse.ui.editors"> 
       <editor 
          id="com.elphel.vdt.ConstraintsEditor" 
-         name="Text Editor" 
+         name="%editor.name.2" 
          extensions="xdc,sdc" 
          class="org.eclipse.ui.editors.text.TextEditor"
          default="true"> 
@@ -15,7 +15,7 @@
     <extension point="org.eclipse.ui.editors"> 
       <editor 
          id="net.sourceforge.GTKWave" 
-         name="GTKWave Waveform Viewer" 
+         name="%editor.name.3" 
          extensions="sav,lxt" 
          command="gtkwave"
          icon="gtkwave.ico" 
