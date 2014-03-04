@@ -241,7 +241,7 @@ public abstract class Context {
     	// calling them with dryRun=true;
     	for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
     		try {
-    			tool.buildParams(false);
+    			tool.buildParams(true); // was false
     	    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
     			if (tool.hashMatch()) System.out.println("recalcHashCodes(): "+tool.getName()+
     					" hashMatch()="+tool.hashMatch()+
@@ -249,7 +249,7 @@ public abstract class Context {
     					" getLastRunHash()="+tool.getLastRunHash());
     	    	}
     		} catch (ToolException e) {
-    			System.out.println("failed buildParams(false) on tool="+tool.getName()+", e="+e.toString());
+    			System.out.println("failed buildParams(true) on tool="+tool.getName()+", e="+e.toString());
     		}
     	}
     }
@@ -406,9 +406,9 @@ public abstract class Context {
 				String [] params=item.getParams();
 				if (params!=null) for (int i=0;i<params.length;i++){
 					currentHash += params[i].hashCode();
-//					if (name.equals("VivadoSynthesis")){
-//						System.out.println(params[i]+": "+currentHash);
-//					}
+//			if (name.equals("VivadoBitstream")){
+//				System.out.println(params[i]+": "+currentHash);
+//			}
 
 				}
 			}
@@ -417,8 +417,8 @@ public abstract class Context {
 // Seems that during build it worked on a working copy of the tool, so calculated parameter did not get back
 		Tool proto=ToolsCore.getConfig().getContextManager().findTool(name);
 //		System.out.println("Calculated currentHash for "+name+"="+currentHash);
-//		if (name.equals("VivadoSynthesis")){
-//			System.out.println("Check here: VivadoSynthesis");
+//		if (name.equals("VivadoBitstream")){
+//			System.out.println("Check here: VivadoBitstream");
 //		}
 		if (proto!=null){
 			if (proto!=this){

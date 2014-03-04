@@ -29,6 +29,7 @@
 		disable="DisableVivadoOptPhys"
 		autosave="AutosaveVivadoOptPhys"
 		save="SaveVivadoOptPhys"
+		inherits="VivadoToolPrototype"
 		>
 		<action-menu>
 			<action label="Post placement optimize" resource="" icon="opt_yellow.png" />
@@ -98,36 +99,22 @@
         <parameter	id="verbose_phys_opt" outid="verbose" label="Verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
-<!-- parser parameters -->
-        <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
-        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
-        			visible="true"  type="String" format="CopyValue"/>
-        <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
-        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
-        			visible="true"  type="String" format="CopyValue"/>
-        <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
-        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
-        			visible="true"  type="String" format="CopyValue"/>
-        <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
-        			default="true" visible="true" omit="false" type="Boolean" format="None"/>
-        <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Memdata"   label="Memdata" tooltip= "Enable problems with [Memdata to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Netlist"   label="Netlist" tooltip= "Enable problems with [Netlist to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Opt"       label="Opt"     tooltip= "Enable problems with [Opt to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Project"   label="Project" tooltip= "Enable problems with [Project to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Timing"    label="Timing"  tooltip= "Enable problems with [Timing to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Pwropt"    label="Pwropt"  tooltip= "Enable problems with [Pwropt to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Vivado_Tcl" label="Vivado_Tcl"  tooltip= "Enable problems with [Vivado_Tcl to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
-        			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
+<!-- parser parameters - will have different values than the base tool -->
+        <parameter id="PatternErrors"/>
+        <parameter id="PatternWarnings"/>
+        <parameter id="PatternInfo"/>
+        <parameter id="NoFileProblem"/>
+        <parameter id="Drc"/>
+        <parameter id="Vivado_Tcl"/>
+        <parameter id="Route"/>
+        <parameter id="Memdata"/>
+        <parameter id="Synth"/>
+        <parameter id="Netlist"/>
+        <parameter id="Opt"/>
+        <parameter id="Project"/>
+        <parameter id="Timing"/>
+        <parameter id="Pwropt"/>
+        <parameter id="OtherProblems"/>
 
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			
@@ -170,23 +157,6 @@
        			"quiet_phys_opt"
        			"verbose_phys_opt"
 			</group>
-			<group name="Parser">
-				"NoFileProblem"
-		        "Drc"
-				"Memdata"
-		        "Netlist"
-		        "Opt"
-		        "Project"
-		        "Timing"
-		        "Pwropt"
-		        "Vivado_Tcl"
-		        "OtherProblems"
-				"---"
-				"PatternErrors"
-				"PatternWarnings"
- 				"PatternInfo"
-			</group>
-			
 		</input>
 
 		<output>
@@ -198,7 +168,7 @@
 			      prompt="@@FINISH@@"
 			      success="phys_opt_design completed successfully"
 			      log=""
-			      stdout="parser_VivadoOptPhys">
+			      stdout="parser_Vivado">
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"			      
 			      "file mkdir $outputDir\n"
@@ -233,30 +203,6 @@
 				      "\n"
 			      </if>
 				"puts \"@@FINISH@@\"\n"
-			</line>
-			<line name="parser_VivadoOptPhys"
-				errors=   "PatternErrors"
-				warnings= "PatternWarnings"
-				info=     "PatternInfo">
-				"-c"
-     			"%GrepEWI"
-     			"| %SedPaths"
-     			<if NoBabyTalk="true">
-     				"| grep --line-buffered -v \"license\""
-     			</if>
-     			"%Drc"
-     			"%Memdata"
-		        "%Netlist"
-		        "%Opt"
-		        "%Project"
-		        "%Timing"
-		        "%Pwropt"
-		        "%Vivado_Tcl"
-		        "%OtherProblems"
-     			<if NoFileProblem="true">
-	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
-     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[PhysOpt:0000\]@'"
-     			</if>
 			</line>
 		</output>
 	</tool>

@@ -169,57 +169,32 @@
 	
  		<parameter id="read_xdc" type="Filelist"
 			 format="read_xdc_syntax" default="%ConstraintsFiles" visible="false" />
-	   <parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
+	    <parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
 			 format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true" />
-		
-<!-- 	   <parameter id="read_xdc" type="Filelist" format="read_xdc_syntax" label="" tooltip="read_xdc"
-			default="%ConstraintsFiles" visible="false" />  -->
-<!--        <parameter	id="top"              label="" tooltip= "Top module of the design"
-        			default="%%TopModule" visible="false" omit="" type="String" format="Dash"/> -->
-   	   <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
+   	    <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
         			
-<!-- parser parameters -->
-<!-- 
-        <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
-        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
-        			visible="true"  type="String" format="CopyValue"/>
-        <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
-        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
-        			visible="true"  type="String" format="CopyValue"/>
-        <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
-        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
-        			visible="true"  type="String" format="CopyValue"/>
-        <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
-        			default="true" visible="true" omit="false" type="Boolean" format="None"/>
-        <parameter	id="Memdata"   label="Memdata" tooltip= "Enable problems with [Memdata to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Synth"     label="Synth"   tooltip= "Enable problems with [Synth to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Netlist"   label="Netlist" tooltip= "Enable problems with [Netlist to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Opt"       label="Opt"     tooltip= "Enable problems with [Opt to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Project"   label="Project" tooltip= "Enable problems with [Project to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Timing"    label="Timing"  tooltip= "Enable problems with [Timing to be reported"
-        			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
-        			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
-        			 -->
+<!-- parser parameters - will have different values than the base tool -->
+        <parameter id="PatternErrors"/>
+        <parameter id="PatternWarnings"/>
+        <parameter id="PatternInfo"/>
+        <parameter id="NoFileProblem"/>
+        <parameter id="Drc"/>
+        <parameter id="Vivado_Tcl"/>
+        <parameter id="Route"/>
+        <parameter id="Memdata"/>
+        <parameter id="Synth"/>
+        <parameter id="Netlist"/>
+        <parameter id="Opt"/>
+        <parameter id="Project"/>
+        <parameter id="Timing"/>
+        <parameter id="Pwropt"/>
+        <parameter id="OtherProblems"/>
 <!--  invisible/calculated parameters -->        			
         <parameter	id="AutosaveVivadoSynthesis" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
                     visible="false" type="Boolean" format="None"/>
         <parameter id="condConstraintsFiles" default="?%%ChosenActionIndex=0 : %ConstraintsFiles, "
                     visible="false" type="Filelist" format="None"/>			
-<!-- 
-        <parameter	id="blabla1"   label="blabla1" tooltip= "blabla1"
-        			default="%blabla2"
-        			visible="true"  type="String" format="CopyValue"/>
-        <parameter	id="blabla2"   label="blabla2" tooltip= "blabla2"
-        			default="%blabla1"
-        			visible="true"  type="String" format="CopyValue"/>
- -->
 			
 		<input>
 			<group name="General">
@@ -258,21 +233,6 @@
 		        "quiet"
 		        "verbose"
 			</group>
-<!-- 			
-			<group name="Parser">
-				"NoFileProblem"
-				"Memdata"
-		        "Synth"
-		        "Netlist"
-		        "Opt"
-		        "Project"
-		        "Timing"
-		        "OtherProblems"
-				"PatternErrors"
-				"PatternWarnings"
- 				"PatternInfo"
-			</group>
-			 -->
 		</input>
 
 		<output>
@@ -347,31 +307,6 @@
 			      "\n"
 				"puts \"@@FINISH@@\"\n"
 			</line>
-<!-- 			
-			<line name="parser_VivadoSynth"
-				errors=   "PatternErrors"
-				warnings= "PatternWarnings"
-				info=     "PatternInfo">
-				"-c"
-     			"%GrepEWI"
-     			"| %SedPaths"
-     			<if NoBabyTalk="true">
-     				"| grep - -line-buffered -v \"license\""
-     			</if>
-				"%Memdata"
-		        "%Synth"
-		        "%Netlist"
-		        "%Opt"
-		        "%Project"
-		        "%Timing"
-		        "%OtherProblems"
-     			<if NoFileProblem="true">
-     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Synthesis:0000\]@'"
-     			</if>
-			</line>
- -->
-      			   	<!-- Add  [Synthesis:0000] to lines that do not have [file:line] - then "Synthesis" will appear in "Problems" location-->
- 			
 		</output>
 	</tool>
 	

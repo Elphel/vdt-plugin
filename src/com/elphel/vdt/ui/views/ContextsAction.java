@@ -59,8 +59,8 @@ abstract public class ContextsAction extends Action
     	this.designFlowView=designFlowView;
     }
     
-    public void updateActions(){
-    	if (this.designFlowView!=null) this.designFlowView.updateLaunchAction();
+    public void updateActions(boolean updateDirty){
+    	if (this.designFlowView!=null) this.designFlowView.updateLaunchAction(updateDirty);
     }
     
     public void setContexts(List<Context> contexts) {

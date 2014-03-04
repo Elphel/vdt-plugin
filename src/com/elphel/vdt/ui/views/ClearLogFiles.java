@@ -64,7 +64,7 @@ public class ClearLogFiles extends ClearAction {
     		for (IFile file:toRemove){
     			try {
 //					file.delete(IResource.ALWAYS_DELETE_PROJECT_CONTENT ,null);
-					file.delete(true ,null);
+					file.delete(true ,null); // force
 				} catch (CoreException e) {
 					System.out.println("Could not delete "+file.getLocation().toOSString()+", exception:"+e);
 				}

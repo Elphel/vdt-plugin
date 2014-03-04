@@ -295,9 +295,9 @@ public class Parameter implements Cloneable, Updateable {
     //
     
     public void setCurrentValue(String value) throws ToolException {
-//        if (id.equals("SimulationTopFile")){ // Andrey
-//       	System.out.println("setCurrentValue() SimulationTopFile, value="+value);
-//      }
+//     if (id.equals("PreBitstreamTCL")){ // Andrey
+//       	System.out.println("setCurrentValue() PreBitstreamTCL, value="+value+", this="+this);
+//     }
 
         if(type.isList())
             throw new ToolException("Assigning a non-list value to list parameter");
@@ -314,9 +314,9 @@ public class Parameter implements Cloneable, Updateable {
     }
     
     public void setCurrentValue(List<String> value) throws ToolException {
-//        if (id.equals("SimulationTopFile")){ // Andrey
-//        	System.out.println("setCurrentValue() SimulationTopFile a list value");
-//        }
+//      if (id.equals("PreBitstreamTCL")){ // Andrey
+//          	System.out.println("setCurrentValue() PreBitstreamTCL, value="+value+", this="+this);
+//      }
 
         if(!type.isList())
             throw new ToolException("Assigning a list value to non-list parameter");

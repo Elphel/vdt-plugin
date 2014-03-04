@@ -56,7 +56,7 @@ public class ClearStateFiles extends ClearAction {
         if (messageBox.getReturnCode() == 0) {
     		for (IFile file:toRemove){
     			try {
-					file.delete(0,null);
+					file.delete(true,null); // force - in log files was needed
 				} catch (CoreException e) {
 					System.out.println("Could not delete "+file.getLocation().toOSString());
 				}

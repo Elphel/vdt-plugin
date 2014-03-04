@@ -141,6 +141,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private TOOL_MODE lastRunMode;           // last running (not STOP) mode
     private int lastRunHash;                 // hash code of the last run
     private ToolWaitingArguments toolWaitingArguments; // save here launch parameters when tool need to wait for other tools to run/get restored
+    private double priority; // the lower the earlier tool will run among those with the same dependencies
 	private static void DEBUG_PRINT(String msg){
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
 			System.out.println(msg);
@@ -172,6 +173,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 String saveString,              // name of tool that saves the state of this tool run 
                 String autoSaveString,          // name of boolean that turns on/off auto-save after the tool run
                 boolean abstractTool,
+                double priority,
                 /* never used ??? */
                 List<Parameter> params,
                 List<ParamGroup> paramGroups,
@@ -211,6 +213,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.saveString=          saveString;             // name of tool that saves the state of this tool run 
         this.autoSaveString=      autoSaveString;         // name of boolean that turns on/off auto-save after the tool run
         this.abstractTool=        abstractTool;
+        this.priority =           priority;
 
         disabled=null;
         restoreTool=null;
@@ -452,6 +455,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (imageKeysActions==null) return null;
         return imageKeysActions[actionIndex];
     }
+    
+    public double getPriority(){
+    	return  (Double.isNaN(priority))? 1.0: priority;
+    }
    
     
     public List<RunFor> getRunFor(){
@@ -528,6 +535,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (restoreString==  null) restoreString =  baseTool.restoreString;
     	if (saveString==     null) saveString =     baseTool.saveString;
     	if (autoSaveString== null) autoSaveString = baseTool.autoSaveString;
+//    	System.out.println("copyBaseAttributes(), tool="+getName());
+    	if (Double.isNaN(priority)) priority=       baseTool.priority;
 //  What about output lines attributes?  	
     	
     	
@@ -856,7 +865,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
 	 * Set tool timestamp from the command timestamp (set when user launches the sequence)
 	 */
 	public void setTimeStamp(){
-    	timeStamp=SelectedResourceManager.getDefault().getBuildStamp();
+    	DEBUG_PRINT(getName()+".setTimeStamp()");
+		setTimeStamp(SelectedResourceManager.getDefault().getBuildStamp()); // sometimes (in the beginning) it is null???
     }
 	
 	public boolean alreadyRan(){
@@ -868,6 +878,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
 	
     public void setTimeStamp(String timeStamp){
+    	DEBUG_PRINT(getName()+".setTimeStamp("+timeStamp+")");
     	this.timeStamp=timeStamp;
     }
     
@@ -924,8 +935,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	IMemento toolMemento= memento.createChild(MEMENTO_TOOL_TYPE,name);
     	toolMemento.putBoolean(MEMENTO_TOOL_PINNED, new Boolean(pinned));
     	toolMemento.putString(MEMENTO_TOOL_STATE,  this.state.toString());
-        if (timeStamp!=null) toolMemento.putString(MEMENTO_TOOL_TIMESTAMP, timeStamp);
-        if (lastRunHash!=0)  toolMemento.putInteger(MEMENTO_TOOL_LASTRUNHASH, lastRunHash);
+        if (getTimeStamp()!=null) toolMemento.putString(MEMENTO_TOOL_TIMESTAMP, getTimeStamp());
+        if (getLastRunHash()!=0)  toolMemento.putInteger(MEMENTO_TOOL_LASTRUNHASH, getLastRunHash());
         IMemento depMemento;
         for(String state:dependStatesTimestamps.keySet()){
         	depMemento=toolMemento.createChild(MEMENTO_TOOL_STATEDEPSTAMP);
@@ -939,7 +950,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         	depMemento.putString(MEMENTO_TOOL_TIMESTAMP, dependFilesTimestamps.get(file));
 //        	DEBUG_PRINT("file="+file+" depMemento="+ depMemento.toString());
         }
-//        DEBUG_PRINT("*** Updated memento for tool "+name+ "  memento="+toolMemento.toString());
+        DEBUG_PRINT("*** Updated memento for tool "+name+ "  memento="+toolMemento.toString());
         
     }
 
@@ -970,7 +981,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     			this.state=TOOL_STATE.NEW;
     	}
     	String timestamp=toolMemento.getString(MEMENTO_TOOL_TIMESTAMP);
-    	if (timestamp!=null) this.timeStamp=timestamp;
+    	if (timestamp!=null) setTimeStamp(timestamp);
     	Integer hc=toolMemento.getInteger(MEMENTO_TOOL_LASTRUNHASH);
     	if (hc!=null) lastRunHash=hc;
     	clearDependStamps();
@@ -1182,6 +1193,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
 //    private void updateContextOptions (IProject project){
     public void updateContextOptions (IProject project){ // public to be able to update parameters before setting "dirty" flags
+    	DEBUG_PRINT("~~~updateContextOptions(project) for tool "+getName());
         PackageContext packageContext = getParentPackage();
         if (packageContext != null) {
             OptionsCore.doLoadContextOptions(packageContext);

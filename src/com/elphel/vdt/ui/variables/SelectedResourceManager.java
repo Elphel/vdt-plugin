@@ -328,7 +328,7 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     }
     
     public static boolean afterStamp(String after, String before){
-    	return  parseStamp(before).after(parseStamp(after));
+    	return  parseStamp(after).after(parseStamp(before));
     }
     
     public String getChosenTarget() {

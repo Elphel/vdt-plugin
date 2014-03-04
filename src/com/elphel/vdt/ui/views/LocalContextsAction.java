@@ -63,7 +63,7 @@ public class LocalContextsAction extends ContextsAction {
         if (lastSelected != null) {
             if (openDialog(title, lastSelected, project)== Window.OK){
             	System.out.println("LocalContextsAction.run()");
-            	super.updateActions();
+            	super.updateActions(true);
             }
         }
     }

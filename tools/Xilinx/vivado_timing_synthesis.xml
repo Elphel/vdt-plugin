@@ -33,6 +33,22 @@
 		<!-- Invisible (calculated) parameters -->
 		<!--  same value as %file, but will appear withou "-file" prefix --> 
         <parameter 	id="file" default="%VivadoRemoteDir/%rawfile" visible="false" omit="" type="String" format="Dash"/>
-        			
+        
+<!-- parser parameters - will have different values than the base tool -->
+        <parameter id="PatternErrors"/>
+        <parameter id="PatternWarnings"/>
+        <parameter id="PatternInfo"/>
+        <parameter id="NoFileProblem"/>
+        <parameter id="Drc"/>
+        <parameter id="Vivado_Tcl"/>
+        <parameter id="Route"/>
+        <parameter id="Memdata"/>
+        <parameter id="Synth"/>
+        <parameter id="Netlist"/>
+        <parameter id="Opt"/>
+        <parameter id="Project"/>
+        <parameter id="Timing"/>
+        <parameter id="Pwropt"/>
+        <parameter id="OtherProblems"/>
 	</tool>
 </vdt-project>

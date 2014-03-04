@@ -54,7 +54,7 @@ public class GlobalContextsAction extends ContextsAction {
             	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
             		System.out.println("GlobalContextsAction.run()");
             	}
-            	super.updateActions();
+            	super.updateActions(true);
             }
         }
     }

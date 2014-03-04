@@ -44,7 +44,8 @@ public class SimpleGeneratorRecognizer implements Recognizer {
             new UserNameGenerator(),
             new StateDirGenerator(processor),
             new StateFileGenerator(processor),
-            new StateBaseGenerator(processor)
+            new StateBaseGenerator(processor),
+            new ToolNameGenerator()
 //            new SourceListGenerator("","",""),
 //            new FilteredSourceListGenerator("","","")
         };

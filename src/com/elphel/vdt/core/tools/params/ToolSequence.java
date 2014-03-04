@@ -100,6 +100,7 @@ public class ToolSequence {
 				tool.clearDependStamps();
 			}
 		}
+		setToolsDirtyFlag(true); // update may be needed ?
 		toolFinished(null);
 	}
 
@@ -538,6 +539,55 @@ public class ToolSequence {
 			if (tool.alreadyRan()){
 				DEBUG_PRINT("Report tool "+tool.getName()+" already ran in this launch, skipping");
 				continue;
+			}
+			if (tool.getState()==TOOL_STATE.FAILURE){
+				// find latest of the current states (usually just one)
+//				MessageUI.error("Enable breakpoints, debugging findReportTool()");
+				ToolStateStamp stamp=null;
+				for (String state:depStates){
+					if (openStates.keySet().contains(state)){
+						ToolStateStamp tss=currentStates.get(state);
+						if (tss!=null){
+							if ((stamp==null) || tss.after(stamp)){
+								stamp=tss;
+							}
+						}
+					}
+				}
+				if (stamp!=null) {
+					DEBUG_PRINT("stamp="+stamp.getToolStamp()+"\ntool.getTimeStamp()="+tool.getTimeStamp());
+				} else {
+					DEBUG_PRINT("stamp=null\ntool.getTimeStamp()="+tool.getTimeStamp());
+				}
+				if (tool.getTimeStamp()==null){
+					DEBUG_PRINT("tool.getTimeStamp()=NULL");
+				}
+				if ((stamp==null) ||(tool.getTimeStamp()==null) || stamp.after(tool.getTimeStamp()) || stamp.getToolStamp().equals(tool.getTimeStamp())){ 
+//					tool.recalcHashCodes(); // it was 0 here
+		    		try {
+		    			//Not needed anymore, as these are ran on load (before it was only for good ones)? 
+		    			tool.updateContextOptions(SelectedResourceManager.getDefault().getSelectedProject()); // restoring this too, as once missed tool
+		    			                                                                                      // parameters when tool state was deleted 
+		    			tool.buildParams(true);  // recalculates hashCode for this tool, this is needed
+		    	    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
+		    			System.out.println("recalcHashCodes(): "+tool.getName()+
+		    					" hashMatch()="+tool.hashMatch()+
+		    					" getCurrentHash()="+tool.getCurrentHash()+
+		    					" getLastRunHash()="+tool.getLastRunHash());
+		    	    	}
+		    		} catch (ToolException e) {
+		    			System.out.println("failed buildParams(true) on tool="+tool.getName()+", e="+e.toString());
+		    		}
+					
+					if (tool.hashMatch()) {
+						DEBUG_PRINT("Report tool "+tool.getName()+" failed after the current state was created, skipping it from automatic run.");
+						continue;
+					} else {
+						DEBUG_PRINT("Report tool "+tool.getName()+" failed after the current state was created, but hash is different - retryting.");
+						DEBUG_PRINT("getLastRunHash()="+tool.getLastRunHash()+" getCurrentHash()="+tool.getCurrentHash());
+					}
+				}
+				// will retry again
 			}
 			DEBUG_PRINT("Report tool "+tool.getName()+" can be ran at the current state.");
 			return tool; // All checks passed, return this tool
@@ -1223,8 +1273,11 @@ public class ToolSequence {
     	public String getToolStateFile(){
     		return toolStateFile;
     	}
-    	public boolean after(ToolStateStamp after, ToolStateStamp before){
-    		return SelectedResourceManager.afterStamp(after.getToolStamp(), before.getToolStamp());
+    	public boolean after(ToolStateStamp after){
+    		return SelectedResourceManager.afterStamp(after.getToolStamp(), getToolStamp());
+    	}
+    	public boolean after(String after){
+    		return SelectedResourceManager.afterStamp(after, getToolStamp());
     	}
     }
 	
@@ -1290,12 +1343,12 @@ public class ToolSequence {
 
     /**
      * Scan all succeeded tools and set "dirty" flag if their dependencies do not match stored ones 
-     * 
+     * No, do for all - good or bad (bad needed to be updateContextOptions(project) to set current parameter values -> hashCodes for considering to be auto-rerun
      */
     public void setToolsDirtyFlag(boolean update){
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
-			if (tool.getState()==TOOL_STATE.SUCCESS){
+//			if (tool.getState()==TOOL_STATE.SUCCESS){
 		        if (update){
 		        	// tool.updateContextOptions(project) recalculates parameters, but not the hashcodes
 		        	tool.updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
@@ -1306,7 +1359,7 @@ public class ToolSequence {
 					}
 		        }
 				tool.setDirty(!matchDependState(tool));
-			}
+//			}
 		}
 		// why did it fail?
 		if (SelectedResourceManager.getDefault().isToolsLinked()) {

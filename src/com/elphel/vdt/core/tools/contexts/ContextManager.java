@@ -55,6 +55,7 @@ public class ContextManager {
         for(Tool toolContext : toolContexts)
             toolContext.init(config);
         
+        sortToolContexts(); // according to priority for selecting "report" tools
         initialized = true;
     }
 
@@ -86,11 +87,26 @@ public class ContextManager {
     }
 
     public void addToolContexts(List<Tool> contexts) throws ConfigException {
-        if(initialized)
-            throw new ConfigException(cannotAddMessage);
+    	if(initialized)
+    		throw new ConfigException(cannotAddMessage);
 
-        toolContexts.addAll(contexts);
+    	toolContexts.addAll(contexts);
     }
+    
+    public void sortToolContexts() throws ConfigException {
+        boolean inOrder=false;
+        while (!inOrder){
+        	inOrder=true;
+        	for (int i=0;i<(toolContexts.size()-1);i++){
+        		if (toolContexts.get(i).getPriority()>toolContexts.get(i+1).getPriority()){
+        			toolContexts.add(i,toolContexts.remove(i+1));
+        			inOrder=false;
+        		}
+        	}
+        }
+    }
+    
+    
     
     public Context findContext(String contextName) {
         if(installationContext != null && installationContext.getName().equals(contextName))

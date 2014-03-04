@@ -396,8 +396,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             	} else {
             		toggleLinkedTools.setImageDescriptor(VDTPluginImages.DESC_TOOLS_LINKED);
             	}
-            	toolSequence.setToolsDirtyFlag(false); //boolean update) - recalculate dirty flags
-            	fDesignFlowView.updateLaunchAction();
+//            	toolSequence.setToolsDirtyFlag(false); //boolean update) - recalculate dirty flags
+            	fDesignFlowView.updateLaunchAction(true); // will call toolSequence.setToolsDirtyFlag(false)
             }
         };
         toggleLinkedTools.setToolTipText("Toggle tool dependency");
@@ -431,7 +431,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
             			System.out.println("openInstallationPropertiesDialog()-> OK");
             		}
-                	fDesignFlowView.updateLaunchAction();
+                	fDesignFlowView.updateLaunchAction(true);
                 }; 
             }
         };
@@ -462,7 +462,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
             			System.out.println("GlobalContextsAction.openDialog()-> OK");
             		}
-                	fDesignFlowView.updateLaunchAction();
+                	fDesignFlowView.updateLaunchAction(); // is it already updated?
                 }; 
             }
         };
@@ -488,7 +488,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
             			System.out.println("LocalContextsAction.openDialog()-> OK");
             		}
-                	fDesignFlowView.updateLaunchAction();
+                	fDesignFlowView.updateLaunchAction(); // is it already updated?
                 }; 
             }
         };
@@ -507,7 +507,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
             			System.out.println("openToolPropertiesDialog()-> OK");
             		}
-                	fDesignFlowView.updateLaunchAction();
+                	fDesignFlowView.updateLaunchAction(true);
                 };  
 //              ConsoleView.getDefault().println("Action 1 executed", ConsoleView.MSG_INFORMATION);                
             }
@@ -552,7 +552,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
             			System.out.println("Ran openToolLaunchDialog() ->"+result);
             		}
-                	fDesignFlowView.updateLaunchAction();
+                	fDesignFlowView.updateLaunchAction(true);
                 } catch (CoreException e) {
                     MessageUI.error(Txt.s("Action.OpenLaunchConfigDialog.Error", 
                                           new String[] {selectedItem.getLabel(), e.getMessage()}),
@@ -627,6 +627,13 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     // Made it public to call from ContexOptionsDialog.okPressed() as launch actions might change
 //    private void updateLaunchAction() {
     public void updateLaunchAction() {
+    	updateLaunchAction(false);
+    }
+
+    public void updateLaunchAction(boolean updateDirty) {
+    	if (updateDirty){
+    		toolSequence.setToolsDirtyFlag(false); // if true - recalculates parameters
+    	}
 
 //    	System.out.println("DesignFlowView.updateLaunchAction()");
 
@@ -1201,7 +1208,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     public void finalizeAfterVEditorDB(IMemento memento){
         toolSequence.restoreCurrentStates(memento); // restore states and recalc "dirty" flags - should be after tools themselves
         doLoadDesignMenu();
-        updateLaunchAction();
+        updateLaunchAction(true); // true?
     }
     
     

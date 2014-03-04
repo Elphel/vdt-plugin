@@ -90,7 +90,7 @@
 		        <!-- TODO: change Placement to Routing? or such -->
      			<if NoFileProblem="true">
 	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
-     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[Bitstream:0000\]@'"
+     				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[%%ToolName:0000\]@'"
      			</if>
 			</line>
 		</output>

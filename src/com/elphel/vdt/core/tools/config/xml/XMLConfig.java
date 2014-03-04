@@ -135,7 +135,8 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_RESTORE =        "restore";  // tool name that restores the state from result (shapshot)
     static final String CONTEXT_TOOL_SAVE =           "save";     // tool name that saves the state to result file (snapshot)
     static final String CONTEXT_TOOL_AUTOSAVE =       "autosave"; // Parameter name of boolean type that controls automatic save after success
-    static final String CONTEXT_TOOL_ABSTRACT =       "abstract";  // true for the prototype tools used only for inheritance by others
+    static final String CONTEXT_TOOL_ABSTRACT =       "abstract"; // true for the prototype tools used only for inheritance by others
+    static final String CONTEXT_TOOL_PRIORITY =       "priority"; // lower the value, first to run among otherwise equivalent report tools (taht do not change state)
     
 
     static final String CONTEXT_LINEBLOCK_TAG =           "line";
@@ -646,6 +647,20 @@ public class XMLConfig extends Config {
                 String autoSaveString =  getAttributeValue(contextNode, CONTEXT_TOOL_AUTOSAVE);
 
                 String isAbstractAttr = getAttributeValue(contextNode, CONTEXT_TOOL_ABSTRACT);
+                
+                String priorityString = getAttributeValue(contextNode, CONTEXT_TOOL_PRIORITY);
+
+
+                double priority=Double.NaN;;
+                if (priorityString!=null){
+                	try {
+                		priority=Double.parseDouble(priorityString);
+                	} catch (Exception e){
+                        throw new ConfigException("Tool priority '" + contextName + 
+                                "' has invalid priority string '"+priorityString+"' - floating point value is expected.");        
+                	}
+                }
+                
                 boolean isAbstract;
                 if(isAbstractAttr != null) {
                     checkBoolAttr(isAbstractAttr, CONTEXT_TOOL_ABSTRACT);
@@ -705,6 +720,7 @@ public class XMLConfig extends Config {
                                    saveString, 
                                    autoSaveString,
                                    isAbstract,
+                                   priority,
                                    null,
                                    null,
                                    null);

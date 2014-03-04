@@ -138,6 +138,7 @@ public class VDT {
     //                  Build in generators for tool description 
     //-------------------------------------------------------------------------
 
+    public static final String GENERATOR_ID_TOOL_NAME     = "ToolName"; 
     public static final String GENERATOR_ID_PROJECT_NAME  = "ProjectName"; 
     public static final String GENERATOR_ID_EXE_PATH      = "ExePath"; 
     public static final String GENERATOR_ID_PROJECT_PATH  = "ProjectPath"; 

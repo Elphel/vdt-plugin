@@ -35,6 +35,7 @@ import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.contexts.PackageContext;
 import com.elphel.vdt.core.tools.params.ToolException;
+import com.elphel.vdt.core.tools.params.ToolSequence;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.views.DesignFlowView;
 
@@ -86,7 +87,8 @@ public class ContextOptionsDialog extends Dialog {
                                  , new String[] {context.getLabel(), e.getMessage()})
                                  , e );
         }
-        context.recalcHashCodes(); 
+        context.recalcHashCodes();
+        
         if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
         	System.out.println("ContexOptionsDialog.okPressed()");
         // Need to update Design menu as it uses calculated parameters

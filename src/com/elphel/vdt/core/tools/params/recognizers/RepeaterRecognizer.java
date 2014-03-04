@@ -25,6 +25,8 @@ import com.elphel.vdt.core.tools.generators.FileListGenerator;
 import com.elphel.vdt.core.tools.generators.FilteredSourceListGenerator;
 import com.elphel.vdt.core.tools.generators.TopModulesNameGenerator;
 import com.elphel.vdt.core.tools.generators.SourceListGenerator;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 
 public class RepeaterRecognizer implements Recognizer {
@@ -104,7 +106,12 @@ public class RepeaterRecognizer implements Recognizer {
                                               String separator,
                                               FormatProcessor topProcessor) 
     {
-    	System.out.println("Ever get here? RepeaterRecognizer.java:findGenerator()"); // yes, sure
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+    		System.out.println("Ever get here? RepeaterRecognizer.java:findGenerator("+genName+","+repPrefix+
+    				","+repSuffix+","+separator+","+((topProcessor==null)?"NULL":((topProcessor.getCurrentTool()==null)?
+    						"Null":topProcessor.getCurrentTool().getName()))+")"); // yes, sure
+    		// repeater in the output lines - see grep.xml
+    	}
     	AbstractGenerator gen=new FilteredSourceListGenerator(repPrefix, repSuffix, separator,topProcessor);
     	if (genName.equals(gen.getName())) return gen;
     	gen=new SourceListGenerator(repPrefix, repSuffix, separator);
