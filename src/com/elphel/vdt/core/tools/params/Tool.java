@@ -538,9 +538,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
 //    	System.out.println("copyBaseAttributes(), tool="+getName());
     	if (Double.isNaN(priority)) priority=       baseTool.priority;
 //  What about output lines attributes?  	
-    	
-    	
-    	
+
     }
     
     public void initDisabled() throws ConfigException{
