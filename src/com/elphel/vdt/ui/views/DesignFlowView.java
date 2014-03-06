@@ -18,6 +18,7 @@
 package com.elphel.vdt.ui.views;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -42,6 +43,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 
 import java.io.File;
 
@@ -99,7 +101,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     private static final String TAG_SELECTED_RESOURCE =   "SelectedProject";
     private static final String TAG_SELECTED_HDL_FILE =   "SelectedHdlFile";
     private static final String TAG_SELECTED_HDL_FILTER = "SelectedHdlFilter";
-    private static final String TAG_LINKED_TOOLS = "LinkedTools";
+    private static final String TAG_LINKED_TOOLS =        "LinkedTools";
 
     private TreeViewer viewer;
     private DrillDownAdapter drillDownAdapter;
@@ -196,6 +198,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
      * to create the viewer and initialize it.
      */
     public void createPartControl(Composite parent) {
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+			System.out.println("+++++ createPartControl()");
+    	
     	compositeParent=parent; // will it help to re-draw
         viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
         drillDownAdapter = new DrillDownAdapter(viewer);
@@ -250,13 +255,45 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         
     } // createPartControl()
 
+    private void doLoadDesignMenu(IProject newProject) {
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+			System.out.println("##### doLoadDesignMenu("+newProject+"): current project="+selectedResource.getProject().toString());
+		}
+		if (newProject!=null){
+			restoreCurrentState(newProject);
+    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+    			System.out.println("Restored new project: "+newProject.toString());
+   	   	    IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
+   	   	    if ((HDLFile!=null) && (toolSequence!=null)){
+   	   	    	if (VerilogUtils.existsVeditorOutlineDatabase(newProject)){
+   	   	    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+   	   	    			System.out.println("VEditor DB for "+newProject+" already exist");
+   	   	    		toolSequence.setUnfinishedBoot(null,false);
+   	   	    		finalizeAfterVEditorDB(memento);
+   	   	    	} else {
+   	   	    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+   	   	    			System.out.println("Initiating DB rebuild HDLFile="+HDLFile);
+   	   	    		toolSequence.setUnfinishedBoot(null,true);
+   	   	    		VerilogUtils.getTopModuleNames((IFile) HDLFile); // will initiate DB rebuild, updateDirty and call doLoadDesignMenu();
+   	   	    	}
+   	   	    	return; 
+   	   	    }
+		}
+		doLoadDesignMenu();
+    }
+
     private void doLoadDesignMenu() {
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+			System.out.println("#### doLoadDesignMenu(): project="+selectedResource.getProject().toString());
+		}
         String menuName = selectedResource == null
                         ? null
                         : OptionsCore.doLoadOption(desigMenuName, selectedResource.getProject()); 
         doLoadDesignMenu(menuName);
+        
     }
 
+    
     private void doLoadDesignMenu(String menuName) {
         if (menuName != null) { // Horizontal menu bar
             DesignMenu designMenu = ToolsCore.getDesignMenuManager().findDesignMenu(menuName);
@@ -609,18 +646,29 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     /* Method declared on ISelectionListener */
     public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-//    	System.out.println("DesignFlowView.selectionChanged()");
-
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+			System.out.println(">>>>> DesignFlowView.selectionChanged(, new selection)="+selection+" selectedResource="+selectedResource);
         IResource oldSelection = selectedResource; 
+     // Save old project if it changed, before doin anything else
+        IProject oldProject= (selectedResource ==null)? null : selectedResource.getProject();
+        IResource newSelectedResource=SelectedResourceManager.getDefault().getSelectedResource(part, selection);
+        IProject newProject= (newSelectedResource ==null)? null : newSelectedResource.getProject();
+//        	if (HDLFile.getProject().getFullPath().toPortableString().equals(project.getFullPath().toPortableString())){
+        
+        if ((oldProject != null) && 
+        		((newProject == null) ||
+        		!oldProject.getFullPath().toPortableString().equals(newProject.getFullPath().toPortableString()))){
+		    saveState(oldProject);
+        }
         selectedResource = SelectedResourceManager.getDefault().getSelectedResource(part, selection);
-        IProject newProject = selectedResource == null 
-                            ? null
-                            : selectedResource.getProject();
+//        IProject newProject = selectedResource == null 
+//                            ? null
+//                            : selectedResource.getProject();
         
         if ( (oldSelection == null) || 
              (newProject != oldSelection.getProject())
            ) {
-            doLoadDesignMenu();
+            doLoadDesignMenu(newProject);
         }
         updateLaunchAction();
     } // selectionChanged()
@@ -729,7 +777,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         		final int finalI=i;
         		final String fFullPath=fullPath;
                 final String fIgnoreFilter=ignoreFilter;
-                final DesignFlowView fDesignFlowView=this;
+//                final DesignFlowView fDesignFlowView=this;
 
                 launchActions[i] = new Action() {
                     public void run() {
@@ -1178,11 +1226,15 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         }
         selectedResource = ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(location));
         String HDLLocation=memento.getString(TAG_SELECTED_HDL_FILE);
+        if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        	System.out.println("restoreState(memento): selectedResource="+selectedResource+ " HDLLocation="+HDLLocation);
         if (HDLLocation!=null) {
         	IResource HDLFile=ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(HDLLocation));
-        	SelectedResourceManager.getDefault().setChosenVerilogFile(HDLFile);
-        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
-        		System.out.println("Setting HDL file to "+HDLFile.toString());
+        	if (HDLFile!=null){
+        		SelectedResourceManager.getDefault().setChosenVerilogFile(HDLFile);
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        			System.out.println("Setting HDL file to "+HDLFile.toString());
+        	}
         }
         String HDLFilter=memento.getString(TAG_SELECTED_HDL_FILTER); //SelectedResourceManager.getDefault().getFilter();
         if (HDLFilter!=null){
@@ -1193,24 +1245,96 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     	if (linkedTools==null) linkedTools=true;
     	SelectedResourceManager.getDefault().setToolsLinked(linkedTools);
         toggleLinkedTools.setChecked(!SelectedResourceManager.getDefault().isToolsLinked());
-
         // Initialize VEditor database build
-        
    	    IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
+   	    	// restore properties from the project, overwrite global ones
+   	    restoreCurrentState(selectedResource.getProject()); // null OK
+   	    
    	    if ((HDLFile!=null) && HDLFile.exists()){
-   	    	toolSequence.setUnfinishedBoot(memento);
+   	    	toolSequence.setUnfinishedBoot(memento,true);
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("Initiating DB rebuild HDLFile="+HDLFile);
    	    	VerilogUtils.getTopModuleNames((IFile) HDLFile);
    	    } else {
-   	    	toolSequence.setUnfinishedBoot(null);
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("Skipping DB rebuild HDLFile=NULL");
+   	    	toolSequence.setUnfinishedBoot(null,false);
    	    	finalizeAfterVEditorDB(memento);
    	    }
     }
     public void finalizeAfterVEditorDB(IMemento memento){
-        toolSequence.restoreCurrentStates(memento); // restore states and recalc "dirty" flags - should be after tools themselves
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+    		System.out.println("finalizeAfterVEditorDB(), memento is "+((memento==null)?"NULL":"not NULL"));
+    	if (memento!=null) {
+    		toolSequence.restoreCurrentStates(memento); // restore states and recalc "dirty" flags - should be after tools themselves
+    	}
+        if (selectedResource!=null) toolSequence.restoreCurrentStates(selectedResource.getProject()); // restore states and recalc "dirty" flags - should be after tools themselves
+        IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
+        if ((HDLFile!=null) && HDLFile.exists()){
+        	toolSequence.setToolsDirtyFlag(true); // recalculate each successful tool's parameters - does it trigger Database rebuild?
+        }
         doLoadDesignMenu();
         updateLaunchAction(true); // true?
     }
     
+    private void restoreCurrentState(IProject project){
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+    		System.out.println("^^^^ restoreCurrentState("+project+")");
+    	if ((project==null) || !project.exists()){
+    		System.out.println("Can not restore persistent properties from non-existent project "+project);
+    		return;
+    	}
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)){
+    		System.out.println("::::: Restoring persistent properties from the project "+project);
+    	}
+
+    	ToolsCore.restoreToolsState(project);
+    	Map<QualifiedName,String> pp;
+    	try {
+    		pp=project.getPersistentProperties();
+    	} catch (CoreException e){
+    		System.out.println(project+": Failed getPersistentProperties(), e="+e);
+    		return;
+    	}
+    	String location=	pp.get(new QualifiedName(VDT.ID_VDT, TAG_SELECTED_RESOURCE));
+    	if (location!=null) {
+    		IResource resource=ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(location));
+        	if (resource.getProject().getFullPath().toPortableString().equals(project.getFullPath().toPortableString())){
+        		selectedResource = resource;
+        	} else {
+        		System.out.println("**** Wrong selected resource "+location+" for project "+project.getFullPath().toPortableString());
+        	}
+    	}
+    	String HDLLocation=	pp.get(new QualifiedName(VDT.ID_VDT, TAG_SELECTED_HDL_FILE));
+    	if (HDLLocation!=null) {
+            if (HDLLocation!=null) {
+            	IResource HDLFile=ResourcesPlugin.getWorkspace().getRoot().findMember(Path.fromPortableString(HDLLocation));
+            	if (HDLFile!=null){
+            		if (HDLFile.getProject().getFullPath().toPortableString().equals(project.getFullPath().toPortableString())){
+            			SelectedResourceManager.getDefault().setChosenVerilogFile(HDLFile);
+            			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+            				System.out.println("Setting HDL file to "+HDLFile.toString());
+            		} else {
+                		System.out.println("*** Wrong HDLFile "+HDLLocation+" for project "+project.getFullPath().toPortableString());
+            		}
+            	}
+            }
+    	}
+        String HDLFilter= pp.get(new QualifiedName(VDT.ID_VDT, TAG_SELECTED_HDL_FILTER));
+        if (HDLFilter!=null){
+        	SelectedResourceManager.getDefault().setFilter(HDLFilter);
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("Setting HDL filter to "+HDLFilter);
+        }
+    	
+    	String LinkedToolsStr=pp.get(new QualifiedName(VDT.ID_VDT, TAG_LINKED_TOOLS));
+    	if (LinkedToolsStr!=null)	try {
+    		SelectedResourceManager.getDefault().setToolsLinked(Boolean.parseBoolean(LinkedToolsStr));
+            toggleLinkedTools.setChecked(!SelectedResourceManager.getDefault().isToolsLinked());
+    	} catch (Exception e){
+    		System.out.println(project+"Failed .setToolsLinked("+LinkedToolsStr+"), e="+e);
+    	}
+    }
     
     
     
@@ -1220,14 +1344,25 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
      * @see ViewPart#saveState
      */
     public void saveState(IMemento memento) {
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+    		System.out.println("^^^^saveState()");
         if (viewer == null) {
             if (this.memento != null) //Keep the old state;
                 memento.putMemento(this.memento);
-            return;
+//            return;
         }
+        IProject project = selectedResource == null 
+                ? null
+                : selectedResource.getProject();
+        if (project==null) {
+        	System.out.println("No project selected, nothing to save");
+        	return;
+        }
+
         if (selectedResource != null) {
             String location = selectedResource.getFullPath().toPortableString();
             memento.putString(TAG_SELECTED_RESOURCE, location);
+            System.out.println("saveState(memento): selectedResource="+selectedResource);
         }
         IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
         if (HDLFile!=null){
@@ -1243,7 +1378,63 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         }
         memento.putBoolean(TAG_LINKED_TOOLS, new Boolean(SelectedResourceManager.getDefault().isToolsLinked()));
         ToolsCore.saveToolsState(memento);
-        toolSequence.saveCurrentStates(memento);
+        if (toolSequence!=null) {
+        	toolSequence.saveCurrentStates(memento);
+        }
+// set project properties  
+        
+        if ((project!=null) && project.exists())
+        	saveState(project); 
     }
+// this may need some synchronization as saveState(IMemento memento) is called by the timer (what if selectedResource changes while save is in progress?
+    public void saveState(IProject project) {
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+    		System.out.println("^^^^ SaveState("+project+")");
+    	if ((project==null) || !project.exists()){
+    		System.out.println("Can not save persistent properties to non-existent project "+project);
+    		return;
+    	}
+    	QualifiedName qn;
+        if (selectedResource != null) {
+        	if (selectedResource.getProject().getFullPath().toPortableString().equals(project.getFullPath().toPortableString())){
+        		String location = selectedResource.getFullPath().toPortableString();
+        		qn= new QualifiedName(VDT.ID_VDT, TAG_SELECTED_RESOURCE);
+        		try {project.setPersistentProperty(qn, location);}
+        		catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+location+", e="+e);}
+        	} else {
+        		System.out.println("*** Wrong selected resource "+selectedResource+" for project "+project);
+        		return;
+        	}
+        }
 
+        IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
+        if (HDLFile!=null){
+        	if (HDLFile.getProject().getFullPath().toPortableString().equals(project.getFullPath().toPortableString())){
+        		qn= new QualifiedName(VDT.ID_VDT, TAG_SELECTED_HDL_FILE);
+        		try {project.setPersistentProperty(qn, HDLFile.getFullPath().toPortableString());}
+        		catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+HDLFile.getFullPath().toPortableString()+", e="+e);}
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        			System.out.println("project.setPersistentProperty("+qn.toString()+","+HDLFile.getFullPath().toPortableString()+")");
+        	} else {
+        		System.out.println("*** Wrong HDLFile "+HDLFile+" for project "+project);
+        		return;
+        	}
+        }
+        String HDLFilter=SelectedResourceManager.getDefault().getFilter();
+        if (HDLFilter!=null){
+        	qn= new QualifiedName(VDT.ID_VDT, TAG_SELECTED_HDL_FILTER);
+        	try {project.setPersistentProperty(qn, HDLFilter);}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+HDLFilter+", e="+e);}
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("project.setPersistentProperty("+qn.toString()+","+HDLFilter+")");
+        }
+        qn= new QualifiedName(VDT.ID_VDT, TAG_LINKED_TOOLS);
+        try {project.setPersistentProperty(qn, new Boolean(SelectedResourceManager.getDefault().isToolsLinked()).toString());}
+        catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+
+        		SelectedResourceManager.getDefault().isToolsLinked()+", e="+e);}
+        ToolsCore.saveToolsState(project);
+        if (toolSequence!=null) {
+        	toolSequence.saveCurrentStates(project);
+        }
+    }
 } // class DesignFlowView

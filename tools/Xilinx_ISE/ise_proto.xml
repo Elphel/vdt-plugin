@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <vdt-project>
-	<tool name="VivadoToolPrototype" label="VivadoToolPrototype"
+	<tool name="ISEToolPrototype" label="ISEToolPrototype"
 	    project="FPGA_project"
-		interface="VivadoInterface"
+		interface="ISEInterface"
 		package="FPGA_package"
 		shell="/bin/bash"
-		description="Vivado tool prototype"
+		description="ISE tool prototype"
 		abstract="true"
 		>
+<!-- Parameters common to all tools -->
+        <!-- Not clear what is the default value for intstyle so using always -->
+
+        <parameter	id="intstyle" label="Integration Style" tooltip= "Defines screen output"
+        			default="xflow" visible="true" omit="" type="intstyleType" format="Dash"/>
+        
+        <parameter	id="command_files" outid="f" label="command files" tooltip= "Include command files"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
+		
+<!--   <parameter	id="part_num" outid="p" label="part number" tooltip= "Device part number"
+        			default="%part" visible="true" omit="" type="String" format="Dash"/> -->
+
+        <parameter	id="speed_grade" outid="s" label="speed grade" tooltip= "Device speed grade"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+		
 <!-- parser parameters -->
+<!-- TODO: parser is temporarily copied from Vivado, change to ISE -->
         <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
         			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
@@ -23,7 +39,7 @@
         			default="true" visible="true" omit="false" type="Boolean" format="None"/>
         <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
-        <parameter	id="Vivado_Tcl" label="Vivado_Tcl"  tooltip= "Enable problems with [Vivado_Tcl to be reported"
+        <parameter	id="ISE_Tcl" label="ISE_Tcl"  tooltip= "Enable problems with [ISE_Tcl to be reported"
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
         <parameter	id="Route"     label="Route" tooltip= "Enable problems with [Route to be reported"
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
@@ -43,7 +59,6 @@
         			default="true" visible="true" omit="true" type="Boolean" format="GrepFilterProblemSyntax"/>
         <parameter	id="OtherProblems"    label="Other problems"  tooltip= "Other problem patterns (after opening '[') to be suppressed)"
         			default="" visible="true" omit="" type="Stringlist" format="GrepFilterProblemOtherSyntax"/>
-
         <parameter id="ShowWarnings" label="Show Warnings" tooltip="Parse warning messages"
 		           default="true"
 		           type= "Boolean" format="None"/>
@@ -62,6 +77,13 @@
                    visible="true" readonly="true"/>
         			
 		<input>
+			<group name="Common options"
+			       weight="9">
+		        "intstyle"
+		        "command_files"
+<!-- 		    "part_num" -->
+		        "speed_grade"
+			</group>
 			<group name="Parser"
 			       weight="10">
 				"ShowWarnings"
@@ -70,7 +92,7 @@
 				"---"
 				"NoFileProblem"
 		        "Drc"
-		        "Vivado_Tcl"
+		        "ISE_Tcl"
 				"Route"
 				"Memdata"
 				"Synth"
@@ -87,18 +109,18 @@
 			</group>
 		</input>
 		<output>
-			<line name="parser_Vivado"
+			<line name=   "parser_ISE"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
 				info=     "PatternInfo">
 				"-c"
      			"%GrepEWI"
-     			"| %VivadoSedPaths"
+     			"| %ISESedPaths"
      			<if NoBabyTalk="true">
      				"| grep --line-buffered -v \"license\""
      			</if>
      			"%Drc"
-		        "%Vivado_Tcl"
+		        "%ISE_Tcl"
 		        "%Route"
      			"%Memdata"
      			"%Synth"

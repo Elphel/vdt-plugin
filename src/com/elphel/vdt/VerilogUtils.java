@@ -18,11 +18,7 @@
 package com.elphel.vdt;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
 
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 import com.elphel.vdt.veditor.VerilogPlugin;
@@ -41,9 +37,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 
 /**
  * Verilog file utilities.
@@ -52,24 +45,45 @@ import org.eclipse.jface.viewers.ViewerFilter;
  * @author  Lvov Konstantin
  */
 public class VerilogUtils {
+	public static boolean  existsVeditorOutlineDatabase(IProject project){
+		try {
+			if (project.getSessionProperty(VerilogPlugin.getOutlineDatabaseId()) !=null) return true;
+		} catch (CoreException e) {
+			System.out.println("Probably project is closed: "+e);
+		}
+		return false;
+	}
 	
 	public static OutlineDatabase getVeditorOutlineDatabase(IProject project){
 		OutlineDatabase database=null;
 		HdlDocument hdlDocument=null;
 		try {
 			database = (OutlineDatabase)project.getSessionProperty(VerilogPlugin.getOutlineDatabaseId());			
-		} catch (CoreException e) {			
-			e.printStackTrace();
+		} catch (CoreException e) {
+			System.out.println("Probably project is closed: "+e);
 		}
 		if (database !=null) return database;
-		System.out.println("database is null, looking for the HdlDocument");
+   		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+   			System.out.println("database is null, looking for the HdlDocument");
 		try {
 			hdlDocument=(HdlDocument)project.getSessionProperty(VerilogPlugin.getHdlDocumentId());
+			if ((hdlDocument!=null) && (hdlDocument.getFile()!=null)) {
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+					System.out.println("database is null, looking for the HdlDocument="+hdlDocument.getFile().toString());
+			} else {
+				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+					System.out.println("database is null, HdlDocument="+((hdlDocument==null)?"NULL":" not null, but getFile() is NULL"));
+			}
+			
 		} catch (CoreException e) {			
 			e.printStackTrace();
 		}
 		if (hdlDocument!=null) return hdlDocument.getOutlineDatabase(); /* will create a new one if does not exist */
 		// Create HdlDocument from selected/restored HDLfile
+		if (SelectedResourceManager.getDefault().getChosenVerilogFile()==null) {
+			System.out.println("database is null, and no Verilog file is selected to create one.");
+			return null;
+		}
 		hdlDocument=new VerilogDocument(project, (IFile) SelectedResourceManager.getDefault().getChosenVerilogFile());
 		return hdlDocument.getOutlineDatabase(); /* will create a new one if does not exist */
 	}

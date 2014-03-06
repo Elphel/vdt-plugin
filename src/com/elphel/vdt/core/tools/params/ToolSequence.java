@@ -65,7 +65,11 @@ public class ToolSequence {
     private static final String TAG_CURRENTSTATE_TOOLNAME =  ".currentState.toolName.";
     private static final String TAG_CURRENTSTATE_STATEFILE =  ".currentState.stateFile.";
     private static final String TAG_CURRENTSTATE_TOOLSTAMP =  ".currentState.toolStamp.";
-    
+
+    private static final String PROJECT_CURRENTSTATE_TOOLNAME =  "currentState.toolName.";
+    private static final String PROJECT_CURRENTSTATE_STATEFILE = "currentState.stateFile.";
+    private static final String PROJECT_CURRENTSTATE_TOOLSTAMP = "currentState.toolStamp.";
+
 //    private static final int MAX_TOOLS_TO_RUN=100;
    
 	private boolean shiftPressed=false;
@@ -96,7 +100,7 @@ public class ToolSequence {
 			if (tool.getState()== TOOL_STATE.KEPT_OPEN) {
 				MessageUI.error("Tool "+tool.getName()+" is running session, you need to close it to stop");
 			} else {
-				tool.setState(TOOL_STATE.NEW);
+				tool.setStateJustThis(TOOL_STATE.NEW);
 				tool.clearDependStamps();
 			}
 		}
@@ -174,9 +178,10 @@ public class ToolSequence {
 	
 	
 	
-	public void setUnfinishedBoot(IMemento memento){
+	public void setUnfinishedBoot(IMemento memento, boolean updateDB){
 		unfinishedMemento=memento;
-		if (memento!=null){
+//		if (memento!=null){
+		if (updateDB) {
 			// Does not seem to work:
 			IActionBars bars = designFlowView.getViewSite().getActionBars();
 			bars.getStatusLineManager().setMessage("Waiting for VEditor database to be built...");
@@ -186,13 +191,13 @@ public class ToolSequence {
 		}
 	}
 	public void finalizeBootAfterVEditor(){
-		if (unfinishedMemento!=null) {
+//		if (unfinishedMemento!=null) {
 			// Does not seem to work:
 			IActionBars bars = designFlowView.getViewSite().getActionBars();
 			bars.getStatusLineManager().setMessage("");
 //			designFlowView.changeMenuTitle(menuName);
 			designFlowView.finalizeAfterVEditorDB(unfinishedMemento);
-		}
+//		}
 	}
 	
 	public void toolFinished(Tool tool){
@@ -1281,7 +1286,81 @@ public class ToolSequence {
     	}
     }
 	
-    public void saveCurrentStates(IMemento memento) {
+    /**
+     * Save tool states to the project persistent properties
+     * @param project - project to save properties to
+     */
+    public void saveCurrentStates(IProject project) {
+    	if ((project==null) || !project.exists()) {
+    		System.out.println("Can not set persistent properties of non-existent project "+project);
+    		return;
+    	}
+    	for (String state:currentStates.keySet()){
+    		ToolStateStamp tss=currentStates.get(state);
+        	QualifiedName qn= new QualifiedName(VDT.ID_VDT, PROJECT_CURRENTSTATE_TOOLNAME+state);
+        	try {project.setPersistentProperty(qn, tss.getToolName());}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+tss.getToolName()+", e="+e);}
+        	
+        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_CURRENTSTATE_STATEFILE+state);
+        	try {project.setPersistentProperty(qn, tss.getToolStateFile());}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+tss.getToolStateFile()+", e="+e);}
+    		
+        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_CURRENTSTATE_TOOLSTAMP+state);
+        	try {project.setPersistentProperty(qn, tss.getToolStamp());}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+tss.getToolStamp()+", e="+e);}
+            DEBUG_PRINT("Saving state  "+state+
+            		" to project:"+project.toString()+
+            		", toolName="+tss.getToolName()+
+            		", toolStateFile="+tss.getToolStateFile()+
+            		", toolStamp="+tss.getToolStamp());
+    	}
+    }
+
+	/**
+	 * Restore tool states from the project persistent properites
+	 * @param project - project to get properties from
+	 */
+	public void restoreCurrentStates(IProject project) {
+    	if ((project==null) || !project.exists()) {
+    		System.out.println("Can not read persistent properties from the non-existent project "+project);
+    		return;
+    	}
+    	Map<QualifiedName,String> pp;    
+    	try {
+    	pp=project.getPersistentProperties();
+    	} catch (CoreException e){
+    		System.out.println(project+": Failed getPersistentProperties(), e="+e);
+    		return;
+    	}
+
+    	currentStates.clear();
+   	    setStateProvides(); // Can be called just once - during initialization?
+   	    for (String state:stateProviders.keySet()){
+        	QualifiedName qn_toolName=  new QualifiedName(VDT.ID_VDT, PROJECT_CURRENTSTATE_TOOLNAME+state);
+        	if (pp.containsKey(qn_toolName)){
+            	QualifiedName qn_stateFile= new QualifiedName(VDT.ID_VDT, PROJECT_CURRENTSTATE_STATEFILE+state);
+            	QualifiedName qn_toolStamp= new QualifiedName(VDT.ID_VDT, PROJECT_CURRENTSTATE_TOOLSTAMP+state);
+   	    		currentStates.put(state,new ToolStateStamp(
+   	    				pp.get(qn_toolName),
+   	    				pp.get(qn_stateFile),
+   	    				pp.get(qn_toolStamp)
+   	    				));
+   	    		DEBUG_PRINT("Restoring state  "+state+
+   	    				" from project "+project.toString()+
+   	    				", toolName="+pp.get(qn_toolName)+
+   	    				", toolStateFile="+pp.get(qn_stateFile)+
+   	    				", toolStamp="+pp.get(qn_toolStamp));
+        		
+        	}
+   	    }
+   	    // Set all tool dirty flags according to restored states and tools dependencies
+   	    //        updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
+   	    // setToolsDirtyFlag(true) initiates Verilog database rebuild, let's trigger it intentionally
+   	    //VerilogUtils.getTopModuleNames((IFile)resource);
+   	    // stToolsDirtyFlag(true); // recalculate each successful tool's parameters - moved to caller
+	}
+	
+	public void saveCurrentStates(IMemento memento) {
     	for (String state:currentStates.keySet()){
     		ToolStateStamp tss=currentStates.get(state);
             memento.putString(state+TAG_CURRENTSTATE_TOOLNAME, tss.getToolName());
@@ -1295,6 +1374,8 @@ public class ToolSequence {
     	}
     }
 
+    
+    
     /**
      * Restore states (snapshot files status) from persistent storage
      * Should be called after tools are restored
@@ -1326,11 +1407,11 @@ public class ToolSequence {
    	    				", toolStamp="+memento.getString(state+TAG_CURRENTSTATE_TOOLSTAMP));
    	    	}
    	    }
-   	    // Set all tool dirty flags according to restored states and tools dendencies
+   	    // Set all tool dirty flags according to restored states and tools dependencies
    	    //        updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
    	    // setToolsDirtyFlag(true) initiates Verilog database rebuild, let's trigger it intentionally
    	    //VerilogUtils.getTopModuleNames((IFile)resource);
-   	    setToolsDirtyFlag(true); // recalculate each successful tool's parameters
+   	    // stToolsDirtyFlag(true); // recalculate each successful tool's parameters - moved to caller
 	}
 	
     public void putCurrentState(Tool tool){

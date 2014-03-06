@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<tool name="ISEUnisims" label="Get Xilinx ISE unisims"
+	    project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Copy ISE unisims library to the project directory">
+		<action-menu>
+			<action label="Copy ISE unisims" resource="" icon="copy.png" />
+		</action-menu>
+		<input>
+ 			<group name="General">
+		   		"ISEUnisimsAbsolutePath"
+ 			</group>
+		</input>
+
+		<output>
+			<line name="copy_unisims">
+					"-c"
+					"rsync -avr -e ssh"
+					"%RemoteUser@%RemoteHost:%ISEUnisimsAbsolutePath/unisims"
+					"./;"
+			</line>
+		</output>
+	</tool>
+</vdt-project>

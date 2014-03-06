@@ -244,20 +244,26 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
      * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
      */
     public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+			System.out.print("$$$ Selection changed, fSelectedResource="+fSelectedResource);
 //    	System.out.println("SelectedResourceManager.selectionChanged()");
         IWorkbenchWindow window = part.getSite().getWorkbenchWindow();
         if (fWindowStack.isEmpty() || !fWindowStack.peek().equals(window)) {
             // selection is not in the active window
+        	System.out.println(" - stray selection outside acrtive window");
             return;
         }
         IResource selectedResource = getSelectedResource(part, selection);
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+			System.out.println(" New selection: "+selectedResource);
         if (selectedResource != null) {
             fSelectedResource = selectedResource;
-//        	System.out.println("SelectedResourceManager.selectionChanged(): fSelectedResource changed to "+fSelectedResource.getName());
-            
             if ((selectedResource.getType()==IResource.FILE) && (VerilogUtils.isHhdlFile((IFile)fSelectedResource))){
                 fSelectedVerilogFile = selectedResource; /* Maybe same will work for vhdl too? */
-//            	System.out.println("SelectedResourceManager.selectionChanged(): fSelectedVerilogFile changed to "+fSelectedVerilogFile.getName());
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        			System.out.println("Updated fSelectedVerilogFile: "+fSelectedVerilogFile);
+            } else {
+            	System.out.println(selectedResource+" is not a file or not an HDL file");
             }
         }
         
@@ -339,12 +345,34 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     }
     
     public IResource getChosenVerilogFile() {
-        return (fChosenVerilogFile!=null)?fChosenVerilogFile:fSelectedVerilogFile;
+    	IProject project=getSelectedProject();
+    	if (project==null) return null;
+    	IResource rslt=(fChosenVerilogFile!=null)?fChosenVerilogFile:fSelectedVerilogFile;
+    	if (rslt==null) return null;
+    	if (project.getFullPath().toPortableString().equals(rslt.getProject().getFullPath().toPortableString())){
+    		return (fChosenVerilogFile!=null)?fChosenVerilogFile:fSelectedVerilogFile;
+    	} else {
+    		System.out.println("Wrong getChosenVerilogFile="+rslt+" for project "+project);
+    		if (fSelectedVerilogFile==null) return null;
+    		if (project.getFullPath().toPortableString().equals(fSelectedVerilogFile.getProject().getFullPath().toPortableString())){
+        		System.out.println("Using: "+fSelectedVerilogFile);
+    			return  fSelectedVerilogFile;
+    		} else {
+        		System.out.println("fSelectedVerilogFile is also wrong: "+fSelectedVerilogFile);
+    		}
+    		return fSelectedResource;
+    	}
     }
 
     // Used when restoring from memento
     public void setChosenVerilogFile(IResource file) {
     	fChosenVerilogFile=file;
+    	IProject project=getSelectedProject();
+    	IProject newProject= (file == null)? null: file.getProject();
+    	// if file is different project than selectedResource
+    	if ((newProject != null) && ((project == null) || !newProject.getFullPath().toPortableString().equals(project.getFullPath().toPortableString()))){
+    		fSelectedResource=file;
+    	}
     	if (fSelectedResource==null) fSelectedResource=file;
     }
 

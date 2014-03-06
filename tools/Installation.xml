@@ -24,6 +24,18 @@
                    format  = "Equation"
                    readonly= "true" />
 
+        <parameter id      = "TRUE"
+                   type    = "Boolean"
+                   default = "true"
+                   format  = "None"
+                   visible= "false" />
+
+        <parameter id      = "FALSE"
+                   type    = "Boolean"
+                   default = "false"
+                   format  = "None"
+                   visible= "false" />
+
         <input>
           <group name="General" label="System properties">
             "OSName"

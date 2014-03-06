@@ -51,7 +51,9 @@ public class ProjectPathGenerator extends AbstractGenerator {
             String project_name = workspaceRoot+resource.getProject().getFullPath().toString()+File.separator; 
             value = new String[]{project_name};
         } else {
-            fault("There is no selected project");
+//            fault("There is no selected project");
+            System.out.println(getName()+": no project selected");
+            return new String[] {""};
         }
         return value;
     }

@@ -31,13 +31,32 @@
                           label="Send a command to the remote Python session"
                           icon="my_tool.gif"
                           call="RemotePythonCommand"/>
-        </menu>                  
+        </menu>
+                <menu name="ISE" 
+                          label="ISE Tools"
+                          icon="xilinx.png">
+              
+                <menuitem name="ISECopyUnisims"
+                          label="Copy Xilinx ISE primitives library to the local project"
+                          icon="copy.png"
+                          call="ISEUnisims"/>
+                <menuitem name="ISE Server"
+                          label="Start remote ISE session"
+                          icon="door_in.png"
+                          call="ISE"/>
+                <menuitem name="ISEPartgen"
+                          label="Run ISE partgen"
+                          icon="bitstream.png"
+                          call="ISEPartgen"/>
+
+        </menu>
+                          
         <menu name="Vivado" 
               label="Vivado Tools"
               icon="xilinx.png">
               
                 <menuitem name="CopyUnisims"
-                          label="Copy Xilinx primitives library to the local project"
+                          label="Copy Xilinx Vivado primitives library to the local project"
                           icon="copy.png"
                           call="VivadoUnisims"/>
                 <menuitem name="Vivado Server"

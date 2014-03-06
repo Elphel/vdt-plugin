@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISEInterface" extends="FPGAPprojectInterface">
+		<syntax name="GrepFilterProblemSyntax"        format='| grep --line-buffered -v  "\[%%ParamName"' />
+		<syntax name="GrepFilterProblemOtherSyntax"   format='%(| grep --line-buffered -v  "\[%%ParamValue"%|\n%)' />
+		<typedef name="intstyleType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="ise"    label="Indicates the program is being run as part of an integrated design environment"/>
+      			<item value="xflow"  label="Indicates the program is being run as part of an integrated batch flow"/>
+      			<item value="silent" label="Only errors and warnings are output"/>
+      		</paramtype>
+    	</typedef>
+	 <syntax name="DashNamePart"    format="-%%ParamName %part" />
+		
+	
+<!-- <syntax name="QuietSyntax"     format=" -quiet" />
+		<syntax name="VerboseSyntax"   format=" -verbose" />
+		<syntax name="DirectiveSyntax" format=" -directive %%ParamValue" /> -->
+		
+	
+	<!-- 
+		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
+		<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" /> -->
+		
+	</interface>
+	<!--  Abstract tools to be inherited by instances used for various ISE tools -->	
+	<!--  Restore tool for ISE -->
+	<tool name="RestoreISE" label="Restore state after ISE tool"
+	    project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		abstract="true">
+		<output>
+			<line name="ise_pre_restore">
+				"-c"
+				<!-- Create project directory on remote server if it did not exist -->
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%ISEProjectRoot"
+				"' ;"
+				<!-- Copy snapshot generated after synthesis from local to remote -->
+				"rsync -avrR -e ssh"
+				<!--  from: -->
+				"%ISELocalDir/%%StateFile"
+				<!-- to: -->
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+				";"
+			</line>
+			
+			<line name="ise_restore"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      failure="ERROR"
+			      prompt="@@FINISH@@"
+			      log="">
+			      "cd ~/%ISEProjectRoot\n"
+			      "set outputDir ~/%ISEProjectRoot/%ISERemoteDir\n"			      
+			      "file mkdir $outputDir\n"
+		          "open_checkpoint %ISERemoteDir/%%StateFile\n"
+		          "puts \"@@FINISH@@\"\n"
+		    </line>
+		</output>
+	</tool>
+
+	<!--  Save tool for ISE tool -->
+	<tool name="SaveISE"
+	    label="SaveISE"
+	    project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		abstract="true">
+		<output>
+			<line name="ise_save"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      failure="ERROR"
+			      log="">
+			      "cd ~/%ISEProjectRoot\n"
+			      "set outputDir ~/%ISEProjectRoot/%ISERemoteDir\n"			      
+			      "file mkdir $outputDir\n"
+	      		  "write_checkpoint -force %ISERemoteDir/%%StateFile\n"
+	      		  "puts \"@@FINISH@@\"\n"
+			</line>
+			<line name="ise_copy_after_save">
+					"-c"
+					"mkdir -p %ISELocalDir ;"
+					"rsync -avr -e ssh"
+					"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/%%StateFile"
+					"%%StateDir/"
+			</line>
+		</output>		
+	</tool>
+</vdt-project>

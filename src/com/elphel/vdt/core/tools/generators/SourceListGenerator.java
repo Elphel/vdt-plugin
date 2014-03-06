@@ -21,6 +21,7 @@ package com.elphel.vdt.core.tools.generators;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
+
 //import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
 //import com.elphel.vdt.core.verilog.VerilogUtils;
@@ -60,7 +61,9 @@ public class SourceListGenerator extends AbstractGenerator {
             for (int i=0; i < files.length; i++)
                 file_names[i] = files[i].getProjectRelativePath().toOSString(); //.getName();
         } else {
-            fault("There is no selected project");
+//            fault("There is no selected project");
+            System.out.println(getName()+": no project selected");
+            return new String[] {""};
         }
         return file_names;
     }

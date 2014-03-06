@@ -62,23 +62,6 @@
 
 		<parameter id="SkipTCL" label="Skip TCL commands" tooltip="Do not run pre-timing summary TCL commands"
 		           default="false" type= "Boolean" format="None"/>
-<!--   left from synthesis, may need update--> 
-		<parameter id="ShowWarnings" label="Parse warnings" tooltip="Parse warning messages"
-		           default="true"
-		           type= "Boolean" format="None"/>
-		<parameter id="ShowInfo" label="Parse info" tooltip="Parse info messages"
-		           default="true"
-		           type= "Boolean" format="None"/>
-        <parameter id="PreGrepW" visible="false"
-                   type="String" format="None"
-                   default="?%ShowWarnings=true: |WARNING, "/>
-        <parameter id="PreGrepI" visible="false"
-                   type="String" format="None"
-                   default="?%ShowInfo=true: |INFO, "/>
-        <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
-                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
-                   type="String" format="CopyValue"
-                   visible="true" readonly="true"/>
                    
 		<parameter id="PreTCL" label="Pre timing summary TCL commands" tooltip="TCL commands to run before timing summary"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
@@ -214,6 +197,12 @@
         <parameter id="Pwropt"/>
         <parameter id="OtherProblems"/>
 		
+        <parameter id="ShowWarnings"/>
+        <parameter id="ShowInfo"/>
+        <parameter id="PreGrepW"/>
+        <parameter id="PreGrepI"/>
+        <parameter id="GrepEWI"/>
+
 		<!-- Invisible (calculated) parameters -->
 		<!--  same value as %file, but will appear withou "-file" prefix --> 
         <parameter 	id="file" default="%VivadoRemoteDir/%rawfile" visible="false" omit="" type="String" format="Dash"/>
@@ -221,9 +210,6 @@
 			<group name="General">
 				"DisableVivadoTiming"
 				"SkipTCL"
-				"ShowWarnings"
-				"ShowInfo"
-				"GrepEWI"
 			</group>
 			<group name="TCL commands">
 		        "PreTCL"

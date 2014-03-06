@@ -108,7 +108,9 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
             }
             file_names=fileList.toArray(new String[0]);
         } else {
-            fault("There is no selected project");
+//            fault("There is no selected project");
+            System.out.println(getName()+": no project selected");
+            return new String[] {""};
         }
         return file_names;
     }

@@ -55,23 +55,6 @@
 		<parameter id="SkipSnapshotPlace" label="Skip snapshot save" tooltip="Do not create snapshot after placement"
 		           default="false" type= "Boolean" format="None"/>
 
-<!--   left from synthesis, may need update--> 
-		<parameter id="ShowWarnings" label="Parse warnings" tooltip="Parse warning messages"
-		           default="true"
-		           type= "Boolean" format="None"/>
-		<parameter id="ShowInfo" label="Parse info" tooltip="Parse info messages"
-		           default="true"
-		           type= "Boolean" format="None"/>
-        <parameter id="PreGrepW" visible="false"
-                   type="String" format="None"
-                   default="?%ShowWarnings=true: |WARNING, "/>
-        <parameter id="PreGrepI" visible="false"
-                   type="String" format="None"
-                   default="?%ShowInfo=true: |INFO, "/>
-        <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
-                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
-                   type="String" format="CopyValue"
-                   visible="true" readonly="true"/>
                    
 		<parameter id="PreOptTCL" label="Pre-placement TCL commands" tooltip="TCL commands to run before place_design"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
@@ -111,6 +94,11 @@
         <parameter id="Pwropt"/>
         <parameter id="OtherProblems"/>
 
+        <parameter id="ShowWarnings"/>
+        <parameter id="ShowInfo"/>
+        <parameter id="PreGrepW"/>
+        <parameter id="PreGrepI"/>
+        <parameter id="GrepEWI"/>
 
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			
@@ -125,9 +113,6 @@
 				"SkipPlacement"
 				"---"
  				"SnapshotPlace" <!--  same as in project -->
-				"ShowWarnings"
-				"ShowInfo"
-				"GrepEWI"
 			</group>
 			<group name="Pre-optimization commands">
 		        "PreOptTCL"

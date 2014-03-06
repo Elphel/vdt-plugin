@@ -97,22 +97,7 @@
 		<parameter id="ResetProject" label="Reset project" tooltip="Reset project before loading source files"
 		           default="true"
 		           type= "Boolean" format="None"/>
-		<parameter id="ShowWarnings" label="Show Warnings" tooltip="Parse warning messages"
-		           default="true"
-		           type= "Boolean" format="None"/>
-		<parameter id="ShowInfo" label="Show info" tooltip="Parse info messages"
-		           default="true"
-		           type= "Boolean" format="None"/>
-        <parameter id="PreGrepW" visible="false"
-                   type="String" format="None"
-                   default="?%ShowWarnings=true: |WARNING, "/>
-        <parameter id="PreGrepI" visible="false"
-                   type="String" format="None"
-                   default="?%ShowInfo=true: |INFO, "/>
-        <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
-                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
-                   type="String" format="CopyValue"
-                   visible="true" readonly="true"/>
+		           
   
 <!-- synth_design arguments -->  
 
@@ -190,6 +175,13 @@
         <parameter id="Timing"/>
         <parameter id="Pwropt"/>
         <parameter id="OtherProblems"/>
+        
+        <parameter id="ShowWarnings"/>
+        <parameter id="ShowInfo"/>
+        <parameter id="PreGrepW"/>
+        <parameter id="PreGrepI"/>
+        <parameter id="GrepEWI"/>
+        
 <!--  invisible/calculated parameters -->        			
         <parameter	id="AutosaveVivadoSynthesis" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
                     visible="false" type="Boolean" format="None"/>
@@ -203,9 +195,6 @@
 				"SkipSnapshotSynth"
  				"SnapshotSynth" <!--  same as in project -->
 				"ResetProject"
-				"ShowWarnings"
-				"ShowInfo"
-				"GrepEWI"
 			</group>
 			<group name="Synthesis">
 		        "directive"

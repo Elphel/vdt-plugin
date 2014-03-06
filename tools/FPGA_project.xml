@@ -17,19 +17,7 @@
 		<parameter id="RemoteUser" label="Remote user name" tooltip="Remote user name" type="String"
 			format="CopyValue" default="%%UserName" readonly="false" visible="true" />
 
-		<parameter id="PreSSH" label="pre-ssh" tooltip="pre-ssh shell parameters"
-			type="String" format="CopyValue" default="" readonly="false" visible="true" />
-
-		<parameter id="ShellSwitches" label="Shell switch" tooltip="Shell switches" type="String"
-			format="CopyValue" default="-c" readonly="false" visible="true" />
-
-		<parameter id="TerminalMode" type="BoolYesNo" format="None"
-			default="false" label="Force terminal mode" tooltip="Force terminal mode for the remote program" />
-
-		<parameter id="SSHSwitches" label="ssh switches" tooltip="Other ssh switches"
-			type="String" format="CopyValue" default="" readonly="false" visible="true" />
-
-
+<!-- Vivado options -->
 		<parameter id="VivadoRelease" label="Vivado release" tooltip="Vivado release number (part of the path)"
 			type="String" format="CopyValue" default="2013.4" readonly="false"
 			visible="true" />
@@ -37,43 +25,117 @@
 		<parameter id="VivadoInstallationRoot" label="Vivado root" tooltip="Vivado Installation Root"
 			type="String" format="CopyValue" default="/opt/Xilinx/Vivado" readonly="false"
 			visible="true" />
-			
-		<parameter id="VivadoRelativeExeOptions" label="Vivado launch command" tooltip="Vivado relative executable path and command options"
-			type="String" format="CopyValue" default="bin/vivado -mode tcl" readonly="false"
+
+<!-- ISE options -->
+		<parameter id="ISERelease" label="ISE release" tooltip="ISE release number (part of the path)"
+			type="String" format="CopyValue" default="14.7" readonly="false"
 			visible="true" />
 
-		<parameter id="VivadoUnisimsPath" label="unisims location" tooltip="Relative location of Xilinx unisims library"
-			type="String" format="CopyValue" default="data/verilog/src" readonly="false"
+		<parameter id="ISEInstallationRoot" label="ISE root" tooltip="ISE Installation Root"
+			type="String" format="CopyValue" default="/opt/Xilinx" readonly="false"
 			visible="true" />
-<!-- /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
-		<parameter id="RemoteCommand" label="Remote command" tooltip="Remote ssh command"
-			type="String" format="CopyValue"
-			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoRelativeExeOptions"
-			readonly="true"
-			visible="true" />
-		<parameter id="VivadoUnisimsAbsolutePath" label="Full unisims path" tooltip="Full path of Xilinx unisims primitives library"
-			type="String" format="CopyValue"
-			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoUnisimsPath"
-			readonly="true"
-			visible="true" />
-			
+
+
+<!-- Vivado advanced parameters -->
+		<parameter id="TerminalMode" type="BoolYesNo" format="None"
+			default="false" label="Force terminal mode" tooltip="Force terminal mode for the remote program" />
+
+		<parameter id="ShellSwitches" label="Shell switch" tooltip="Shell switches" type="String"
+			format="CopyValue" default="-c" readonly="false" visible="true" />
+
+		<parameter id="PreSSH" label="pre-ssh" tooltip="pre-ssh shell parameters"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="SSHSwitches" label="ssh switches" tooltip="Other ssh switches"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
 
 		<parameter id="SSHExtra" label="ssh extra parameters" tooltip="ssh extra parameters" type="String"
 			format="CopyValue" default="" readonly="false" visible="true" />
 
 		<parameter id="VivadoConsole" default="Vivado" label="Vivado console name" tooltip="Vivado console name in Eclipse, used by other tools"
 			type="String" format="CopyValue" visible="true" readonly="false"/>
+
+		<parameter id="VivadoRelativeExeOptions" label="Vivado launch command" tooltip="Vivado relative executable path and command options"
+			type="String" format="CopyValue" default="bin/vivado -mode tcl" readonly="false"
+			visible="true" />
+
+		<parameter id="VivadoUnisimsPath" label="unisims location" tooltip="Relative location of Xilinx Vivado unisims library"
+			type="String" format="CopyValue" default="data/verilog/src" readonly="false"
+			visible="true" />
+
+		<parameter id="RemoteCommand" label="Remote command" tooltip="Remote ssh command"
+			type="String" format="CopyValue"
+			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoRelativeExeOptions"
+			readonly="true"
+			visible="true" />
+
+		<parameter id="VivadoUnisimsAbsolutePath" label="Full unisims path" tooltip="Full path of Xilinx Vivado unisims primitives library"
+			type="String" format="CopyValue"
+			default="%VivadoInstallationRoot/%VivadoRelease/%VivadoUnisimsPath"
+			readonly="true"
+			visible="true" />
+
+<!-- ISE advanced parameters -->
+		<parameter id="ISETerminalMode" type="BoolYesNo" format="None"
+			default="false" label="Force terminal mode" tooltip="Force terminal mode for the remote program" />
+
+		<parameter id="ISEShellSwitches" label="Shell switch" tooltip="Shell switches" type="String"
+			format="CopyValue" default="-c" readonly="false" visible="true" />
+
+		<parameter id="ISEPreSSH" label="pre-ssh" tooltip="pre-ssh shell parameters"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="ISESSHSwitches" label="ssh switches" tooltip="Other ssh switches"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="ISESSHExtra" label="ssh extra parameters" tooltip="ssh extra parameters" type="String"
+			format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="ISEConsole" default="ISE" label="ISE console name" tooltip="ISE shell console name in Eclipse, used by other tools"
+			type="String" format="CopyValue" visible="true" readonly="false"/>
+
+		<parameter id="ISEUnisimsPath" label="ISE unisims location" tooltip="Relative location of Xilinx ISE unisims library"
+			type="String" format="CopyValue" default="ISE_DS/ISE/verilog/src" readonly="false"
+			visible="true" />
+
+		<parameter id="ISERemoteCommand" label="Remote command" tooltip="Remote ssh command"
+			type="String" format="CopyValue"
+			default="/bin/bash"
+			readonly="false"
+			visible="true" />
+
+		<parameter id="ISEBinDirectory" label="ISE executables" tooltip="ISE executables sub-directory"
+			type="String" format="CopyValue" default="ISE_DS/ISE/bin/lin64" readonly="false"
+			visible="true" />
+
+		  <parameter id="ISEUnisimsAbsolutePath" label="Full unisims path" tooltip="Full path of Xilinx ISE unisims primitives library"
+			type="String" format="CopyValue"
+			default="%ISEInstallationRoot/%ISERelease/%ISEUnisimsPath"
+			readonly="true"
+			visible="true" />
+
+		  <parameter id="ISEBinAbsolutePath" label="Full ISE executables path" tooltip="Full path of Xilinx ISE executables directory"
+			type="String" format="CopyValue"
+			default="%ISEInstallationRoot/%ISERelease/%ISEBinDirectory"
+			readonly="true"
+			visible="true" />
+
+
+<!-- /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
+			
         <parameter 	id="NoBabyTalk" label="No Baby talk" tooltip= "Remove licensing baby talk from INFO messages."
         			default="true" visible="true" omit="false" type="Boolean" format="DashName"/>
 			
 	     <input>
-			<group name="VivadoServer" label="Vivado server setup">
+			<group name="XilinxServer" label="Xilinx server setup">
 				"RemoteHost"
 				"RemoteUser"
 				"VivadoRelease"
 				"VivadoInstallationRoot"
+				"ISERelease"
+				"ISEInstallationRoot"
 			</group>
-			<group name="Advanced" label="Vivado server advanced setup">
+			<group name="AdvancedVivado" label="Vivado server advanced setup">
 				"TerminalMode"
 				"ShellSwitches"
 				"PreSSH"
@@ -84,6 +146,18 @@
 				"VivadoUnisimsPath"
 				"RemoteCommand"
 				"VivadoUnisimsAbsolutePath"
+			</group>
+			<group name="AdvancedISE" label="Xilinx ISE server advanced setup">
+				"ISETerminalMode"
+				"ISEShellSwitches"
+				"ISEPreSSH"
+				"ISESSHSwitches"
+				"ISESSHExtra"
+				"ISEConsole"
+				"ISEUnisimsPath"
+				"ISERemoteCommand"
+				"ISEBinDirectory"
+				"ISEUnisimsAbsolutePath"
 			</group>
 		</input>
 	</package>
@@ -103,7 +177,7 @@
 			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
 		<!--  Vivado parameters  -->
 		<parameter	id="part" label="Device" tooltip= "FPGA part number (device) to use"
-        		default="" visible="true" omit="" type="String" format="Dash"/>
+        		default="" visible="true" omit="" type="String" format="CopyValue"/>
 		<parameter id="VivadoProjectRoot" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on Vivado server"
 			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
 
@@ -117,11 +191,32 @@
 		    tooltip="Local project subdirectroy for Xilinx Vivado generated result files"
 			type="Pathname" default="vivado_results" format="CopyValue" readonly="false" />
 
-		<parameter id="VivadoLogDir" label="Local Vivado tool logsx directory" tooltip="Local project subdirectroy for Xilinx Vivado tools log files"
+		<parameter id="VivadoLogDir" label="Local Vivado tool logs directory" tooltip="Local project subdirectroy for Xilinx Vivado tools log files"
 			type="Pathname" default="vivado_logs" format="CopyValue" readonly="false" />
 
 		<parameter id="VivadoIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
 			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
+<!-- ISE parameters -->			
+		<parameter id="ISEProjectRoot" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on ISE server"
+			type="String" default="vdt_ise" format="RemoteRootSyntax" readonly="false" />
+
+		<parameter id="ISERemoteDir" label="Remote ISE directory" tooltip="Remote ISE output subdirectroy for snapshot and result files"
+			type="Pathname" default="vivado_build" format="CopyValue" readonly="false" />
+
+		<parameter id="ISELocalDir" label="Local ISE directory" tooltip="Local project subdirectroy for Xilinx ISE snapshot files"
+			type="Pathname" default="vivado_state" format="CopyValue" readonly="false" />
+
+		<parameter id="ISELocalResultDir" label="Local ISE results directory"
+		    tooltip="Local project subdirectroy for Xilinx ISE generated result files"
+			type="Pathname" default="vivado_results" format="CopyValue" readonly="false" />
+
+		<parameter id="ISELogDir" label="Local ISE tool logs directory" tooltip="Local project subdirectroy for Xilinx ISE tools log files"
+			type="Pathname" default="vivado_logs" format="CopyValue" readonly="false" />
+
+		<parameter id="ISEIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
+			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
+			
+			
 <!-- Calculated -->
 <!-- 	<parameter id="VivadoProjectRoot" label="" tooltip="Relative (to user home directory) path of the project on Vivado server"
 			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" /> -->
@@ -205,27 +300,42 @@
 <!-- Invisible (calculated) project-wide parameters -->			
 		<parameter id="SimulDirSlash" type="Pathname" visible="false"
 		 default="?%SimulDir=:,%SimulDir/" format="CopyValue"/>
-		<parameter id="SedPaths" type="String" format="CopyValue"
-		label="sed commaaand line" tooltip="Remote file prefix to be removed for the local error parser"
+		<parameter id="VivadoSedPaths" type="String" format="CopyValue"
+		label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running Vivado tools"
 		default="sed -u 's@/home/%RemoteUser/%VivadoProjectRoot/%%ProjectName/@@'"/>
-		
+	
+		<parameter id="ISESedPaths" type="String" format="CopyValue"
+		label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running ISE tools"
+		default="sed -u 's@/home/%RemoteUser/%VivadoProjectRoot/%%ProjectName/@@'"/>
 			
 		<input>
+			<group name="Genaral" label="General parameters">
+			    "part"
+			</group>
 			<group name="Simulation" label="Simulation properties">
 				"SimulationTopFile"
 				"SimulationTopModule"
 				"ImplementationTopFile"
 				"SimulDir"
 			</group>
+			
 			<group name="Vivado" label="Vivado general properties">
-			    "part"
 				"VivadoProjectRoot"
 				"VivadoRemoteDir"
 				"VivadoLocalDir"
 				"VivadoLocalResultDir"
 				"VivadoLogDir"
 				"VivadoIgnoreSource"
-				"SedPaths"
+				"VivadoSedPaths"
+			</group>
+			<group name="ISE" label="ISE general properties">
+				"ISEProjectRoot"
+				"ISERemoteDir"
+				"ISELocalDir"
+				"ISELocalResultDir"
+				"ISELogDir"
+				"ISEIgnoreSource"
+				"ISESedPaths"
 			</group>
 			<group name="VivadoDisable" label="Selectively disable Vivado tools">
 			    "DisableVivadoSynth"

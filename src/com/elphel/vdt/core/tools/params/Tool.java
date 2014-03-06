@@ -21,6 +21,8 @@ import java.util.*;
 import java.io.*;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.ui.IMemento;
 
 import com.elphel.vdt.VDT;
@@ -60,6 +62,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private static final String MEMENTO_TOOL_DEPNAME =       "name";
     private static final String MEMENTO_TOOL_FILEDEPSTAMP =  "fileDependency";
     private static final String MEMENTO_TOOL_STATEDEPSTAMP = "stateDependency";
+    
+    private static final String PROJECT_TOOL_NAME =          "tool.";
+    private static final String PROJECT_TOOL_PINNED =        ".pinned";
+    private static final String PROJECT_TOOL_STATE =         ".state";
+    private static final String PROJECT_TOOL_TIMESTAMP =     ".timestamp";
+    private static final String PROJECT_TOOL_LASTRUNHASH =   ".lastrunhash";
+    private static final String PROJECT_TOOL_DEPSTATE =      ".depstate.";
+    private static final String PROJECT_TOOL_DEPFILE =       ".depfile.";
 
 
     private String baseToolName;
@@ -415,11 +425,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public void setLastRunHash(int hash){ // to restore from file
     	lastRunHash=hash;
     }
+    public void setStateJustThis(TOOL_STATE state) {
+    	this.state=state;
+    }
     
     public void setState(TOOL_STATE state) {
-    	this.state=state;
+    	setStateJustThis(state);
     	DEBUG_PRINT("SetState("+state+") for tool "+getName()+" threadID="+Thread.currentThread().getId());
-    	if (getRestoreMaster()!=null){
+    	if ((getRestoreMaster()!=null) && (state != TOOL_STATE.NEW)){
     		getRestoreMaster().setState(state); // TODO: Should it be always or just for SUCCESS ?
     	}
     }
@@ -928,6 +941,98 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	return names.get(0);
     }
     
+    /**
+     * Save tool state as project persistent properties
+     * @param project where to attach properties
+     */
+    public void saveState(IProject project) {
+    	QualifiedName qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_PINNED);
+    	try {project.setPersistentProperty(qn, new Boolean(isPinned()).toString());}
+    	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+isPinned()+", e="+e);}
+    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_STATE);
+    	try {project.setPersistentProperty(qn, getState().toString());}
+    	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+getState()+", e="+e);}
+        if (getTimeStamp()!=null) {
+        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_TIMESTAMP);
+        	try {project.setPersistentProperty(qn, getTimeStamp());}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+getTimeStamp()+", e="+e);}
+
+        }
+        if (getLastRunHash()!=0)  {
+        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_LASTRUNHASH);
+        	try {project.setPersistentProperty(qn, new Integer(getLastRunHash()).toString());}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+getLastRunHash()+", e="+e);}
+        }
+        for(String state:dependStatesTimestamps.keySet()){
+        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE+state);
+        	try {project.setPersistentProperty(qn, dependStatesTimestamps.get(state));}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+dependStatesTimestamps.get(state)+", e="+e);}
+        }
+        for(String file:dependFilesTimestamps.keySet()){
+        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPFILE+file);
+        	try {project.setPersistentProperty(qn, dependFilesTimestamps.get(file));}
+        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+dependFilesTimestamps.get(file)+", e="+e);}
+        }
+        DEBUG_PRINT("*** Updated persistent properties for tool "+getName()+ "  in the project "+project.toString());
+    }
+
+    public void restoreState(IProject project) {
+    	Map<QualifiedName,String> pp;    
+    	try {
+    	pp=project.getPersistentProperties();
+    	} catch (CoreException e){
+    		System.out.println(project+": Failed getPersistentProperties(), e="+e);
+    		return;
+    	}
+    	DEBUG_PRINT("restoring "+getName()+" state for project "+project);
+    	QualifiedName qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_PINNED);
+    	String str=	pp.get(qn);
+    	if (str!=null)	try {
+    		setPinned(Boolean.parseBoolean(str));
+    	} catch (Exception e){
+    		System.out.println(project+"Failed setPinned(), e="+e);
+    	}
+    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_STATE);
+    	str=	pp.get(qn);
+    	if (str!=null) {
+    		try {
+    			setStateJustThis(TOOL_STATE.valueOf(str));
+    		} catch (IllegalArgumentException e){
+    			System.out.println("Invalid tool state: "+str+" for tool "+getName()+" in memento");
+    		}
+    		if (getState()==TOOL_STATE.KEPT_OPEN)
+    			setStateJustThis(TOOL_STATE.NEW);
+    	}
+    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_TIMESTAMP);
+    	str=	pp.get(qn);
+   		if (str!=null)	setTimeStamp(str);
+    	
+    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_LASTRUNHASH);
+    	str=	pp.get(qn);
+    	if (str!=null)	{
+    		try {
+    		Integer hc=Integer.parseInt(str);
+    		setLastRunHash(hc);
+    		} catch (Exception e){
+    			System.out.println("Invalid hashCode: "+str+" for tool "+getName()+" for project "+project);
+    		}
+    	}
+    	clearDependStamps();
+    	String statePrefix=PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE;
+    	String filePrefix= PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPFILE;
+    	for (QualifiedName qName: pp.keySet()){
+    		//        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE+state);
+    		if (qName.getLocalName().startsWith(statePrefix)){
+    			String value=pp.get(qName);
+    			setStateTimeStamp(qName.getLocalName().substring(statePrefix.length()), value);
+    		}
+    		if (qName.getLocalName().startsWith(filePrefix)){
+    			String value=pp.get(qName);
+    			setFileTimeStamp(qName.getLocalName().substring(filePrefix.length()), value);
+    		}
+    	}
+    }
+    
     
     public void saveState(IMemento memento) {
     	IMemento toolMemento= memento.createChild(MEMENTO_TOOL_TYPE,name);
@@ -971,12 +1076,12 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	String state=toolMemento.getString(MEMENTO_TOOL_STATE);
     	if (state!=null){
     		try {
-    			this.state=TOOL_STATE.valueOf(state);
+    			setStateJustThis(TOOL_STATE.valueOf(state));
     		} catch (IllegalArgumentException e){
     			System.out.println("Invalid tool state: "+state+" for tool "+name+" in memento");
     		}
-    		if (this.state==TOOL_STATE.KEPT_OPEN)
-    			this.state=TOOL_STATE.NEW;
+    		if (getState()==TOOL_STATE.KEPT_OPEN)
+    			setStateJustThis(TOOL_STATE.NEW);
     	}
     	String timestamp=toolMemento.getString(MEMENTO_TOOL_TIMESTAMP);
     	if (timestamp!=null) setTimeStamp(timestamp);

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISEPartgenInterface" extends="ISEInterface">
+	</interface>
+
+	<tool name="ISEPartgen" label="run partgen"
+	    project="FPGA_project"
+		interface="ISEPartgenInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Run ISE partgen"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		disable="TRUE"
+		inherits="ISEToolPrototype"
+		>
+		<action-menu>
+			<action label="Partgen" resource="" icon="bitstream.png" />
+		</action-menu>
+		
+        <parameter	id="p_option" outid="p"  label="include part" tooltip= "Include -p &lt;part&gt; option"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashNamePart"/>
+		
+        <parameter	id="v_option" outid="v"  label="include verbose part" tooltip= "Include -v &lt;part&gt; option"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashNamePart"/>
+
+        <parameter	id="arch"  label="architecture" tooltip= "Output information for the specified architecture"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+		
+        <parameter	id="nopkgfile" label="no package file" tooltip= "Do not generate package file"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+
+        <parameter	id="info" outid="i" label="list devices" tooltip= "Output list of devices, packages, speeds"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        			
+        <parameter	id="redirect" label="redirect output" tooltip= "Redirect output to file (for info and arch options)"
+        			default="partgen.out" visible="true" omit="" type="String" format="CopyValue"/>
+        			
+<!--  common parameters form the base tool -->        			
+		<parameter	id="intstyle"/>
+        <parameter	id="command_files"/>
+        <parameter	id="speed_grade"/>
+<!-- hidden (calculated) parameters -->
+        <parameter  id= "useRedirect" label="debug condition"
+         default="?(%info = true | %arch # ) ^ %redirect #  : true , false" visible="true" omit="false" type="Boolean" format="None"/>
+		<input>
+			<group name="Partgen options">
+				"p_option"
+				"v_option"
+				"arch"
+				"nopkgfile"
+				"info"
+				"redirect"
+				"useRedirect"
+			</group>
+		</input>
+		<output>
+			<line name="ise_run_partgen"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      success="@@FINISH@@"
+			      failure="ERROR"
+			      log=""
+			      stdout="parser_ISE">
+			      "mkdir -p"
+			      "~/%ISEProjectRoot"
+			      "\n"
+			      "cd ~/%ISEProjectRoot\n"
+			      "%ISEBinAbsolutePath/partgen"
+			      "%p_option"
+			      "%v_option"
+			      "%arch"
+			      "%nopkgfile"
+			      "%info"
+			      "%intstyle"
+			      <if useRedirect="true">
+			          "&gt;%redirect"
+			      </if>
+			      "\n"
+				"echo \"@@FINISH@@\"\n"
+			</line>
+<!-- TODO: copy results -->			
+		</output>
+	</tool>
+</vdt-project>
+

@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IMemento;
+
 
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
@@ -78,15 +81,29 @@ public class ToolsCore {
     }
     
     public static void saveToolsState(IMemento memento){
-        for (Tool tool : getConfig().getContextManager().getToolList())
-        	tool.saveState(memento);
+    	if (getConfig().getContextManager().getToolList()!=null) {
+    		for (Tool tool : getConfig().getContextManager().getToolList())
+    			tool.saveState(memento);
+    	}
     }
     
     public static void restoreToolsState(IMemento memento){
         for (Tool tool : getConfig().getContextManager().getToolList())
         	tool.restoreState(memento);
     }
+
+    public static void saveToolsState(IProject project){
+    	if (getConfig().getContextManager().getToolList()!=null) {
+    		for (Tool tool : getConfig().getContextManager().getToolList())
+    			tool.saveState(project);
+    	}
+    }
     
+    public static void restoreToolsState(IProject project){
+        for (Tool tool : getConfig().getContextManager().getToolList())
+        	tool.restoreState(project);
+    }
+
 
     public static Tool getToolWorkingCopy(String toolID) {
         Tool tool = getTool(toolID);
