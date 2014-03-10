@@ -11,7 +11,16 @@
       			<item value="silent" label="Only errors and warnings are output"/>
       		</paramtype>
     	</typedef>
+    	<typedef name = "Cardinal_M1_100">
+            <paramtype kind="number" lo="-1" hi="100" format="%d" />
+        </typedef>
+    	
 	 <syntax name="DashNamePart"    format="-%%ParamName %part" />
+
+	<syntax name="DashListQuoted"      format='-%%ParamName "%(%%ParamValue%| %)"' />
+	<syntax name="DashListBraced"      format="-%%ParamName {%(%%ParamValue%| %)}" />
+ 
+
 		
 	
 <!-- <syntax name="QuietSyntax"     format=" -quiet" />

@@ -48,7 +48,10 @@
                           label="Run ISE partgen"
                           icon="bitstream.png"
                           call="ISEPartgen"/>
-
+               	<menuitem name="ISESynthesis"
+                          label="Synthesize design"
+                          icon="Retort.png"
+                          call="ISExst"/>
         </menu>
                           
         <menu name="Vivado" 

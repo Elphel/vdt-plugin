@@ -263,7 +263,8 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
         		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
         			System.out.println("Updated fSelectedVerilogFile: "+fSelectedVerilogFile);
             } else {
-            	System.out.println(selectedResource+" is not a file or not an HDL file");
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        			System.out.println(selectedResource+" is not a file or not an HDL file");
             }
         }
         

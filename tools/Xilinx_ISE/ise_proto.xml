@@ -27,13 +27,13 @@
 <!-- parser parameters -->
 <!-- TODO: parser is temporarily copied from Vivado, change to ISE -->
         <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
-        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			default='ERROR:(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
-        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			default='WARNING:(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
-        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			default='INFO:(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
         			default="true" visible="true" omit="false" type="Boolean" format="None"/>
@@ -67,12 +67,12 @@
 		           type= "Boolean" format="None"/>
         <parameter id="PreGrepW" visible="false"
                    type="String" format="None"
-                   default="?%ShowWarnings=true: |WARNING, "/>
+                   default="?%ShowWarnings=true: |WARNING:, "/>
         <parameter id="PreGrepI" visible="false"
                    type="String" format="None"
-                   default="?%ShowInfo=true: |INFO, "/>
+                   default="?%ShowInfo=true: |INFO:, "/>
         <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
-                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
+                   default="grep --line-buffered -E 'ERROR:%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
         			

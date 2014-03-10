@@ -66,9 +66,9 @@
 			      log=""
 			      stdout="parser_ISE">
 			      "mkdir -p"
-			      "~/%ISEProjectRoot"
+			      "~/%ISEProjectRoot/%ISERemoteDir"
 			      "\n"
-			      "cd ~/%ISEProjectRoot\n"
+			      "cd ~/%ISEProjectRoot/%ISERemoteDir\n"
 			      "%ISEBinAbsolutePath/partgen"
 			      "%p_option"
 			      "%v_option"
@@ -83,6 +83,17 @@
 				"echo \"@@FINISH@@\"\n"
 			</line>
 <!-- TODO: copy results -->			
+			<line name="ise_copy_after_partgen">
+				"-c"
+				"mkdir -p %ISELocalResultDir ;"
+				"rsync -avr -e ssh"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/partlist.*"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/*.pkg"
+			      <if useRedirect="true">
+			          "%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/%redirect"
+			      </if>
+				"%ISELocalResultDir/"
+			</line>
 		</output>
 	</tool>
 </vdt-project>

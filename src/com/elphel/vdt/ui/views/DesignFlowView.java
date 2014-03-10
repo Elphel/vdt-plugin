@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -104,7 +104,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     private static final String TAG_LINKED_TOOLS =        "LinkedTools";
 
     private TreeViewer viewer;
-    private DrillDownAdapter drillDownAdapter;
+//    private DrillDownAdapter drillDownAdapter;
     private Action showLaunchConfigAction;
 //    private Action launchAction;
     
@@ -154,7 +154,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     IDoubleClickListener doubleClickListener=null;
     private Action [] launchActions;
     private ToolSequence toolSequence=null;
-    private Composite compositeParent;
+//    private Composite compositeParent;
     /**
      * The constructor.
      */
@@ -201,9 +201,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
 			System.out.println("+++++ createPartControl()");
     	
-    	compositeParent=parent; // will it help to re-draw
+//    	compositeParent=parent; // will it help to re-draw
         viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
-        drillDownAdapter = new DrillDownAdapter(viewer);
+//        drillDownAdapter = new DrillDownAdapter(viewer);
 
         viewer.setContentProvider(new ViewContentProvider());
         viewer.setLabelProvider(new ViewLabelProvider());
@@ -1109,7 +1109,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             Object obj = ((IStructuredSelection)selection).getFirstElement();
             selectedItem = (DesignMenuModel.Item) obj;
             if (selectedResource == null)
-                selectedResource = SelectedResourceManager.getDefault().getViewSelectedResource(IPageLayout.ID_RES_NAV);
+//                selectedResource = SelectedResourceManager.getDefault().getViewSelectedResource(IPageLayout.ID_RES_NAV);
+            	selectedResource = SelectedResourceManager.getDefault().getViewSelectedResource(IPageLayout.ID_PROJECT_EXPLORER);
+            //
             updateLaunchAction();
         }    
     } // class ToolSelectionChangedListener
@@ -1362,7 +1364,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         if (selectedResource != null) {
             String location = selectedResource.getFullPath().toPortableString();
             memento.putString(TAG_SELECTED_RESOURCE, location);
-            System.out.println("saveState(memento): selectedResource="+selectedResource);
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
+        		System.out.println("saveState(memento): selectedResource="+selectedResource);
         }
         IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
         if (HDLFile!=null){

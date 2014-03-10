@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISEXstInterface" extends="ISEInterface">
+		 <typedef name="BusDelimeterType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "&lt;&gt;" label="default bus delimiter"/>
+      			<item value= "[]"       label="[] bus delimiter"/>
+      			<item value= "{}"       label="{} bus delimiter"/>
+      			<item value= "()"       label="()bus delimiter"/>
+      		</paramtype>
+    	</typedef>
+		 <typedef name="CaseType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "upper"   label="Convert to upper case"/>
+      			<item value= "lower"    label="Convert to lower case"/>
+      			<item value= "maintain" label="Keep current case"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="AutoUserType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto"   label="automatic compilation order"/>
+      			<item value= "user"   label="user-defined compilation order"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="HierarchySeparatorType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "_" label="underscore hierarchy separator"/>
+      			<item value= "/" label="slash hierarchy separator"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="InputFormatType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "mixed"   label="both vhdl and verilog allowed"/>
+      			<item value= "vhdl"    label="vhdl-only source files"/>
+      			<item value= "verilog" label="verilog-only source files"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="LUTCombineType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto"  label="automatically combine LUTs"/>
+      			<item value= "area"  label="combine LUTs to minimize area"/>
+      			<item value= "off"   label="do not combine LUTs"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="NetlistHierarchyType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "as_optimized" label="sam blocks may be flattened"/>
+      			<item value= "rebuilt"      label="hierarchical NGC netlist, regardless of KEEP_HIERARCHY"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="OutputFileFormatType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "ngc" label="output file format"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="AutoNoType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto" label="auto"/>
+      			<item value= "no"   label="no"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="AutoYesNoType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto" label="auto "/>
+      			<item value= "yes"  label="yes"/>
+      			<item value= "no"   label="no"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="YesNoOnlyType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "yes"  label="yes"/>
+      			<item value= "no"   label="no"/>
+      			<item value= "only" label="only"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="VerilogCaseStyleType">
+      		<paramtype kind= "enum"  base="String">
+      			<item value= "full"          label="XST assumes that the case statements are complete, and avoids latch creation."/>
+      			<item value= "parallel"      label="XST assumes that the branches cannot occur in parallel, and does not use a priority encoder"/>
+      			<item value= "full-parallel" label="XST assumes that the case statements are complete, and that the branches cannot in parallel"/>
+      			<item value= "exact"         label="Exact behaviour of the case statement"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="GlobOptType">
+      		<paramtype kind= "enum"              base="String">
+      			<item value= "allclocknets"      label="Register-to-register, optimizes the period of the entire design"/>
+      			<item value= "offset_in_before"  label="Inpad-to-register, optimizes the maximum delay from input pad to clock"/>
+      			<item value= "offset_out_after"  label="Register-to-outpad, optimizes the maximum delay from clock to output pad"/>
+      			<item value= "inpad_to_outpad"   label="Inpad-to-outpad, optimizes the maximum delay from input pad to output pad throughout an entire design"/>
+      			<item value= "max_delay"         label="Combines all other constraints"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="YesNoSoftType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "yes"  label="yes"/>
+      			<item value= "no"   label="no"/>
+      			<item value= "soft" label="applies in synthesis, but does not propagate to implementation"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="OptLevelType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "1"  label="Normal, fast optimization"/>
+      			<item value= "2"  label="high optimization, longer run times"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="OptModeType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "speed" label="Reduce number of logic levels to increase frequency"/>
+      			<item value= "area"  label="Minimize total amount of logic"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="FSMEncodingType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto"  label="Atomatically select the best style for each state machine"/>
+      			<item value= "one-hot"  label="one-hot"/>
+      			<item value= "compact"   label="compact"/>
+      			<item value= "sequential"   label="sequential"/>
+      			<item value= "gray"   label="gray"/>
+      			<item value= "johnson"   label="johnson"/>
+      			<item value= "speed1"   label="speed1"/>
+      			<item value= "user"   label="user"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="FSMStyleType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "lut"   label="use LUT to implement FSM"/>
+      			<item value= "bram"  label="use BRAM to implement FSM"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="YesNoForceType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "yes" label="Enable"/>
+      			<item value= "no" label="Disable"/>
+      			<item value= "force" label="Force"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="SignalEncodingType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto" label="Automatically select individual signal encoding style"/>
+      			<item value= "one-hot" label="Force one-hot signal encoding"/>
+      			<item value= "user" label="Keep user encoding"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="MultStyleType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto" label="auto"/>
+      			<item value= "block" label="block"/>
+      			<item value= "pipe_block" label="pipeline dsp48 - Virtex4, 5 and Spartan 3a"/>
+      			<item value= "kcm" label="kcm"/>
+      			<item value= "csd" label="csd"/>
+      			<item value= "lut" label="lut"/>
+      			<item value= "pipe_lut" label="pipeline slice-based multipliers only"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="MuxStyleType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto" label="auto"/>
+      			<item value= "muxf" label="muxf"/>
+      			<item value= "muxcy" label="muxcy"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="RAMStyleType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "auto" label="Automatically select RAM/ROM style"/>
+      			<item value= "block" label="Infer block RAM/ROM"/>
+      			<item value= "distributed" label="Infer distributed RAM/ROM"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="ReadCoresType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "yes"      label="Enable 'black box' core processing"/>
+      			<item value= "no"       label="Disable core processing"/>
+      			<item value= "optimize" label="merge cores with overall design"/>
+      		</paramtype>
+    	 </typedef>
+		 <typedef name="RegisterBalancingType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "yes"      label="Both forward and backward retiming are allowed"/>
+      			<item value= "no"       label="Neither forward nor backward retiming is allowed"/>
+      			<item value= "forward"  label="Only forward retiming is allowed"/>
+      			<item value= "backward" label="Only backward retiming is allowed"/>
+      		</paramtype>
+    	 </typedef>
+    	 <syntax name="XSTPrjFile"      format="%(verilog work %%ParamValue%|\n%)" />
+    	 
+    	 
+	</interface>
+
+	<tool name="ISExst" label="run XST"
+	    project="FPGA_project"
+		interface="ISEXstInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%ISEIgnoreSource"
+		description="Run XST"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		inherits="ISEToolPrototype"
+		>
+<!-- 		disable="TRUE"  -->
+
+		<extensions-list>
+			<extension mask="v" />
+			<extension mask="tf" />
+		</extensions-list>
+
+		<action-menu>
+			<action label="Synthesize with XST:" resource="%ImplementationTopFile"
+			        check-extension="false" check-existence="true"  icon="Retort.png" />
+		</action-menu>
+<!--  TODO: find out, how to reset state and make a tool to depend on-->		
+		<depends-list>
+			<depends files="FilteredSourceListPar"/>
+			<depends files="constraints"/>
+		</depends-list>
+<!-- Constraints parameters -->
+        <parameter	id="arch"  label="VHDL architecture" tooltip= "VHDL Top Level Architecture"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="async_to_sync" label="Async. to Sync." tooltip= "Replace Asynchronous to Synchronous set/reset signals, absorb registers in DSP and BRAM"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        <parameter	id="auto_bram_packing" label="Auto BRAM Packing" tooltip= "Allow packing of 2 small sinble-port BRAMs into one dual-port one"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        <parameter	id="bram_utilization_ratio" label="BRAM utilization ratio (%)" tooltip= "Limit number of BRAM instances (-1..100), -=1 - no limit"
+        			default="100" visible="true" omit="100" type="Cardinal_M1_100" format="Dash"/>
+        <parameter	id="bufg" label="Maximum bufg number" tooltip= "Maximum number of global clock buffers"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="bufr" label="Maximum bufr number" tooltip= "Maximum number of regional clock buffers"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="bus_delimiter" label="Bus delimiters" tooltip= "Bus delimiter characters"
+        			default="&lt;&gt;" visible="true" omit="&lt;&gt;" type="BusDelimeterType" format="QuotedDash"/>
+        <parameter	id="case" label="Case" tooltip= "Treating the character case"
+        			default="maintain" visible="true" omit="maintain" type="CaseType" format="Dash"/>
+        <parameter	id="decoder_extract" label="Decoder extract" tooltip= "Automatic Decoder extract"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="define"     label="Verilog Macros" tooltip= "Verilog macros as 'name=value' pairs"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListBraced"/>
+        <parameter	id="dsp_utilization_ratio" label="DSP utilization ratio, %" tooltip= "DSP utilization ratio (-1..100)"
+        			default="100" visible="true" omit="100" type="Cardinal_M1_100" format="Dash"/>
+        <parameter	id="duplication_suffix" label="Duplication suffix" tooltip= "Format of the duplication suffix appended to the instances"
+        			default="_%d" visible="true" omit="_%d" type="String" format="Dash"/>
+        <parameter	id="entity" outid="ent" label="VHDL entity name" tooltip= "VHDL entity name (only for VHDL-only designs, use 'top' for mixed)"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="equivalent_register_removal" label="Equivalent register removal"
+                    tooltip= "Removes equivalent flip-flops and flip-flops with constant inputs."
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="fsm_encoding" label="FSM encoding style" tooltip= "Set global FSM encoding style"
+        			default="auto" visible="true" omit="auto" type="FSMEncodingType" format="Dash"/>
+        <parameter	id="fsm_extract" label="FSM extract" tooltip= "Automatic FSM extraction"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        			
+        <parameter	id="fsm_style" label="FSM style" tooltip= "USE LUT/BRAM to implement FSM"
+        			default="lut" visible="true" omit="lut" type="FSMStyleType" format="Dash"/>
+        			
+        <parameter	id="generics" label="VHDL generics" tooltip= "VHDL generics as 'name=value' pairs"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListBraced"/>
+        <parameter	id="hdl_compilation_order" label="Compilation order" tooltip= "HDL compilation order"
+        			default="auto" visible="true" omit="auto" type="AutoUserType" format="Dash"/>
+        <parameter	id="hierarchy_separator" label="Hierarchy separator" tooltip= "Hierarchy separator character"
+        			default="/" visible="true" omit="/" type="HierarchySeparatorType" format="QuotedDash"/>
+        <parameter	id="ifmt" label="input format" tooltip= "Type of the HDL source files"
+        			default="mixed" visible="true" omit="mixed" type="InputFormatType" format="Dash"/>
+<!-- Try if XST can accept multiple source files as '-ifn file1.v file2.v -other_option, if not - will generate/use command file -->        			
+        <parameter	id="input_file" outid="ifn" label="Input file name" tooltip= "input/project file name"
+        			default="%%FilteredSourceList" visible="true" omit="" type="Stringlist" format="Dash"/>
+        			
+        			
+        <parameter	id="iobuf" label="Add I/O buffers" tooltip= "Automatcally add I/O bufferes"
+        			default="yes" visible="true" omit="yes" type="YesNoSoftType" format="Dash"/>
+        <parameter	id="ignore_constraints" outid="iuc" label="Ignore constraints" tooltip= "Ignore user constraints"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        			
+        <parameter	id="keep_hierarchy" label="Keep Hierarchy" tooltip= "Keep Hierarchy of the design"
+        			default="yes" visible="true" omit="yes" type="YesNoSoftType" format="Dash"/>
+        			
+        			
+        <parameter	id="library_search_order" outid="lso" label="Library search order" tooltip= "Library search order (filename.lso)"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="lut_combine" outid="lc" label="LUT combining" tooltip= "LUT combining mode"
+        			default="off" visible="true" omit="off" type="LUTCombineType" format="Dash"/>
+
+        <parameter	id="max_fanout" label="Max fanout" tooltip= "Limit fanout of nets or signals"
+        			default="500" visible="true" omit="500" type="Cardinal" format="Dash"/>
+
+        <parameter	id="move_first_stage" label="Move first stage" tooltip= "Move first stage registers"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+
+        <parameter	id="move_last_stage" label="Move last stage" tooltip= "Move last stage registers"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+
+        <parameter	id="mult_style"  label="Mult style" tooltip= "Not supported for Virtex 4,5, Spartan 3a - for them use 'use_dsp48'"
+        			default="auto" visible="true" omit="auto" type="MultStyleType" format="Dash"/>
+        			
+        <parameter	id="mux_extract"  label="MUX extract" tooltip= "Control MUX extraction and inference"
+        			default="yes" visible="true" omit="yes" type="YesNoForceType" format="Dash"/>
+        <parameter	id="mux_style"  label="Mux style" tooltip= "Multiplexer macro control"
+        			default="auto" visible="true" omit="auto" type="MuxStyleType" format="Dash"/>
+        			
+        <parameter	id="netlist_hierarchy" label="Netlist hierarchy" tooltip= "Netlist hierarchy type"
+        			default="as_optimized" visible="true" omit="as_optimized" type="NetlistHierarchyType" format="Dash"/>
+        			
+<!-- opt_level (defl="1") and opt_mode (dflt="speed" warns if missing, removing ommit -->]        			
+        <parameter	id="opt_level" label="Optimization level" tooltip= "Optimization level, changes run time"
+        			default="1" visible="true" omit="" type="OptLevelType" format="Dash"/>
+        <parameter	id="opt_mode" label="Optimization mode" tooltip= "Optimization goal (area or speed)"
+        			default="speed" visible="true" omit="" type="OptModeType" format="Dash"/>
+    			
+        <parameter	id="output_format" outid="ofmt" label="Output format" tooltip= "Output file format"
+        			default="ngc" visible="true" omit="ngc" type="OutputFileFormatType" format="Dash"/>
+        <parameter	id="output_file" outid="ofn" label="Output file name" tooltip= "Output file name"
+        			default="%%ProjectName.%output_format" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="target_device" outid="p"  label="Target device" tooltip= "Target device part number"
+        			default="%part" visible="true" omit="" type="String" format="Dash"/>
+<!--  pld-only -->
+        <parameter	id="pld_ce" label="PLD clock enable" tooltip= "PLD clock enable"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="pld_mp" label="PLD macro preserve" tooltip= "PLD macro preserve"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="pld_xp" label="PLD XOR preserve" tooltip= "PLD XOR preserve (set to 'no' to completely flatten the design)"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        			
+        			
+        <parameter	id="power" label="Power reduction" tooltip= "Optimize to reduce power consumption"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        <parameter	id="priority_extract"  label="Priority extract" tooltip= "Priority encoder extraction"
+        			default="yes" visible="true" omit="yes" type="YesNoForceType" format="Dash"/>
+        <parameter	id="ram_extract" label="RAM extract" tooltip= "Control RAM macro inference"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="ram_style"  label="RAM style" tooltip= "RAM extraction style"
+        			default="auto" visible="true" omit="auto" type="RAMStyleType" format="Dash"/>
+        <parameter	id="read_cores"  label="Read cores" tooltip= "Processing of the used cores"
+        			default="yes" visible="true" omit="yes" type="ReadCoresType" format="Dash"/>
+        <parameter	id="reduce_control_sets" label="Reduce control sets" tooltip= "Reduce control sets (Virtex-5 only)"
+        			default="no" visible="true" omit="no" type="AutoNoType" format="Dash"/>
+        <parameter	id="register_balancing" label="Register balancing" tooltip= "Control FF retiming by moving logic"
+        			default="no" visible="true" omit="no" type="RegisterBalancingType" format="Dash"/>
+        <parameter	id="register_duplication" label="Register duplication"
+                    tooltip= "Enable register duplication to increase clock rate"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="rom_extract" label="ROM extract"
+                    tooltip= "Enable ROM extraction (set to 'yes' to use ROM extraction style)"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="rom_style"  label="ROM style" tooltip= "ROM extraction style"
+        			default="auto" visible="true" omit="auto" type="RAMStyleType" format="Dash"/>
+        			
+        <parameter	id="resource_sharing"  label="Resource sharing" tooltip= "Control resource sharing"
+        			default="yes" visible="true" omit="yes" type="YesNoForceType" format="Dash"/>
+        			
+        <parameter	id="rtlview" label="Generate RTL schematics" tooltip= "Generate a netlist representinmg RTL structure of the design (*.ngr)"
+        			default="no" visible="true" omit="no" type="YesNoOnlyType" format="Dash"/>
+        <parameter	id="core_directories" outid="sd" label="Core search directories" tooltip= "Core search directories other than default"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListBraced"/>
+        			
+        <parameter	id="safe_implementation" label="Safe implementation"
+                    tooltip= "Safe implementation of the FSM (an logic to recover from invalid states)"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        <parameter	id="shift_extract" label="Shifter extract" tooltip= "Automatic logical shifter extraction"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+
+        <parameter	id="shreg_extract" label="Shift register extract" tooltip= "Automatic shift register extraction (such as SLR16 and SLRC16)"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+
+        			
+        <parameter	id="signal_encoding" label="Signal encoding" tooltip= "Globally set signal encoding style"
+        			default="auto" visible="true" omit="auto" type="SignalEncodingType" format="Dash"/>
+
+        			
+        <parameter	id="slice_packing" label="Slice packing" tooltip= "Slice packing - enables the XST internal packer"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="slice_utilization_ratio" label="Slice utilization ratio (%)" tooltip= "Limit number of slices (-1..100), -=1 - no limit"
+        			default="100" visible="true" omit="100" type="Cardinal_M1_100" format="Dash"/>
+        <parameter	id="slice_utilization_ratio_maxmargin" label="Slice utilization max margin (%)"
+                    tooltip= "Stop if slice utilisation axceeds this value"
+        			default="100" visible="true" omit="100" type="Cardinal_M1_100" format="Dash"/>
+        <parameter	id="top" label="Top level block" tooltip= "Top level block for synthesis"
+        			default="%%TopModule" visible="true" omit="" type="String" format="Dash"/>
+        <parameter	id="tristate2logic" label="Tristate to logic"
+                    tooltip= "Convert tristate to logic on tyhe internal bus (for architectures that support it)"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="constraints" outid="uc" label="Synthesis constraints file" tooltip= "Synthesis constraints file (*.xcf)"
+        			default="" visible="true" omit="" type="Filename" format="Dash"/>
+        <parameter	id="use_carry_chain" label="Use carry chain" tooltip= "Set to 'no' to deactivate carry chain usage"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="use_clock_enable" label="Use clock enable" tooltip= "Use clock enable (CE) in FF"
+        			default="auto" visible="true" omit="auto" type="AutoYesNoType" format="Dash"/>
+        <parameter	id="use_dsp48" label="Use DSP48" tooltip= "Use DSP48 (Virtex4, 5, Spartan3A DSP)"
+        			default="auto" visible="true" omit="auto" type="AutoYesNoType" format="Dash"/>
+        <parameter	id="use_sync_set" label="Use sync. set" tooltip= "Use dedicated synchronous set function in FF"
+        			default="auto" visible="true" omit="auto" type="AutoYesNoType" format="Dash"/>
+        <parameter	id="use_sync_reset" label="Use sync. reset" tooltip= "Use dedicated synchronous reset function in FF"
+        			default="auto" visible="true" omit="auto" type="AutoYesNoType" format="Dash"/>
+        <parameter	id="verilog2001" label="Verilog 2001" tooltip= "Enable Verilog 2001 mode"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        <parameter	id="vlgcase" label="Case implementation style" tooltip= "Case implementation style (for Verilog only)"
+        			default="exact" visible="true" omit="exact" type="VerilogCaseStyleType" format="Dash"/>
+        <parameter	id="xor_collapse" label="XOR collapse" tooltip= "Collapse cascaded XOR into a single XOR"
+        			default="true" visible="true" omit="true" type="BoolYesNo" format="Dash"/>
+        			
+        			
+        			
+<!-- Elaborate command options  ifn, ifmt, lso, work_lib, verilog2001, vlgpath, vlgincdir -->
+
+        <parameter	id="vlgpath" label="Verilog search paths" tooltip= "Verilog Verilog search paths"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListQuoted"/>
+        <parameter	id="vlgincdir" label="Verilog include directories" tooltip= "Verilog include directories"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListBraced"/>
+        			
+        <parameter	id="work_lib" label="Work library" tooltip= "Work library for compilation"
+        			default="work" visible="true" omit="work" type="String" format="Dash"/>
+        <parameter	id="wysiwyg" label="wysiwyg" tooltip= "Preserves all user internal signals (nodes), skip optimization]"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        <parameter	id="xsthdpdir" label="Work directory" tooltip= "Work directory for VHDL-compiled files"
+        			default="./xst" visible="true" omit="./xst" type="String" format="Dash"/>
+        <parameter	id="xsthdpini" label="HDL library mapping file" tooltip= " Contains information about the locations of the standard VHDL and UNISIM libraries (filename.ini)"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+<!-- Timing constraints -->
+        <parameter	id="glob_opt" label="Global optimization goal" tooltip= "Global optimization goal for design regions"
+        			default="allclocknets" visible="true" omit="allclocknets" type="GlobOptType" format="Dash"/>
+        <parameter	id="cross_clock_analysis" label="Cross clock analysis" tooltip= "Perform inter-clock domain analysis during timing optimization"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        <parameter	id="write_timing_constraints" label="Write timing constraints" tooltip= "Write timing constraints to the NGC file"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+<!-- set option -->
+        <parameter	id="tmpdir" label="TMP directory" tooltip= "temporary directory (clean up regularly)"
+        			default="/tmp" visible="true" omit="/tmp" type="String" format="Dash"/>
+		
+		
+		
+        <parameter	id="v_option" outid="v"  label="include verbose part" tooltip= "Include -v &lt;part&gt; option"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashNamePart"/>
+
+		
+        <parameter	id="nopkgfile" label="no package file" tooltip= "Do not generate package file"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+
+        <parameter	id="info" outid="i" label="list devices" tooltip= "Output list of devices, packages, speeds"
+        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        			
+        <parameter	id="redirect" label="redirect output" tooltip= "Redirect output to file (for info and arch options)"
+        			default="partgen.out" visible="true" omit="" type="String" format="CopyValue"/>
+<!--  common parameters from the base tool -->        			
+		<parameter	id="intstyle"/>
+        <parameter	id="command_files"/>
+        <parameter	id="speed_grade"/>
+
+<!-- calculated parameters -->        			
+	    <parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
+			 format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true" />
+   	    <parameter   id="ISESynthActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
+			default="%constraints" label="Constraints files" readonly="true"
+			visible="true" />
+			
+		<parameter id="RawOutFile" type="String" format="CopyValue"
+			default="%output_file" label="Output file name" readonly="true"
+			visible="true" />
+		<parameter id="RawTmpdir" type="String" format="CopyValue"
+			default="%tmpdir" label="tmpdir" readonly="true"
+			visible="true" />
+		<parameter id="xst_prj" label="XST project file"
+		    default="%%ProjectName.prj" type="Filename" format="CopyValue"
+		    readonly="true" visible="true" />	
+		<parameter id="xst_prj_content" default="%%FilteredSourceList"
+		    type="Stringlist" format="XSTPrjFile" visible="false" />	
+			
+        			
+<!-- hidden (calculated) parameters -->
+        <parameter  id= "useRedirect" label="debug condition"
+         default="?(%info = true | %arch # ) ^ %redirect #  : true , false" visible="true" omit="false" type="Boolean" format="None"/>
+		<input>
+		    <group name="General options">
+		        "top"
+		        "ConstraintsFiles"
+		        "ifmt"
+			    "input_file" <!-- outid="ifn" --> 
+			    "output_format" <!-- outid="ofmt" --> 
+			    "output_file" <!-- outid="ofn" --> 
+			    "target_device" <!-- outid="p" --> 
+		        
+		        "FilteredSourceListPar"
+		        "RawOutFile"
+		        "xst_prj"
+		    </group>
+		    <group name ="Synthesis Options">
+			    "constraints" <!-- outid="uc" --> 
+			    "opt_mode"
+			    "opt_level"
+			    "ignore_constraints" <!-- outid="iuc" --> 
+			    "library_search_order" <!--  outid="lso" --> 
+			    "glob_opt"
+			    "rtlview"
+			    "write_timing_constraints"
+			    "verilog2001"
+			    "keep_hierarchy"
+			    "core_directories" <!-- outid="sd" --> 
+			    "cross_clock_analysis"
+			    "hierarchy_separator"
+			    "bus_delimiter"
+			    "case"
+			    "vlgincdir"
+			    "slice_utilization_ratio"
+			    "slice_utilization_ratio_maxmargin"
+			    "---"
+			    "tmpdir"
+			    "xsthdpdir"
+			    "xsthdpini"
+			    
+		    </group>
+		    <group name="FPGA/PLD HDL options">
+			    "fsm_encoding"
+			    "safe_implementation"
+			    "vlgcase"
+			    "mux_extract"
+			    "resource_sharing"
+		    </group>
+		    <group name="FPGA HDL options">
+			    "fsm_style"
+			    "ram_extract"
+			    "ram_style"
+			    "rom_extract"
+			    "rom_style"
+			    "mux_style"
+			    "decoder_extract"
+			    "priority_extract"
+			    "shreg_extract"
+			    "shift_extract"
+			    "xor_collapse"
+			    "mult_style"
+			    "use_dsp48"
+		    </group>
+		    <group name="Xilinx options">
+			    "iobuf"
+			    "equivalent_register_removal"
+		    </group>
+		    <group name="Xilinx FPGA options">
+			    "lut_combine" <!-- outid="lc" --> 
+			    "max_fanout"
+			    "register_duplication"
+			    "reduce_control_sets"
+			    "register_balancing"
+			    "move_first_stage"
+			    "move_last_stage"
+			    "tristate2logic"
+			    "use_clock_enable"
+			    "use_sync_set"
+			    "use_sync_reset"
+			    "bufg"
+			    "bufr"
+		    </group>
+		    <group name="Xilinx PLD options">
+			    "pld_ce"
+			    "pld_mp"
+			    "pld_xp"
+			    "wysiwyg"
+		    </group>
+		    <group name ="other options">
+			    "arch"
+			    "async_to_sync"
+			    "auto_bram_packing"
+			    "bram_utilization_ratio"
+			    "define"
+			    "dsp_utilization_ratio"
+			    "duplication_suffix"
+			    "entity"  <!-- outid="ent" --> 
+			    "fsm_extract"
+			    "generics"
+			    "hdl_compilation_order"
+			    "netlist_hierarchy"
+
+			    "power"
+			    "read_cores"
+			    "signal_encoding"
+			    "slice_packing"
+			    "use_carry_chain"
+<!-- Elaborate command options  ifn, ifmt, lso, work_lib, verilog2001, vlgpath, vlgincdir -->
+			    "vlgpath"
+			    "work_lib"
+<!-- set option -->
+			    "v_option" <!-- outid="v" --> 
+<!--		    "redirect"-->
+		    </group>
+		</input>
+		<output>
+		    <line name="ise_xst_prj"
+			      dest="xst_prj"
+			      sep="\n"
+		    >
+		        "%xst_prj_content"
+		    </line>
+		
+		//xst_prj
+			<line name="ise_copy_pre_synth">
+				"-c"
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%ISEProjectRoot;"
+				<if-not tmpdir="/tmp">
+				  "rm -f -r"
+				  "%ISEProjectRoot/%RawTmpdir;"
+				  "mkdir -p"
+				  "%ISEProjectRoot/%RawTmpdir;"
+				</if-not>
+				"' ;"
+				"rsync -avrR -e ssh"
+				"%FilteredSourceListPar"
+			    <if ISESynthActionIndex="0">
+					"%ConstraintsFiles"
+				</if>
+				"%xst_prj"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+			</line>
+		
+			<line name="ise_run_partgen"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      success="@@FINISH@@"
+			      failure="ERROR"
+			      log=""
+			      stdout="parser_ISE">
+			      "mkdir -p"
+			      "~/%ISEProjectRoot/%ISERemoteDir"
+			      "\n"
+			      "cd ~/%ISEProjectRoot\n"
+			      "%ISEBinAbsolutePath/xst; echo \"@@FINISH@@\"\n"
+			      "\n"
+			      "set"
+			      "%tmpdir"
+			      "%xsthdpdir"
+			      "%xsthdpini"
+			      "\n"
+
+			      "run"
+<!-- General options -->
+<!-- 			      "%ifmt"
+			      "%input_file"-->
+			      "-ifn %xst_prj"
+			      "%output_format" <!-- outid="ofmt" -->
+			      "%output_file"
+			      "%top"
+			      "%target_device" <!-- outid="p" -->
+<!-- Synthesis Options -->			      
+			      "%constraints" <!-- outid="uc" -->
+			      "%opt_mode"
+			      "%opt_level"
+			      "%ignore_constraints" <!-- outid="iuc" -->
+			      "%library_search_order" <!--  outid="lso" -->
+			      "%glob_opt"
+			      "%rtlview"
+			      "%write_timing_constraints"
+			      "%verilog2001"
+			      "%keep_hierarchy"
+			      "%core_directories" <!-- outid="sd" -->
+			      "%cross_clock_analysis"
+			      "%hierarchy_separator"
+			      "%bus_delimiter"
+			      "%case"
+			      "%vlgincdir"
+			      "%slice_utilization_ratio"
+			      "%slice_utilization_ratio_maxmargin"
+<!-- "FPGA/PLD HDL options -->			      
+			      "%fsm_encoding"
+			      "%safe_implementation"
+			      "%vlgcase"
+			      "%mux_extract"
+			      "%resource_sharing"
+<!-- FPGA HDL options -->			      
+			      "%fsm_style"
+			      "%ram_extract"
+			      "%ram_style"
+			      "%rom_extract"
+			      "%rom_style"
+			      "%mux_style"
+			      "%decoder_extract"
+			      "%priority_extract"
+			      "%shreg_extract"
+			      "%shift_extract"
+			      "%xor_collapse"
+			      "%mult_style"
+			      "%use_dsp48"
+<!-- Xilinx options -->
+			      "%iobuf"
+			      "%equivalent_register_removal"
+<!-- Xilinx FPGA options -->
+			      "%lut_combine" <!-- outid="lc" -->
+			      "%max_fanout"
+			      "%register_duplication"
+			      "%reduce_control_sets"
+			      "%register_balancing"
+			      "%move_first_stage"
+			      "%move_last_stage"
+			      "%tristate2logic"
+			      "%use_clock_enable"
+			      "%use_sync_set"
+			      "%use_sync_reset"
+			      "%bufg"
+			      "%bufr"
+<!-- Xilinx PLD options -->
+			      "%pld_ce"
+			      "%pld_mp"
+			      "%pld_xp"
+			      "%wysiwyg"
+<!-- "other options -->
+			      "%arch"
+			      "%async_to_sync"
+			      "%auto_bram_packing"
+			      "%bram_utilization_ratio"
+			      "%define"
+			      "%dsp_utilization_ratio"
+			      "%duplication_suffix"
+			      "%entity"  <!-- outid="ent" -->
+			      "%fsm_extract"
+			      "%generics"
+			      "%hdl_compilation_order"
+			      "%netlist_hierarchy"
+			      "%power"
+			      "%read_cores"
+			      "%signal_encoding"
+			      "%slice_packing"
+			      "%use_carry_chain"
+			      "\n"
+			      "quit\n"
+			</line>
+<!-- TODO: copy results -->			
+			<line name="ise_copy_after_partgen">
+				"-c"
+				"mkdir -p %ISELocalResultDir ;"
+				"rsync -avr -e ssh"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/partlist.*"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/*.pkg"
+			      <if useRedirect="true">
+			          "%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/%redirect"
+			      </if>
+				"%ISELocalResultDir/"
+			</line>
+		</output>
+	</tool>
+</vdt-project>
+

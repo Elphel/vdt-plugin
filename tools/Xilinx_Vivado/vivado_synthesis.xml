@@ -86,10 +86,6 @@
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
 			default="" label="Constraints files" tooltip="Select constraint files to load to Vivado" readonly="false"
 			visible="true" />
-		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
-			default="%" label="Constraints files" tooltip="Select constraint files to load to Vivado" readonly="false"
-			visible="true" />
-			
 			
 		<parameter id="SkipSnapshotSynth" label="Skip snapshot" tooltip="Do not create snapshot after synthesis"
 		           default="false"

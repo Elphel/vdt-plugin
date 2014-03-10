@@ -201,17 +201,17 @@
 			type="String" default="vdt_ise" format="RemoteRootSyntax" readonly="false" />
 
 		<parameter id="ISERemoteDir" label="Remote ISE directory" tooltip="Remote ISE output subdirectroy for snapshot and result files"
-			type="Pathname" default="vivado_build" format="CopyValue" readonly="false" />
+			type="Pathname" default="ise_build" format="CopyValue" readonly="false" />
 
 		<parameter id="ISELocalDir" label="Local ISE directory" tooltip="Local project subdirectroy for Xilinx ISE snapshot files"
-			type="Pathname" default="vivado_state" format="CopyValue" readonly="false" />
+			type="Pathname" default="ise_state" format="CopyValue" readonly="false" />
 
 		<parameter id="ISELocalResultDir" label="Local ISE results directory"
 		    tooltip="Local project subdirectroy for Xilinx ISE generated result files"
-			type="Pathname" default="vivado_results" format="CopyValue" readonly="false" />
+			type="Pathname" default="ise_results" format="CopyValue" readonly="false" />
 
 		<parameter id="ISELogDir" label="Local ISE tool logs directory" tooltip="Local project subdirectroy for Xilinx ISE tools log files"
-			type="Pathname" default="vivado_logs" format="CopyValue" readonly="false" />
+			type="Pathname" default="ise_logs" format="CopyValue" readonly="false" />
 
 		<parameter id="ISEIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
 			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
@@ -306,16 +306,16 @@
 	
 		<parameter id="ISESedPaths" type="String" format="CopyValue"
 		label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running ISE tools"
-		default="sed -u 's@/home/%RemoteUser/%VivadoProjectRoot/%%ProjectName/@@'"/>
+		default="sed -u 's@/home/%RemoteUser/%ISEProjectRoot/%%ProjectName/@@'"/>
 			
 		<input>
 			<group name="Genaral" label="General parameters">
 			    "part"
+				"ImplementationTopFile"
 			</group>
 			<group name="Simulation" label="Simulation properties">
 				"SimulationTopFile"
 				"SimulationTopModule"
-				"ImplementationTopFile"
 				"SimulDir"
 			</group>
 			

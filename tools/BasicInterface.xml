@@ -94,6 +94,7 @@
 	<syntax name="DashListIndividual"  format="%(-%%ParamName %%ParamValue%| %)" />
 	<syntax name="DashListCommon"      format="-%%ParamName %(%%ParamValue%| %)" />
 	<syntax name="DashName"            format=" -%%ParamName" />
+	<syntax name="QuotedDash"          format=' -%%ParamName "%%ParamValue"' />
 <!--
 Does not work according to 2.2.1. "Inside text-repetitor, one and only one pattern-generator is mandatory".
 	
