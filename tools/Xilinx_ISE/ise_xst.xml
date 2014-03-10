@@ -183,8 +183,6 @@
       		</paramtype>
     	 </typedef>
     	 <syntax name="XSTPrjFile"      format="%(verilog work %%ParamValue%|\n%)" />
-    	 
-    	 
 	</interface>
 
 	<tool name="ISExst" label="run XST"
@@ -194,8 +192,12 @@
 		shell="/bin/bash"
 		ignore="%ISEIgnoreSource"
 		description="Run XST"
+		result="ISESnapshotSynth"
 		log-dir="ISELogDir"
 		state-dir="ISELocalDir"
+		restore="RestoreISESynthesis"
+		autosave="AutosaveISESynthesis"
+		save="SaveISESynthesis"
 		inherits="ISEToolPrototype"
 		>
 <!-- 		disable="TRUE"  -->
@@ -214,6 +216,11 @@
 			<depends files="FilteredSourceListPar"/>
 			<depends files="constraints"/>
 		</depends-list>
+		<parameter	id="clean_start" label="Clean start" tooltip= "Delete all files on remote before running XST"
+        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+		<parameter id="SkipSnapshotSynth" label="Skip snapshot" tooltip="Do not create snapshot after synthesis"
+		           default="false"
+		           type= "Boolean" format="None"/>
 <!-- Constraints parameters -->
         <parameter	id="arch"  label="VHDL architecture" tooltip= "VHDL Top Level Architecture"
         			default="" visible="true" omit="" type="String" format="Dash"/>
@@ -463,13 +470,16 @@
 		    readonly="true" visible="true" />	
 		<parameter id="xst_prj_content" default="%%FilteredSourceList"
 		    type="Stringlist" format="XSTPrjFile" visible="false" />	
-			
-        			
 <!-- hidden (calculated) parameters -->
+        <parameter	id="AutosaveISESynthesis" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
+
         <parameter  id= "useRedirect" label="debug condition"
          default="?(%info = true | %arch # ) ^ %redirect #  : true , false" visible="true" omit="false" type="Boolean" format="None"/>
 		<input>
 		    <group name="General options">
+		        "clean_start"
+				"SkipSnapshotSynth"
 		        "top"
 		        "ConstraintsFiles"
 		        "ifmt"
@@ -477,10 +487,13 @@
 			    "output_format" <!-- outid="ofmt" --> 
 			    "output_file" <!-- outid="ofn" --> 
 			    "target_device" <!-- outid="p" --> 
-		        
+		        "---"
 		        "FilteredSourceListPar"
 		        "RawOutFile"
 		        "xst_prj"
+		        "---"
+		        "ISEProjectRoot"
+		        "ISERemoteDir"
 		    </group>
 		    <group name ="Synthesis Options">
 			    "constraints" <!-- outid="uc" --> 
@@ -588,14 +601,16 @@
 		    >
 		        "%xst_prj_content"
 		    </line>
-		
-		//xst_prj
 			<line name="ise_copy_pre_synth">
 				"-c"
 				"ssh"
 				"-oBatchMode=yes"
 				"-l %RemoteUser %RemoteHost"
 				"'"
+				<if clean_start="true">
+				  "rm -f -r"
+				  "%ISEProjectRoot;"
+				</if>
 				"mkdir -p"
 				"%ISEProjectRoot;"
 				<if-not tmpdir="/tmp">
@@ -726,7 +741,8 @@
 			      "\n"
 			      "quit\n"
 			</line>
-<!-- TODO: copy results -->			
+<!-- TODO: copy results -->	
+<!-- 		
 			<line name="ise_copy_after_partgen">
 				"-c"
 				"mkdir -p %ISELocalResultDir ;"
@@ -738,7 +754,22 @@
 			      </if>
 				"%ISELocalResultDir/"
 			</line>
+ -->			
 		</output>
 	</tool>
+	<!--  Restore tool for ISESynthesis -->
+	<tool name="RestoreISESynthesis"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="RestoreISE"/>
+
+	<!--  Save tool for ISESynthesis -->
+	<tool name="SaveISESynthesis"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="SaveISE"/>
+	
 </vdt-project>
 

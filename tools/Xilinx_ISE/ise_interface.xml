@@ -44,20 +44,21 @@
 		<output>
 			<line name="ise_pre_restore">
 				"-c"
-				<!-- Create project directory on remote server if it did not exist -->
+				<!-- Create workspace directory on remote server if it did not exist -->
 				"ssh"
 				"-oBatchMode=yes"
 				"-l %RemoteUser %RemoteHost"
 				"'"
 				"mkdir -p"
-				"%ISEProjectRoot"
+				"%ISEWorkspace"
 				"' ;"
-				<!-- Copy snapshot generated after synthesis from local to remote -->
-				"rsync -avrR -e ssh"
+				<!-- Copy snapshot generated earlier from local to remote -->
+<!-- 			"rsync -avrR -e ssh"  -->
+				"rsync -avr -e ssh"
 				<!--  from: -->
 				"%ISELocalDir/%%StateFile"
 				<!-- to: -->
-				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+				"%RemoteUser@%RemoteHost:%ISEWorkspace/"
 				";"
 			</line>
 			
@@ -68,11 +69,19 @@
 			      failure="ERROR"
 			      prompt="@@FINISH@@"
 			      log="">
-			      "cd ~/%ISEProjectRoot\n"
-			      "set outputDir ~/%ISEProjectRoot/%ISERemoteDir\n"			      
-			      "file mkdir $outputDir\n"
-		          "open_checkpoint %ISERemoteDir/%%StateFile\n"
-		          "puts \"@@FINISH@@\"\n"
+			      "cd ~/%ISEWorkspace\n"
+				<!-- optionally remove project directory on remote before unpacking snapshot -->
+			      <if ISECleanRestore="true">
+			        "rm -f -r"
+			        "%ISEProjectRoot;"
+			      </if>
+				<!-- Unpack snapshot on remote -->
+			      "tar -xzf"
+			      "%%StateFile\n"
+				<!-- Delete snapshot archive on remote -->
+			      "rm -f"
+			      "%%StateFile\n"
+		          "echo \"@@FINISH@@\"\n"
 		    </line>
 		</output>
 	</tool>
@@ -93,18 +102,33 @@
 			      prompt="@@FINISH@@"
 			      failure="ERROR"
 			      log="">
-			      "cd ~/%ISEProjectRoot\n"
-			      "set outputDir ~/%ISEProjectRoot/%ISERemoteDir\n"			      
-			      "file mkdir $outputDir\n"
-	      		  "write_checkpoint -force %ISERemoteDir/%%StateFile\n"
-	      		  "puts \"@@FINISH@@\"\n"
+			      "cd ~/%ISEWorkspace\n"
+			<!-- Remove old snapshot if it exists (unlikely as it includes timestamp?) -->
+			      "rm -f"
+			      "%%StateFile"
+			      "\n"
+			<!-- Create snapshot at remote (workspace, below project) -->
+			      "tar -czf"
+			      "%%StateFile"
+			      "%%ProjectName"
+			      "\n"
+	      		  "echo \"@@FINISH@@\"\n"
 			</line>
 			<line name="ise_copy_after_save">
 					"-c"
+					<!-- Copy snapshot from remote to local -->
 					"mkdir -p %ISELocalDir ;"
 					"rsync -avr -e ssh"
-					"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/%%StateFile"
-					"%%StateDir/"
+					"%RemoteUser@%RemoteHost:%ISEWorkspace/%%StateFile"
+					"%%StateDir/ ;"
+					<!-- Remove snapshot at remote -->
+					"ssh"
+					"-oBatchMode=yes"
+					"-l %RemoteUser %RemoteHost"
+					"'"
+					"rm -f"
+					"%ISEWorkspace/%%StateFile"
+					"' ;"
 			</line>
 		</output>		
 	</tool>

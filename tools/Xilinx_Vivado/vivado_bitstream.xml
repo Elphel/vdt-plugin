@@ -110,7 +110,8 @@
 		<if-not reference_bitfile="">
 			<line name="vivado_copy_pre_opt">
 				"-c"
-				"rsync -avrR -e ssh"
+<!-- 			"rsync -avrR -e ssh" -->
+				"rsync -avr -e ssh"
 				<!--  from: (trying full name) -->
 				"%VivadoLocalResultDir/%reference_bitfile"
 				<!-- to: -->

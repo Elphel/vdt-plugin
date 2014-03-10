@@ -35,7 +35,8 @@
 				"%VivadoProjectRoot"
 				"' ;"
 				<!-- Copy snapshot generated after synthesis from local to remote -->
-				"rsync -avrR -e ssh"
+<!-- 			"rsync -avrR -e ssh"  -->
+				"rsync -avr -e ssh"
 				<!--  from: -->
 				"%VivadoLocalDir/%%StateFile"
 				<!-- to: -->

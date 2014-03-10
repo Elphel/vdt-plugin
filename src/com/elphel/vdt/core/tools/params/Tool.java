@@ -985,51 +985,56 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		return;
     	}
     	DEBUG_PRINT("restoring "+getName()+" state for project "+project);
-    	QualifiedName qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_PINNED);
-    	String str=	pp.get(qn);
-    	if (str!=null)	try {
-    		setPinned(Boolean.parseBoolean(str));
-    	} catch (Exception e){
-    		System.out.println(project+"Failed setPinned(), e="+e);
-    	}
-    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_STATE);
-    	str=	pp.get(qn);
-    	if (str!=null) {
-    		try {
-    			setStateJustThis(TOOL_STATE.valueOf(str));
-    		} catch (IllegalArgumentException e){
-    			System.out.println("Invalid tool state: "+str+" for tool "+getName()+" in memento");
-    		}
-    		if (getState()==TOOL_STATE.KEPT_OPEN)
-    			setStateJustThis(TOOL_STATE.NEW);
-    	}
-    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_TIMESTAMP);
-    	str=	pp.get(qn);
-   		if (str!=null)	setTimeStamp(str);
-    	
-    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_LASTRUNHASH);
-    	str=	pp.get(qn);
-    	if (str!=null)	{
-    		try {
-    		Integer hc=Integer.parseInt(str);
-    		setLastRunHash(hc);
+    	if (getState()!=TOOL_STATE.KEPT_OPEN) { // do not 
+    		QualifiedName qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_PINNED);
+    		String str=	pp.get(qn);
+    		if (str!=null)	try {
+    			setPinned(Boolean.parseBoolean(str));
     		} catch (Exception e){
-    			System.out.println("Invalid hashCode: "+str+" for tool "+getName()+" for project "+project);
+    			System.out.println(project+"Failed setPinned(), e="+e);
     		}
-    	}
-    	clearDependStamps();
-    	String statePrefix=PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE;
-    	String filePrefix= PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPFILE;
-    	for (QualifiedName qName: pp.keySet()){
-    		//        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE+state);
-    		if (qName.getLocalName().startsWith(statePrefix)){
-    			String value=pp.get(qName);
-    			setStateTimeStamp(qName.getLocalName().substring(statePrefix.length()), value);
+    		qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_STATE);
+    		str=	pp.get(qn);
+    		if (str!=null) {
+    			try {
+    				setStateJustThis(TOOL_STATE.valueOf(str));
+    			} catch (IllegalArgumentException e){
+    				System.out.println("Invalid tool state: "+str+" for tool "+getName()+" in memento");
+    			}
+    			if (getState()==TOOL_STATE.KEPT_OPEN)
+    				setStateJustThis(TOOL_STATE.NEW);
+    			// See if console with this name is open    		
     		}
-    		if (qName.getLocalName().startsWith(filePrefix)){
-    			String value=pp.get(qName);
-    			setFileTimeStamp(qName.getLocalName().substring(filePrefix.length()), value);
+    		qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_TIMESTAMP);
+    		str=	pp.get(qn);
+    		if (str!=null)	setTimeStamp(str);
+
+    		qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_LASTRUNHASH);
+    		str=	pp.get(qn);
+    		if (str!=null)	{
+    			try {
+    				Integer hc=Integer.parseInt(str);
+    				setLastRunHash(hc);
+    			} catch (Exception e){
+    				System.out.println("Invalid hashCode: "+str+" for tool "+getName()+" for project "+project);
+    			}
     		}
+    		clearDependStamps();
+    		String statePrefix=PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE;
+    		String filePrefix= PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPFILE;
+    		for (QualifiedName qName: pp.keySet()){
+    			//        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE+state);
+    			if (qName.getLocalName().startsWith(statePrefix)){
+    				String value=pp.get(qName);
+    				setStateTimeStamp(qName.getLocalName().substring(statePrefix.length()), value);
+    			}
+    			if (qName.getLocalName().startsWith(filePrefix)){
+    				String value=pp.get(qName);
+    				setFileTimeStamp(qName.getLocalName().substring(filePrefix.length()), value);
+    			}
+    		}
+    	} else {
+        	DEBUG_PRINT("Do not update state of the open session  "+getName()+" for project "+project);
     	}
     }
     

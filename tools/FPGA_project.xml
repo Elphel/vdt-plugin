@@ -307,6 +307,52 @@
 		<parameter id="ISESedPaths" type="String" format="CopyValue"
 		label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running ISE tools"
 		default="sed -u 's@/home/%RemoteUser/%ISEProjectRoot/%%ProjectName/@@'"/>
+
+		<parameter id="ISEWorkspace" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on ISE server"
+			type="String" default="%ISEProjectRoot" format="CopyValue" readonly="true" />
+
+
+	 	    <parameter id="ISESnapshotSynth"
+	        label="Synthesis snapshot" tooltip="Name of ISE snapshot archive after synthesis"
+	        default="%%ProjectName-synth.tgz"
+			type="String" format="CopyValue" />
+
+	 	    <parameter id="ISESnapshotOptPlace"
+	        label="Placement snapshot" tooltip="Name of ISE snapshot archive after optimization/placement"
+	        default="%%ProjectName-opt-place.tgz"
+			type="String" format="CopyValue" />
+
+	 	    <parameter id="ISESnapshotOpt"
+	        label="Optimization snapshot" tooltip="Name of ISE snapshot archive after optimization"
+	        default="%%ProjectName-opt.tgz"
+			type="String" format="CopyValue" />
+
+	 	    <parameter id="ISESnapshotOptPower"
+	        label="Power optimization snapshot" tooltip="Name of ISE snapshot archive after power optimization"
+	        default="%%ProjectName-opt-power.tgz"
+			type="String" format="CopyValue" />
+
+	 	    <parameter id="ISESnapshotPlace"
+	        label="Placement snapshot" tooltip="Name of ISE snapshot archive after placement"
+	        default="%%ProjectName-place.tgz"
+			type="String" format="CopyValue" />
+
+	 	    <parameter id="ISESnapshotOptPhys"
+	        label="Physical optimization snapshot" tooltip="Name of ISE snapshot archive after physical optimization"
+	        default="%%ProjectName-opt-phys.tgz"
+			type="String" format="CopyValue" />
+
+	 	    <parameter id="ISESnapshotRoute"
+	        label="Routing snapshot" tooltip="Name of ISE snapshot archive after routing"
+	        default="%%ProjectName-route.tgz"
+			type="String" format="CopyValue" />
+
+        <parameter 	id="ISECleanRestore" label="ISE Clean restore"
+                    tooltip= "Remove remote ISE project files before unpacking snapshot archives"
+        			default="true" visible="true" type="Boolean" format="None"/>
+
+			
+
 			
 		<input>
 			<group name="Genaral" label="General parameters">
@@ -328,15 +374,6 @@
 				"VivadoIgnoreSource"
 				"VivadoSedPaths"
 			</group>
-			<group name="ISE" label="ISE general properties">
-				"ISEProjectRoot"
-				"ISERemoteDir"
-				"ISELocalDir"
-				"ISELocalResultDir"
-				"ISELogDir"
-				"ISEIgnoreSource"
-				"ISESedPaths"
-			</group>
 			<group name="VivadoDisable" label="Selectively disable Vivado tools">
 			    "DisableVivadoSynth"
 <!-- 			"DisableVivadoOptPlace"  -->
@@ -356,6 +393,25 @@
 				"SnapshotPlace"
 				"SnapshotOptPhys"
 				"SnapshotRoute"
+			</group>
+			<group name="ISE" label="ISE general properties">
+				"ISEProjectRoot"
+				"ISERemoteDir"
+				"ISELocalDir"
+				"ISELocalResultDir"
+				"ISELogDir"
+				"ISEIgnoreSource"
+				"ISESedPaths"
+			</group>
+			<group name="ISESnapshots" label="ISE snapshot archives">
+				"ISECleanRestore"
+				"ISESnapshotSynth"
+<!-- 			"ISESnapshotOptPlace"  -->	
+				"ISESnapshotOpt"
+				"ISESnapshotOptPower"
+				"ISESnapshotPlace"
+				"ISESnapshotOptPhys"
+				"ISESnapshotRoute"
 			</group>
 		</input>
 		<output>
