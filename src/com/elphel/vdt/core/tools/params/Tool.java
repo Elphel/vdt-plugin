@@ -292,6 +292,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
    
 
     public void clearDependStamps(){
+    	DEBUG_PRINT("clearDependStamps() for "+getName());
     	dependStatesTimestamps.clear();
     	dependFilesTimestamps.clear();
     }
@@ -572,7 +573,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public boolean isDisabled(){
     	if (abstractTool) return true; // abstract are always disabled
     	if (disabled==null) return false;
-    	List<String> values=disabled.getValue(null); // null for topFormatProcessor
+    	List<String> values=disabled.getValue(new FormatProcessor(this)); // null for topFormatProcessor
     	if ((values==null) || (values.size()==0)) return false;
     	return (!values.get(0).equals("true"));
     }
@@ -639,10 +640,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	}
     }
     public List<String> getDependFiles(){
+    	DEBUG_PRINT("------ getDependFiles()");
     	if ((dependFiles == null) || (dependFiles.size()==0)) return null;
     	List<String> list = new ArrayList<String>();
     	for (Iterator<Parameter> iter= dependFiles.iterator(); iter.hasNext();) {
-    		List<String> vList=iter.next().getValue(null); // null for topFormatProcessor
+    		List<String> vList=iter.next().getValue(new FormatProcessor(this)); // null for topFormatProcessor
     		if (vList!=null) {
     			for (String item:vList){
     				if ((item!=null) && (item.trim().length()>0)){
@@ -656,10 +658,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
 
     public List<String> getDependStates(){
+    	DEBUG_PRINT("------ getDependStates() for "+getName());
     	if ((dependStates == null) || (dependStates.size()==0)) return null;
     	List<String> list = new ArrayList<String>();
     	for (Iterator<Parameter> iter= dependStates.iterator(); iter.hasNext();) {
-    		List<String> vList=iter.next().getValue(null); // null for topFormatProcessor
+    		List<String> vList=iter.next().getValue(new FormatProcessor(this)); // null for topFormatProcessor
 			for (String item:vList){
 				if ((item!=null) && (item.trim().length()>0)){
 					list.add(item.trim());
@@ -715,14 +718,14 @@ public class Tool extends Context implements Cloneable, Inheritable {
 
     public boolean getAutoSave(){
     	if (autoSave==null) return false;
-    	List<String>result=autoSave.getValue(null); // null for topFormatProcessor
+    	List<String>result=autoSave.getValue(new FormatProcessor(this)); // null for topFormatProcessor
     	if (!result.isEmpty()) return result.get(0).equals("true");
     	return false;
     }
     
     public List<String> getResultNames(){
     	if (result==null) return null;
-    	return result.getValue(null); // null for topFormatProcessor
+    	return result.getValue(new FormatProcessor(this)); // null for topFormatProcessor
     }
     
     public void initRestore() throws ConfigException{
@@ -831,7 +834,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public String getLogDir() {return getLogDir(true); } 
     public String getLogDir(boolean first) {
     	if (logDir!=null) { // has logDir specified, but may be empty
-        	List<String> value=logDir.getValue(null); // null for topFormatProcessor
+        	List<String> value=logDir.getValue(new FormatProcessor(this)); // null for topFormatProcessor
         	if (value.size()==0) return null; // overwrites with empty
         	return value.get(0);
     	}
@@ -844,7 +847,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     public String getStateDir() {return getStateDir(true); } 
     public String getStateDir(boolean first) {
     	if (stateDir!=null) { // has stateDir specified, but may be empty
-        	List<String> value=stateDir.getValue(null); // null for topFormatProcessor
+        	List<String> value=stateDir.getValue(new FormatProcessor(this)); // null for topFormatProcessor
         	if (value.size()==0) return null; // overwrites with empty
         	return value.get(0);
     	}
@@ -946,23 +949,47 @@ public class Tool extends Context implements Cloneable, Inheritable {
      * @param project where to attach properties
      */
     public void saveState(IProject project) {
+//		if (getName().equals("ISExst")){
+//			System.out.println("saveState(Project): Debugging ISExst");
+//		}
     	QualifiedName qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_PINNED);
     	try {project.setPersistentProperty(qn, new Boolean(isPinned()).toString());}
     	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+isPinned()+", e="+e);}
     	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_STATE);
     	try {project.setPersistentProperty(qn, getState().toString());}
     	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+getState()+", e="+e);}
-        if (getTimeStamp()!=null) {
-        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_TIMESTAMP);
-        	try {project.setPersistentProperty(qn, getTimeStamp());}
-        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+getTimeStamp()+", e="+e);}
 
-        }
-        if (getLastRunHash()!=0)  {
-        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_LASTRUNHASH);
-        	try {project.setPersistentProperty(qn, new Integer(getLastRunHash()).toString());}
-        	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+getLastRunHash()+", e="+e);}
-        }
+    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_TIMESTAMP);
+    	try {project.setPersistentProperty(qn, getTimeStamp());}
+    	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+getTimeStamp()+", e="+e);}
+    	
+    	String lastHashString=(getLastRunHash()!=0)?(new Integer(getLastRunHash()).toString()):null;
+    	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_LASTRUNHASH);
+    	try {project.setPersistentProperty(qn, lastHashString);}
+    	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+lastHashString+", e="+e);}
+
+    	// Delete all old persistent dependencies for this tool before saving current ones (some dependencies might disappear)
+    	Map<QualifiedName,String> pp;    
+    	try {
+    		pp=project.getPersistentProperties();
+    	} catch (CoreException e){
+    		System.out.println(project+": Failed getPersistentProperties(), e="+e);
+    		return;
+    	}
+    	String statePrefix=PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE;
+		String filePrefix= PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPFILE;
+		for (QualifiedName qName: pp.keySet()){
+			if (
+					(qName.getLocalName().startsWith(statePrefix)) ||
+					(qName.getLocalName().startsWith(filePrefix))) {
+				try {
+					project.setPersistentProperty(qName, null); // erase
+				} catch (CoreException e)  {
+					System.out.println(project+"Failed setPersistentProperty("+qName+", "+dependStatesTimestamps.get(state)+", e="+e);
+				}
+			}
+		}
+    	
         for(String state:dependStatesTimestamps.keySet()){
         	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE+state);
         	try {project.setPersistentProperty(qn, dependStatesTimestamps.get(state));}
@@ -977,6 +1004,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
 
     public void restoreState(IProject project) {
+//		if (getName().equals("ISExst")){
+//			System.out.println("restoreState(Project): Debugging ISExst");
+//		}
+
     	Map<QualifiedName,String> pp;    
     	try {
     	pp=project.getPersistentProperties();
@@ -1022,6 +1053,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		clearDependStamps();
     		String statePrefix=PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE;
     		String filePrefix= PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPFILE;
+// TODO: check dependency exists?    		
+    		
     		for (QualifiedName qName: pp.keySet()){
     			//        	qn= new QualifiedName(VDT.ID_VDT, PROJECT_TOOL_NAME+name+PROJECT_TOOL_DEPSTATE+state);
     			if (qName.getLocalName().startsWith(statePrefix)){
@@ -1040,6 +1073,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
     
     
     public void saveState(IMemento memento) {
+//		if (getName().equals("ISExst")){
+//			System.out.println("saveState(memento): Debugging ISExst");
+//		}
     	IMemento toolMemento= memento.createChild(MEMENTO_TOOL_TYPE,name);
     	toolMemento.putBoolean(MEMENTO_TOOL_PINNED, new Boolean(pinned));
     	toolMemento.putString(MEMENTO_TOOL_STATE,  this.state.toString());
@@ -1063,6 +1099,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
 
     public void restoreState(IMemento memento) {
+//		if (getName().equals("ISExst")){
+//			System.out.println("restoreState(memento): Debugging ISExst");
+//		}
     	IMemento[] toolMementos=memento.getChildren(MEMENTO_TOOL_TYPE);
     	IMemento toolMemento=null;
     	for (IMemento tm:toolMementos){
@@ -1602,7 +1641,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     //
     
     private String getResolvedExeName() {
-        return ConditionUtils.resolveContextCondition(this, exeName, null); // null for topFormatProcessor 
+        return ConditionUtils.resolveContextCondition(this, exeName, new FormatProcessor(this)); // null for topFormatProcessor 
     }
 /*    
     private String getResolvedShellName() {

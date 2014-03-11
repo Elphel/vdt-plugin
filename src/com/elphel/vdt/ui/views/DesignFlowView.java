@@ -128,6 +128,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
 
     private Action selectDesignMenuAction;
     private ClearToolStates clearToolStatesAction;
+    
+    private ClearProjectStates clearProjectStatesAction;
     private ClearStateFiles clearStateFilesAction;
     private ClearLogFiles clearLogFilesAction;
 
@@ -349,11 +351,13 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(clearProjectPropertiesAction);
         manager.add(clearToolPropertiesAction);
         manager.add(new Separator());
-        manager.add(clearToolStatesAction);
+        manager.add(selectDesignMenuAction);
+        manager.add(new Separator());
         manager.add(clearStateFilesAction);
         manager.add(clearLogFilesAction);
         manager.add(new Separator());
-        manager.add(selectDesignMenuAction);
+        manager.add(clearToolStatesAction);
+        manager.add(clearProjectStatesAction);
     }
     
     private void fillContextMenu(IMenuManager manager) { // context (right-click) menu
@@ -566,19 +570,24 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             }
         };
         selectDesignMenuAction.setText("Change Design Menu");
-        selectDesignMenuAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
+        selectDesignMenuAction.setImageDescriptor(VDTPluginImages.DESC_DESIGN_MENU);
 
         clearToolStatesAction = new ClearToolStates("Do you wish to reset all tool states (as if they never ran)?",toolSequence);
-        clearToolStatesAction.setText("Clear tool states");
-        clearToolStatesAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
+        clearToolStatesAction.setText("Clear tool states (debug feature)");
+        clearToolStatesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
+
+        clearProjectStatesAction = new ClearProjectStates("Do you wish to reset the project state (persistent storage) as if no tools ran?",
+        		toolSequence);
+        clearProjectStatesAction.setText("Clear project state (debug feature)");
+        clearProjectStatesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
 
         clearStateFilesAction = new ClearStateFiles("Do you wisth to remove all state files (snapshots), but the current ones?",toolSequence);
         clearStateFilesAction.setText("Clear all but latest snapshot files");
-        clearStateFilesAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
+        clearStateFilesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
 
         clearLogFilesAction = new ClearLogFiles("Do you wisth to remove all log files, but the most recent?",toolSequence);
         clearLogFilesAction.setText("Clear all but latest log files");
-        clearLogFilesAction.setImageDescriptor(VDTPluginImages.DESC_DESIGM_MENU);
+        clearLogFilesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
         
         showLaunchConfigAction = new Action() {
             public void run() {
@@ -1424,13 +1433,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         	}
         }
         String HDLFilter=SelectedResourceManager.getDefault().getFilter();
-        if (HDLFilter!=null){
+        //OK with null - will just arase that property
+//        if (HDLFilter!=null){
         	qn= new QualifiedName(VDT.ID_VDT, TAG_SELECTED_HDL_FILTER);
         	try {project.setPersistentProperty(qn, HDLFilter);}
         	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+HDLFilter+", e="+e);}
         	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
         		System.out.println("project.setPersistentProperty("+qn.toString()+","+HDLFilter+")");
-        }
+//        }
         qn= new QualifiedName(VDT.ID_VDT, TAG_LINKED_TOOLS);
         try {project.setPersistentProperty(qn, new Boolean(SelectedResourceManager.getDefault().isToolsLinked()).toString());}
         catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+

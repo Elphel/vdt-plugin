@@ -108,6 +108,30 @@ public class ToolSequence {
 		toolFinished(null);
 	}
 
+	public void clearProjectStates(){
+		IProject project= SelectedResourceManager.getDefault().getSelectedProject();
+		if (project==null){
+			System.out.println("Can not clear persistent properties for a non-existent project");
+			return;
+		}
+    	Map<QualifiedName,String> pp;    
+    	try {
+    		pp=project.getPersistentProperties();
+    	} catch (CoreException e){
+    		System.out.println(project+": Failed getPersistentProperties(), e="+e);
+    		return;
+    	}
+    	for(QualifiedName qn:pp.keySet()) {
+    		DEBUG_PRINT("Clearing persistent property "+qn.toString()+" for project "+project.toString());
+    		try {
+				project.setPersistentProperty(qn, null);
+			} catch (CoreException e) {
+	    		System.out.println(project+": Failed setPersistentProperties("+qn.toString()+",null), e="+e);
+			}
+    	}
+	}
+	
+	
 	public Set<IFile> getOldFiles(Set<String> dirs){
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		Set<String> linkFilesTargets=new HashSet<String>();
@@ -248,6 +272,7 @@ public class ToolSequence {
 			putCurrentState(tool); // delegates to *Master
 			// Set tool timestamps for states and source files
 			if ((tool.getLastMode()==TOOL_MODE.RUN) || (tool.getLastMode()==TOOL_MODE.RESTORE)) {
+		    	DEBUG_PRINT("doToolFinished(), will run setDependState("+tool.getName()+")");
 				setDependState(tool); 
 			}
 			setToolsDirtyFlag(false); // no need to recalculate all parameters here
@@ -1430,6 +1455,9 @@ public class ToolSequence {
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		for (Tool tool : ToolsCore.getConfig().getContextManager().getToolList()){
 //			if (tool.getState()==TOOL_STATE.SUCCESS){
+//			if (tool.getName().equals("ISExst")){
+//				System.out.println("Debugging ISExst");
+//			}
 		        if (update){
 		        	// tool.updateContextOptions(project) recalculates parameters, but not the hashcodes
 		        	tool.updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
@@ -1520,6 +1548,7 @@ public class ToolSequence {
      * @param tool Reference to a tool to process
      */
     public void setDependState(Tool tool){
+    	DEBUG_PRINT("++++++++ setDependState("+tool.getName()+")");
     	tool.clearDependStamps(); // is it needed?
     	Map <String,String> depStates=makeDependStates(tool);
     	for (String state:depStates.keySet()){
@@ -1600,6 +1629,7 @@ public class ToolSequence {
     	return depStates;
     }
     private  Map <String,String> makeDependFiles(Tool tool){
+    	DEBUG_PRINT("++++++ makeDependFiles("+tool.getName()+")");
     	Map <String,String> depFiles=new Hashtable<String,String>();    	
     	List<String> dependFileNames=tool.getDependFiles();
     	if (dependFileNames!=null) {

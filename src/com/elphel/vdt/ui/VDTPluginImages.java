@@ -73,7 +73,9 @@ public class VDTPluginImages {
     public static final ImageDescriptor DESC_INSTALL_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"install_prop.gif", null);
     public static final ImageDescriptor DESC_PACKAGE_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"package_prop.gif", null);
     public static final ImageDescriptor DESC_PROJECT_PROPERTIES = create(ICONS_PATH, "obj16"+File.separator+"project_prop.gif", null);
-    public static final ImageDescriptor DESC_DESIGM_MENU = create(ICONS_PATH, "obj16"+File.separator+"design_menu.gif", null);
+    public static final ImageDescriptor DESC_DESIGN_MENU =      create(ICONS_PATH, "obj16"+File.separator+"design_menu.gif", null);
+    public static final ImageDescriptor DESC_ERASE =            create(ICONS_PATH, "obj16"+File.separator+"eraser.png", null);
+
     public static final ImageDescriptor DESC_TOOLS_LINKED =   create(ICONS_PATH, "obj16"+File.separator+"link.png", null);
     public static final ImageDescriptor DESC_TOOLS_UNLINKED = create(ICONS_PATH, "obj16"+File.separator+"broken_link.png", null);
     public static final ImageDescriptor DESC_TOOLS_SAVE = create(ICONS_PATH, "obj16"+File.separator+"save.png", null);
