@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISEPARInterface" extends="ISEInterface">
+	 	 <typedef name="MTType4">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "off"     label="multi-threading off"/>
+      			<item value= "2"       label="use 2 CPU cores if available"/>
+      			<item value= "3"       label="use 3 CPU cores if available"/>
+      			<item value= "4"       label="use 4 CPU cores if available"/>
+      		</paramtype>
+    	 </typedef>
+	 	 <typedef name="OLType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= ""        label="default effort level (varies for architectures)"/>
+      			<item value= "std"     label="standard effort level"/>
+      			<item value= "high"    label="high effort level"/>
+      		</paramtype>
+    	 </typedef>
+	 	 <typedef name="NormalContinueType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "n"       label="normal"/>
+      			<item value= "c"       label="continue"/>
+      		</paramtype>
+    	 </typedef>
+	</interface>
+
+	<tool name="ISEPAR" label="run PAR"
+	    project="FPGA_project"
+		interface="ISEPARInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%ISEIgnoreSource"
+		description="Run PAR"
+		result="ISESnapshotPAR"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		restore="RestoreISEPAR"
+		autosave="AutosaveISEPAR"
+		save="SaveISEPAR"
+		inherits="ISEToolPrototype"
+		>
+		<action-menu>
+			<action label="Run PAR" resource="" icon="route66.png" />
+		</action-menu>
+
+		<depends-list>
+			<depends state="ISESnapshotMap"/>
+<!-- 		<depends files="constraints"/>-->
+		</depends-list>
+		
+		<parameter id="SkipSnapshotPAR" label="Skip snapshot" tooltip="Do not create snapshot after PAR"
+		           default="false" type= "Boolean" format="None"/>
+        <parameter	id="input_file" label="Design file name" tooltip= "Input design file name (*.ncd)"
+        			default="%%ProjectName.ncd" visible="true" type="String" format="CopyValue"/>
+        <parameter	id="physical_constraints_file" label="Physical constraints file" tooltip= "Physical constraints file (*.pcf)"
+        			default="%%ProjectName.pcf" visible="true" omit="" type="String" format="CopyValue"/>
+		<parameter	id="extra_input_files" label="extra files"
+				    tooltip= "Extra input files to copy to the top directory before running PAR"
+        			default="" omit="" visible="true" type="Filelist" format="ParamListSyntax"/>
+        			<!-- Can output_file be the same as input_file? -->
+        <parameter	id="output_file" label="Output file name" tooltip= "Output file name (*ncd) - may be the same as input"
+        			default="%%ProjectName.ncd" visible="true" omit="" type="String" format="CopyValue"/>
+
+<!-- PAR options -->
+        <parameter id="activityfile" label="Activity file" tooltip= "*.vcd or *.saif file for power optimization (only valid with -power on)"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter id="clock_regions" label="Clock regions" tooltip= "Generate clock regions report file"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter id="re_untrant_routing" outid="k" label="Re-entrant routing" tooltip= "List of two (*.ncd) files: previous.ncd reemtrant.ncd (one per line)"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListCommon"/>
+        <parameter id="multi_threading" outid="mt" label="Multi-threading"
+        		   tooltip= "Enable multithreading during routing"
+        		   default="off" visible="true" omit="off" type="MTType4" format="Dash"/>
+		<parameter id="nopad"  label="Skip pad reports" tooltip="Skip pad reports (by default 3 pad reports are created)"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="non_timing_driven" outid="ntd" label="Non timing-driven"
+				   tooltip="Run in non timing-driven mode for PAR. (separate switch for MAP)"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="overall_effor_level" outid="ol" label="Overall effort level"
+        		   tooltip= "Overall PAR effort level, default varies for architectures"
+        		   default="" visible="true" omit="" type="OLType" format="Dash"/>
+		<parameter id="no_placement" outid="p" label="Skip placement" tooltip="Skip placement, route only"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="placer_effor_level" outid="pl" label="Placer effort level"
+        		   tooltip= "Placer effort level, only fopr S-3,S-3A, S-3E and V-4. For other use 'ol' - overall effort level"
+        		   default="" visible="true" omit="" type="OLType" format="Dash"/>
+		<parameter id="power"  label="Power-aware PAR"
+				   tooltip="For devices other than S-6,V-6,V-7 and Zynq may use 'activityfile' when this option is on"
+		           default="false" omit="false" type= "Bool_on_off" format="Dash"/>
+		<parameter id="no_routing" outid="r" label="Skip placement" tooltip="Skip placement, route only"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="router_effor_level" outid="rl" label="Router effort level"
+        		   tooltip= "Router effort level, only fopr S-3,S-3A, S-3E and V-4. For other use 'ol' - overall effort level"
+        		   default="" visible="true" omit="" type="OLType" format="Dash"/>
+        <parameter id="smartguide" label="Guide file name" tooltip= "Guide file name (*.ncd)"
+        		   default="" omit="" visible="true" type="String" format="Dash"/>
+        <parameter id="placer_cost_table" outid="t" label="Placer cost table"
+        		   tooltip= "Placer cost table with values in 1-100 range. Valid for S3,S3A,S3E,V4 - for others use Map '-t' option"
+        		   default="" visible="true" omit="" type="String" format="Dash"/>
+		<parameter id="overwrite" outid="w" label="Overwrite existent files"
+				   tooltip="Overwrite existent files including design (*.ncd) files."
+		           default="true" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="performance_evaluation" outid="x" label="Performance evaluation mode"
+				   tooltip="Use tool-generated timing constraints instead of the specified to evaluate each clock in the design."
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="extra_effort" outid="xe" label="Extra effort"
+        		   tooltip= "Extra effort for timing-driven packing and placement"
+        		   default="n" visible="true" omit="n" type="NormalContinueType" format="Dash"/>
+		           
+<!--  common parameters from the base tool -->
+		<parameter	id="intstyle"/>      <!-- USED PAR -->
+        <parameter	id="command_files"/> <!-- USED PAR-->
+        <parameter	id="speed_grade"/>
+
+<!-- calculated parameters -->        			
+   	    <parameter   id="ISEPARActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+        <parameter	id="AutosaveISEPAR" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotPAR=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
+        <parameter	id="rawSmartguide" default="%smartguide" visible="false" type="String" format="CopyValue"/>
+
+                    
+		<input>
+		    <group name="General options">
+		        "SkipSnapshotPAR"
+		        "input_file"
+		        "physical_constraints_file"
+		        "extra_input_files"
+		        "output_file"
+		    </group>
+		    <group name ="PAR Options">
+<!-- PAR options -->
+		        "activityfile"
+		        "clock_regions"
+		        "re_untrant_routing"
+		        "multi_threading"
+		        "nopad"
+		        "non_timing_driven"
+		        "overall_effor_level"
+		        "no_placement"
+		        "placer_effor_level"
+		        "power"
+		        "no_routing"
+		        "router_effor_level"
+		        "smartguide"
+		        "placer_cost_table"
+		        "overwrite"
+		        "performance_evaluation"
+		        "extra_effort"
+		        "---"
+		        "ISEProjectRoot"
+		        "ISERemoteDir"
+		    </group>
+		</input>
+		<output>
+		    <if-not extra_input_files="">
+			  <line name="ise_copy_pre_par">
+				"-c"
+				"rsync -avrR -e ssh"
+				"%extra_input_files"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+			  </line>
+		    </if-not>
+			<line name="ise_run_par"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      success="@@FINISH@@"
+			      failure="ERROR"
+			      log=""
+			      stdout="parser_ISE">
+			      "mkdir -p"
+			      "~/%ISEProjectRoot/%ISERemoteDir"
+			      "\n"
+			      "cd ~/%ISEProjectRoot\n"
+			      "%ISEBinAbsolutePath/par"
+			      <!-- par command options -->
+			      "%activityfile"
+			      "%clock_regions"
+			      "%re_untrant_routing"
+			      "%multi_threading"
+			      "%nopad"
+			      "%non_timing_driven"
+			      "%overall_effor_level"
+			      "%no_placement"
+			      "%placer_effor_level"
+			      "%power"
+			      "%no_routing"
+			      "%router_effor_level"
+			      "%smartguide"
+			      "%placer_cost_table"
+			      "%overwrite"
+			      "%performance_evaluation"
+			      "%extra_effort"
+			      <!-- input (*.ngd) file -->
+			      "%input_file"
+			      <!-- output (*.ngd) file -->
+			      "%output_file"
+			      <!-- physical constraints (*.pcf) output file -->
+			      "%physical_constraints_file"
+			      "\n"
+			      "echo \"@@FINISH@@\"\n"
+			</line>
+<!-- TODO: copy results -->	
+			<line name="ise_copy_after_par">
+				"-c"
+				"mkdir -p %ISELocalResultDir ;"
+				"rsync -avr -e ssh"
+<!--				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/*.mrp"   -->
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.par"
+				"%ISELocalResultDir/"
+			</line>
+		</output>
+	</tool>
+	<!--  Restore tool for ISESynthesis -->
+	<tool name="RestoreISEPAR"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="RestoreISE"/>
+
+	<!--  Save tool for ISESynthesis -->
+	<tool name="SaveISEPAR"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="SaveISE"/>
+	
+</vdt-project>
+

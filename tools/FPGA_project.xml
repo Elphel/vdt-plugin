@@ -327,6 +327,12 @@
 	        default="%%ProjectName-map.tgz"
 			type="String" format="CopyValue" />
 
+	 	    <parameter id="ISESnapshotPAR"
+	        label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after PAR"
+	        default="%%ProjectName-par.tgz"
+			type="String" format="CopyValue" />
+
+
 	 	    <parameter id="ISESnapshotOptPlace"
 	        label="Placement snapshot" tooltip="Name of ISE snapshot archive after optimization/placement"
 	        default="%%ProjectName-opt-place.tgz"
@@ -418,6 +424,7 @@
 				"ISESnapshotSynth"
 				"ISESnapshotNGDBuild"
 				"ISESnapshotMap"
+				"ISESnapshotPAR"
 <!-- 			"ISESnapshotOptPlace"  -->	
 				"ISESnapshotOpt"
 				"ISESnapshotOptPower"

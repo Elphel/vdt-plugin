@@ -355,8 +355,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(new Separator());
         manager.add(clearStateFilesAction);
         manager.add(clearLogFilesAction);
-        manager.add(new Separator());
         manager.add(clearToolStatesAction);
+        manager.add(new Separator());
         manager.add(clearProjectStatesAction);
     }
     
@@ -573,7 +573,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         selectDesignMenuAction.setImageDescriptor(VDTPluginImages.DESC_DESIGN_MENU);
 
         clearToolStatesAction = new ClearToolStates("Do you wish to reset all tool states (as if they never ran)?",toolSequence);
-        clearToolStatesAction.setText("Clear tool states (debug feature)");
+        clearToolStatesAction.setText("Clear tool states");
         clearToolStatesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
 
         clearProjectStatesAction = new ClearProjectStates("Do you wish to reset the project state (persistent storage) as if no tools ran?",

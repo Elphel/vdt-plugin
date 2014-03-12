@@ -60,6 +60,10 @@
                           label="Map design"
                           icon="map_icon.png"
                           call="ISEMap"/>
+               	<menuitem name="ISEPAR"
+                          label="Place &amp; route design"
+                          icon="route66.png"
+                          call="ISEPAR"/>
         </menu>
                           
         <menu name="Vivado" 

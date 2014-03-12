@@ -220,6 +220,8 @@
 		        "physical_constraints_file"
 		        "extra_input_files"
 		        "output_file"
+		    </group>
+		    <group name ="Map Options">
 		        "activityfile"
 		        "map_slice_logic"
 		        "pack_slices"
@@ -250,9 +252,6 @@
 		        "---"
 		        "ISEProjectRoot"
 		        "ISERemoteDir"
-		    </group>
-		    <group name ="NGCBuild Options">
-			    
 		    </group>
 		</input>
 		<output>
