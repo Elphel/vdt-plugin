@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISENGDBuildInterface" extends="ISEInterface">
+	 	 <typedef name="NTType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "timestamp" label="Normal timestamp check/update NGO"/>
+      			<item value= "on"        label="Rebuild NGO regardless of the timestamps"/>
+      			<item value= "off"       label="Does not rebuild NGO (if it exists) regardless of the timestamps"/>
+      		</paramtype>
+    	 </typedef>
+	
+	</interface>
+
+	<tool name="ISENGDBuild" label="run NGDBuild"
+	    project="FPGA_project"
+		interface="ISENGDBuildInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%ISEIgnoreSource"
+		description="Run NGDBuild"
+		result="ISESnapshotNGDBuild"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		restore="RestoreISENGDBuild"
+		autosave="AutosaveISENGDBuild"
+		save="SaveISENGDBuild"
+		inherits="ISEToolPrototype"
+		>
+		<action-menu>
+			<action label="Run NGDBuild" resource="" icon="opt_blue.png" />
+		</action-menu>
+
+		<depends-list>
+			<depends state="ISESnapshotSynth"/>
+<!-- 		<depends files="constraints"/>-->
+		</depends-list>
+		
+		<parameter id="SkipSnapshotNGDBuild" label="Skip snapshot" tooltip="Do not create snapshot after NGDBuild"
+		           default="false" type= "Boolean" format="None"/>
+        <parameter	id="design_file" label="Design file name" tooltip= "Top level design file name"
+        			default="%%ProjectName.ngc" visible="true" type="String" format="CopyValue"/>
+		           
+		<parameter	id="extra_input_files" label="extra files" tooltip= "Extra input files to copy to the top directory before running NGDBuild"
+        			default="" omit="" visible="true" type="Filelist" format="ParamListSyntax"/>
+        <parameter	id="output_file" label="Output file name" tooltip= "Output file name"
+        			default="%%ProjectName.ngd" visible="true" omit="" type="String" format="CopyValue"/>
+        			
+
+<!-- NGDBuild options -->
+		<parameter id="add_pads" outid="a" label="Add pads" tooltip="Add PADs to top-level port signals (EDIF only)"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="allow_unmatched_loc" outid="aul" label="Allow unmatched LOCs" tooltip="Warning instead of error if no pin/net/port matches LOC constraint."
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="allow_unmatched_timegroups" outid="aut" label="Allow unmatched timegroups" tooltip="Warning instead of error if specified timegroup does not exist."
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="bmm_file" outid="bm" label="Specify BMM file" tooltip= "Specify BMM file(*.bmm)"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter id="destination_directory" outid="dd" label="Destination directory" tooltip= "Destination directory for *.ngo and netlist files"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+		<parameter id="ignore_ucf" outid="i" label="Ignore UCF" tooltip="Ignore UCF files."
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="insert_keep_hierarchy"  label="Insert keep hierarchy" tooltip="Attach KEEP_HIERARCHY constraint to each netlist"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="libraries" outid="l" label="Librarioes to search" tooltip= "Valid names: 'xilinxun', 'synopsys'"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
+        <parameter	id="netlist_translation_type" outid="nt" label="Netlist translation type" tooltip= "Treating timestamps when rebuilding NGO files"
+        			default="timestamp" visible="true" omit="timestamp" type="NTType" format="Dash"/>
+		<parameter id="ignore_loc" outid="r" label="Ignore LOC constraints"
+				   tooltip="Ignore LOC constraints in found UCF files."
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="search_directories" outid="sd" label="Search directories" tooltip= "Search directories to resolve dependencies"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
+        <parameter id="user_constraints" outid="uc" label="User constraints files" tooltip= "Specify user constraints files (*.ucf) to read"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
+        <parameter id="user_rules" outid="ur" label="User rules file" tooltip= "Specify user rules file (*.urf) to read"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+		<parameter id="verbose"  label="Verbose mode" tooltip="Generate more detailed output"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter	id="target_device" outid="p"  label="Target device" tooltip= "Target device part number"
+        			default="%part" visible="true" omit="" type="String" format="Dash"/>
+		           
+		           
+<!--  common parameters from the base tool -->
+		<parameter	id="intstyle"/>
+        <parameter	id="command_files"/>
+        <parameter	id="speed_grade"/>
+
+<!-- calculated parameters -->        			
+   	    <parameter   id="ISENGDBuildActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+			
+<!-- hidden (calculated) parameters -->
+        <parameter	id="AutosaveISENGDBuild" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotNGDBuild=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
+		<input>
+		    <group name="General options">
+				"SkipSnapshotNGDBuild"
+				"design_file"
+				"output_file"
+		        "extra_input_files"	
+		        "add_pads"
+		        "allow_unmatched_loc"
+		        "allow_unmatched_timegroups"
+		        "bmm_file"
+		        "destination_directory"
+		        "ignore_ucf"
+		        "insert_keep_hierarchy"
+		        "libraries"
+		        "netlist_translation_type"
+		        "ignore_loc"
+		        "search_directories"
+		        "user_constraints"
+		        "user_rules"
+		        "verbose"
+		        "target_device"
+		        "---"
+		        "ISEProjectRoot"
+		        "ISERemoteDir"
+		    </group>
+		    <group name ="NGCBuild Options">
+			    
+		    </group>
+		</input>
+		<output>
+		    <if-not extra_input_files="">
+			  <line name="ise_copy_pre_ngdbuild">
+				"-c"
+				"rsync -avrR -e ssh"
+				"%extra_input_files"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+			  </line>
+		    </if-not>
+			<line name="ise_run_ngdbuild"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      success="@@FINISH@@"
+			      failure="ERROR"
+			      log=""
+			      stdout="parser_ISE">
+			      "mkdir -p"
+			      "~/%ISEProjectRoot/%ISERemoteDir"
+			      "\n"
+			      "cd ~/%ISEProjectRoot\n"
+			      "%ISEBinAbsolutePath/ngdbuild"
+			      <!-- ngdbuild command options -->
+			      "%add_pads"
+			      "%allow_unmatched_loc"
+			      "%allow_unmatched_timegroups"
+			      "%bmm_file"
+			      "%destination_directory"
+			      "%ignore_ucf"
+			      "%insert_keep_hierarchy"
+			      "%libraries"
+			      "%netlist_translation_type"
+			      "%ignore_loc"
+			      "%search_directories"
+			      "%user_constraints"
+			      "%user_rules"
+			      "%verbose"
+			      "%target_device"
+			      <!-- ngdbuild design name -->
+			      "%design_file"
+			      <!-- ngdbuild output name -->
+			      "%output_file"
+			      "\n"
+			      "echo \"@@FINISH@@\"\n"
+			</line>
+<!-- TODO: copy results -->	
+			<line name="ise_copy_after_ngdbuild">
+				"-c"
+				"mkdir -p %ISELocalResultDir ;"
+				"rsync -avr -e ssh"
+<!-- 			"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/*.bld"  -->	
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.bld"
+				"%ISELocalResultDir/"
+			</line>
+		</output>
+	</tool>
+	<!--  Restore tool for ISESynthesis -->
+	<tool name="RestoreISENGDBuild"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="RestoreISE"/>
+
+	<!--  Save tool for ISESynthesis -->
+	<tool name="SaveISENGDBuild"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="SaveISE"/>
+	
+</vdt-project>
+
