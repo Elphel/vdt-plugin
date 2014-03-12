@@ -108,7 +108,9 @@ public class FormatProcessor {
         		topProcessor.setCurrentTool(context);
         		return;
         	}
-    		currentTool=(Tool) context;
+        	if (currentTool==null) { // otherwise after using parameter belonging to baseTool, it will be changed 
+        		currentTool=(Tool) context;
+        	}
     	}
     }
 

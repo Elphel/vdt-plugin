@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISEMapInterface" extends="ISEInterface">
+	 	 <typedef name="CoverModeType">
+      		<paramtype kind= "enum"     base="String">
+      			<item value= "area"     label="minimize area"/>
+      			<item value= "speed"    label="maximize speed (minimaize number of logic levels)"/>
+      			<item value= "balanced" label="speed/area balamnced goal"/>
+      		</paramtype>
+    	 </typedef>
+	     <typedef name = "Cardinal_0_100">
+    	    <paramtype kind="number" lo="0" hi="100" format="%d" />
+    	 </typedef>
+	 	 <typedef name="GlobalOptType">
+      		<paramtype kind= "enum"   base="String">
+      			<item value= "off"    label="no global optimization"/>
+      			<item value= "speed"  label="maximize speed (minimaize number of logic levels), not available for Virtex-4"/>
+      			<item value= "area"   label="minimize area"/>
+      			<item value= "power"  label="optimizes for minimal power, not available for Virtex-4"/>
+      		</paramtype>
+    	 </typedef>
+	 	 <typedef name="DoNotUseRLOCType">
+      		<paramtype kind= "enum"     base="String">
+      			<item value= "all"     label="disable  all RLOC processing"/>
+      			<item value= "off"     label="enable all RLOC properties"/>
+      			<item value= "place"   label="only use RLOC to group elements into slices"/>
+      		</paramtype>
+    	 </typedef>
+	 	 <typedef name="LUTCombineType">
+      		<paramtype kind= "enum"     base="String">
+      			<item value= "off"     label="disable LUT combining"/>
+      			<item value= "auto"    label="moderate LUI combining, balancing compression and performance"/>
+      			<item value= "area"    label="combine LUT whenev er possible"/>
+      		</paramtype>
+    	 </typedef>
+	 	 <typedef name="MTType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "off"     label="multi-threading off"/>
+      			<item value= "2"       label="use 2 CPU cores if available"/>
+      		</paramtype>
+    	 </typedef>
+	 	 <typedef name="OLType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "std"     label="standard effort level"/>
+      			<item value= "high"    label="high effort level"/>
+      		</paramtype>
+    	 </typedef>
+
+	 	 <typedef name="PowerType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "on"   label="standard power optimization"/>
+      			<item value= "off"  label="no power optimization"/>
+      			<item value= "high" label="intelligent clock gating. Available for Spartan-6, Virtex-6,-7 and Zynq"/>
+      			<item value= "xe"   label="extra effort. Available for Spartan-6, Virtex-6,-7 and Zynq"/>
+      		</paramtype>
+    	 </typedef>
+
+	 	 <typedef name="PRIOType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "off"     label="no register packing in I/O blocks unless 'IOB=TRUE' in constraints"/>
+      			<item value= "i"       label="attempt to pack registers in input blocks"/>
+      			<item value= "o"       label="attempt to pack registers in output blocks"/>
+      			<item value= "b"       label="attempt to pack registers in both input and output blocks"/>
+      		</paramtype>
+    	 </typedef>
+
+	 	 <typedef name="RegisterOrderingType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "4"       label="4 registers per slice"/>
+      			<item value= "off"     label="disable register ordering"/>
+      			<item value= "8"       label="8 registers per slice"/>
+      		</paramtype>
+    	 </typedef>
+
+	 	 <typedef name="NormalContinueType">
+      		<paramtype kind= "enum"    base="String">
+      			<item value= "n"       label="normal"/>
+      			<item value= "c"       label="continue"/>
+      		</paramtype>
+    	 </typedef>
+	
+	</interface>
+
+	<tool name="ISEMap" label="run Map"
+	    project="FPGA_project"
+		interface="ISEMapInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%ISEIgnoreSource"
+		description="Run Map"
+		result="ISESnapshotMap"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		restore="RestoreISEMap"
+		autosave="AutosaveISEMap"
+		save="SaveISEMap"
+		inherits="ISEToolPrototype"
+		>
+		<action-menu>
+			<action label="Run Map" resource="" icon="map_icon.png" />
+		</action-menu>
+
+		<depends-list>
+			<depends state="ISESnapshotNGDBuild"/>
+<!-- 		<depends files="constraints"/>-->
+		</depends-list>
+		
+		<parameter id="SkipSnapshotMap" label="Skip snapshot" tooltip="Do not create snapshot after Map"
+		           default="false" type= "Boolean" format="None"/>
+        <parameter	id="input_file" label="Design file name" tooltip= "Top level design file name"
+        			default="%%ProjectName.ngd" visible="true" type="String" format="CopyValue"/>
+        <parameter	id="physical_constraints_file" label="Physical constraints file" tooltip= "Physical constraints file"
+        			default="%%ProjectName.pcf" visible="true" omit="" type="String" format="CopyValue"/>
+		<parameter	id="extra_input_files" label="extra files" tooltip= "Extra input files to copy to the top directory before running Map"
+        			default="" omit="" visible="true" type="Filelist" format="ParamListSyntax"/>
+        <parameter	id="output_file" outid="o" label="Output file name" tooltip= "Output file name"
+        			default="%%ProjectName.ncd" visible="true" omit="" type="String" format="Dash"/>
+
+<!-- Map options -->
+        <parameter id="activityfile" label="Activity file" tooltip= "*.vcd or *.saif file for power optimization (only valid with -power on)"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+		<parameter id="map_slice_logic" outid="bp" label="Map slice logic" tooltip="Try to use BRAM for LUTs and FFs"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="pack_slices" outid="c" label="Pack slices"
+				   tooltip="Degree to pack unrelated logic into slices (value restrictions apply, 1 - maximal density, 100 - minimal)"
+		           default="100" omit="100" type= "Cardinal_0_100" format="Dash"/>
+        <parameter id="cover_mode" outid="cm" label="Cover mode strategy" tooltip= "Not applicable to Spartan-6, Virtex-6,-7 and Zynq"
+        		   default="area" visible="true" omit="area" type="CoverModeType" format="Dash"/>
+		<parameter id="detail"  label="Detailed map report" tooltip="Enable detailed map report"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+
+		<parameter id="equivalent_register_removal"  label="Equivalent register removal"
+				   tooltip="Removes redundant registers (Spartan-6, Virtex-4,-5,-6) when '-global_opt' is used."
+		           default="true" omit="true" type= "Bool_on_off" format="Dash"/>
+        <parameter id="global_opt" outid="cm" label="Global optimization"
+        		   tooltip= "Applicable to Spartan-6, Virtex-4,-5,-6,-7 only. '-register_duplication' is disabled, '-u' is not allowed."
+        		   default="off" visible="true" omit="off" type="GlobalOptType" format="Dash"/>
+		<parameter id="ignore_keep_hierarchy"  label="Ignore KEEP_HIERARCHY" tooltip="Enable detailed map report"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+
+        <!-- Not clear what the default value is, so omit="" -->
+        <parameter id="do_not_use_rloc" outid="ir" label="Do not use RLOC"
+        		   tooltip= "Sets mode of processing RLOC constraints"
+        		   default="off" visible="true" omit="" type="DoNotUseRLOCType" format="Dash"/>
+        <parameter id="lut_combine" outid="lc" label="LUT combine"
+        		   tooltip= "Sets mode LUT combining"
+        		   default="off" visible="true" omit="off" type="LUTCombineType" format="Dash"/>
+		<parameter id="logic_opt"  label="Logic optimization"
+				   tooltip="Post-placement logic restructuring"
+		           default="true" omit="true" type= "Bool_on_off" format="Dash"/>
+        <parameter id="multi_threading" outid="mt" label="Multi-threading"
+        		   tooltip= "Enable multithreading during placement"
+        		   default="off" visible="true" omit="off" type="MTType" format="Dash"/>
+		<parameter id="non_timing_driven" outid="ntd" label="Non timing-driven"
+				   tooltip="Run in non timing-driven mode for MAP. (separate switch for PAR)"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="overall_effor_level" outid="ol" label="Overall effort level"
+        		   tooltip= "Overall MAP effort level used for packing and placement (recommended >= PAR effort level)"
+        		   default="std" visible="true" omit="std" type="OLType" format="Dash"/>
+        <parameter	id="target_device" outid="p"  label="Target device" tooltip= "Target device part number"
+        			default="%part" visible="true" omit="" type="String" format="Dash"/>
+        <parameter id="power_optimization" outid="power" label="Power optimization mode"
+        		   tooltip= "Controls power reduction optimization mode"
+        		   default="off" visible="true" omit="off" type="PowerType" format="Dash"/>
+        <parameter id="pack_registers_iob" outid="pr" label="Pack registers in IOB"
+        		   tooltip= "Attempt to pack registers in I/O blocks"
+        		   default="off" visible="true" omit="off" type="PRIOType" format="Dash"/>
+                   <!-- default not clear , disabling omit-->
+		<parameter id="register_duplication"  label="Register duplication"
+				   tooltip="PRegister duplication (disabled if '-global_opt' is used, reguires '-timing')"
+		           default="true" omit="" type= "Bool_on_off" format="Dash"/>
+		<parameter id="register_ordering" outid="r" label="Register ordering"
+				   tooltip="Register ordering in a slice (use 4 or 8)"
+		           default="4" omit="4" type= "RegisterOrderingType" format="Dash"/>
+        <parameter id="smartguide" label="Smart guide file" tooltip= "Guide file (*.ncd). Enable after initial 'timing' placement is performed"
+        		   default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter id="placer_cost_table" outid="t" label="Placer cost table"
+        		   tooltip= "Placer cost table with values in 1-100 range. Valid with '-timing' option only"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+		<parameter id="timing" label="Timing driven"
+				   tooltip="Timing driven packing and placement. Alwais on for Spartan-6, Virtex-6,-7 and Zynq"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="do_not_remove_unused" outid="u" label="Do not remove unused"
+				   tooltip="Keep unused resources by applying 'S' (NOCLIP) property to all dangling signals."
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		           <!-- made overwrite on by default  -->
+		<parameter id="overwrite" outid="w" label="Overwrite existent files"
+				   tooltip="Overwrite existent files including design (*.ncd) files."
+		           default="true" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="performance_evaluation" outid="x" label="Performance evaluation mode"
+				   tooltip="Use tool-generated timing constraints instead of the specified to evaluate each clock in the design."
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="extra_effort" outid="xe" label="Extra effort"
+        		   tooltip= "Extra effort for timing-driven packing and placement"
+        		   default="n" visible="true" omit="n" type="NormalContinueType" format="Dash"/>
+        <parameter id="extra_placer_cost_table" outid="xt" label="Extra Placer cost table"
+        		   tooltip= "Placer extra cost table with values in 1-100 range. Valid for S-6, V-6,-7 and Zynq"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        			<!-- is it available? NOT-->
+<!-- 		<parameter id="verbose"  label="Verbose mode" tooltip="Generate more detailed output"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>  -->
+		           
+<!--  common parameters from the base tool -->
+		<parameter	id="intstyle"/>      <!-- USED -->
+        <parameter	id="command_files"/> <!-- USED -->
+        <parameter	id="speed_grade"/>
+
+<!-- calculated parameters -->        			
+   	    <parameter   id="ISEMapActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+			
+<!-- hidden (calculated) parameters -->
+        <parameter	id="AutosaveISEMap" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotMap=false : true, false"
+                    visible="false" type="Boolean" format="None"/>
+		<input>
+		    <group name="General options">
+		        "SkipSnapshotMap"
+		        "input_file"
+		        "physical_constraints_file"
+		        "extra_input_files"
+		        "output_file"
+		        "activityfile"
+		        "map_slice_logic"
+		        "pack_slices"
+		        "cover_mode"
+		        "detail"
+		        "equivalent_register_removal"
+		        "global_opt"
+		        "ignore_keep_hierarchy"
+		        "do_not_use_rloc"
+		        "lut_combine"
+		        "logic_opt"
+		        "multi_threading"
+		        "non_timing_driven"
+		        "overall_effor_level"
+		        "target_device"
+		        "power_optimization"
+		        "pack_registers_iob"
+		        "register_duplication"
+		        "register_ordering"
+		        "smartguide"
+		        "placer_cost_table"
+		        "timing"
+		        "do_not_remove_unused"
+		        "overwrite"
+		        "performance_evaluation"
+		        "extra_effort"
+		        "extra_placer_cost_table"
+		        "---"
+		        "ISEProjectRoot"
+		        "ISERemoteDir"
+		    </group>
+		    <group name ="NGCBuild Options">
+			    
+		    </group>
+		</input>
+		<output>
+		    <if-not extra_input_files="">
+			  <line name="ise_copy_pre_map">
+				"-c"
+				"rsync -avrR -e ssh"
+				"%extra_input_files"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+			  </line>
+		    </if-not>
+			<line name="ise_run_map"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      success="@@FINISH@@"
+			      failure="ERROR"
+			      log=""
+			      stdout="parser_ISE">
+			      "mkdir -p"
+			      "~/%ISEProjectRoot/%ISERemoteDir"
+			      "\n"
+			      "cd ~/%ISEProjectRoot\n"
+			      "%ISEBinAbsolutePath/map"
+			      <!-- map command options -->
+			      "%output_file"
+			      "%activityfile"
+			      "%map_slice_logic"
+			      "%pack_slices"
+			      "%cover_mode"
+			      "%detail"
+			      "%equivalent_register_removal"
+			      "%global_opt"
+			      "%ignore_keep_hierarchy"
+			      "%do_not_use_rloc"
+			      "%lut_combine"
+			      "%logic_opt"
+			      "%multi_threading"
+			      "%non_timing_driven"
+			      "%overall_effor_level"
+			      "%target_device"
+			      "%power_optimization"
+			      "%pack_registers_iob"
+			      "%register_duplication"
+			      "%register_ordering"
+			      "%smartguide"
+			      "%placer_cost_table"
+			      "%timing"
+			      "%do_not_remove_unused"
+			      "%overwrite"
+			      "%performance_evaluation"
+			      "%extra_effort"
+			      "%extra_placer_cost_table"
+			      <!-- input (*.ngd) file -->
+			      "%input_file"
+			      <!-- physical constraints (*.pcf) output file -->
+			      "%physical_constraints_file"
+			      "\n"
+			      "echo \"@@FINISH@@\"\n"
+			</line>
+<!-- TODO: copy results -->	
+			<line name="ise_copy_after_map">
+				"-c"
+				"mkdir -p %ISELocalResultDir ;"
+				"rsync -avr -e ssh"
+<!--				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/*.mrp"   -->
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.mrp"
+				"%ISELocalResultDir/"
+			</line>
+		</output>
+	</tool>
+	<!--  Restore tool for ISESynthesis -->
+	<tool name="RestoreISEMap"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="RestoreISE"/>
+
+	<!--  Save tool for ISESynthesis -->
+	<tool name="SaveISEMap"
+		project="FPGA_project"
+		interface="ISEInterface"
+		package="FPGA_package"
+		inherits="SaveISE"/>
+	
+</vdt-project>
+

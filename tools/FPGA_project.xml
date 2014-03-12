@@ -317,6 +317,16 @@
 	        default="%%ProjectName-synth.tgz"
 			type="String" format="CopyValue" />
 
+	 	    <parameter id="ISESnapshotNGDBuild"
+	        label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after NGDBuild"
+	        default="%%ProjectName-ngdbuild.tgz"
+			type="String" format="CopyValue" />
+
+	 	    <parameter id="ISESnapshotMap"
+	        label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after map"
+	        default="%%ProjectName-map.tgz"
+			type="String" format="CopyValue" />
+
 	 	    <parameter id="ISESnapshotOptPlace"
 	        label="Placement snapshot" tooltip="Name of ISE snapshot archive after optimization/placement"
 	        default="%%ProjectName-opt-place.tgz"
@@ -406,6 +416,8 @@
 			<group name="ISESnapshots" label="ISE snapshot archives">
 				"ISECleanRestore"
 				"ISESnapshotSynth"
+				"ISESnapshotNGDBuild"
+				"ISESnapshotMap"
 <!-- 			"ISESnapshotOptPlace"  -->	
 				"ISESnapshotOpt"
 				"ISESnapshotOptPower"

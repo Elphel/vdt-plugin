@@ -52,6 +52,14 @@
                           label="Synthesize design"
                           icon="Retort.png"
                           call="ISExst"/>
+               	<menuitem name="ISENGDBuild"
+                          label="Run NGDBuild"
+                          icon="opt_blue.png"
+                          call="ISENGDBuild"/>
+               	<menuitem name="ISEMap"
+                          label="Map design"
+                          icon="map_icon.png"
+                          call="ISEMap"/>
         </menu>
                           
         <menu name="Vivado" 

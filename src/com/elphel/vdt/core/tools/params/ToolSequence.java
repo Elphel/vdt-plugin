@@ -912,8 +912,12 @@ public class ToolSequence {
 		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
 		IFolder stateDir= project.getFolder((stateDirString==null)?"":stateDirString);
 		IFile target=  stateDir.getFile(targetString); //null po
+		if (target==null){
+			System.out.println("Restore file for tool "+tool.getName()+" - '"+targetString+"': got null");
+			return false;
+		}
 		if (!target.exists()){
-			System.out.println("Restore file "+target.getLocation().toOSString()+" does not exist");
+			System.out.println("Restore file for tool "+tool.getName()+": "+target.getLocation().toOSString()+" does not exist");
 			return false;
 		}
 		return true;

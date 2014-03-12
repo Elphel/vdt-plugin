@@ -217,7 +217,7 @@
 			<depends files="constraints"/>
 		</depends-list>
 		<parameter	id="clean_start" label="Clean start" tooltip= "Delete all files on remote before running XST"
-        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        			default="true" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
 		<parameter id="SkipSnapshotSynth" label="Skip snapshot" tooltip="Do not create snapshot after synthesis"
 		           default="false"
 		           type= "Boolean" format="None"/>
@@ -629,7 +629,7 @@
 				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
 			</line>
 		
-			<line name="ise_run_partgen"
+			<line name="ise_run_xst"
 			      dest="ISEConsole"
 			      mark="``" 
 			      sep=" "
@@ -743,7 +743,7 @@
 			</line>
 <!-- TODO: copy results -->	
 <!-- 		
-			<line name="ise_copy_after_partgen">
+			<line name="ise_copy_after_synth">
 				"-c"
 				"mkdir -p %ISELocalResultDir ;"
 				"rsync -avr -e ssh"

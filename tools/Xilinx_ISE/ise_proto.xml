@@ -75,6 +75,11 @@
                    default="grep --line-buffered -E 'ERROR:%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
+        <parameter id="parsers_path" label="Parsers Path" tooltip= "parsers directory in plugins"
+        			default="%%ParsersPath" visible="true" omit="" type="String" format="CopyValue"/>
+        <parameter id="parser_name" label="ISE parser name" tooltip= "ISE parser script path"
+        			default="parser_ise.py" visible="true" omit="" type="String" format="CopyValue"/>
+                   
         			
 		<input>
 			<group name="Common options"
@@ -86,6 +91,9 @@
 			</group>
 			<group name="Parser"
 			       weight="10">
+				"parsers_path"
+				"parser_name"
+			       
 				"ShowWarnings"
 				"ShowInfo"
 				"GrepEWI"
@@ -114,6 +122,7 @@
 				warnings= "PatternWarnings"
 				info=     "PatternInfo">
 				"-c"
+				"python -u %parsers_path%parser_name %%ToolName | "
      			"%GrepEWI"
      			"| %ISESedPaths"
      			<if NoBabyTalk="true">
@@ -130,11 +139,12 @@
 		        "%Timing"
 		        "%Pwropt"
 		        "%OtherProblems"
-		        <!-- TODO: change Placement to Routing? or such -->
+		        <!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
+		        <!-- 
      			<if NoFileProblem="true">
-	  				<!-- Add  [Placement:0000] to lines that do not have [file:line] - then "Placement" will appear in "Problems" location-->
      				"| sed -u 's@^[^\[]*\[[^\[]*$@&amp;\[%%ToolName:0000\]@'"
      			</if>
+     			 -->
 			</line>
 		</output>
 	</tool>
