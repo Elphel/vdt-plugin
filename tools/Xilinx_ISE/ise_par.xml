@@ -194,9 +194,9 @@
 			      "%overwrite"
 			      "%performance_evaluation"
 			      "%extra_effort"
-			      <!-- input (*.ngd) file -->
+			      <!-- input (*.ncd) file -->
 			      "%input_file"
-			      <!-- output (*.ngd) file -->
+			      <!-- output (*.ncd) file -->
 			      "%output_file"
 			      <!-- physical constraints (*.pcf) output file -->
 			      "%physical_constraints_file"
@@ -210,6 +210,8 @@
 				"rsync -avr -e ssh"
 <!--				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/*.mrp"   -->
 				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.par"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.xml"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.xrpt"
 				"%ISELocalResultDir/"
 			</line>
 		</output>

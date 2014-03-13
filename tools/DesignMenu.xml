@@ -64,6 +64,10 @@
                           label="Place &amp; route design"
                           icon="route66.png"
                           call="ISEPAR"/>
+               	<menuitem name="ISEBitgen"
+                          label="Generate bitstream file(s)n"
+                          icon="bitstream.png"
+                          call="ISEBitgen"/>
         </menu>
                           
         <menu name="Vivado" 

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISEBitgenInterface" extends="ISEInterface">
+	</interface>
+
+	<tool name="ISEBitgen" label="run Bitgen"
+	    project="FPGA_project"
+		interface="ISEBitgenInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%ISEIgnoreSource"
+		description="Run Bitgen"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		inherits="ISEToolPrototype"
+		>
+		<action-menu>
+			<action label="Run Bitgen" resource="" icon="bitstream.png" />
+		</action-menu>
+
+		<depends-list>
+			<depends state="ISESnapshotPAR"/>
+<!-- 		<depends files="constraints"/>-->
+		</depends-list>
+		
+        <parameter	id="input_file" label="Design file name" tooltip= "Input design file name (*.ncd)"
+        			default="%%ProjectName.ncd" visible="true" type="String" format="CopyValue"/>
+        <parameter	id="physical_constraints_file" label="Physical constraints file" tooltip= "Physical constraints file (*.pcf)"
+        			default="%%ProjectName.pcf" visible="true" omit="" type="String" format="CopyValue"/>
+		<parameter	id="extra_input_files" label="extra files"
+				    tooltip= "Extra input files to copy to the top directory before running Bitgen"
+        			default="" omit="" visible="true" type="Filelist" format="ParamListSyntax"/>
+        			<!-- Can output_file be the same as input_file? -->
+        <parameter	id="output_file" label="Output file name" tooltip= "Output file name (*.ncd) - may be the same as input"
+        			default="%%ProjectName.bit" visible="true" omit="" type="String" format="CopyValue"/>
+<!-- Bitgen options -->
+
+		<parameter id="rawbits" outid="b" label="Create Rawbits file" tooltip="Generate rawbits (*.rbt) file. with '-g' option creates *.rba also"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="update_brams" outid="bd" label="Update BlockRAM with"
+				   tooltip="Update BlockRAM content with provides *.elf or *.mem file"
+		           default="" omit="" type= "String" format="DashName"/>
+		<parameter id="no_drc" outid="d" label="Skip DRC"
+				   tooltip="Skip DRC and do not generate *.bgn (bitgen report) and *.drc files"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="set_configuration" outid="g" label="Set configuration"
+                    tooltip= "Provides various configurations as 'sub-option' or 'sub-option:value' entries"
+        			default="" visible="true" omit="" type="Stringlist" format="DashListIndividual"/>
+		<parameter id="no_bit_file" outid="j" label="Skip Bitfile"
+				   tooltip="Skip bitfile generation"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="logic_allocation" outid="l" label="Logic allocation file"
+				   tooltip="Create logic allocation (*.ll) file"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="mask_file" outid="m" label="Mask file"
+				   tooltip="Create mask file that specifies which bits to be compared during readback for verification"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="partial_bitfile" outid="r" label="Partial bitfile"
+				   tooltip="Use provided bitfile and program only the bits that differ"
+		           default="" omit="" type= "String" format="DashName"/>
+		<parameter id="overwrite" outid="w" label="Overwrite existent files"
+				   tooltip="Overwrite existent files including design (*.ncd) files."
+		           default="true" omit="false" type= "Boolean" format="DashName"/>
+		           
+<!--  common parameters from the base tool -->
+		<parameter	id="intstyle"/>      <!-- USED Bitgen -->
+        <parameter	id="command_files"/> <!-- USED Bitgen-->
+        <parameter	id="speed_grade"/>
+
+<!-- calculated parameters -->        			
+   	    <parameter  id="ISEBitgenActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+                    
+		<input>
+		    <group name="General options">
+		        "input_file"
+		        "physical_constraints_file"
+		        "extra_input_files"
+		        "output_file"
+		    </group>
+		    <group name ="Bitgen Options">
+<!-- Bitgen options -->
+		        "rawbits"
+		        "update_brams"
+		        "no_drc"
+		        "set_configuration"
+		        "no_bit_file"
+		        "logic_allocation"
+		        "mask_file"
+		        "partial_bitfile"
+		        "overwrite"
+		        "---"
+		        "ISEProjectRoot"
+		        "ISERemoteDir"
+		    </group>
+		</input>
+		<output>
+		    <if-not extra_input_files="">
+			  <line name="ise_copy_pre_bitgen">
+				"-c"
+				"rsync -avrR -e ssh"
+				"%extra_input_files"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+			  </line>
+		    </if-not>
+			<line name="ise_run_bitgen"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      success="@@FINISH@@"
+			      failure="ERROR"
+			      log=""
+			      stdout="parser_ISE">
+			      "mkdir -p"
+			      "~/%ISEProjectRoot/%ISERemoteDir"
+			      "\n"
+			      "cd ~/%ISEProjectRoot\n"
+			      "%ISEBinAbsolutePath/bitgen"
+			      <!-- bitgen command options -->
+			      "%rawbits"
+			      "%update_brams"
+			      "%no_drc"
+			      "%set_configuration"
+			      "%no_bit_file"
+			      "%logic_allocation"
+			      "%mask_file"
+			      "%partial_bitfile"
+			      "%overwrite"
+			      <!-- input (*.ncd) file -->
+			      "%input_file"
+			      <!-- output (*.ncd) file -->
+			      "%output_file"
+			      <!-- physical constraints (*.pcf) output file -->
+			      "%physical_constraints_file"
+			      "\n"
+			      "echo \"@@FINISH@@\"\n"
+			</line>
+<!-- TODO: copy results -->	
+			<line name="ise_copy_after_bitgen">
+				"-c"
+				"mkdir -p %ISELocalResultDir ;"
+				"echo \" *** ignore missing files below ***\""
+				"rsync -avr -e ssh"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.bgn"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.drc"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.isc"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.rba"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.rbb"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.ebc"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.bit"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.rbt"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.nky"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.msd"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.ebd"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.ebc"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.bin"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.msk"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.ll"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.xml"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.xrpt"
+				"%ISELocalResultDir/"
+			</line>
+		</output>
+	</tool>
+	
+</vdt-project>
+

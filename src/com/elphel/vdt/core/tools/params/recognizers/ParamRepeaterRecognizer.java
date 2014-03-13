@@ -28,7 +28,7 @@ import com.elphel.vdt.core.tools.params.Parameter;
 
 
 public class ParamRepeaterRecognizer extends RepeaterRecognizer {
-    private final Parameter param;
+//    private final Parameter param; // moved to RepeaterRecognizer
     
     public ParamRepeaterRecognizer(Parameter param) {
         this.param = param;

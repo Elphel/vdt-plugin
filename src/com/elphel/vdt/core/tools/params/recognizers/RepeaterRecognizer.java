@@ -25,8 +25,10 @@ import com.elphel.vdt.core.tools.generators.FileListGenerator;
 import com.elphel.vdt.core.tools.generators.FilteredSourceListGenerator;
 import com.elphel.vdt.core.tools.generators.TopModulesNameGenerator;
 import com.elphel.vdt.core.tools.generators.SourceListGenerator;
+import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
+import com.elphel.vdt.core.tools.params.Parameter;
 
 
 public class RepeaterRecognizer implements Recognizer {
@@ -40,7 +42,8 @@ public class RepeaterRecognizer implements Recognizer {
 
     private static final int FORMAT_REPEATER_OPEN_LEN = FORMAT_REPEATER_OPEN.length(); 
     private static final int FORMAT_REPEATER_SEP_LEN = FORMAT_REPEATER_SEP.length(); 
-    private static final int FORMAT_REPEATER_CLOSE_LEN = FORMAT_REPEATER_CLOSE.length(); 
+    private static final int FORMAT_REPEATER_CLOSE_LEN = FORMAT_REPEATER_CLOSE.length();
+    protected Parameter param=null;
     
     public RecognizerResult recognize(String template, int startPos, FormatProcessor topProcessor)
         throws ToolException
@@ -68,37 +71,70 @@ public class RepeaterRecognizer implements Recognizer {
             repBody = template.substring(startPos, closePos);
             sepBody = "";
         }
-                       
-        int genNamePos = repBody.indexOf(FORMAT_REPEATER_NAME_MARK);
-        
-        if(genNamePos < 0)
-            throw new ToolException("Generator name (i.e. sequence '" + FORMAT_REPEATER_NAME_MARK + 
-                                    "NAME') not found");
-        
-        int genNameEnd = Utils.findBoundary(repBody, genNamePos + FORMAT_REPEATER_NAME_MARK_LEN);
+        for (int startName=0;startName<repBody.length();){
+        	int genNamePos = repBody.indexOf(FORMAT_REPEATER_NAME_MARK,startName);
 
-        if(genNameEnd == genNamePos)
-            throw new ToolException("Generator name after '" + FORMAT_REPEATER_NAME_MARK +
-                                    "' mark is absent");
-        
-        String repPrefix = repBody.substring(0, genNamePos);
-        String genName = repBody.substring(genNamePos + FORMAT_REPEATER_NAME_MARK_LEN, genNameEnd);        
-        String repSuffix = repBody.substring(genNameEnd);
+        	if(genNamePos < 0)
+        		throw new ToolException("Generator name (i.e. sequence '" + FORMAT_REPEATER_NAME_MARK + 
+        				"NAME') not found");
 
- //       System.out.println("Gen name: '" + genName + 
- //                          "', repPrefix: '" + repPrefix + 
- //                          "', repSuffix: '" + repSuffix + 
- //                          "', sepBody: '" + sepBody + 
- //                          "'");
-        
-        result.set(findGenerator(genName, repPrefix, repSuffix, sepBody, topProcessor),     /* Why did it miss FileListGenerator here? */   
-                   closePos + FORMAT_REPEATER_CLOSE_LEN, topProcessor);
-        
-        if(result.getGenerator() == null)
-            throw new ToolException("Unknown generator '" + genName + "'");
-        
+        	int genNameEnd = Utils.findBoundary(repBody, genNamePos + FORMAT_REPEATER_NAME_MARK_LEN);
+
+        	if(genNameEnd == genNamePos)
+        		throw new ToolException("Generator name after '" + FORMAT_REPEATER_NAME_MARK +
+        				"' mark is absent");
+        	startName=genNameEnd;
+        	String repPrefix = repBody.substring(0, genNamePos);
+        	String genName = repBody.substring(genNamePos + FORMAT_REPEATER_NAME_MARK_LEN, genNameEnd);        
+        	String repSuffix = repBody.substring(genNameEnd);
+
+        	//       System.out.println("Gen name: '" + genName + 
+        	//                          "', repPrefix: '" + repPrefix + 
+        	//                          "', repSuffix: '" + repSuffix + 
+        	//                          "', sepBody: '" + sepBody + 
+        	//                          "'");
+
+        	result.set(findGenerator(genName, repPrefix, repSuffix, sepBody, topProcessor),     /* Why did it miss FileListGenerator here? */   
+        			closePos + FORMAT_REPEATER_CLOSE_LEN, topProcessor);
+
+        	if(result.getGenerator() == null) { // wrong generator - should be processed separately
+        		continue;
+//        		throw new ToolException("Unknown generator '" + genName + "'");
+        	}
+        	// if prefix or suffix contains %% - evaluate them and re-run result.set(findGenerator(... 
+        	if (repPrefix.contains(FORMAT_REPEATER_NAME_MARK) ||
+        			repSuffix.contains(FORMAT_REPEATER_NAME_MARK) ||
+        			sepBody.contains(FORMAT_REPEATER_NAME_MARK)) {
+            	result.set(findGenerator(genName,
+            			resolveString(repPrefix,topProcessor),
+            			resolveString(repSuffix,topProcessor),
+            			resolveString(sepBody,topProcessor),
+            			topProcessor),     /* Why did it miss FileListGenerator here? */   
+            			closePos + FORMAT_REPEATER_CLOSE_LEN, topProcessor);
+        		
+        	}
+        	return result;
+        }
+        throw new ToolException("Generator name (i.e. sequence '" + FORMAT_REPEATER_NAME_MARK + "NAME') not found");
+    }
+    private String resolveString(String template, FormatProcessor topProcessor){
+    	if ((template==null) || !template.contains(FORMAT_REPEATER_NAME_MARK)) return template;
+        FormatProcessor processor = new FormatProcessor(new Recognizer[] {
+                new ParamFormatRecognizer(param), 
+                new SimpleGeneratorRecognizer(topProcessor)
+            }, false,topProcessor);
+        String result = null;
+        if(template != null) {
+            try {
+                result = processor.process(template).get(0);
+            } catch(ToolException e) {
+                MessageUI.error(e);
+                return template;
+            }
+        }
         return result;
     }
+    
     
     protected AbstractGenerator findGenerator(String genName, 
                                               String repPrefix, 

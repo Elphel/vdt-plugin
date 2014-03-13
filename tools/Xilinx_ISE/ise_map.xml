@@ -320,6 +320,8 @@
 				"rsync -avr -e ssh"
 <!--				"%RemoteUser@%RemoteHost:%ISEProjectRoot/%ISERemoteDir/*.mrp"   -->
 				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.mrp"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.xml"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.xrpt"
 				"%ISELocalResultDir/"
 			</line>
 		</output>

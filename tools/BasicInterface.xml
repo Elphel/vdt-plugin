@@ -91,6 +91,7 @@
 	<syntax name="ParamListSyntax"     format="%(%%ParamValue%| %)" />
 	<syntax name="Dash"                format=" -%%ParamName %%ParamValue" />
 <!-- <syntax name="DashList"  format=" -%%ParamName %(-s%%ParamValue%| %)" /> -->
+<!-- DashListIndividual does not currently work as only one generator is allowed inside repetitor body -->
 	<syntax name="DashListIndividual"  format="%(-%%ParamName %%ParamValue%| %)" />
 	<syntax name="DashListCommon"      format="-%%ParamName %(%%ParamValue%| %)" />
 	<syntax name="DashName"            format=" -%%ParamName" />
