@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<tool name="ISETraceMap" label="Report post-map timing"
+	    project="FPGA_project"
+		interface="ISETraceInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Report post-map timing"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		disable="DisableISETiming"
+		inherits="ISETrace"
+		>
+		<action-menu>
+			<action label="Report post-map static timing" resource="" icon="clock.png" />
+		</action-menu>
+		<depends-list>
+			<depends state="ISESnapshotMap"/>
+		</depends-list>
+		<parameter id="DisableISETiming"/>
+        <parameter	id="input_file"/>
+        <parameter	id="physical_constraints_file"/>
+		<parameter	id="extra_input_files"/>
+<!-- Trace options -->
+		<parameter id="advanced_analysis"/>
+		<parameter id="error_report"/>
+		<parameter id="fastpath"/>
+		<parameter id="limit_per_endpoint"/>
+		<parameter id="nodatasheet"/>
+		<parameter id="noflight"/>
+        <parameter id="output_file" default="%%ProjectName-map.twr"/>
+        <parameter id="stamp"/>
+		<parameter id="timegroups"/>
+        <parameter id="timing_specification_interaction"/>
+        <parameter id="uncovered_paths"/>
+        <parameter id="verbose"/>
+        <parameter id="output_xml" default="%%ProjectName-map.twx"/>
+<!--  common parameters from the base tool -->
+		<parameter	id="intstyle"/>
+        <parameter	id="command_files"/>
+        <parameter	id="speed_grade"/>
+<!-- calculated parameters -->        			
+   	    <parameter  id="ISETraceActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+        <parameter id="rawStamp"	default="%stamp" visible="false" type="String" format="CopyValue"/>
+	</tool>
+	
+</vdt-project>
+

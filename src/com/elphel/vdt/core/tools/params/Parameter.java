@@ -558,7 +558,8 @@ public class Parameter implements Cloneable, Updateable {
         if(id == null) 
             throw new NullPointerException("id == null");
         
-        if(outid == null)
+      //outid is never null - it is set to id in that case just when parameter is constructed         
+        if((outid == null) || outid.equals(id))
             outid = param.outid;
         
         if(typeName == null)

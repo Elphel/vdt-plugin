@@ -141,7 +141,7 @@
 			<line name="ise_copy_after_bitgen">
 				"-c"
 				"mkdir -p %ISELocalResultDir ;"
-				"echo \" *** ignore missing files below ***\""
+				"echo \" *** ignore missing files below ***\";"
 				"rsync -avr -e ssh"
 				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.bgn"
 				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.drc"

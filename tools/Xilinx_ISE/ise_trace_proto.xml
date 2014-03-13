@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vdt-project>
+	<interface name="ISETraceInterface" extends="ISEInterface">
+	</interface>
+
+	<tool name="ISETrace" label="run Trace"
+	    project="FPGA_project"
+		interface="ISETraceInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Run Trace"
+		log-dir="ISELogDir"
+		state-dir="ISELocalDir"
+		disable="DisableISETiming"
+		abstract="true"
+		inherits="ISEToolPrototype"
+		priority="0.5"
+		>
+		<action-menu>
+			<action label="Report static timing" resource="" icon="clock.png" />
+		</action-menu>
+		<parameter id="DisableISETiming" label="Disable" tooltip="Disable timing report"
+		           default="false" type= "Boolean" format="None"/>
+		
+        <parameter	id="input_file" label="Design file name" tooltip= "Input design file name (*.ncd)"
+        			default="%%ProjectName.ncd" visible="true" type="String" format="CopyValue"/>
+        <parameter	id="physical_constraints_file" label="Physical constraints file" tooltip= "Physical constraints file (*.pcf)"
+        			default="%%ProjectName.pcf" visible="true" omit="" type="String" format="CopyValue"/>
+		<parameter	id="extra_input_files" label="extra files"
+				    tooltip= "Extra input files to copy to the top directory before running Trace"
+        			default="" omit="" visible="true" type="Filelist" format="ParamListSyntax"/>
+        			<!-- Can output_file be the same as input_file? -->
+<!-- Trace options -->
+
+		<parameter id="advanced_analysis" outid="a" label="Advanced analysis"
+				   tooltip="Used when no timing constraints are provided"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="error_report" outid="e" label="Generate error report"
+				   tooltip="Generate error report instead of timing report, limit number of items per constraint"
+		           default="3" omit="3" type= "Cardinal" format="Dash"/>
+		<parameter id="fastpath" label="Report fastest"
+				   tooltip="Report fastest paths of the design"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="limit_per_endpoint" outid="n" label="Limit per endpoint"
+				   tooltip="Limit paths per endpoint"
+		           default="3" omit="3" type= "Cardinal" format="Dash"/>
+		<parameter id="nodatasheet" label="Skip datasheet"
+				   tooltip="Skip datasheet section in the report"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+		<parameter id="noflight" label="No package delay"
+				   tooltip="Do not include package flight delay"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="output_file" outid="o" label="Output file name"
+        		    tooltip= "Output file name (*.twr) (use '-' to disable)"
+        			default="%%ProjectName.twr" visible="true" omit="-" type="String" format="Dash"/>
+        <parameter id="stamp" label="Stamp file"
+        		    tooltip= "Generate STAMP timing model files"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+		<parameter id="timegroups" label="Generate a table of timegroups"
+				   tooltip="Generate a table of timegroups, requires 'v' (verbose) or 'e' (generate error report) options"
+		           default="false" omit="false" type= "Boolean" format="DashName"/>
+        <parameter id="timing_specification_interaction" outid="tsi" label="Timing specification interaction"
+        		    tooltip= "Generate timing specification interaction (*.tsi) report"
+        			default="" visible="true" omit="" type="String" format="Dash"/>
+        <parameter id="uncovered_paths" outid="u" label="Report uncovered paths"
+        		    tooltip= "Report paths that are not covered by any delays"
+        			default="0" visible="true" omit="0" type="Cardinal" format="Dash"/>
+        <parameter id="verbose" outid="v" label="Verbose report limit"
+        		    tooltip= "Verbose report, limit number of items per constraint"
+        			default="0" visible="true" omit="0" type="Cardinal" format="Dash"/>
+        <parameter id="output_xml" outid="xml" label="Output xml file"
+        		    tooltip= "Output xml file name (*.twx), use '-' to disable"
+        			default="%%ProjectName.twx" visible="true" omit="-" type="String" format="Dash"/>
+
+		           
+<!--  common parameters from the base tool -->
+		<parameter	id="intstyle"/>      <!-- USED Trace -->
+        <parameter	id="command_files"/> <!-- USED Trace-->
+        <parameter	id="speed_grade"/> <!-- USED Trace-->
+
+<!-- calculated parameters -->        			
+   	    <parameter  id="ISETraceActionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+        <parameter id="rawStamp"	default="%stamp" visible="false" type="String" format="CopyValue"/>
+					
+		<input>
+		    <group name="General options">
+		        "DisableISETiming"
+		        "input_file"
+		        "physical_constraints_file"
+		        "extra_input_files"
+		        "output_file"
+		        "output_xml"
+		        "stamp"
+		        
+		    </group>
+		    <group name ="Trace Options">
+<!-- Trace options -->
+		        "advanced_analysis"
+		        "error_report"
+		        "fastpath"
+		        "limit_per_endpoint"
+		        "nodatasheet"
+		        "noflight"
+		        "timegroups"
+		        "timing_specification_interaction"
+		        "uncovered_paths"
+		        "verbose"
+		        "---"
+		        "ISEProjectRoot"
+		        "ISERemoteDir"
+		    </group>
+		</input>
+		<output>
+		    <if-not extra_input_files="">
+			  <line name="ise_copy_pre_timing">
+				"-c"
+				"rsync -avrR -e ssh"
+				"%extra_input_files"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot"
+			  </line>
+		    </if-not>
+			<line name="ise_run_timimg"
+			      dest="ISEConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      success="@@FINISH@@"
+			      failure="ERROR"
+			      log=""
+			      stdout="parser_ISE">
+			      "mkdir -p"
+			      "~/%ISEProjectRoot/%ISERemoteDir"
+			      "\n"
+			      "cd ~/%ISEProjectRoot\n"
+			      "%ISEBinAbsolutePath/trce"
+			      <!-- bitgen command options -->
+			      "%advanced_analysis"
+			      "%error_report"
+			      "%fastpath"
+			      "%limit_per_endpoint"
+			      "%nodatasheet"
+			      "%noflight"
+			      "%timegroups"
+			      "%timing_specification_interaction"
+			      "%uncovered_paths"
+			      "%verbose"
+			      "%output_file"
+			      "%output_xml"
+			      "%stamp"
+			      <!-- input (*.ncd) file -->
+			      "%input_file"
+			      <!-- physical constraints (*.pcf) output file -->
+			      "%physical_constraints_file"
+			      "\n"
+			      "echo \"@@FINISH@@\"\n"
+			</line>
+<!-- TODO: copy results -->	
+			<line name="ise_copy_after_timing">
+				"-c"
+				"mkdir -p %ISELocalResultDir ;"
+				"echo \" *** ignore missing files below ***\";"
+				"rsync -avr -e ssh"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.twr"
+				"%RemoteUser@%RemoteHost:%ISEProjectRoot/*.twx"
+				<if-not rawStamp="">
+				   "%RemoteUser@%RemoteHost:%ISEProjectRoot/%rawStamp"
+				</if-not>
+				"%ISELocalResultDir/"
+			</line>
+		</output>
+	</tool>
+	
+</vdt-project>
+

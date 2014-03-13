@@ -10,8 +10,8 @@
 			<action label="Launch Vivado" resource="" icon="door_in.png" />
 			<action label="Generate public key" resource="" icon="key.png" />
 			<action label="Setup connection to" resource="%RemoteUser@%RemoteHost"
-			check-extension="false" check-existence="false" icon="setup.png" />
-			<action label="Launch shell on remote" resource="" icon="shell.png" />
+			        check-extension="false" check-existence="false" icon="setup.png" />
+<!--		<action label="Launch shell on remote" resource="" icon="shell.png" />  -->
 		</action-menu>
  
 		<parameter   id="command" label="Shell command" default="bash"
@@ -106,6 +106,7 @@
 					"ssh-copy-id %RemoteUser@%RemoteHost;"
 				</line>
 			</if>
+			<!-- 
 			<if actionIndex="3">
 				<line name="Vivado">
 					"%ShellSwitches"
@@ -130,7 +131,7 @@
 					"exit 1; } ;"
 				</line>
 			</if>
-			
+			 -->
 		</output>
 	</tool>
 </vdt-project>

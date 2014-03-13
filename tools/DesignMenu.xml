@@ -19,35 +19,26 @@
                       icon="gtkwave.ico"
                       call="iverilog"/>
         </menu>
-        <menu name="Python tests" 
-              label="Tests with remote Python console"
-              icon="python.png">
-        
-                <menuitem name="RemotePython"
-                          label="Run remote Python session"
-                          icon="python.png"
-                          call="RemotePython"/>
-                <menuitem name="RemotePythonCommand"
-                          label="Send a command to the remote Python session"
-                          icon="my_tool.gif"
-                          call="RemotePythonCommand"/>
-        </menu>
-                <menu name="ISE" 
-                          label="ISE Tools"
-                          icon="xilinx.png">
-              
+        <menu name="ISE" 
+              label="ISE Tools"
+              icon="xilinx.png">
+              <menu name="ISE_utils" 
+                    label="ISE utilities"
+                    icon="setup.png">
                 <menuitem name="ISECopyUnisims"
                           label="Copy Xilinx ISE primitives library to the local project"
                           icon="copy.png"
                           call="ISEUnisims"/>
-                <menuitem name="ISE Server"
-                          label="Start remote ISE session"
-                          icon="door_in.png"
-                          call="ISE"/>
                 <menuitem name="ISEPartgen"
                           label="Run ISE partgen"
                           icon="bitstream.png"
                           call="ISEPartgen"/>
+              </menu>
+              
+                <menuitem name="ISE Server"
+                          label="Start remote ISE session"
+                          icon="door_in.png"
+                          call="ISE"/>
                	<menuitem name="ISESynthesis"
                           label="Synthesize design"
                           icon="Retort.png"
@@ -60,10 +51,18 @@
                           label="Map design"
                           icon="map_icon.png"
                           call="ISEMap"/>
+               	<menuitem name="ISETraceMap"
+                          label="Report post-map timing"
+                          icon="clock.png"
+                          call="ISETraceMap"/>
                	<menuitem name="ISEPAR"
                           label="Place &amp; route design"
                           icon="route66.png"
                           call="ISEPAR"/>
+               	<menuitem name="ISETracePAR"
+                          label="Report post-implementation timing"
+                          icon="clock.png"
+                          call="ISETracePAR"/>
                	<menuitem name="ISEBitgen"
                           label="Generate bitstream file(s)n"
                           icon="bitstream.png"
@@ -73,11 +72,19 @@
         <menu name="Vivado" 
               label="Vivado Tools"
               icon="xilinx.png">
+                <menu name="VivadoUtils" 
+              	      label="Vivado utilities"
+              		  icon="setup.png">
+                    <menuitem name="CopyUnisims"
+                              label="Copy Xilinx Vivado primitives library to the local project"
+                              icon="copy.png"
+                              call="VivadoUnisims"/>
+                    <menuitem name="Vivado Test"
+                              label="Send a 'Hello World' command to the remote Vivado session"
+                              icon="my_tool.gif"
+                              call="VivadoTest"/>
+                </menu>
               
-                <menuitem name="CopyUnisims"
-                          label="Copy Xilinx Vivado primitives library to the local project"
-                          icon="copy.png"
-                          call="VivadoUnisims"/>
                 <menuitem name="Vivado Server"
                           label="Start remote Vivado session"
                           icon="door_in.png"
@@ -146,27 +153,8 @@
                           icon="bitstream.png"
                           call="VivadoBitstream"/>
                           
-                <menuitem name="Vivado Test"
-                          label="Send a 'Hello World' command to the remote Vivado session"
-                          icon="my_tool.gif"
-                          call="VivadoTest"/>
                           
         </menu>
-           <menuitem name="Test VDT"
-             label="Testing some VDT features"
-             icon="sample.gif"
-             call="VDTTest"/>
-<!--              
-           <menuitem name="Test VDT-A"
-             label="Testing some VDT features"
-             icon="sample.gif"
-             tool-instance="VDTTest_inst2"
-             call="VDTTest"/>
-               -->
-           <menuitem name="Test VDT1"
-             label="Testing some VDT features - variant 1"
-             icon="sample.gif"
-             call="VDTTest1"/>
                           
     </menu>
     
@@ -175,6 +163,19 @@
           icon="sample.gif"
           tip="This is an user menu"
           inherits="MainDesignMenu">
+         <menu name="Python tests" 
+              label="Tests with remote Python console"
+              icon="python.png">
+        
+                <menuitem name="RemotePython"
+                          label="Run remote Python session"
+                          icon="python.png"
+                          call="RemotePython"/>
+                <menuitem name="RemotePythonCommand"
+                          label="Send a command to the remote Python session"
+                          icon="my_tool.gif"
+                          call="RemotePythonCommand"/>
+        </menu>
                               
         <menu name="OtherStuff" 
               label="Various Sample Tools">
@@ -193,6 +194,21 @@
                       label="MyTool"
                       icon="my_tool.gif"
                       call="MyTool"/>
+           <menuitem name="Test VDT"
+             label="Testing some VDT features"
+             icon="sample.gif"
+             call="VDTTest"/>
+<!--              
+           <menuitem name="Test VDT-A"
+             label="Testing some VDT features"
+             icon="sample.gif"
+             tool-instance="VDTTest_inst2"
+             call="VDTTest"/>
+               -->
+           <menuitem name="Test VDT1"
+             label="Testing some VDT features - variant 1"
+             icon="sample.gif"
+             call="VDTTest1"/>
         </menu>
 
     </menu>
