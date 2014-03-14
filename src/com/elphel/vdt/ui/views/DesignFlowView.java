@@ -582,11 +582,11 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         clearProjectStatesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
 
         clearStateFilesAction = new ClearStateFiles("Do you wisth to remove all state files (snapshots), but the current ones?",toolSequence);
-        clearStateFilesAction.setText("Clear all but latest snapshot files");
+        clearStateFilesAction.setText("Clear all but the latest snapshot files");
         clearStateFilesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
 
         clearLogFilesAction = new ClearLogFiles("Do you wisth to remove all log files, but the most recent?",toolSequence);
-        clearLogFilesAction.setText("Clear all but latest log files");
+        clearLogFilesAction.setText("Clear all but the latest log files");
         clearLogFilesAction.setImageDescriptor(VDTPluginImages.DESC_ERASE);
         
         showLaunchConfigAction = new Action() {
