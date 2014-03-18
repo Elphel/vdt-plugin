@@ -277,6 +277,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
    	   	    			System.out.println("Initiating DB rebuild HDLFile="+HDLFile);
    	   	    		toolSequence.setUnfinishedBoot(null,true);
    	   	    		VerilogUtils.getTopModuleNames((IFile) HDLFile); // will initiate DB rebuild, updateDirty and call doLoadDesignMenu();
+//   	   	  java.lang.ClassCastException: org.eclipse.core.internal.resources.Project cannot be cast to org.eclipse.core.resources.IFile
+//   	   	  	at com.elphel.vdt.ui.views.DesignFlowView.doLoadDesignMenu(DesignFlowView.java:279)
    	   	    	}
    	   	    	return; 
    	   	    }
@@ -1266,6 +1268,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
         		System.out.println("Initiating DB rebuild HDLFile="+HDLFile);
    	    	VerilogUtils.getTopModuleNames((IFile) HDLFile);
+// 	    	java.lang.ClassCastException: org.eclipse.core.internal.resources.Project cannot be cast to org.eclipse.core.resources.IFile
+//   	 	at com.elphel.vdt.ui.views.DesignFlowView.restoreState(DesignFlowView.java:1270)
+//  	 	at com.elphel.vdt.ui.views.DesignFlowView.createPartControl(DesignFlowView.java:237)   	    	
    	    } else {
         	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
         		System.out.println("Skipping DB rebuild HDLFile=NULL");

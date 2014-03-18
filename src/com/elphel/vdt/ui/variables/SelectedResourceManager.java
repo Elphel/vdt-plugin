@@ -26,6 +26,7 @@ import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.core.tools.params.ToolSequence;
+import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
@@ -367,6 +368,25 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
 
     // Used when restoring from memento
     public void setChosenVerilogFile(IResource file) {
+        if (file != null){
+        	if (file.getType() != IResource.FILE) {
+        		String msg="Tried to use "+file+" as HDL file";
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+        			MessageUI.error(msg);
+        		}
+        		System.out.println(msg);
+        		return;
+        	}
+        	if (!VerilogUtils.isHhdlFile((IFile)file)){
+        		String msg="Tried to use non-HDL "+file+" as HDL file";
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+        			MessageUI.error(msg);
+        		}
+        		System.out.println(msg);
+        		return;
+        	}
+
+        }
     	fChosenVerilogFile=file;
     	IProject project=getSelectedProject();
     	IProject newProject= (file == null)? null: file.getProject();
