@@ -52,6 +52,8 @@
         <parameter 	id="file" default="%VivadoRemoteDir/%rawfile" visible="false" omit="" type="String" format="Dash"/>
 
 <!-- parser parameters - will have different values than the base tool -->
+        <parameter id="parsers_path"/>
+        <parameter id="parser_name"/>
         <parameter id="PatternErrors"/>
         <parameter id="PatternWarnings"/>
         <parameter id="PatternInfo"/>

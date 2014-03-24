@@ -87,6 +87,8 @@
         <parameter	id="verbose_opt" outid="verbose" label="verbose" tooltip= "Temporarily override message limits set with set_msg_config"
         			default="false" visible="true" omit="False" type="Boolean" format="DashName"/>
 <!-- parser parameters - will have different values than the base tool -->
+        <parameter id="parsers_path"/>
+        <parameter id="parser_name"/>
         <parameter id="PatternErrors"/>
         <parameter id="PatternWarnings"/>
         <parameter id="PatternInfo"/>

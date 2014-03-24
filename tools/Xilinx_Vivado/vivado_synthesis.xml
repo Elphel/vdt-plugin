@@ -173,6 +173,8 @@
 					type="String" format="CopyValue" visible="false"  />
         			
 <!-- parser parameters - will have different values than the base tool -->
+        <parameter id="parsers_path"/>
+        <parameter id="parser_name"/>
         <parameter id="PatternErrors"/>
         <parameter id="PatternWarnings"/>
         <parameter id="PatternInfo"/>
@@ -270,6 +272,8 @@
 			      <if ResetProject="true"> 
 			          "reset_project -quiet\n"
 			      </if>
+			      <!-- Increase number of warning lines, filter them separately. TODO: add configuration parameter -->
+                  "set_msg_config -severity WARNING -limit 1000\n"			      
 			      "file mkdir $outputDir\n"
 			      "read_verilog "
 			      "%FilteredSourceListPar\n"

@@ -77,10 +77,18 @@
                    default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
+
+        <parameter id="parsers_path" label="Parsers Path" tooltip= "parsers directory in plugins"
+        			default="%%ParsersPath" visible="true" omit="" type="String" format="CopyValue"/>
+        <parameter id="parser_name" label="Vivado parser name" tooltip= "Vivado output parser script path"
+        			default="parser_vivado.py" visible="true" omit="" type="String" format="CopyValue"/>
         			
 		<input>
 			<group name="Parser"
 			       weight="10">
+				"parsers_path"
+				"parser_name"
+				"---"
 				"ShowWarnings"
 				"ShowInfo"
 				"GrepEWI"
@@ -109,6 +117,7 @@
 				warnings= "PatternWarnings"
 				info=     "PatternInfo">
 				"-c"
+				"python -u %parsers_path%parser_name %%ToolName | "
      			"%GrepEWI"
      			"| %VivadoSedPaths"
      			<if NoBabyTalk="true">

@@ -51,6 +51,7 @@
 		description="Report timing summary"
 		log-dir="VivadoLogDir"
 		state-dir="VivadoLocalDir"
+		disable="DisableVivadoTimingSummary"
 		abstract="true"
 		inherits="VivadoToolPrototype"
 		priority="0.4"
@@ -59,6 +60,9 @@
 			<action label="Report timing summary" resource="" icon="clock_sum.png" />
 		</action-menu>
 		
+		<parameter id="DisableVivadoTimingSummary" label="Disable" tooltip="Disable timing report"
+		           default="false" type= "Boolean" format="None"/>
+
 		<parameter id="SkipTCL" label="Skip TCL commands" tooltip="Do not run pre-timing summary TCL commands"
 		           default="false" type= "Boolean" format="None"/>
 		
@@ -119,6 +123,8 @@
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
 
 <!-- parser parameters - will have different values than the base tool -->
+        <parameter id="parsers_path"/>
+        <parameter id="parser_name"/>
         <parameter id="PatternErrors"/>
         <parameter id="PatternWarnings"/>
         <parameter id="PatternInfo"/>
@@ -147,6 +153,7 @@
 			
 		<input>
 			<group name="General">
+			    "DisableVivadoTimingSummary"
 				"SkipTCL"
 			</group>
 			<group name="TCL commands">
