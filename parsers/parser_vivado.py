@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 ##/usr/bin/python -u
 import sys
+import re
+pattern=re.compile("\[[^[:]*:\d*]")
 tool="EXTERNAL_TOOL"
 if len(sys.argv)>1:
     tool=sys.argv[1]
@@ -9,19 +11,21 @@ def isProblem(string):
     if string.startswith("ERROR:") or string.startswith("WARNING:") or string.startswith("INFO:"):
         return True
     return False
-def hasLine(string):
-    if '" Line ' in string:
+#def hasLine(string):
+#    if '" Line ' in string:
+#        return True
+#    return False
+#Problem string has "[filename:line_number]"
+def hasFileVivado(string): # [*:*]
+    if pattern.findall(string):
         return True
     return False
+#add [tool_name:0000] if there is no {file:line_no] to generate Eclipse problem marker
 def addTool(string,tool):
-    if hasLine(string):
+    if hasFileVivado(string):
         return string
     else:
-        index=string.find(" - ")+3
-        return string[:index]+(" \"%s\" Line 0000:"%tool)+string[index:]
-#        return string[:len(string)-1]+(" \"%s\" Line 0000:"%tool)+"\n"
-
-  
+        return string[:len(string)-1]+"[%s:0000]"%tool+string[len(string)-1]
 pline=""
 for line in iter(sys.stdin.readline,''):
     if isProblem(pline):
@@ -34,3 +38,4 @@ for line in iter(sys.stdin.readline,''):
         pline = line
 if isProblem(pline):
     sys.stdout.write(addTool(pline,tool))
+
