@@ -32,6 +32,7 @@
             <paramtype kind="enum" base="String">
                 <item value="Windows" />                            
                 <item value="Linux" />                            
+                <item value="Mac OS X" />                            
             </paramtype>
         </typedef>
 

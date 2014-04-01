@@ -35,6 +35,7 @@ public class OSNameGenerator extends AbstractGenerator {
 
     private static final String OS_WINDOWS = "Windows";
     private static final String OS_LINUX = "Linux";
+    private static final String OS_MAC = "Mac OS X";
     
     public String getName() {
         return NAME;
@@ -51,6 +52,8 @@ public class OSNameGenerator extends AbstractGenerator {
             return new String[] { OS_WINDOWS };
         } else if (osName.indexOf("Linux") >= 0) {
             return new String[] { OS_LINUX };
+		} else if (osName.contains("OS X")) {
+        	return new String[] { OS_MAC };
         } else {
             MessageUI.error("Generator '" + getName() + "' failure: OS '" + osName + "' is unknown");
             return null;
