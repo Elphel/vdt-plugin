@@ -293,6 +293,8 @@ public class RunningBuilds {
 				Tool tool=ToolsCore.getTool(runConfig.getToolName());
 				if (tool.getState()==TOOL_STATE.KEPT_OPEN) {
 					tool.setState(TOOL_STATE.NEW);
+					tool. setOpenTool(null);
+					removeConfiguration(consoleName);
 					if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) System.out.print("Killed open console");
 					return true;
 				}
@@ -316,17 +318,26 @@ public class RunningBuilds {
 						System.out.println("Unfinished build: "+key);
 					}
 				}
-	    		tool.setMode(TOOL_MODE.STOP);
-				tool.toolFinished();
-				if (tool.getState()==TOOL_STATE.KEPT_OPEN) {
-					MessageUI.error("Termninal that starts by this tool ("+toolName+") is already open in console \""+consoleName+"\". You may close it manually.");
+				// got here with no actual console, but unfinishedBuilds had "Vivado ..." in state "New"
+				if (actualConsoleExists(consoleName)) {
+					tool.setMode(TOOL_MODE.STOP);
+					tool.toolFinished();
+					if (tool.getState()==TOOL_STATE.KEPT_OPEN) {
+						MessageUI.error("Termninal that starts by this tool ("+toolName+") is already open in console \""+consoleName+"\". You may close it manually.");
+						tool.toolFinished();
+						return true;
+					}
+					MessageUI.error("Something is wrong in: RunningBuilds#isAlreadyOpen as the console for the specified tool "+tool.getName()+" is already open");
+					tool.setState(TOOL_STATE.FAILURE);
 					tool.toolFinished();
 					return true;
+				} else {
+					String msg="BUG: there is unfinishedBuild for cosole="+consoleName+ "( tool="+toolName+
+							"), but no actual is console open.";
+					System.out.println(msg);
+					MessageUI.error(msg);
+					removeConfiguration(consoleName);
 				}
-	    		MessageUI.error("Something is wrong in RunningBuilds#isAlreadyOpen as the console for the specified tool "+tool.getName()+" is already open");
-	    		tool.setState(TOOL_STATE.FAILURE);
-				tool.toolFinished();
-	    		return true;
 			}
 		}
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
@@ -337,6 +348,27 @@ public class RunningBuilds {
 		}
 		return false;
 	}
+
+	
+	/**
+	 * Checks if there is actual console starting with this name (plus " (" actually exists
+	 * Used to recover if for some reasons unfinishedBuild for this console was not removed (a BUG)
+	 * @param consolePrefix console name without timestamp data
+	 * @return true if such console actually exusts
+	 */
+	public boolean actualConsoleExists(String consolePrefix){
+		IConsoleManager man = ConsolePlugin.getDefault().getConsoleManager(); // debugging
+		IConsole[] consoles=(IConsole[]) man.getConsoles();
+		String consoleStartsWith=consolePrefix+" ("; // space and start of date
+		for (int i=0;i<consoles.length;i++){
+			if (consoles[i].getName().startsWith(consoleStartsWith)){
+				return true;
+			}
+		}
+		return false;
+		
+	}
+	
 
 	
 } // class RunningBuilds

@@ -111,6 +111,7 @@ public class ToolSequence {
 				tool.setStateJustThis(TOOL_STATE.NEW);
 				tool.clearDependStamps();
 			}
+			tool.setOpenTool(null); // reset tool state (only needed for console tools) 
 		}
 		setToolsDirtyFlag(true); // update may be needed ?
 		toolFinished(null);
@@ -369,8 +370,26 @@ public class ToolSequence {
 			return false; // tools are not linked
 		}
 	}
-
-	public void launchNextTool(Tool tool) throws CoreException {
+	public void launchNextTool(final Tool tool) throws CoreException {
+		if (Thread.currentThread().getId()>1){
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
+				System.out.println(">>>>>>>> launching 2A: "+tool.getName()+" threadID="+Thread.currentThread().getId()+
+						" ("+Thread.currentThread().getName()+")");
+			Display.getDefault().asyncExec(new Runnable() { 
+				public void run() {
+		    		try {
+		    			do_launchNextTool(tool);		    			
+					} catch (CoreException e1) {
+                        MessageUI.error( "Error launchNextTool("+tool.getName()+" e="+ e1.getMessage());
+					}
+				}
+			});
+			
+		} else {
+			do_launchNextTool(tool);
+		}
+	}
+	public void do_launchNextTool(Tool tool) throws CoreException {
 //		if (!okToRun()) return;
 //		setStateProvides(); // just testing
 		tool.setDesignFlowView(designFlowView); // maybe will not be needed with ToolSequencing class
@@ -384,7 +403,8 @@ public class ToolSequence {
 				tool.setMode(twa.getMode()) ; //TOOL_MODE.RUN);
 				tool.setChoice(twa.getChoice());
 				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
-					System.out.println(">>>>>>>> launching: "+tool.getName()+" threadID="+Thread.currentThread().getId());
+					System.out.println(">>>>>>>> launching: "+tool.getName()+" threadID="+Thread.currentThread().getId()+
+							" ("+Thread.currentThread().getName()+")");
 				LaunchCore.launch( tool,
 						SelectedResourceManager.getDefault().getSelectedProject(),
 						twa.getFullPath(),
@@ -400,10 +420,30 @@ public class ToolSequence {
 		// apply designFlowView to the tool itself
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_THREAD_CONFICT))
 			System.out.println(">>>>>>>> launching 2: "+tool.getName()+" threadID="+Thread.currentThread().getId());
+		if (Thread.currentThread().getId()>1){
+			System.out.println("High thread number");
+		}
+		// here were problems with the thread id >1, waiting at breakpoint fixed
 		LaunchCore.launch( tool,
 				SelectedResourceManager.getDefault().getSelectedProject(),
 				SelectedResourceManager.getDefault().getChosenTarget(),
 				null); // run, not playback 
+/*
+ * Reused old VDTRunner()
+RunningBuilds#isAlreadyOpen(VivadoOpt), no match threadID=42
+Unfinished build: Vivado (Apr 1, 2014 11:23:25 AM MDT) tool Vivado
+Internal Error
+java.lang.NullPointerException
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.launchInBackground(DebugUIPlugin.java:1257)
+	at org.eclipse.debug.ui.DebugUITools.launch(DebugUITools.java:757)
+	at com.elphel.vdt.core.launching.LaunchCore.launch(LaunchCore.java:255)
+	at com.elphel.vdt.core.tools.params.ToolSequence.launchNextTool(ToolSequence.java:403)
+	at com.elphel.vdt.core.tools.params.ToolSequence.continueRunningTools(ToolSequence.java:356)
+	at com.elphel.vdt.core.tools.params.ToolSequence.doToolFinished(ToolSequence.java:306)
+	at com.elphel.vdt.core.tools.params.ToolSequence.toolFinished(ToolSequence.java:236)
+	at com.elphel.vdt.core.tools.params.Tool.toolFinished(Tool.java:455)
+
+ */
 	} // launchTool()
 
 	
@@ -525,6 +565,7 @@ public class ToolSequence {
 		for (Tool consoleTool:consoleTools){ // or maybe do it after other dependencies?
 			if (consoleTool.getState()!=TOOL_STATE.KEPT_OPEN) {
 				DEBUG_PRINT("Need to launch tool"+consoleTool.getName()+" to satisfy dependencies of tool "+tool.getName());
+				consoleTool.setOpenTool(null); // reset tool state 
 				return consoleTool; // start the console session
 			}
 		}

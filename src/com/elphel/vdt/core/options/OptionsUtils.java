@@ -57,6 +57,11 @@ class OptionsUtils {
             String str = (String)i.next();
             value += str + SEPARATOR;
         }
+        if (value.contains("ConstraintsFiles")){
+        	System.out.println("convertListToString() contains ConstraintsFiles");
+        	System.out.println("convertListToString() contains ConstraintsFiles");
+        	
+        }
         return value;
     }
     
@@ -70,6 +75,11 @@ class OptionsUtils {
         if ((value == null) || (value.length() == 0 )) {
             list = new ArrayList<String>();
         } else {
+            if (value.contains("ConstraintsFiles")){
+            	System.out.println("convertStringToList() contains ConstraintsFiles");
+            	System.out.println("convertStringToList() contains ConstraintsFiles");
+            }
+        	
             String items[] = value.split(SEPARATOR);
             list = new ArrayList<String>(items.length);
             for (String item : items) {

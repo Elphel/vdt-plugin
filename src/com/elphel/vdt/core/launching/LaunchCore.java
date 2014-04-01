@@ -253,6 +253,30 @@ public class LaunchCore {
             }
 //        	System.out.println("DebugUITools.launch() tool="+tool.getName()+" project="+project.getName()+" resource="+resource.toString()+" logBuildStamp="+logBuildStamp);
             DebugUITools.launch(launchConfig, ILaunchManager.RUN_MODE);
+/*
+java.lang.NullPointerException
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.launchInBackground(DebugUIPlugin.java:1257)
+	at org.eclipse.debug.ui.DebugUITools.launch(DebugUITools.java:757)
+	at com.elphel.vdt.core.launching.LaunchCore.launch(LaunchCore.java:255)
+	at com.elphel.vdt.core.tools.params.ToolSequence.launchNextTool(ToolSequence.java:403)
+	at com.elphel.vdt.core.tools.params.ToolSequence.continueRunningTools(ToolSequence.java:356)
+	at com.elphel.vdt.core.tools.params.ToolSequence.doToolFinished(ToolSequence.java:306)
+	at com.elphel.vdt.core.tools.params.ToolSequence.toolFinished(ToolSequence.java:236)
+	at com.elphel.vdt.core.tools.params.Tool.toolFinished(Tool.java:455)
+	at com.elphel.vdt.core.launching.VDTRunner.doResumeLaunch(VDTRunner.java:315)
+	at com.elphel.vdt.core.launching.VDTRunner.resumeLaunch(VDTRunner.java:123)
+	at com.elphel.vdt.core.launching.VDTConsoleRunner.finishConsolescript(VDTConsoleRunner.java:439)
+	at com.elphel.vdt.core.launching.VDTConsoleRunner$2.streamAppended(VDTConsoleRunner.java:268)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor$ContentNotifier.run(OutputStreamMonitor.java:258)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor$ContentNotifier.notifyAppend(OutputStreamMonitor.java:268)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor.fireStreamAppended(OutputStreamMonitor.java:117)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor.read(OutputStreamMonitor.java:157)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor.access$1(OutputStreamMonitor.java:135)
+	at org.eclipse.debug.internal.core.OutputStreamMonitor$1.run(OutputStreamMonitor.java:208)
+	at java.lang.Thread.run(Thread.java:724)
+            
+ */
         } catch (CoreException e) {
             IStatus status = e.getStatus();
             if (status.getSeverity() != IStatus.CANCEL)
