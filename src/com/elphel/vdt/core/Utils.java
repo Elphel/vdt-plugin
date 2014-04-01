@@ -26,7 +26,8 @@
  *******************************************************************************/
 package com.elphel.vdt.core;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -48,6 +49,8 @@ public class Utils {
 
     public static final int OS_WINDOWS = 1;
     public static final int OS_LINUX = 2;
+	public static final int OS_MAC = 3;
+
     private static int os;
 
     public static boolean isWindows() {
@@ -58,6 +61,10 @@ public class Utils {
         return os == OS_LINUX;
     }
     
+	public static boolean isMac() {
+		return os == OS_MAC;
+	}
+
 	/** Returns the pure file name without path and extensions. */
 	public static String getPureFileName(String fileName) {
         if ((fileName == null) || (fileName.length() == 0))
@@ -139,6 +146,8 @@ public class Utils {
             os = OS_WINDOWS;
         else if (osName.indexOf("Linux") >= 0)
             os = OS_LINUX;
+		else if (osName.contains("OS X"))
+			os = OS_MAC;
         else
             MessageUI.fatalError("Unknown os.name");
     }
