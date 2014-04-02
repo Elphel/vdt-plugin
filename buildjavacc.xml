@@ -16,8 +16,8 @@
 	<property name="dst" value="bin"/>
 
 	<property name="javacc_generated" value="_generated"/>
-	<property name="javacc_file_dir_verilog" value="net/sourceforge/veditor/parser/verilog"/>
-	<property name="javacc_file_dir_vhdl" value="net/sourceforge/veditor/parser/vhdl"/>
+	<property name="javacc_file_dir_verilog" value="com/elphel/vdt/veditor/parser/verilog"/>
+	<property name="javacc_file_dir_vhdl" value="com/elphel/vdt/veditor/parser/vhdl"/>
 	<property name="javacc_src_verilog" value="${src}/${javacc_file_dir_verilog}/VerilogParserCore.jj"/>
 	<property name="javacc_src_vhdl" value="${src}/${javacc_file_dir_vhdl}/vhdl.jj"/>
 	<property name="jtree_src_vhdl" value="${src}/${javacc_file_dir_vhdl}/vhdl.jjt"/>
