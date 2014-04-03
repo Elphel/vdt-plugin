@@ -292,6 +292,12 @@ public abstract class Context {
         	String toolErrors=  subsitutePattern(commandLinesBlock.getErrors());
         	String toolWarnings=subsitutePattern(commandLinesBlock.getWarnings());
         	String toolInfo=    subsitutePattern(commandLinesBlock.getInfo());
+        	
+        	String instCapture=   subsitutePattern(commandLinesBlock.getinstCapture());
+        	String instSeparator= subsitutePattern(commandLinesBlock.getInstSeparator());
+        	String instSuffix=    subsitutePattern(commandLinesBlock.getInstSuffix());
+        	
+        	
         	String stderr=commandLinesBlock.getStderr();
         	String stdout=commandLinesBlock.getStdout();
         	// the result will not be used as some other parameter value, so topProcessor is null in the next 2 lines /Andrey
@@ -343,6 +349,9 @@ public abstract class Context {
             					    toolErrors,
             					    toolWarnings,
             					    toolInfo,
+            						instCapture,
+            						instSeparator,
+            						instSuffix,
             					    prompt,
             					    interrupt,
             					    stderr,
@@ -389,6 +398,9 @@ public abstract class Context {
         					    toolErrors,
         					    toolWarnings,
         					    toolInfo,
+        						instCapture,
+        						instSeparator,
+        						instSuffix,
         					    prompt,
         					    interrupt,
         					    stderr,

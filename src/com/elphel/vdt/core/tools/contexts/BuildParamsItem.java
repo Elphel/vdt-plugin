@@ -42,6 +42,11 @@ public class BuildParamsItem implements Cloneable{
     private String toolErrors;   // Eclipse pattern for pattern recognizer
     private String toolWarnings; // Eclipse pattern for pattern recognizer
     private String toolInfo;     // Eclipse pattern for pattern recognizer
+
+    private String instCapture;  // RegEx to extract hierarchical name form tool output (may need extra "()" around)
+    private String instSeparator;// RegEx to split name segments (i.e. "\.")
+    private String instSuffix;   // RegEx to remove tool-generated name suffixes, like "_reg|_suffix2|suffix3" 
+    
     // for commands being sent to opened remote console:
     private String prompt;       // relevant for commands sent to remote console - double prompt means "done" (extra separator on input) 
     private String interrupt;    // control character(s) to interrupt console command 
@@ -66,6 +71,9 @@ public class BuildParamsItem implements Cloneable{
 		    String toolErrors,
 		    String toolWarnings,
 		    String toolInfo,
+		    String instCapture,
+		    String instSeparator,
+		    String instSuffix, 
 		    String prompt, 
 		    String interrupt, 
 		    String stderr,
@@ -83,6 +91,9 @@ public class BuildParamsItem implements Cloneable{
 		this.toolErrors=toolErrors;
 		this.toolWarnings=toolWarnings;
 		this.toolInfo=toolInfo;
+        this.instCapture=instCapture;
+        this.instSeparator=instSeparator;
+        this.instSuffix=instSuffix; 
 		this.prompt=prompt; 
 		this.interrupt=interrupt; 
 		this.stderr=stderr;
@@ -102,6 +113,9 @@ public class BuildParamsItem implements Cloneable{
 				item.toolErrors,
 				item.toolWarnings,
 				item.toolInfo,
+				item.instCapture,
+				item.instSeparator,
+				item.instSuffix, 
 				item.prompt,
 				item.interrupt,
 				item.stderr,
@@ -155,6 +169,9 @@ public class BuildParamsItem implements Cloneable{
 	public String getErrors()       { return toolErrors; }
 	public String getWarnings()     { return toolWarnings; }
 	public String getInfo()         { return toolInfo; }
+	public String getinstCapture()  { return instCapture; }
+	public String getInstSeparator(){ return instSeparator; }
+	public String getInstSuffix()   { return instSuffix; }
 	public String getPrompt()       { return prompt; }
 	public String getInterrupt()    { return interrupt; }
 	public String getStderr()       { return stderr; }

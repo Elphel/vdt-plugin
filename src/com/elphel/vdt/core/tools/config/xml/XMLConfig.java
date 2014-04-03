@@ -157,6 +157,11 @@ public class XMLConfig extends Config {
     static final String CONTEXT_LINEBLOCK_ERRORS_ATTR =   "errors";
     static final String CONTEXT_LINEBLOCK_WARNINGS_ATTR = "warnings";
     static final String CONTEXT_LINEBLOCK_INFO_ATTR =     "info";
+//Regular expressions for capturing hierarchical names    
+    static final String CONTEXT_LINEBLOCK_INSTANCE_CAPTURE =  "instance-capture";
+    static final String CONTEXT_LINEBLOCK_INSTANCE_SEPARATOR ="instance-separator";
+    static final String CONTEXT_LINEBLOCK_INSTANCE_SUFFIX =   "instance-suffix";
+    
     static final String CONTEXT_LINEBLOCK_PROMPT_ATTR =   "prompt";
     static final String CONTEXT_LINEBLOCK_INTERRUPT_ATTR ="interrupt";
     static final String CONTEXT_LINEBLOCK_STDERR_ATTR =   "stderr";

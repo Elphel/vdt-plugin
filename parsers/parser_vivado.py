@@ -5,8 +5,10 @@ import re
 pattern=re.compile("\[[^[:]*:\d*]")
 START_REF="(\\"
 END_REF=" )"
-PREFIX_REF="@{"
-SUFFIX_REF="}@"
+#PREFIX_REF="@{"
+#SUFFIX_REF="}@"
+PREFIX_REF=""
+SUFFIX_REF=""
 MODE_IMMED=0
 MODE_SINGLE=1
 MODE_ONCE=1

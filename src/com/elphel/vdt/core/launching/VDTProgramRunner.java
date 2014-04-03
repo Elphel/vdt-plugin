@@ -120,6 +120,10 @@ public class VDTProgramRunner {
         String patternErrors=  combinePatterns(buildParamsItem.getErrors(),  runConfig.getPatternErrors()) ;
         String patternWarnings=combinePatterns(buildParamsItem.getWarnings(),runConfig.getPatternWarnings()) ;
         String patternInfo=    combinePatterns(buildParamsItem.getInfo(),    runConfig.getPatternInfo()) ;
+
+        String instCapture=  buildParamsItem.getinstCapture();
+        String instSeparator=buildParamsItem.getInstSeparator();
+        String instSuffix=   buildParamsItem.getInstSuffix(); 
         
         IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
         subMonitor.beginTask(Txt.s("Launch.Message.Launching"), 2);
@@ -132,6 +136,9 @@ public class VDTProgramRunner {
         	System.out.println("patternErrors= \""+  patternErrors+"\"");
         	System.out.println("patternWarnings= \""+patternWarnings+"\"");
         	System.out.println("patternInfo= \""    +patternInfo+"\"");
+        	System.out.println("instCapture= \""    +instCapture+"\"");
+        	System.out.println("instSeparator= \""  +instSeparator+"\"");
+        	System.out.println("instSuffix= \""     +instSuffix+"\"");
         	System.out.println((isShell?"Shell":"Tool")+" to launch=\""+toolTolaunch+"\"");
         	if (arguments!=null){
         		for (int i=0;i<arguments.length;i++){
@@ -210,7 +217,10 @@ public class VDTProgramRunner {
         		process,
         		patternErrors,
         		patternWarnings,
-        		patternInfo
+        		patternInfo,
+        		instCapture,
+        		instSeparator,
+        		instSuffix
         		);
         
         subMonitor.worked(1);

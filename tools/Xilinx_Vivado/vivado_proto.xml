@@ -45,6 +45,22 @@
         <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
         			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
+        			
+        <parameter	id="InstanceCapture"   label="Instance capture"
+        			tooltip= "Regular expression to extract hierarchical instance name (outer '()' enclose the hierarchical name itself)"
+        			default="((([a-zA-Z_]([a-zA-Z_0-9]|\[[0-9:]+\])*)\.)+([a-zA-Z_]([a-zA-Z_0-9]|\[[0-9:]+\])*))"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="InstanceSeparator"   label="Instance separator"
+        			tooltip= "Regular expression to extract hierarchical name separator, for literal '.' it is '\.'"
+        			default="\."
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="InstanceSuffix"   label="Instance suffix"
+        			tooltip= "Regular expression to match/remove name suffixes automatically added by the tools"
+        			default="_reg"
+        			visible="true"  type="String" format="CopyValue"/>
+        			
+        			
+        			
         <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
         			default="true" visible="true" omit="false" type="Boolean" format="None"/>
         <parameter	id="Drc"       label="Drc"     tooltip= "Enable problems with [Drc to be reported"
@@ -124,13 +140,19 @@
 				"PatternErrors"
 				"PatternWarnings"
  				"PatternInfo"
+ 				"InstanceCapture"
+ 				"InstanceSeparator"
+ 				"InstanceSuffix"
 			</group>
 		</input>
 		<output>
 			<line name="parser_Vivado"
 				errors=   "PatternErrors"
 				warnings= "PatternWarnings"
-				info=     "PatternInfo">
+				info=     "PatternInfo"
+				instance-capture=  "InstanceCapture"
+ 				instance-separator="InstanceSeparator"
+ 				instance-suffix=   "InstanceSuffix">
 				"-c"
 				"python -u %parsers_path%parser_name %%ToolName | "
      			"%GrepEWI"

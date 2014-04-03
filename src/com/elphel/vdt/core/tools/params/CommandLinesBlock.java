@@ -52,6 +52,13 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     private String toolErrors;   // Eclipse pattern for pattern recognizer
     private String toolWarnings; // Eclipse pattern for pattern recognizer
     private String toolInfo;     // Eclipse pattern for pattern recognizer
+    
+    private String instCapture;  // RegEx to extract hierarchical name form tool output (may need extra "()" around)
+    private String instSeparator;// RegEx to split name segments (i.e. "\.")
+    private String instSuffix;   // RegEx to remove tool-generated name suffixes, like "_reg|_suffix2|suffix3" 
+
+    
+    
     // for commands being sent to opened remote console:
     private String prompt;       // relevant for commands sent to remote console - double prompt means "done" (extra separator on input) 
     private String stderr;       // name of the command to (command line block) to launch in a separate process/console
@@ -77,6 +84,9 @@ public class CommandLinesBlock extends UpdateableStringsContainer
                              String toolErrors,
                              String toolWarnings,
                              String toolInfo,
+                             String instCapture,  // RegEx to extract hierarchical name form tool output (may need extra "()" around)
+                             String instSeparator,// RegEx to split name segments (i.e. "\.")
+                             String instSuffix,   // RegEx to remove tool-generated name suffixes, like "_reg|_suffix2|suffix3" 
                              String prompt, 
                              String interrupt, 
                              String stderr,
@@ -101,6 +111,9 @@ public class CommandLinesBlock extends UpdateableStringsContainer
         this.toolErrors=toolErrors;
         this.toolWarnings=toolWarnings;
         this.toolInfo=toolInfo;
+        this.instCapture=instCapture;
+        this.instSeparator=instSeparator;
+        this.instSuffix=instSuffix; 
         this.prompt=prompt; 
         this.interrupt=interrupt;
         this.stderr=stderr;
@@ -147,6 +160,9 @@ public class CommandLinesBlock extends UpdateableStringsContainer
              block.toolErrors,
              block.toolWarnings,
              block.toolInfo,
+             block.instCapture,
+             block.instSeparator,
+             block.instSuffix, 
              block.prompt, 
              block.interrupt, 
              block.stderr,
@@ -217,12 +233,17 @@ public class CommandLinesBlock extends UpdateableStringsContainer
     public List<String> getLines() { return ConditionUtils.resolveConditionStrings(strings);  }
     // to distinguish between empty command block (program w/o any parameters) and conditionally removed one
     public boolean hadStrings() {return (strings!=null) && (strings.getEntries().size()>0); }
-    public String getName()        { return name; }    
-    public String getSeparator()   { return separator; }    
-	public String getMark()        { return mark; }
-	public String getErrors()      { return toolErrors; }
-	public String getWarnings()    { return toolWarnings; }
-	public String getInfo()        { return toolInfo; }
+    public String getName()         { return name; }    
+    public String getSeparator()    { return separator; }    
+	public String getMark()         { return mark; }
+	public String getErrors()       { return toolErrors; }
+	public String getWarnings()     { return toolWarnings; }
+	public String getInfo()         { return toolInfo; }
+
+	public String getinstCapture()  { return instCapture; }
+	public String getInstSeparator(){ return instSeparator; }
+	public String getInstSuffix()   { return instSuffix; }
+	
 	public String getPrompt()      { return prompt; }
 	public String getInterrupt()   { return interrupt; }
 	public String getStderr()      { return stderr; }
