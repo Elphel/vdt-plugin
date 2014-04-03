@@ -119,6 +119,14 @@
 		<parameter id="ResetProject" label="Reset project" tooltip="Reset project before loading source files"
 		           default="true"
 		           type= "Boolean" format="None"/>
+
+		<parameter id="SkipPreSynth" label="Skip pre-synthesis" tooltip="Do not run pre-synthesis TCL commands"
+		           default="false" type= "Boolean" format="None"/>
+                   
+		<parameter id="PreTCL" label="Pre-synthesis TCL commands" tooltip="TCL commands to run before synthesis"
+			type="Stringlist" format="ProgramSyntax" default="" omit=""
+			readonly="false" visible="true" />
+
 		           
   
 <!-- synth_design arguments -->  
@@ -205,7 +213,7 @@
         <parameter id="PreGrepW"/>
         <parameter id="PreGrepI"/>
         <parameter id="GrepEWI"/>
-        
+        <parameter id="MaxMsg"/>
 <!--  invisible/calculated parameters -->        			
         <parameter	id="AutosaveVivadoSynthesis" default="?%%ChosenActionIndex=0 ^ %SkipSnapshotSynth=false : true, false"
                     visible="false" type="Boolean" format="None"/>
@@ -219,6 +227,9 @@
 				"SkipSnapshotSynth"
  				"SnapshotSynth" <!--  same as in project -->
 				"ResetProject"
+				"---"
+				"SkipPreSynth"
+				"PreTCL"
 			</group>
 			<group name="Synthesis">
 		        "directive"
@@ -294,6 +305,16 @@
 	                     "%read_xdc\n"
 				      </if-not>
 			      </if>
+		          <!-- Run pre-synthesis TCL commands (if specified) -->
+			      <if SkipPreSynth="false">
+				      <if-not PreTCL="">
+				      		"%PreTCL\n"
+				      </if-not>
+				      <if PreTCL="">
+				      		"puts \"No pre-synthesis TCL commands specified\"\n"'
+				      </if>
+			      </if>
+			      "%MaxMsg\n"
 			      "synth_design"
 		          "%top"
 			      <if VivadoSynthActionIndex="0">

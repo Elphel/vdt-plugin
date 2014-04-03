@@ -91,6 +91,11 @@
         			default="%%ParsersPath" visible="true" omit="" type="String" format="CopyValue"/>
         <parameter id="parser_name" label="Vivado parser name" tooltip= "Vivado output parser script path"
         			default="parser_vivado.py" visible="true" omit="" type="String" format="CopyValue"/>
+
+        <parameter	id="MaxMsg"    outid="set_param messaging.defaultLimit"
+        		    label="Maximal messages" tooltip= "Maximum number of messages to output (per type)"
+        			default="100"  visible="true" omit="100" type="Cardinal" format="NameValue"/>
+
         			
 		<input>
 			<group name="Parser"
@@ -100,6 +105,7 @@
 				"---"
 				"ShowWarnings"
 				"ShowInfo"
+				"MaxMsg"
 				"GrepEWI"
 				"---"
 				"NoFileProblem"
