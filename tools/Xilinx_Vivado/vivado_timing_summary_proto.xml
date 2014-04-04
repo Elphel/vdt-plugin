@@ -137,6 +137,10 @@
         <parameter id="PatternErrors"/>
         <parameter id="PatternWarnings"/>
         <parameter id="PatternInfo"/>
+        <parameter id="InstanceCapture"/>
+        <parameter id="InstanceSeparator"/>
+        <parameter id="InstanceSuffix"/>
+        <parameter id="parser_mode"/>
         <parameter id="NoFileProblem"/>
         <parameter id="Drc"/>
         <parameter id="Vivado_Tcl"/>
@@ -149,12 +153,12 @@
         <parameter id="Timing"/>
         <parameter id="Pwropt"/>
         <parameter id="OtherProblems"/>
-        
         <parameter id="ShowWarnings"/>
         <parameter id="ShowInfo"/>
         <parameter id="PreGrepW"/>
         <parameter id="PreGrepI"/>
         <parameter id="GrepEWI"/>
+        <parameter id="MaxMsg"/>
         
 		<!-- Invisible (calculated) parameters -->
 		<!--  same value as %file, but will appear withou "-file" prefix --> 

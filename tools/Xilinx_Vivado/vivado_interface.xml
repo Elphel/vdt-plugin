@@ -30,15 +30,17 @@
 	<interface name="VivadoInterface" extends="FPGAPprojectInterface">
 		<syntax name="GrepFilterProblemSyntax"        format='| grep --line-buffered -v  "\[%%ParamName"' />
 		<syntax name="GrepFilterProblemOtherSyntax"   format='%(| grep --line-buffered -v  "\[%%ParamValue"%|\n%)' />
+	    <typedef name="ParserModeType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="0"   label="Tool output is parsed immediately"/>
+      			<item value="1"   label="Tool output is delayed by not more than 1 line when consolidating bits"/>
+      			<item value="2"   label="As '1', but do not show same bits again"/>
+      			<item value="3"   label="All tool output containg hierarchical output is delayed to the very end"/>
+      		</paramtype>
+    	</typedef>
 	
-<!-- <syntax name="QuietSyntax"     format=" -quiet" />
-		<syntax name="VerboseSyntax"   format=" -verbose" />
-		<syntax name="DirectiveSyntax" format=" -directive %%ParamValue" /> -->
-		
-	
-	<!-- 
-		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
-		<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" /> -->
+
+
 		
 	</interface>
 	<!--  Abstract tools to be inherited by instances used for various Vivado tools -->	

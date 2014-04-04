@@ -58,8 +58,9 @@
         			tooltip= "Regular expression to match/remove name suffixes automatically added by the tools"
         			default="_reg"
         			visible="true"  type="String" format="CopyValue"/>
-        			
-        			
+       
+        <parameter 	id="parser_mode" label="Parser mode" tooltip= "Parser mode (consolidation of bits of the same instance)"
+        			default="1" visible="true" omit="" type="ParserModeType" format="CopyValue"/>
         			
         <parameter	id="NoFileProblem"   label="No-file problems" tooltip= "Report problems that do not specify particular source file/line"
         			default="true" visible="true" omit="false" type="Boolean" format="None"/>
@@ -110,7 +111,7 @@
 
         <parameter	id="MaxMsg"    outid="set_param messaging.defaultLimit"
         		    label="Maximal messages" tooltip= "Maximum number of messages to output (per type)"
-        			default="100"  visible="true" omit="100" type="Cardinal" format="NameValue"/>
+        			default="1000"  visible="true" omit="100" type="Cardinal" format="NameValue"/>
 
         			
 		<input>
@@ -143,6 +144,7 @@
  				"InstanceCapture"
  				"InstanceSeparator"
  				"InstanceSuffix"
+ 				"parser_mode"
 			</group>
 		</input>
 		<output>
@@ -154,7 +156,7 @@
  				instance-separator="InstanceSeparator"
  				instance-suffix=   "InstanceSuffix">
 				"-c"
-				"python -u %parsers_path%parser_name %%ToolName | "
+				"python -u %parsers_path%parser_name %%ToolName %%TopModule %parser_mode| "
      			"%GrepEWI"
      			"| %VivadoSedPaths"
      			<if NoBabyTalk="true">

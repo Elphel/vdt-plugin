@@ -108,7 +108,8 @@ public class ComboComponent extends GeneralComponent {
             item = param.getDefaultValue(null).get(0); // null for topFormatProcessor
 
         ParamTypeEnum type = (ParamTypeEnum)param.getType();
-        int pos = type.getLabelIndex(item);
+//        int pos = type.getLabelIndex(item);
+        int pos = type.getValueIndex(item);
         String[] values = type.getValues();
         
         return values[pos];

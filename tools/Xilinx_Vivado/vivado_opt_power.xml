@@ -70,6 +70,10 @@
         <parameter id="PatternErrors"/>
         <parameter id="PatternWarnings"/>
         <parameter id="PatternInfo"/>
+        <parameter id="InstanceCapture"/>
+        <parameter id="InstanceSeparator"/>
+        <parameter id="InstanceSuffix"/>
+        <parameter id="parser_mode"/>
         <parameter id="NoFileProblem"/>
         <parameter id="Drc"/>
         <parameter id="Vivado_Tcl"/>
@@ -87,6 +91,7 @@
         <parameter id="PreGrepW"/>
         <parameter id="PreGrepI"/>
         <parameter id="GrepEWI"/>
+        <parameter id="MaxMsg"/>
 
 <!-- hidden (calculated) parameters -->
 <!--  not really used now, always "0" -->			

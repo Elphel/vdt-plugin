@@ -66,6 +66,10 @@
         <parameter id="PatternErrors"/>
         <parameter id="PatternWarnings"/>
         <parameter id="PatternInfo"/>
+        <parameter id="InstanceCapture"/>
+        <parameter id="InstanceSeparator"/>
+        <parameter id="InstanceSuffix"/>
+        <parameter id="parser_mode"/>
         <parameter id="NoFileProblem"/>
         <parameter id="Drc"/>
         <parameter id="Vivado_Tcl"/>
@@ -78,6 +82,7 @@
         <parameter id="Timing"/>
         <parameter id="Pwropt"/>
         <parameter id="OtherProblems"/>
+        <parameter id="MaxMsg"/>
         
 	</tool>
 </vdt-project>

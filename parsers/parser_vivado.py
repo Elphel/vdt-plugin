@@ -11,24 +11,26 @@ PREFIX_REF=""
 SUFFIX_REF=""
 MODE_IMMED=0
 MODE_SINGLE=1
-MODE_ONCE=1
+MODE_ONCE=2
 MODE_POSTPONE=3
 tool="EXTERNAL_TOOL"
 if len(sys.argv)>1:
     tool=sys.argv[1]
+try:
+    global_top_module=int(sys.argv[2])
+except:
+    global_top_module=""
     
 try:
-    global_mode=int(sys.argv[2])
+    global_mode=int(sys.argv[3])
 except:
     global_mode=MODE_POSTPONE # MODE_SINGLE
 
 global_db={}
 global_pRef=()        
 
-try:
-    global_top_module=int(sys.argv[3])
-except:
-    global_top_module="test_ps7"
+sys.stdout.write("Running: %s %s %s %s\n" % (sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3]))
+
 
 def isProblem(string):
     if string.startswith("ERROR:") or string.startswith("WARNING:") or string.startswith("INFO:"):
@@ -77,7 +79,7 @@ def addRef(pRef):
             global_db[pRef[0]]={}
         line_type=global_db[pRef[0]]
         if not pRef[1] in line_type:
-             line_type[pRef[1]]=set()
+            line_type[pRef[1]]=set()
         line_type[pRef[1]].add(pRef[2])
 def getRanges(pRef):
     global global_db
@@ -102,13 +104,12 @@ def printLineRef(pRef):
     global global_db
     global global_top_module
     if pRef:
-#        add(pRef) # just in case
         ranges=getRanges(pRef)
         if ranges:
-            line=pRef[0]
+#            line=pRef[0]
             ref=pRef[1];
             if global_top_module:
-               ref= global_top_module+"."+ref
+                ref= global_top_module+"."+ref
             for rng in ranges:
                 if (rng[0]<0):
                     sys.stdout.write(pRef[0]%(ref))
@@ -123,7 +124,7 @@ def printLineRef(pRef):
                         if not global_db[pRef[0]][pRef[1]]:
                             global_db[pRef[0]].pop(pRef[1])
                             if not global_db[pRef[0]]:
-                                 global_db.pop(pRef[0])
+                                global_db.pop(pRef[0])
                     except:
                         pass
                     
@@ -149,7 +150,7 @@ def addTool(string,tool):
             addRef(parseRef)
             if ((global_mode != MODE_POSTPONE) and global_pRef and 
              ((parseRef[0] != global_pRef[0]) or(parseRef[1] != global_pRef[1]))) :
-                 printLineRef(global_pRef)
+                printLineRef(global_pRef)
             global_pRef=parseRef
             return ""
         else:
@@ -157,6 +158,14 @@ def addTool(string,tool):
                 printLineRef(global_pRef)
                 global_pRef=None
             return string
+
+
+def debugSize():
+    l=0
+    for line in global_db:
+        for ref in global_db[line]:
+            l+=len(global_db[line][ref])
+    return l
 
 
 #### Start
@@ -167,6 +176,7 @@ for line in iter(sys.stdin.readline,''):
             pline = pline[:len(pline)-1]+line[2:]
         else:
             pline=addTool(pline,tool)
+#            sys.stdout.write("*"+str(debugSize())+pline)
             sys.stdout.write(pline)
             pline = line
     else:
@@ -178,5 +188,6 @@ if isProblem(pline):
 if global_mode == MODE_POSTPONE:
     for line in global_db:
         for ref in global_db[line]:
-             printLineRef((line,ref,0)) # will not add
+            printLineRef((line,ref,0)) # will not add
+#            printLineRef((line,ref,0)) # will not add
 

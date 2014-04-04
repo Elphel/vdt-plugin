@@ -231,6 +231,23 @@
 		<parameter	id="intstyle"/>      <!-- USED -->
         <parameter	id="command_files"/> <!-- USED -->
         <parameter	id="speed_grade"/>
+<!-- parser parameters - will have different values than the base tool -->
+        <parameter id="parsers_path"/>
+        <parameter id="parser_name"/>
+        <parameter id="PatternErrors"/>
+        <parameter id="PatternWarnings"/>
+        <parameter id="PatternInfo"/>
+        <parameter id="InstanceCapture"/>
+        <parameter id="InstanceSeparator"/>
+        <parameter id="InstanceSuffix"/>
+        <parameter id="parser_mode"/>
+        <parameter id="NoFileProblem"/>
+        <parameter id="OtherProblems"/>
+        <parameter id="ShowWarnings"/>
+        <parameter id="ShowInfo"/>
+        <parameter id="PreGrepW"/>
+        <parameter id="PreGrepI"/>
+        <parameter id="GrepEWI"/>
 
 <!-- calculated parameters -->        			
    	    <parameter   id="ISEMapActionIndex" default="%%ChosenActionIndex"

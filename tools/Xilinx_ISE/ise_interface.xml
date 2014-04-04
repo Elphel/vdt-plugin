@@ -40,6 +40,14 @@
     	<typedef name = "Cardinal_M1_100">
             <paramtype kind="number" lo="-1" hi="100" format="%d" />
         </typedef>
+	    <typedef name="ParserModeType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="0"   label="Tool output is parsed immediately"/>
+      			<item value="1"   label="Tool output is delayed by not more than 1 line when consolidating bits"/>
+      			<item value="2"   label="As '1', but do not show same bits again"/>
+      			<item value="3"   label="All tool output containg hierarchical output is delayed to the very end"/>
+      		</paramtype>
+    	</typedef>
     	
 	 <syntax name="DashNamePart"    format="-%%ParamName %part" />
 
