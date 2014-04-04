@@ -17,7 +17,7 @@ tool="EXTERNAL_TOOL"
 if len(sys.argv)>1:
     tool=sys.argv[1]
 try:
-    global_top_module=int(sys.argv[2])
+    global_top_module=sys.argv[2]
 except:
     global_top_module=""
     
