@@ -56,7 +56,7 @@
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="InstanceSuffix"   label="Instance suffix"
         			tooltip= "Regular expression to match/remove name suffixes automatically added by the tools"
-        			default="_reg"
+        			default="_reg|__parameterized[0-9]*"
         			visible="true"  type="String" format="CopyValue"/>
        
         <parameter 	id="parser_mode" label="Parser mode" tooltip= "Parser mode (consolidation of bits of the same instance)"

@@ -261,7 +261,7 @@
         <parameter	id="bufr" label="Maximum bufr number" tooltip= "Maximum number of regional clock buffers"
         			default="" visible="true" omit="" type="String" format="Dash"/>
         <parameter	id="bus_delimiter" label="Bus delimiters" tooltip= "Bus delimiter characters"
-        			default="&lt;&gt;" visible="true" omit="&lt;&gt;" type="BusDelimeterType" format="QuotedDash"/>
+        			default="&lt;&gt;" visible="true" omit="&lt;&gt;" type="BusDelimeterType" format="Dash"/>
         <parameter	id="case" label="Case" tooltip= "Treating the character case"
         			default="maintain" visible="true" omit="maintain" type="CaseType" format="Dash"/>
         <parameter	id="decoder_extract" label="Decoder extract" tooltip= "Automatic Decoder extract"
@@ -290,7 +290,7 @@
         <parameter	id="hdl_compilation_order" label="Compilation order" tooltip= "HDL compilation order"
         			default="auto" visible="true" omit="auto" type="AutoUserType" format="Dash"/>
         <parameter	id="hierarchy_separator" label="Hierarchy separator" tooltip= "Hierarchy separator character"
-        			default="/" visible="true" omit="/" type="HierarchySeparatorType" format="QuotedDash"/>
+        			default="/" visible="true" omit="/" type="HierarchySeparatorType" format="Dash"/>
         <parameter	id="ifmt" label="input format" tooltip= "Type of the HDL source files"
         			default="mixed" visible="true" omit="mixed" type="InputFormatType" format="Dash"/>
 <!-- Try if XST can accept multiple source files as '-ifn file1.v file2.v -other_option, if not - will generate/use command file -->        			

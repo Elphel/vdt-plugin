@@ -5,6 +5,11 @@ import re
 pattern=re.compile("\[[^[:]*:\d*]")
 START_REF="(\\"
 END_REF=" )"
+
+patternFlatRef=re.compile("\(([A-Za-z_$][A-Za-z_$0-9]*)\)")
+patternHierRef=re.compile("\(\\\(\S*) \)")
+patternModule= re.compile("module ([A-Za-z_$][A-Za-z_$0-9]*)\.")
+
 #PREFIX_REF="@{"
 #SUFFIX_REF="}@"
 PREFIX_REF=""
@@ -48,13 +53,20 @@ def hasFileVivado(string): # [*:*]
 
 def getLineSignalBit(string):
 #    sys.stdout.write(START_REF)
-    if START_REF in string:
-        start = string.find(START_REF)
-        end = string.find(END_REF,start)
-        if end <0:
-            return None
-        line=string[:start]+PREFIX_REF+"%s"+SUFFIX_REF+string[end+len(END_REF):]
-        ref=string[start+len(START_REF):end]
+    m=patternHierRef.search(string)
+    if not m:
+        m=patternFlatRef.search(string)
+#    if START_REF in string:
+    if m:    
+#        start = string.find(START_REF)
+#        end = string.find(END_REF,start)
+#        if end <0:
+#            return None
+#        line=string[:start]+PREFIX_REF+"%s"+SUFFIX_REF+string[end+len(END_REF):]
+#        ref=string[start+len(START_REF):end]
+        line=string[:m.start(0)]+PREFIX_REF+"%s"+SUFFIX_REF+string[m.end(0):]
+#        ref=string[m.start(1):m.end(1)]
+        ref=m.group(1)
         # replace "/" (used in Xilinx Vivado) with "." for Verilog
         ref=ref.replace("/",".")
         if "[" in ref:
@@ -103,13 +115,17 @@ def printLineRef(pRef):
     global global_mode
     global global_db
     global global_top_module
+    mod=global_top_module
+    m=patternModule.search(pRef[0])
+    if m:
+        mod=m.group(1)
     if pRef:
         ranges=getRanges(pRef)
         if ranges:
 #            line=pRef[0]
             ref=pRef[1];
-            if global_top_module:
-                ref= global_top_module+"."+ref
+            if mod:
+                ref= mod+"."+ref
             for rng in ranges:
                 if (rng[0]<0):
                     sys.stdout.write(pRef[0]%(ref))
