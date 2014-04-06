@@ -6,9 +6,11 @@ pattern=re.compile("\[[^[:]*:\d*]")
 START_REF="(\\"
 END_REF=" )"
 
-patternFlatRef=re.compile("\(([A-Za-z_$][A-Za-z_$0-9]*)\)")
-patternHierRef=re.compile("\(\\\(\S*) \)")
-patternModule= re.compile("module ([A-Za-z_$][A-Za-z_$0-9]*)\.")
+patternModule= re.compile("module ([A-Za-z_$][A-Za-z_$0-9:]*)\.")
+
+patternFlatRef=re.compile("(\(([A-Za-z_$][A-Za-z_$0-9]*)\))")
+patternHierRef=re.compile("(\(\\\(\S*) \))")
+patternPin=    re.compile("pin (([A-Za-z_$][A-Za-z_$0-9:]*:[A-Za-z_$][A-Za-z_$0-9:]*(\[\d*])* ))")
 
 #PREFIX_REF="@{"
 #SUFFIX_REF="}@"
@@ -52,22 +54,16 @@ def hasFileVivado(string): # [*:*]
     return False
 
 def getLineSignalBit(string):
-#    sys.stdout.write(START_REF)
+    pref=""
     m=patternHierRef.search(string)
     if not m:
         m=patternFlatRef.search(string)
-#    if START_REF in string:
+    if not m:
+        m=patternPin.search(string)
+        pref="#"
     if m:    
-#        start = string.find(START_REF)
-#        end = string.find(END_REF,start)
-#        if end <0:
-#            return None
-#        line=string[:start]+PREFIX_REF+"%s"+SUFFIX_REF+string[end+len(END_REF):]
-#        ref=string[start+len(START_REF):end]
-        line=string[:m.start(0)]+PREFIX_REF+"%s"+SUFFIX_REF+string[m.end(0):]
-#        ref=string[m.start(1):m.end(1)]
-        ref=m.group(1)
-        # replace "/" (used in Xilinx Vivado) with "." for Verilog
+        line=string[:m.start(1)]+PREFIX_REF+pref+"%s"+SUFFIX_REF+string[m.end(1):]
+        ref=m.group(2)
         ref=ref.replace("/",".")
         if "[" in ref:
             bitStart= ref.find("[")
@@ -124,7 +120,7 @@ def printLineRef(pRef):
         if ranges:
 #            line=pRef[0]
             ref=pRef[1];
-            if mod:
+            if mod and not ":" in ref:
                 ref= mod+"."+ref
             for rng in ranges:
                 if (rng[0]<0):

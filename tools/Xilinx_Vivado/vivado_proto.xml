@@ -48,7 +48,7 @@
         			
         <parameter	id="InstanceCapture"   label="Instance capture"
         			tooltip= "Regular expression to extract hierarchical instance name (outer '()' enclose the hierarchical name itself)"
-        			default="((([a-zA-Z_]([a-zA-Z_0-9]|\[[0-9:]+\])*)\.)+([a-zA-Z_]([a-zA-Z_0-9]|\[[0-9:]+\])*))"
+        			default="((([#a-zA-Z_$]([a-zA-Z_$0-9]|\[[0-9:]+\])*)(\.|:))+([a-zA-Z_$]([a-zA-Z_$0-9]|\[[0-9:]+\])*))"
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="InstanceSeparator"   label="Instance separator"
         			tooltip= "Regular expression to extract hierarchical name separator, for literal '.' it is '\.'"
