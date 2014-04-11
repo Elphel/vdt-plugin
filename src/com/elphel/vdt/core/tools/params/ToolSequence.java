@@ -39,7 +39,7 @@ import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.core.launching.LaunchCore;
 import com.elphel.vdt.core.launching.ToolLogFile;
-import com.elphel.vdt.core.launching.VDTLaunchUtil;
+//import com.elphel.vdt.core.launching.VDTLaunchUtil;
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_STATE;
