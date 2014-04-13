@@ -508,6 +508,9 @@
        file-extensions="v"/>
       <file-association 
        content-type="com.elphel.vdt.veditor.verilogSource"
+       file-extensions="vh"/>
+      <file-association 
+       content-type="com.elphel.vdt.veditor.verilogSource"
        file-extensions="tf"/>
     </extension>
     <extension point="org.eclipse.core.runtime.contentTypes"> 
