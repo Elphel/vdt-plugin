@@ -86,11 +86,11 @@
 			      dest="VivadoConsole"
 			      mark="``" 
 			      sep=""
-			      success="Finished parsing RTL primitives"
+			      success="All Rights Reserved."
 			      prompt="@@FINISH@@">
+			      <!--success="Finished parsing RTL primitives"-->
 				  "puts \"@@FINISH@@\"\n"
 			</line>
-				
 				
 			</if>
 			<if actionIndex="1">
