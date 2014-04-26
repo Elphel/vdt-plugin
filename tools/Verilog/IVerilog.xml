@@ -116,6 +116,14 @@
 			format="CopyValue" default="/usr/bin/iverilog" readonly="false"
 			visible="true" />
 
+		<parameter id="VVP_Exe" label="VVP_Exe" type="Filename"
+			format="CopyValue" default="/usr/bin/vvp" readonly="false"
+			visible="true" />
+
+		<parameter id="GtkWave_Exe" label="GtkWave_Exe" type="Filename"
+			format="CopyValue" default="/usr/bin/gtkwave" readonly="false"
+			visible="true" />
+
 		<parameter id="Param_TopModule" label="Top module extracted from the chosen target file"
 			type="String" format="TopModuleSyntax" default="%%TopModule"
 			readonly="true" visible="true" />
@@ -283,6 +291,8 @@
 				"Param_Exe"
 				"Param_Shell_Options"
 				"IVerilogOther"
+				"VVP_Exe"
+				"GtkWave_Exe"
 				"LogFile"
 				"OutFile"
 				"LxtDumpFile"
@@ -358,7 +368,7 @@
 					<!-- "time vvp -v" -->
 					"%Param_1"
 					"trap 'killall vvp; ' EXIT;"
-					"vvp -v"
+					"%VVP_Exe -v"
 					"%Param_2"
 					"%OutFileFull"
 					"-lxt2 "
@@ -373,7 +383,7 @@
 					<!-- "%Param_2" -->
 					"%Param_3"
 					<if ShowWaves="true">
-						"gtkwave"
+						"%GtkWave_Exe"
 						"%LxtDumpFileFull"
 						"%GTKWaveSavFile"
 						"&amp; "
