@@ -35,6 +35,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.params.Parameter;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 /**
  * Utilities for ExDT options.
@@ -75,11 +77,12 @@ class OptionsUtils {
         if ((value == null) || (value.length() == 0 )) {
             list = new ArrayList<String>();
         } else {
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
             if (value.contains("ConstraintsFiles")){
             	System.out.println("convertStringToList() contains ConstraintsFiles");
             	System.out.println("convertStringToList() contains ConstraintsFiles");
             }
-        	
+			}
             String items[] = value.split(SEPARATOR);
             list = new ArrayList<String>(items.length);
             for (String item : items) {
