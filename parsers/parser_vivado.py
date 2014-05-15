@@ -51,6 +51,7 @@ MODE_IMMED=0
 MODE_SINGLE=1
 MODE_ONCE=2
 MODE_POSTPONE=3
+REMOVE_DUPS=True
 tool="EXTERNAL_TOOL"
 if len(sys.argv)>1:
     tool=sys.argv[1]
@@ -71,7 +72,7 @@ sys.stdout.write("Running: %s %s %s %s\n" % (sys.argv[0],sys.argv[1],sys.argv[2]
 
 
 def isProblem(string):
-    if string.startswith("ERROR:") or string.startswith("WARNING:") or string.startswith("INFO:"):
+    if string.startswith("ERROR:") or string.startswith("CRITICAL WARNING:") or string.startswith("WARNING:") or string.startswith("INFO:"):
         return True
     return False
 #def hasLine(string):
@@ -213,6 +214,7 @@ def debugSize():
 
 #### Start
 pline=""
+dupLines=set()
 for line in iter(sys.stdin.readline,''):
     if isProblem(pline):
         if line.startswith("   ") :
@@ -220,12 +222,31 @@ for line in iter(sys.stdin.readline,''):
         else:
             pline=addTool(pline,tool)
 #            sys.stdout.write("*"+str(debugSize())+pline)
-            sys.stdout.write(pline)
+#            sys.stdout.write(pline)
+            if REMOVE_DUPS:
+                lineHash=hash(pline)
+                if not lineHash in dupLines:
+                    dupLines.add(lineHash)
+                    sys.stdout.write(pline)
+#                    sys.stdout.write(": "+str(lineHash)+" : " +count(dupLines))
+            else:
+                sys.stdout.write(pline)    
+            
+            
             pline = line
     else:
         pline = line
 if isProblem(pline):
-    sys.stdout.write(addTool(pline,tool))
+#    sys.stdout.write(addTool(pline,tool))
+    outLine=addTool(pline,tool)
+    if REMOVE_DUPS:
+        lineHash=hash(outLine)
+        if not lineHash in dupLines:
+            dupLines.add(lineHash)
+            sys.stdout.write(outline)
+#            sys.stdout.write(": "+str(lineHash)+" : " +count(dupLines))
+    else:
+        sys.stdout.write(outline)    
     addTool("",tool)
     
 if global_mode == MODE_POSTPONE:
