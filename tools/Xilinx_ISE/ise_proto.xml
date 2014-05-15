@@ -53,13 +53,13 @@
 <!-- parser parameters -->
 <!-- TODO: parser is temporarily copied from Vivado, change to ISE -->
         <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
-        			default='ERROR:(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
+        			default='(ERROR:)(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
-        			default='WARNING:(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
+        			default='(WARNING:)(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
-        			default='INFO:(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
+        			default='(INFO:)(\S*).*"(.*)"\s*Line\s*([0-9]+):\s*(\S.*)'
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="InstanceCapture"   label="Instance capture"
         			tooltip= "Regular expression to extract hierarchical instance name (outer '()' enclose the hierarchical name itself)"

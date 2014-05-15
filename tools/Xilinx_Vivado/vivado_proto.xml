@@ -37,13 +37,13 @@
 		>
 <!-- parser parameters -->
         <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
-        			default=".*ERROR: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			default=".*(ERROR:|CRITICAL WARNING:) (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
-        			default=".*WARNING: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			default=".*([^ ]WARNING:) (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
-        			default=".*INFO: (\[.*\].*)\[(.*):([0-9]+)\]"
+        			default=".*(INFO:) (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
         			
         <parameter	id="InstanceCapture"   label="Instance capture"
@@ -100,7 +100,7 @@
                    type="String" format="None"
                    default="?%ShowInfo=true: |INFO, "/>
         <parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
-                   default="grep --line-buffered -E 'ERROR%PreGrepW%PreGrepI'"
+                   default="grep --line-buffered -E 'ERROR|CRITICAL WARNING%PreGrepW%PreGrepI'"
                    type="String" format="CopyValue"
                    visible="true" readonly="true"/>
 
