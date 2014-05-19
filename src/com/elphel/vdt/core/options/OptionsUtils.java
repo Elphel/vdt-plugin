@@ -54,16 +54,17 @@ class OptionsUtils {
     
     public static String convertListToString(List<String> list) {
         String value = "";
-        Iterator i = list.iterator();
+        Iterator<String> i = list.iterator();
         while(i.hasNext()) {
             String str = (String)i.next();
             value += str + SEPARATOR;
         }
-        if (value.contains("ConstraintsFiles")){
-        	System.out.println("convertListToString() contains ConstraintsFiles");
-        	System.out.println("convertListToString() contains ConstraintsFiles");
-        	
-        }
+    	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+    		if (value.contains("ConstraintsFiles")){
+    			System.out.println("convertStringToList() contains ConstraintsFiles");
+    			System.out.println("convertStringToList() contains ConstraintsFiles");
+    		}
+    	}
         return value;
     }
     
@@ -77,12 +78,12 @@ class OptionsUtils {
         if ((value == null) || (value.length() == 0 )) {
             list = new ArrayList<String>();
         } else {
-			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
-            if (value.contains("ConstraintsFiles")){
-            	System.out.println("convertStringToList() contains ConstraintsFiles");
-            	System.out.println("convertStringToList() contains ConstraintsFiles");
-            }
-			}
+        	if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+        		if (value.contains("ConstraintsFiles")){
+        			System.out.println("convertStringToList() contains ConstraintsFiles");
+        			System.out.println("convertStringToList() contains ConstraintsFiles");
+        		}
+        	}
             String items[] = value.split(SEPARATOR);
             list = new ArrayList<String>(items.length);
             for (String item : items) {
