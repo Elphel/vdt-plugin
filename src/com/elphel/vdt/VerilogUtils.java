@@ -46,6 +46,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * Verilog file utilities.
@@ -251,7 +256,39 @@ public class VerilogUtils {
         } catch (CoreException e) {
         }
     } // getVerilogFiles()
+    /**
+     * Get the full text from one of the open editor windows or null (if there is none)
+     * @param file IFile for which we are looking for text
+     * @return full text of the current state of the file or null
+     */
+    public static String getEditorText(IFile file){
+    	try {
+    		IEditorPart editor=org.eclipse.ui.ide.ResourceUtil.findEditor(PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow().getActivePage(), file);
+    		if (editor instanceof TextEditor) {
+    			IDocument doc =	((ITextEditor)editor).getDocumentProvider().getDocument(editor.getEditorInput());
+    			return doc.get();
+    		}
+    	} catch (Exception e) {
+    		
+    	}
+    	return null;
+    }
+    
+/*
+ * 
+ IDocument doc =
+((ITextEditor)editor).getDocumentProvider().getDocument(editor.getEditorInput());
+String text = doc.get();
 
+IWorkbench wb = PlatformUI.getWorkbench();
+IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+IWorkbenchPage page = window.getActivePage();
+IEditorPart editor = page.getActiveEditor();
+IEditorInput input = editor.getEditorInput();
+IPath path = ((FileEditorInput)input).getPath();
+
+ */
 /*
     
     private static SourceFile getSourceFile(IFile file) {

@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
+import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.parser.HdlParserException;
 import com.elphel.vdt.veditor.parser.OutlineContainer;
@@ -63,10 +64,13 @@ public class VerilogParseMultipass {
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_EDITOR)) {
 			System.out.println ("parseMultiPass("+file+")");
 		}
+		String text= VerilogUtils.getEditorText(file);
 		try {
 			parser=null;
 			// VerilogParserReader handles verilog compiler directive
-			ParserReader reader = new VerilogParserReader(file.getContents(), file);
+			ParserReader reader = (text==null)?
+					(new VerilogParserReader(file.getContents(), file)): // use file
+					(new VerilogParserReader(text, file)); // use (possibly dirty) editor window
 			parser = (VerilogParser) ParserFactory.createVerilogParser(reader, project, file); // Creates file on outline database
 			//do we have parser
 			if(parser!= null){
@@ -95,7 +99,11 @@ public class VerilogParseMultipass {
 			Map<String,VariableStore> variableStoreMap=parser.getVariableStoreMap();
 			ParserReader reader;
 			try {
-				reader = new VerilogParserReader(file.getContents(), file);
+//				reader = new VerilogParserReader(file.getContents(), file);
+				reader = (text==null)?
+						(new VerilogParserReader(file.getContents(), file)): // use file
+						(new VerilogParserReader(text, file)); // use (possibly dirty) editor window
+				
 			} catch (CoreException e) {
 				System.out.println("BUG: parseMultiPass() could not create VerilogParserReader() e="+e);
 				return false;
@@ -118,10 +126,10 @@ public class VerilogParseMultipass {
 				if (rank>=0) maxPass= rank+2;
 			}
 			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_EDITOR)) {
-				System.out.println("getDepsResolved()=    "+parser.getDepsResolved());
-				System.out.println("getParsResolved()=    "+parser.getParsResolved());
-				System.out.println("getExpressionsValid()="+parser.getExpressionsValid());
-				System.out.println("getPortsValid()=      "+parser.getPortsValid());
+				System.out.println("parseMultiPass: getDepsResolved()=    "+parser.getDepsResolved()+" file:"+file);
+				System.out.println("parseMultiPass: getParsResolved()=    "+parser.getParsResolved()+" file:"+file);
+				System.out.println("parseMultiPass: getExpressionsValid()="+parser.getExpressionsValid()+" file:"+file);
+				System.out.println("parseMultiPass: getPortsValid()=      "+parser.getPortsValid()+" file:"+file);
 			}
 			if (parser.getExpressionsValid() || (numPass == maxPass)) {
 				parser.setParametricPorts();
