@@ -37,6 +37,7 @@
 		<syntax name="TopModuleSyntax" format="-s%%TopModule" />
 		<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
 		<syntax name="ModuleLibrarySyntax" format="%(-y%%ParamValue%| %)" />
+		<syntax name="IncludeDirSyntax" format="%(-I%%ParamValue%| %)" />
 		<syntax name="ExtraFilesSyntax" format="%(%%ParamValue%| %)" />
 		<syntax name="SwitchSyntax" format="-%%ParamName" />
 		<syntax name="GrepFindSyntax"
@@ -68,6 +69,12 @@
 			<paramtype kind="string" default="" textkind="dir"
 				maxlength="256" sensitivity="sensitive" />
 		</typedef>
+		<typedef name="IncludeDirType" list="true">
+			<paramtype kind="string" default="" textkind="dir"
+				maxlength="256" sensitivity="sensitive" />
+		</typedef>
+		
+		
 		<typedef name="SwitchType">
 			<paramtype kind="bool" formatTrue="-%%ParamName"
 				formatFalse="" />
@@ -87,7 +94,8 @@
 		shell="bash"
 		package="FPGA_package"
 		interface="IVerilog" errors="(.*):([0-9]+): [a-z_\- ]*error: (.*)"
-		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)" info="(.*):([0-9]+): [a-z_\-  ]*info: (.*)"> <!--do not actually exist -->
+		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)"
+		info="(.*):([0-9]+): [a-z_\-  ]*sorry: (.*)">
 
 		<extensions-list>
 			<extension mask="v" />
@@ -141,6 +149,10 @@
 		<parameter id="ExtraFiles" type="Filelist" format="ExtraFilesSyntax"
 			default="" label="Select additional files to include" readonly="false"
 			visible="true" />
+
+		<parameter id="IncludeDir" type="IncludeDirType"
+			format="IncludeDirSyntax" default="" label="Select include file directories"
+			omit="" readonly="false" visible="true" />
 
 
 		<parameter id="legacy_model" outid="legacy_model" type="D_ParamType"
@@ -272,6 +284,7 @@
 				"TopModulesOther"
 				"ExtraFiles"
 				"ModuleLibrary"
+				"IncludeDir"
 				"GTKWaveSavFile"
 				"IncludeParametersList"
 			</group>
@@ -338,6 +351,7 @@
 				"%Param_TopModule"
 				"%TopModulesOther"
 				"%ModuleLibrary"
+				"%IncludeDir"
 				"%legacy_model"
 				"%no_specify"
 				"%v"
