@@ -74,7 +74,7 @@ find vdt-veditor -name ".svn" -exec rm -rf {} \;
 
 patch -p0 < "$PATCH_FILE"
 
-# cp -v -r vdt-veditor/* "$INITIAL_DIRECTORY"
+cp -v -r vdt-veditor/* "$INITIAL_DIRECTORY"
 cd "$INITIAL_DIRECTORY"
 pwd
 exit 0
