@@ -1,52 +1,33 @@
-To import the VDT plugin project into the Eclipse workspace:
+VDT plugin uses modified VEditor plugin for Eclipse and because of the license incompatibility
+(Eclipse Public License v1.0 for VEditor and GNU General Public License v3.0+ for VDT plugin)
+it is not possible to distribute a pre-compiled version (.jar file), so the plugin code has to be
+merged (using provided script) and compiled/built as Eclipse plugin project. To do this you
+will need "Eclipse IDE for Java EE Developers", currently tested version is "Kepler".
 
-  1) Unzip the source archive file com.elphel.vdt_1.0.2-src.zip. 
-     The 'com.elphel.vdt' directory shall appear.
+VDT plugin may (and likely will) interfere with another VEditor installation, so if you have it
+in your system you will need to run a different copy of Eclipse environment that does not have
+VEditor.
 
-  2) Run Eclipse (the plugin was tested with Eclipse 3.2M4).
+  1) Clone VDT source code from the Git repository.
+  2) Run
+./install_and_patch_veditor.sh
+in the top directory of vdt-plugin. This will clone the original VEditor source tree
+as tmp/unmodified_veditor_1_2_0_clone, re-organize files to match VDT plugin code tree, apply
+patch and copy the produced files to VDT project locations (most under src/com/elphel/vdt/veditor
+and _generated), these files/directories are listed in .gitignore . When VEditor-related part
+of the VDT code will be changed (and so the vdt-veditor.patch) you will need to run
+./install_and_patch_veditor.sh again
+  3) Import the VDT plugin project into the Eclipse workspace.
 
-  3) From the main menu, select "File" -> "Import" -> "General" -> "Existing Project into Workspace".
-     Click the "Next" button.
-
-  4) Select 'Select root directory' option and specify a path to the 'com.elphel.vdt' directory.
-     The 'com.elphel.vdt' name in the "Projects" list shall appear.
-     
-  5) Ensure that it is selected and click the "Finish" button.
-
-
-To build and run the VDT plugin from the Eclipse workspace:
-
-  1) Import the VDT plugin project into the Eclipse workspace.
-
-  2) In the "Package Explorer" window, expand the 'com.elphel.vdt' folder and double-click
+  4) In the "Package Explorer" window, expand the 'com.elphel.vdt' folder and double-click
      the 'plugin.xml' file.
 
-  3) Select the "Overview" tab at the bottom of the appeared window.
+  5) Select the "Overview" tab at the bottom of the appeared window.
 
-  4) Under the "Testing" label, click the "Launch an Eclipe application" link.
+  6) Under the "Testing" label, click the "Launch an Eclipe application" link.
      A new instance of Eclipse shall be run.
 
-  5) Now play with the plugin. To open the main perspective, select from the main menu
+  7) Now play with the plugin. To open the main perspective, select from the main menu
      "Window" -> "Open Perspective" -> "Other" -> "Verilog".
-
-
-To create a binary distribution package of the plugin:
-
-  1) Import the VDT plugin project into the Eclipse workspace.
-
-  2) In the "Package Explorer" window, expand the 'com.elphel.vdt' folder and double-click
-     the 'plugin.xml' file.
-
-  3) Select the "Overview" tab at the bottom of the appeared window.
-
-  4) Under the "Exporting" label, click the "Export Wizard" link.
-     The "Export" dialog shall appear.
-
-  5) Ensure that 'com.elphel.vdt (1.0.2)' is selected in the plugins list.
-
-  6) In the "Export Destination" field, enter an archive file name, for example:
-     'D:\com.elphel.vdt_1.0.2.zip'.
-
-  7) Click the "Finish" button. A distribution package 'D:\com.elphel.vdt_1.0.2.zip' shall be created.
-     Now you can just unpack it in the Eclipse installation directory and the plugin will work.
-
+Having two Eclipse instances (one with VDT plugin source code and the other with Verilog development 
+allows to monitor and debug plugin errors. 
