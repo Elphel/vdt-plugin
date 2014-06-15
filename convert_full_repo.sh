@@ -48,6 +48,7 @@ git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch CONTR
 
 echo "Modifying gitignore to include removed files/directories"
 cat << EOF >> .gitignore
+
 src/com/elphel/vdt/veditor
 _generated
 src/com/elphel/vdt/core/launching/VDTErrorParser.java
