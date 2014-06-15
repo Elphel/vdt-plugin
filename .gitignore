@@ -1,5 +1,6 @@
 bin
-tmpsrc/com/elphel/vdt/veditor
+tmp
+src/com/elphel/vdt/veditor
 _generated
 src/com/elphel/vdt/core/launching/VDTErrorParser.java
 about_veditor.html
