@@ -141,10 +141,104 @@ Select the **Overview** tab at the bottom of the appeared window.
 
 Under the **Testing** label, click the **Launch an Eclipe application** link.
 
+You may also use "Run Eclipse Application" (green triangle) or "Debug Eclipse Application"
+(green bug) buttons on Eclipse toolbar to launch
 A new instance of Eclipse will open, this new Eclipse will have VDT plugin activated.
 You may minimize the original Eclipse window at this point (it can be used to monitor
 and fix plugin errors). Next you may create a new FPGA development project or import
 an existing one. We will use DDR3 memory interface project as an example.
+## Import and configuration of the sample project in VDT
+Sample project is a DDR3 memory interface for Xilinx Zynq SOC that does not depend on
+undocumented featuers and encrypted modules and can be simulated with the Free Software
+tools.
+### Import [eddr3](https://github.com/Elphel/eddr3) project
+```
+git clone git@github.com:Elphel/eddr3.git
+```
+From the Eclipse instance that runs VDT plugin (not the one with the VDT source code)
+use the same steps as for importing VDT plugin code (described above):  
+```
+File->Import->Git->Projects from Git->Existing local repository-> Select directory where you cloned eddr3
+Import Existing Projects (wizard selection)
+```
+Keep **eddr3** checked and press **Finish**
 
+### configuration of VDT for eddr3 project
+The cloned eddr3 project does not include Verilog modules of Xilinx primitives that are
+required even for simulation of the design. The required library (unisims) is included
+with the Xilinx Vivado software and the proprietary license does not allow to redistribute
+it. VDT provides means to copy this library from your Vivado installation to the project,
+So for the next step you need Xilinx software to be installed on the same or different
+computer running GNU/Linux.
+
+Open the top module (ddrc_test01.v) in the Editor (seems to be a bug that prevents
+configuration without that step)
+
+Open "Verilog/VHDL' perspective:
+```
+Window->Open Perspective->Other->Verilog/VHDL
+```
+It should look as shown on screenshots in [VDT-UserManualAddendum.pdf](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf?raw=true),
+with bottom-left panel showind "Design Menu" and FPGA-related tools
+
+#### Configure access to the server with Xilinx tools
+In the "Design menu" panel select "Package" icon, it will open a dialog with "Xilinx server setup"
+tab active.
+
+If you have Xilinx tools installed on the same computer as VDT, leave the default value for
+*Remote Host IP* (localhost) and *Remote user name* (your current login name).
+
+If you are using phisically different computer - change the both fields as needed.
+
+You may also change Vivado Release to the current one, installation directory (if different from the
+default) and configure same parameters for Xilinx ISE if you plan to use it (VDT supports both)
+
+Next you need to setup password-less access to the tools server based on the key pairs:
+
+Generate ssh key (if you do not have it already). Use command line tool or expand
+*Vivado Tools* in the design menu, right-click *Start remote Vivado session* and select
+*Generate public key* (or use a key icon on the Design menu toolbar)
+
+Send this key to the server - you may either use a command-line program *ssh-copy-id* or right-click
+*Start remote Vivado session* and select *Setup connection to user@server* (tools icon on the toolbar).
+This operation requires you to enter the password for the server and this requires a separate program
+to be installed, you can do this with
+```
+sudo apt-get install ssh-askpass
+```
+If ssh will not find *ssh-askpass* or a similar program, it will fail and Eclipse console output will
+output the resolution suggestions.
+
+With ssh-askpass a separate dialog window will open, likely the first question will be not the password
+itself, but your permission to connect to an unknown host, so just enter *yes* there.
+
+If everything was configured correctly you may try opening remote Vivado session (later it will
+happen automatically when needed):
+
+Right-click *Start remote Vivado session* and select *Launch Vivado* (door with entering green arrow icon
+on the toolbar)
+
+If everything is correct, in Eclipse console you will see
+``` 
+puts "@@FINISH@@"
+```
+and a few secods later server response ending with
+```
+@@FINISH@@
+```
+@@FINISH@@ sequence is just a marker to know server successfully finished the requested command
+*Start remote Vivado session* shold now show pulsating green dot to the right of it and the console is
+open for both VDT communication and you can also manually enter TCL commands as covered in Xilinx Vivado
+manuals.
+
+
+ 
+
+
+
+
+
+
+ 
 
   
