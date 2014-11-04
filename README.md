@@ -1,26 +1,30 @@
+VDT plugin
+==========
+
 Table of Contents                                                                                                                                                                                                                                                             
-=================
-`` ``                                                                                                                                                                                                                                                             
-    * [VDT plugin documentation](#vdt-plugin-documentation)
-    * [Instalation of VDT plugin and related programs](#instalation-of-vdt-plugin-and-related-programs)
-      * [Installation of Xilinx tools](#installation-of-xilinx-tools)
-      * [Programs and libraries installed from (K)ubuntu repositories](#programs-and-libraries-installed-from-kubuntu-repositories)
-        * [GtkWave (3.3.58-1)](#gtkwave-3358-1)
-        * [other programs needed for building Icarus Verilog](#other-programs-needed-for-building-icarus-verilog)
-        * [Java JDK](#java-jdk)
-      * [Icarus Verilog](#icarus-verilog)
-      * [JavaCC](#javacc)
-      * [Eclipse IDE](#eclipse-ide)
-      * [Installation of VDT plugin itself](#installation-of-vdt-plugin-itself)
-        * [Clone VDT plugin source code](#clone-vdt-plugin-source-code)
-      * [Run VEditor installation/patch script from within the top directory of vdt-plugin](#run-veditor-installationpatch-script-from-within-the-top-directory-of-vdt-plugin)
-        * [Import the VDT plugin project into the Eclipse workspace.](#import-the-vdt-plugin-project-into-the-eclipse-workspace)
-        * [Configuring JavaCC (optional)](#configuring-javacc-optional)
-        * [Building and running VDT](#building-and-running-vdt)
-    * [Import and configuration of the sample project in VDT](#import-and-configuration-of-the-sample-project-in-vdt)
-      * [Import <a href="https://github.com/Elphel/eddr3">eddr3</a> project](#import-eddr3-project)
-      * [configuration of VDT for eddr3 project](#configuration-of-vdt-for-eddr3-project)
-        * [Configure access to the server with Xilinx tools](#configure-access-to-the-server-with-xilinx-tools)
+-----------------
+                                                                                                                                                                                                                                                             
+  * [VDT plugin documentation](#vdt-plugin-documentation)
+  * [Instalation of VDT plugin and related programs](#instalation-of-vdt-plugin-and-related-programs)
+    * [Installation of Xilinx tools](#installation-of-xilinx-tools)
+    * [Programs and libraries installed from (K)ubuntu repositories](#programs-and-libraries-installed-from-kubuntu-repositories)
+      * [GtkWave (3.3.58-1)](#gtkwave-3358-1)
+      * [other programs needed for building Icarus Verilog](#other-programs-needed-for-building-icarus-verilog)
+      * [Java JDK](#java-jdk)
+    * [Icarus Verilog](#icarus-verilog)
+    * [JavaCC](#javacc)
+    * [Eclipse IDE](#eclipse-ide)
+    * [Installation of VDT plugin itself](#installation-of-vdt-plugin-itself)
+      * [Clone VDT plugin source code](#clone-vdt-plugin-source-code)
+    * [Run VEditor installation/patch script from within the top directory of vdt-plugin](#run-veditor-installationpatch-script-from-within-the-top-directory-of-vdt-plugin)
+      * [Import the VDT plugin project into the Eclipse workspace.](#import-the-vdt-plugin-project-into-the-eclipse-workspace)
+      * [Configuring JavaCC (optional)](#configuring-javacc-optional)
+      * [Building and running VDT](#building-and-running-vdt)
+  * [Import and configuration of the sample project in VDT](#import-and-configuration-of-the-sample-project-in-vdt)
+    * [Import eddr3 project](#import-eddr3-project)
+    * [configuration of VDT for eddr3 project](#configuration-of-vdt-for-eddr3-project)
+      * [Configure access to the server with Xilinx tools](#configure-access-to-the-server-with-xilinx-tools)
+      
 ##VDT plugin documentation
 Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
 ##Instalation of VDT plugin and related programs
@@ -174,7 +178,7 @@ an existing one. We will use DDR3 memory interface project as an example.
 Sample project is a DDR3 memory interface for Xilinx Zynq SOC that does not depend on
 undocumented featuers and encrypted modules and can be simulated with the Free Software
 tools.
-### Import [eddr3](https://github.com/Elphel/eddr3) project
+### Import eddr3 project
 ```
 git clone git@github.com:Elphel/eddr3.git
 ```
