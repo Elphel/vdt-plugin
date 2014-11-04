@@ -67,7 +67,7 @@ If you run ```make``` with unmodified code it will not be able to simulate the t
 assert in vvp is triggered by the Micron DDR3 memory model. I do not understand what exactly
 is wrong but just disabling these assert statements in
 [vpi_vthr_vector.cc](https://github.com/steveicarus/iverilog/blob/master/vvp/vpi_vthr_vector.cc)
-allow vvp to proceed without any visible problems:
+allows vvp to proceed without any visible problems:
 
 ```c++
 vpiHandle vpip_make_vthr_vector(unsigned base, unsigned wid, bool signed_flag)
@@ -190,7 +190,7 @@ Import Existing Projects (wizard selection)
 ```
 Keep **eddr3** checked and press **Finish**
 
-### configuration of VDT for eddr3 project
+### Configuration of VDT for eddr3 project
 The cloned eddr3 project does not include Verilog modules of Xilinx primitives that are
 required even for simulation of the design. The required library (unisims) is included
 with the Xilinx Vivado software and the proprietary license does not allow to redistribute
@@ -257,8 +257,29 @@ and a few secods later server response ending with
 *Start remote Vivado session* shold now show pulsating green dot to the right of it and the console is
 open for both VDT communication and you can also manually enter TCL commands as covered in Xilinx Vivado
 manuals.
+#### Copy unisims library to the local directory
+```
+Vivado Tools -> Vivado utilities -> Copy Vivado primitives library to the local project
+```
+#### Patch primitive(s) to work with Icarus Verilog
+Some of the Xilinx primitives can not be simulated correctly with Icarus Verilog, we will add more patches
+when we'll hit particular problems, for eddr3 only one file needs to be patched - OSERDESE1.v
 
+Run patch command from the unisms subdirectory of the eddr3 project :  
+```bash
+~/git/eddr3/unisims$ patch -p1 < ../unisims_patches/OSERDESE1.diff
+```
+#### Simulating eddr3 project with Icarus Verilog
+```
+Design Menu -> Verilog Development tools -> Icarus Verilog simulator
+```
+If everything will work correctly, Icarus will compile and simulate the design (some warnings in the beginning are not fixed yet). After that GTKWave will
+open the simulation results.
 
+In the case of problems you may get more verbose output in the console if you right-click on the 
+*Icarus Verilog Simulator*, select *Tool parameters*, open *Options tab*  and check *Show output
+with no errors/warnings*
+  
  
 
 
