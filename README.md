@@ -22,8 +22,11 @@ Table of Contents
       * [Building and running VDT](#building-and-running-vdt)
   * [Import and configuration of the sample project in VDT](#import-and-configuration-of-the-sample-project-in-vdt)
     * [Import eddr3 project](#import-eddr3-project)
-    * [configuration of VDT for eddr3 project](#configuration-of-vdt-for-eddr3-project)
+    * [Configuration of VDT for eddr3 project](#configuration-of-vdt-for-eddr3-project)
       * [Configure access to the server with Xilinx tools](#configure-access-to-the-server-with-xilinx-tools)
+      * [Copy unisims library to the local directory](#copy-unisims-library-to-the-local-directory)
+      * [Patch primitive(s) to work with Icarus Verilog](#patch-primitives-to-work-with-icarus-verilog)
+  * [Simulating eddr3 project with Icarus Verilog](#simulating-eddr3-project-with-icarus-verilog)
       
 ##VDT plugin documentation
 Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
@@ -269,7 +272,7 @@ Run patch command from the unisms subdirectory of the eddr3 project :
 ```bash
 ~/git/eddr3/unisims$ patch -p1 < ../unisims_patches/OSERDESE1.diff
 ```
-#### Simulating eddr3 project with Icarus Verilog
+## Simulating eddr3 project with Icarus Verilog
 ```
 Design Menu -> Verilog Development tools -> Icarus Verilog simulator
 ```
