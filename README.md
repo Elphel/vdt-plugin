@@ -1,6 +1,6 @@
 Table of Contents                                                                                                                                                                                                                                                             
-=================                                                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                              
+=================
+`` ``                                                                                                                                                                                                                                                             
     * [VDT plugin documentation](#vdt-plugin-documentation)
     * [Instalation of VDT plugin and related programs](#instalation-of-vdt-plugin-and-related-programs)
       * [Installation of Xilinx tools](#installation-of-xilinx-tools)
