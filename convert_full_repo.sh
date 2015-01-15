@@ -35,7 +35,7 @@ DERIVATIVE_REPO_NAME="vdt-plugin"
 cd ../
 cp -v -r "$INITIAL_DIRECTORY" "$DERIVATIVE_REPO_NAME"
 cd "$DERIVATIVE_REPO_NAME"
-echo "Removing git remote origin to preven accidental corruption of the original repository"
+echo "Removing git remote origin to prevent accidental corruption of the original repository"
 echo "You may set it late with \"git remote set-url origin <new-url>\""
 git remote set-url origin ""
 
