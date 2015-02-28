@@ -42,6 +42,7 @@ patternModule= re.compile("module ([A-Za-z_$][A-Za-z_$0-9:]*)\.")
 patternFlatRef=re.compile("(\(([A-Za-z_$][A-Za-z_$0-9]*)\))")
 patternHierRef=re.compile("(\(\\\(\S*) \))")
 patternPin=    re.compile("pin (([A-Za-z_$][A-Za-z_$0-9:]*:[A-Za-z_$][A-Za-z_$0-9:]*(\[\d*])* ))")
+patternHierPin=re.compile("pin ((\\\([A-Za-z_$][A-Za-z_$0-9]*(\[[0-9:]*\])*(\.[A-Za-z_$][A-Za-z_$0-9]*(\[[0-9:]*\])*)* :[A-Za-z_$][A-Za-z_$0-9]*)(\[\d*])* ))")
 
 #PREFIX_REF="@{"
 #SUFFIX_REF="}@"
@@ -69,8 +70,6 @@ global_db={}
 global_pRef=()        
 
 sys.stdout.write("Running: %s %s %s %s\n" % (sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3]))
-
-
 def isProblem(string):
     if string.startswith("ERROR:") or string.startswith("CRITICAL WARNING:") or string.startswith("WARNING:") or string.startswith("INFO:"):
         return True
@@ -93,12 +92,19 @@ def getLineSignalBit(string):
     if not m:
         m=patternPin.search(string)
         pref="#"
+    if not m:
+        m=patternHierPin.search(string)
+        pref="#"
+            
     if m:    
         line=string[:m.start(1)]+PREFIX_REF+pref+"%s"+SUFFIX_REF+string[m.end(1):]
         ref=m.group(2)
         ref=ref.replace("/",".")
+        ref=ref.replace("\\","") #for patternHierPin only
+        ref=ref.replace(" :",":") #for patternHierPin only
         if "[" in ref:
-            bitStart= ref.find("[")
+#            bitStart= ref.find("[") # aggregate first [index]
+            bitStart= ref.rfind("[") # aggregate last [index]
             bitEnd=ref.find("]",bitStart)
             try:
                 bit=int(ref[bitStart+1:bitEnd])
@@ -137,7 +143,21 @@ def getRanges(pRef):
             h=h+1
         ranges.append((l,h))
     return ranges        
-            
+def rangeToString(ranges): # ranges are sorted in increasing order
+    result=""
+    for (i,rng) in enumerate (reversed(ranges)):
+        if rng[0] >= 0:
+            if i>0:
+                result+=","
+            if (rng[0]<0):
+                return None
+            elif (rng[1]<=(rng[0]+1)):
+                result+="%d"%(rng[0])
+            else:
+                result+="%d:%d"%(rng[1]-1,rng[0])
+#    sys.stdout.write("**** %s ****"%result)
+    return result
+
 def printLineRef(pRef):
     global global_pRef
     global global_mode
@@ -154,13 +174,23 @@ def printLineRef(pRef):
             ref=pRef[1];
             if mod and not ":" in ref:
                 ref= mod+"."+ref
-            for rng in ranges:
-                if (rng[0]<0):
-                    sys.stdout.write(pRef[0]%(ref))
-                elif (rng[1]<=(rng[0]+1)):
-                    sys.stdout.write(pRef[0]%(ref%(rng[0])))
-                else:
-                    sys.stdout.write(pRef[0]%(ref%("%d:%d"%(rng[1]-1,rng[0]))))
+# Replaced with non-Verilog standard ranges, like [11:8,6,4:2,0]                
+#            for rng in ranges:
+#                if (rng[0]<0):
+#                    sys.stdout.write(pRef[0]%(ref))
+#                elif (rng[1]<=(rng[0]+1)):
+#                    sys.stdout.write(pRef[0]%(ref%(rng[0])))
+#                else:
+#                    sys.stdout.write(pRef[0]%(ref%("%d:%d"%(rng[1]-1,rng[0]))))
+
+            srng=rangeToString(ranges);
+            if (srng) :
+                sys.stdout.write(pRef[0]%(ref%(rangeToString(ranges)))) # ("**** [%s] ****"%srng)
+            else:
+                sys.stdout.write(pRef[0]%(ref))   
+#                sys.stdout.write(str(global_mode)+(pRef[0]%(ref)))   
+#           sys.stdout.write(">>>>"+str(ref)+"::::"+str(ranges)+"<<<<") 
+#           sys.stdout.write("global_mode: %d\n" % (global_mode))
             if (global_mode == MODE_ONCE):
                 for rng in ranges:
                     try:
@@ -243,10 +273,10 @@ if isProblem(pline):
         lineHash=hash(outLine)
         if not lineHash in dupLines:
             dupLines.add(lineHash)
-            sys.stdout.write(outline)
+            sys.stdout.write(outLine)
 #            sys.stdout.write(": "+str(lineHash)+" : " +count(dupLines))
     else:
-        sys.stdout.write(outline)    
+        sys.stdout.write(outLine)    
     addTool("",tool)
     
 if global_mode == MODE_POSTPONE:
@@ -255,3 +285,5 @@ if global_mode == MODE_POSTPONE:
             printLineRef((line,ref,0)) # will not add
 #            printLineRef((line,ref,0)) # will not add
 
+sys.stdout.write("Running: %s %s %s %s\n" % (sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3]))
+sys.stdout.write("global_mode: %d\n" % (global_mode))

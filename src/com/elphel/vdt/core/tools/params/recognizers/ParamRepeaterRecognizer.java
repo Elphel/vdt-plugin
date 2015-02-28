@@ -30,6 +30,8 @@ import com.elphel.vdt.core.tools.generators.AbstractGenerator;
 import com.elphel.vdt.core.tools.generators.FileListGenerator;
 import com.elphel.vdt.core.tools.generators.FilteredSourceListGenerator;
 import com.elphel.vdt.core.tools.generators.SourceListGenerator;
+import com.elphel.vdt.core.tools.generators.FilteredIncludesListGenerator;
+import com.elphel.vdt.core.tools.generators.IncludesListGenerator;
 import com.elphel.vdt.core.tools.generators.TopModulesNameGenerator;
 import com.elphel.vdt.core.tools.generators.ValueGenerator;
 import com.elphel.vdt.core.tools.params.FormatProcessor;
@@ -72,6 +74,10 @@ public class ParamRepeaterRecognizer extends RepeaterRecognizer {
             return new FilteredSourceListGenerator(repPrefix, repSuffix, separator, topProcessor);
         else if(genName.equals(SourceListGenerator.NAME))
             return new SourceListGenerator(repPrefix, repSuffix, separator);
+        if(genName.equals(FilteredIncludesListGenerator.NAME))
+            return new FilteredIncludesListGenerator(repPrefix, repSuffix, separator, topProcessor);
+        else if(genName.equals(IncludesListGenerator.NAME))
+            return new IncludesListGenerator(repPrefix, repSuffix, separator);
         else if(genName.equals(FileListGenerator.NAME))
             return new FileListGenerator(repPrefix, repSuffix, separator);
         else if(genName.equals(TopModulesNameGenerator.NAME))
