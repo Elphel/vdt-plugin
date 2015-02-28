@@ -28,8 +28,8 @@
  -->
 <vdt-project>
 	<interface name="ISEInterface" extends="FPGAPprojectInterface">
-		<syntax name="GrepFilterProblemSyntax"        format='| grep --line-buffered -v  "\[%%ParamName"' />
-		<syntax name="GrepFilterProblemOtherSyntax"   format='%(| grep --line-buffered -v  "\[%%ParamValue"%|\n%)' />
+		<syntax name="GrepFilterProblemSyntax"        format='| grep --line-buffered -v  "%%ParamName"' />
+		<syntax name="GrepFilterProblemOtherSyntax"   format='%(| grep --line-buffered -v  "%%ParamValue"%|\n%)' />
 		<typedef name="intstyleType">
       		<paramtype kind= "enum" base="String">
       			<item value="ise"    label="Indicates the program is being run as part of an integrated design environment"/>

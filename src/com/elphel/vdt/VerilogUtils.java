@@ -188,7 +188,23 @@ public class VerilogUtils {
     public static IFile[] getDependencies(IFile topFile) {
     	return getDependencies(new IFile [] {topFile});
     }    
-/* for now all modules, including library ones */
+
+    /**
+     * Returns included files dependency closure for given verilog file.
+     */
+
+    public static IFile[] getIncludedDependencies(IFile [] topFiles) {
+    	if (topFiles==null) return null;
+        IProject project = topFiles[0].getProject();
+        OutlineDatabase outlineDatabase=getVeditorOutlineDatabase(project);
+    	return outlineDatabase.getCLosureIncludes(topFiles);
+    } // getDependencies()
+    
+    public static IFile[] getIncludedDependencies(IFile topFile) {
+    	return getIncludedDependencies(new IFile [] {topFile});
+    }    
+    
+    /* for now all modules, including library ones */
     
     public static OutlineElement[] getModuleListVeditor(IProject project) {
    		OutlineDatabase database=getVeditorOutlineDatabase(project);

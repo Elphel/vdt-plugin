@@ -240,6 +240,7 @@
 <!--  TODO: find out, how to reset state and make a tool to depend on-->		
 		<depends-list>
 			<depends files="FilteredSourceListPar"/>
+			<depends files="FilteredIncludesListPar"/>
 			<depends files="constraints"/>
 		</depends-list>
 		<parameter	id="clean_start" label="Clean start" tooltip= "Delete all files on remote before running XST"
@@ -496,6 +497,8 @@
 <!-- calculated parameters -->        			
 	    <parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
 			 format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true" />
+	    <parameter id="FilteredIncludesListPar" type="Filelist" label="FilteredIncludesListPar"
+			 format="ParamListSyntax" default="%%FilteredIncludesList" readonly="false" visible="true" />
    	    <parameter   id="ISESynthActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
@@ -532,6 +535,7 @@
 			    "target_device" <!-- outid="p" --> 
 		        "---"
 		        "FilteredSourceListPar"
+			    "FilteredIncludesListPar"
 		        "RawOutFile"
 		        "xst_prj"
 		        "---"
@@ -665,6 +669,7 @@
 				"' ;"
 				"rsync -avrR -e ssh"
 				"%FilteredSourceListPar"
+				"%FilteredIncludesListPar"
 			    <if ISESynthActionIndex="0">
 					"%ConstraintsFiles"
 				</if>

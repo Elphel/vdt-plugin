@@ -106,6 +106,7 @@
 <!--  TODO: find out, how to reset state and make a tool to depend on-->		
 		<depends-list>
 			<depends files="FilteredSourceListPar"/>
+			<depends files="FilteredIncludesListPar"/>			
 			<depends files="ConstraintsFiles"/>
 		</depends-list>
  		
@@ -186,6 +187,8 @@
 			 format="read_xdc_syntax" default="%ConstraintsFiles" visible="false" />
 	    <parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
 			 format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true" />
+	    <parameter id="FilteredIncludesListPar" type="Filelist" label="FilteredIncludesListPar"
+			 format="ParamListSyntax" default="%%FilteredIncludesList" readonly="false" visible="true" />
    	    <parameter   id="VivadoSynthActionIndex" default="%%ChosenActionIndex"
 					type="String" format="CopyValue" visible="false"  />
         			
@@ -226,6 +229,7 @@
 		<input>
 			<group name="General">
 			    "FilteredSourceListPar"
+			    "FilteredIncludesListPar"
 				"ConstraintsFiles"
 				"SkipSnapshotSynth"
  				"SnapshotSynth" <!--  same as in project -->
@@ -275,6 +279,7 @@
 				"' ;"
 				"rsync -avrR -e ssh"
 				"%FilteredSourceListPar"
+				"%FilteredIncludesListPar"
 			    <if VivadoSynthActionIndex="0">
 					"%ConstraintsFiles"
 				</if>
@@ -289,14 +294,14 @@
 			      success="synth_design completed successfully"
 			      log=""
 			      stdout="parser_Vivado">
-			      <!-- synth_design completed successfully -->
+			      <!-- synth_design completed successfully reset_project -quiet (quiet - will not complain if nothing opened)-->
 			      "cd ~/%VivadoProjectRoot\n"
 			      "set outputDir ~/%VivadoProjectRoot/%VivadoRemoteDir\n"
 			      <if ResetProject="true"> 
-			          "reset_project -quiet\n"
+			          "close_project -quiet\n"
 			      </if>
 			      <!-- Increase number of warning lines, filter them separately. TODO: add configuration parameter -->
-                  "set_msg_config -severity WARNING -limit 1000\n"			      
+                  "set_msg_config -severity WARNING -limit 10000\n"			      
 			      "file mkdir $outputDir\n"
 			      "read_verilog "
 			      "%FilteredSourceListPar\n"

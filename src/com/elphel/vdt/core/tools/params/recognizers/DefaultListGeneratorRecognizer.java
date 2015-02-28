@@ -29,7 +29,7 @@ package com.elphel.vdt.core.tools.params.recognizers;
 import com.elphel.vdt.core.Utils;
 import com.elphel.vdt.core.tools.generators.*;
 import com.elphel.vdt.core.tools.params.FormatProcessor;
-import com.elphel.vdt.core.tools.params.Tool;
+//import com.elphel.vdt.core.tools.params.Tool;
 
 
 public class DefaultListGeneratorRecognizer implements Recognizer {
@@ -42,6 +42,8 @@ public class DefaultListGeneratorRecognizer implements Recognizer {
     	AbstractGenerator[] generators=  new AbstractGenerator[]{
     			new SourceListGenerator("","",null),
     			new FilteredSourceListGenerator("","",null, topProcessor),
+    			new IncludesListGenerator("","",null),
+    			new FilteredIncludesListGenerator("","",null, topProcessor),
     			new FileListGenerator("","",null)
     	};
     	this.generators=generators;

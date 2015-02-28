@@ -273,11 +273,19 @@ public class VDTLaunchUtil {
 //                  System.out.println("  "+dependencies[i].getName());
             }    
         }
+        dependencies = VerilogUtils.getIncludedDependencies(file);
+        if(dependencies != null) {
+            for (int i=0; i < dependencies.length; i++) {
+                    dependenciesLocation.add(dependencies[i].getLocation().toOSString());
+//                  System.out.println("  "+dependencies[i].getName());
+            }    
+        }
+        
         return dependenciesLocation;
         
     }
     
-
+//
     /** 
      * Returns an array of environment variables to be used when
      * launching the given configuration or <code>null</code> if unspecified.
