@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ /*******************************************************************************
+ * Copyright (c) 2015 Elphel, Inc.
+ * This file is a part of VDT plug-in.
+ * VDT plug-in is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * VDT plug-in is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  Additional permission under GNU GPL version 3 section 7:
+ * If you modify this Program, or any covered work, by linking or combining it
+ * with Eclipse or Eclipse plugins (or a modified version of those libraries),
+ * containing parts covered by the terms of EPL/CPL, the licensors of this
+ * Program grant you additional permission to convey the resulting work.
+ * {Corresponding Source for a non-source form of such a combination shall
+ * include the source code for the parts of Eclipse or Eclipse plugins used
+ * as well as that of the covered work.}
+ *******************************************************************************/
+ -->
+<vdt-project>
+	<interface name="QuartusInterface" extends="FPGAPprojectInterface">
+		<syntax name="GrepFilterProblemSyntax"        format='| grep --line-buffered -v  "\[%%ParamName"' />
+		<syntax name="GrepFilterProblemOtherSyntax"   format='%(| grep --line-buffered -v  "\[%%ParamValue"%|\n%)' />
+	    <typedef name="ParserModeType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="0"   label="Tool output is parsed immediately"/>
+      			<item value="1"   label="Tool output is delayed by not more than 1 line when consolidating bits"/>
+      			<item value="2"   label="As '1', but do not show same bits again"/>
+      			<item value="3"   label="All tool output containg hierarchical output is delayed to the very end"/>
+      		</paramtype>
+    	</typedef>
+	</interface>
+	<!--  Abstract tools to be inherited by instances used for various Quartus tools -->	
+	<!--  Restore tool for Quartus -->
+	<tool name="RestoreQuartus" label="Restore state after Quartus tool"
+	    project="FPGA_project"
+		interface="QuartusInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		abstract="true">
+		<output>
+			<line name="quartus_pre_restore">
+				"-c"
+				<!-- Create project directory on remote server if it did not exist -->
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%QuartusProjectRoot"
+				"' ;"
+				<!-- Copy snapshot generated after synthesis from local to remote -->
+				"rsync -avr -e ssh"
+				<!--  from: -->
+				"%QuartusLocalDir/%%StateFile"
+				<!-- to: -->
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot"
+				";"
+			</line>
+			
+			<line name="quartus_restore"
+			      dest="QuartusConsole"
+			      mark="``" 
+			      sep=" "
+			      failure="ERROR"
+			      prompt="@@FINISH@@"
+			      log="">
+			      "cd ~/%QuartusProjectRoot\n"
+			      "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir\n"			      
+			      "file mkdir $outputDir\n"
+		          "open_checkpoint %QuartusRemoteDir/%%StateFile\n"
+		          "puts \"@@FINISH@@\"\n"
+		    </line>
+		</output>
+	</tool>
+
+	<!--  Save tool for Quartus tool -->
+	<tool name="SaveQuartus"
+	    label="SaveQuartus"
+	    project="FPGA_project"
+		interface="QuartusInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		abstract="true">
+		<output>
+			<line name="quartus_save"
+			      dest="QuartusConsole"
+			      mark="``" 
+			      sep=" "
+			      prompt="@@FINISH@@"
+			      failure="ERROR"
+			      log="">
+			      "cd ~/%QuartusProjectRoot\n"
+			      "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir\n"			      
+			      "file mkdir $outputDir\n"
+	      		  "write_checkpoint -force %QuartusRemoteDir/%%StateFile\n"
+	      		  "puts \"@@FINISH@@\"\n"
+			</line>
+			<line name="quartus_copy_after_save">
+					"-c"
+					"mkdir -p %QuartusLocalDir ;"
+					"rsync -avr -e ssh"
+					"%RemoteUser@%RemoteHost:%QuartusProjectRoot/%QuartusRemoteDir/%%StateFile"
+					"%%StateDir/"
+			</line>
+		</output>		
+	</tool>
+	
+</vdt-project>
