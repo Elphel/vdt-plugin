@@ -46,7 +46,7 @@
 		
 		<input>
 			<group name="General">
- 				"RemoteCommand"
+ 				"QuartusRemoteCommand"
 			</group>
 			<group name="Shell">
 		 		"command"
