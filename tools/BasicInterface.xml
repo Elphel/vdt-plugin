@@ -123,6 +123,8 @@
 	<syntax name="DashName"            format=" -%%ParamName" />
 	<syntax name="QuotedDash"          format=' -%%ParamName "%%ParamValue"' />
 	<syntax name="NameValue"           format=" %%ParamName %%ParamValue" />
+	<syntax name="DoubleDash"			format="--%%ParamName=%%ParamValue" />
+	<syntax name="DoubleDashName"		format="--%%ParamName" />
 <!--
 Does not work according to 2.2.1. "Inside text-repetitor, one and only one pattern-generator is mandatory".
 	

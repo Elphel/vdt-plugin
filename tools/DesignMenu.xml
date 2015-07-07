@@ -185,6 +185,10 @@
 				label="Start remote Quartus session"
 				icon="door_in.png"
 				call="Quartus"/>
+			<menuitem name="QuartusSynthesis"
+				label="Synthesize design"
+				icon="Retort.png"
+				call="QuartusSynthesis"/>
 		</menu>
                           
                           

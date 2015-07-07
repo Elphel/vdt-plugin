@@ -83,7 +83,7 @@
 					dest="QuartusConsole"
 					mark="``" 
 					sep=""
-					success="All Rights Reserved."
+					success="All rights reserved."
 					prompt="@@FINISH@@">
 					<!--success="Finished parsing RTL primitives"-->
 					"puts \"@@FINISH@@\"\n"
