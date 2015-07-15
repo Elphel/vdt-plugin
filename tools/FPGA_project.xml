@@ -463,7 +463,12 @@
 
 		<parameter id="QuartusSnapshotSynth"
 			label="Synthesis snapshot" tooltip="Name of Quartus snapshot archive"
-			default="%%ProjectName.qar"
+			default="%%ProjectName-synth.qar"
+			type="String" format="CopyValue" />
+
+		<parameter id="QuartusSnapshotPlace"
+			label="Place and route snapshot" tooltip="Name of Quartus snapshot archive"
+			default="%%ProjectName-par.qar"
 			type="String" format="CopyValue" />
 
 		<input>

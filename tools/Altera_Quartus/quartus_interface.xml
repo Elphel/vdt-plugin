@@ -70,15 +70,16 @@
 			<line name="quartus_restore"
 			      dest="QuartusConsole"
 			      mark="``" 
-			      sep=" "
+			      sep="\n"
 			      failure="ERROR"
 			      prompt="@@FINISH@@"
 			      log="">
-			      "cd ~/%QuartusProjectRoot\n"
-			      "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir\n"			      
-			      "file mkdir $outputDir\n"
-		          "open_checkpoint %QuartusRemoteDir/%%StateFile\n"
-		          "puts \"@@FINISH@@\"\n"
+				  "puts \"\Restoring snapshot %%StateFile""
+			      "cd ~/%QuartusProjectRoot"
+			      "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir"
+			      "file mkdir $outputDir"
+		          "project_restore %QuartusRemoteDir/%%StateFile"
+		          "puts \"@@FINISH@@\""
 		    </line>
 		</output>
 	</tool>
@@ -95,15 +96,16 @@
 			<line name="quartus_save"
 			      dest="QuartusConsole"
 			      mark="``" 
-			      sep=" "
+			      sep="\n"
 			      prompt="@@FINISH@@"
 			      failure="ERROR"
 			      log="">
-			      "cd ~/%QuartusProjectRoot\n"
-			      "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir\n"			      
-			      "file mkdir $outputDir\n"
-	      		  "write_checkpoint -force %QuartusRemoteDir/%%StateFile\n"
-	      		  "puts \"@@FINISH@@\"\n"
+				  "puts \"Saving snapshot %%StateFile\""
+			      "cd ~/%QuartusProjectRoot"
+			      "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir"
+			      "file mkdir $outputDir"
+	      		  "project_archive -overwrite %QuartusRemoteDir/%%StateFile"
+	      		  "puts \"@@FINISH@@\""
 			</line>
 			<line name="quartus_copy_after_save">
 					"-c"

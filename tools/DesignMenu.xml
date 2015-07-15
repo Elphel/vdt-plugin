@@ -189,6 +189,10 @@
 				label="Synthesize design"
 				icon="Retort.png"
 				call="QuartusSynthesis"/>
+			<menuitem name="QuartusFitter"
+				label="Place and route design"
+				icon="route66.png"
+				call="QuartusPlace"/>
 		</menu>
                           
                           
