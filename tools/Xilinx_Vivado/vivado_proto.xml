@@ -25,6 +25,9 @@
  * include the source code for the parts of Eclipse or Eclipse plugins used
  * as well as that of the covered work.}
  *******************************************************************************/
+ Warnings was (was in an attempt to catch "CRITICAL WARNING" too?):
+  default=".*([^ ]WARNING:) (\[.*\].*)\[(.*):([0-9]+)\]"
+  Problem was - missing 1-st line as group 0 had the previous end of line)
  -->
 <vdt-project>
 	<tool name="VivadoToolPrototype" label="VivadoToolPrototype"
@@ -40,7 +43,7 @@
         			default=".*(ERROR:|CRITICAL WARNING:) (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
-        			default=".*([^ ]WARNING:) (\[.*\].*)\[(.*):([0-9]+)\]"
+        			default=".*(WARNING:) (\[.*\].*)\[(.*):([0-9]+)\]"
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
         			default=".*(INFO:) (\[.*\].*)\[(.*):([0-9]+)\]"
