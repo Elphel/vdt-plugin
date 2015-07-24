@@ -124,7 +124,8 @@ are added just before line
 ```
 --launcher.appendVmargs.
 ```
-in the eclipse.ini file.
+in the eclipse.ini file. With Gtk 3 the hover text (such as problems, module instance templates)
+are shown black on black background and tool states icons are invisible. 
 
 
 ### Installation of VDT plugin itself
