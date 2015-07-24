@@ -114,6 +114,19 @@ recommend to have a separate (from your other development) installation. VDT use
 modified version of [VEditor](http://sourceforge.net/projects/veditor/) and any other
 versions of VEditor installed will conflict with VDT.
 
+**Update:** Mars ( eclipse-jee-mars-R-linux-gtk-x86_64.tar.gz ) seems to be working too if
+Gtk3 is disabled (Gtk2 used instead) by adding the following 2 lines:
+```
+--launcher.GTK_version
+2
+```
+are added just before line
+```
+--launcher.appendVmargs.
+```
+in the eclipse.ini file.
+
+
 ### Installation of VDT plugin itself
 
 VDT plugin uses modified VEditor plugin for Eclipse and because of the license incompatibility
