@@ -73,7 +73,6 @@ register cascade chains, or that can be converted to register cascade chains"/>
 		log-dir="QuartusLogDir"
 		state-dir="QuartusLocalDir"
 		restore="RestoreQuartusPlace"
-		disable="DisableQuartusPlace"
 		save="SaveQuartusPlace"
 		autosave="AutosaveQuartusPlace"
 		inherits="QuartusToolPrototype"

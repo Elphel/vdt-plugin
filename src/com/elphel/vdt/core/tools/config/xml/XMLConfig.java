@@ -139,7 +139,7 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_LOG_DIRECTORY =  "log-dir"; // folder to store the tool log files
     static final String CONTEXT_TOOL_STATE_DIRECTORY = "state-dir"; // folder to store the tool state (snapshot) files
     
-    static final String CONTEXT_TOOL_DISABLED =       "disabled"; // Parameter name that disables the tool if true
+    static final String CONTEXT_TOOL_DISABLED =       "disable"; // Parameter name that disables the tool if true
     static final String CONTEXT_TOOL_RESULT =         "result";   // Parameter name keeps the filename representing result (snapshot)
     static final String CONTEXT_TOOL_RESTORE =        "restore";  // tool name that restores the state from result (shapshot)
     static final String CONTEXT_TOOL_SAVE =           "save";     // tool name that saves the state to result file (snapshot)

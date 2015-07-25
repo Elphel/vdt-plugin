@@ -72,7 +72,6 @@ may decrease as fast-synthesis netlists take longer to route."/>
 		log-dir="QuartusLogDir"
 		state-dir="QuartusLocalDir"
 		restore="RestoreQuartusSynthesis"
-		disable="DisableQuartusSynth"
 		save="SaveQuartusSynthesis"
 		autosave="AutosaveQuartusSynthesis"
 		inherits="QuartusToolPrototype"
