@@ -39,7 +39,6 @@ import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.swt.widgets.Display;
 
 import com.elphel.vdt.Txt;
-import com.elphel.vdt.core.tools.contexts.BuildParamsItem;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;

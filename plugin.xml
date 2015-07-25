@@ -362,6 +362,12 @@
    <extension
          point="org.eclipse.core.variables.dynamicVariables">
       <variable
+            name="verilog_project_loc"
+            description="Returns the absolute file system path of the project."
+            resolver="com.elphel.vdt.ui.variables.VerilogResolver"
+            supportsArgument="true">
+      </variable>
+      <variable
             name="verilog_source_loc"
             description="%verilog_source_loc.description"
             resolver="com.elphel.vdt.ui.variables.VerilogResolver"

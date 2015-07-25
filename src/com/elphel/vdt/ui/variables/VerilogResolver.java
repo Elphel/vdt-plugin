@@ -77,7 +77,11 @@ public class VerilogResolver implements IDynamicVariableResolver {
      */
     protected String translateToValue(IResource resource, IDynamicVariable variable) throws CoreException {
         String name = variable.getName();
-        if (name.endsWith("_loc")) { //$NON-NLS-1$
+        if (name.endsWith("project_loc")) { //$NON-NLS-1$
+            resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
+            return resource.getProject().getLocation().toOSString();
+            
+        } else if (name.endsWith("_loc")) { //$NON-NLS-1$
             return resource.getLocation().toOSString();
         } else if (name.endsWith("_path")) { //$NON-NLS-1$
             return resource.getFullPath().toOSString();

@@ -35,6 +35,12 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.variables.IDynamicVariable;
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.IValueVariable;
+import org.eclipse.core.variables.VariablesPlugin;
+
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.config.Config;
 import com.elphel.vdt.core.tools.config.ConfigException;
@@ -327,7 +333,7 @@ public abstract class Context {
             for(Iterator<String> lineIter = lines.iterator(); lineIter.hasNext();) {
             	String line = (String)lineIter.next();
             	// the result will not be used as some other parameter value, so topProcessor is null in the next line /Andrey
-            	commandSequence.add(buildCommandString(line,null));  // TODO: parses them here? VERIFY               
+            	commandSequence.add(resolveStrings(buildCommandString(line,null)));  // TODO: parses them here? VERIFY               
             }
             
             // Here - already resolved to empty            
@@ -736,4 +742,89 @@ public abstract class Context {
         if(initialized)
             throw new ConfigException("Context cannot be re-initialized");
     }
+    //Substitute Eclipse and VDT ("verilog_") strings ${} here, after all VDT parameter processing
+    // recursively resolve variables
+    private List<String> resolveStrings(List<String> preResolved){
+        List<String> resolved = new ArrayList<String>();
+        for (String s:preResolved){
+        	resolved.add(resolveStrings(s));
+        }
+        return resolved;
+    }
+    
+    
+    private String resolveStrings(String s){
+    	int start = s.indexOf("${");
+    	if (start < 0) return s;
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.println("Before substitution\""+s+"\"");
+    	int end = s.indexOf("}", start);
+    	if (end < 0) return s;
+    	String dynVar = s.substring(start+2,end).trim();
+    	String dynValue = resolveEclipseVariables(dynVar);
+    	if (dynValue == null) {
+    		System.out.println("getEclipseSubstitutedString("+s+") - undefined variable: "+dynVar);
+    		dynValue = s.substring(start,end+1); // just no substitution
+    	}
+    	String result = s.substring(0,start)+dynValue;
+    	if (end < s.length()) result += resolveStrings(s.substring(end+1));
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) System.out.println("After substitution\""+result+"\"");
+    	return result;
+    	
+    }
+    // from http://www.programcreek.com/java-api-examples/index.php?api=org.eclipse.core.variables.IDynamicVariable
+    private String resolveEclipseVariables(String key){
+    	if (key == null)   return null;
+    	IStringVariableManager variableManager=VariablesPlugin.getDefault().getStringVariableManager();
+    	
+    	//debug
+/*    	
+       	IValueVariable [] variables = variableManager.getValueVariables();
+    	IDynamicVariable [] dVariables = variableManager.getDynamicVariables();
+		System.out.println("resolveEclipseVariables: key=" + key);
+	
+    	for (IValueVariable v : variables){
+    		System.out.println("resolveEclipseVariables: variables=" + v.getValue());
+    	}
+    	for (IDynamicVariable dv : dVariables){
+    		if (!dv.getName().contains("prompt")) {
+    			try {
+    				System.out.print("resolveEclipseVariables: dVariables=" + dv.getName());
+    				System.out.println(" -- "+dv.getValue(null));
+    			} catch (CoreException e) {
+    				// TODO Auto-generated catch block
+    				System.out.println(" -- null?");
+    			}
+    		}
+    	}
+*/  	
+    	int index=key.indexOf(':');
+    	if (index > 1) {
+    		String varName=key.substring(0,index);
+    		IDynamicVariable variable=variableManager.getDynamicVariable(varName);
+    		if (variable == null)     return null;
+    		try {
+    			if (key.length() > index + 1)       return variable.getValue(key.substring(index + 1));
+    			return variable.getValue(null);
+    		}
+    		catch (    CoreException e) {
+    			return null;
+    		}
+    	}
+    	IValueVariable variable=variableManager.getValueVariable(key);
+    	
+    	
+    	if (variable == null) {
+    		IDynamicVariable dynamicVariable=variableManager.getDynamicVariable(key);
+    		if (dynamicVariable == null)     return null;
+    		try {
+    			return dynamicVariable.getValue(null);
+    		}
+    		catch (    CoreException e) {
+    			return null;
+    		}
+    	}
+    	return variable.getValue();
+    }
+    
+    
 }
