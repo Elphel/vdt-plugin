@@ -29,8 +29,6 @@
 <vdt-project>
 	<interface name="FPGAPprojectInterface">
 		<syntax name="RemoteRootSyntax" format="%%ParamValue/%%ProjectName" />
-<!-- 	<syntax name="SourceListSyntax" format="%(%%SourceList%| %)" />
-		<syntax name="FilteredSourceListSyntax" format="%(%%FilteredSourceList%| %)" />  -->
 		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
 		<!-- typedef -->
 	</interface>
@@ -44,7 +42,7 @@
 		<parameter id="RemoteUser" label="Remote user name" tooltip="Remote user name" type="String"
 			format="CopyValue" default="%%UserName" readonly="false" visible="true" />
 
-<!-- Vivado options -->
+		<!-- Vivado options -->
 		<parameter id="VivadoRelease" label="Vivado release" tooltip="Vivado release number (part of the path)"
 			type="String" format="CopyValue" default="2013.4" readonly="false"
 			visible="true" />
@@ -53,7 +51,7 @@
 			type="String" format="CopyValue" default="/opt/Xilinx/Vivado" readonly="false"
 			visible="true" />
 
-<!-- ISE options -->
+		<!-- ISE options -->
 		<parameter id="ISERelease" label="ISE release" tooltip="ISE release number (part of the path)"
 			type="String" format="CopyValue" default="14.7" readonly="false"
 			visible="true" />
@@ -62,8 +60,16 @@
 			type="String" format="CopyValue" default="/opt/Xilinx" readonly="false"
 			visible="true" />
 
+		<!-- Quartus options -->
+		<parameter id="QuartusRelease" label="Quartus release" tooltip="Quartus release number (part of the path)"
+			type="String" format="CopyValue" default="15.0" readonly="false"
+			visible="true" />
 
-<!-- Vivado advanced parameters -->
+		<parameter id="QuartusInstallationRoot" label="Quartus root" tooltip="Quartus Installation Root"
+			type="String" format="CopyValue" default="/opt/Altera" readonly="false"
+			visible="true" />
+
+		<!-- Vivado advanced parameters -->
 		<parameter id="TerminalMode" type="BoolYesNo" format="None"
 			default="false" label="Force terminal mode" tooltip="Force terminal mode for the remote program" />
 
@@ -102,7 +108,7 @@
 			readonly="true"
 			visible="true" />
 
-<!-- ISE advanced parameters -->
+		<!-- ISE advanced parameters -->
 		<parameter id="ISETerminalMode" type="BoolYesNo" format="None"
 			default="false" label="Force terminal mode" tooltip="Force terminal mode for the remote program" />
 
@@ -147,9 +153,36 @@
 			readonly="true"
 			visible="true" />
 
+		<!-- Quartus advanced parameters -->
+		<parameter id="QuartusTerminalMode" type="BoolYesNo" format="None"
+			default="false" label="Force terminal mode" tooltip="Force terminal mode for the remote program" />
 
-<!-- /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
-			
+		<parameter id="QuartusShellSwitches" label="Shell switch" tooltip="Shell switches" type="String"
+			format="CopyValue" default="-c" readonly="false" visible="true" />
+
+		<parameter id="QuartusPreSSH" label="pre-ssh" tooltip="pre-ssh shell parameters"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="QuartusSSHSwitches" label="ssh switches" tooltip="Other ssh switches"
+			type="String" format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="QuartusSSHExtra" label="ssh extra parameters" tooltip="ssh extra parameters" type="String"
+			format="CopyValue" default="" readonly="false" visible="true" />
+
+		<parameter id="QuartusConsole" default="Quartus" label="Quartus console name" tooltip="Quartus console name in Eclipse, used by other tools"
+			type="String" format="CopyValue" visible="true" readonly="false"/>
+
+		<parameter id="QuartusRelativeExeOptions" label="Quartus launch command" tooltip="Quartus relative executable path and command options"
+			type="String" format="CopyValue" default="quartus/bin/quartus_sh -s" readonly="false"
+			visible="true" />
+
+		<parameter id="QuartusRemoteCommand" label="Remote command" tooltip="Remote ssh command"
+			type="String" format="CopyValue"
+			default="%QuartusInstallationRoot/%QuartusRelease/%QuartusRelativeExeOptions"
+			readonly="true"
+			visible="true" />
+
+		<!-- /opt/Xilinx/Vivado/2013.4/bin/vivado -mode tcl -->
         <parameter 	id="NoBabyTalk" label="No Baby talk" tooltip= "Remove licensing baby talk from INFO messages."
         			default="true" visible="true" omit="false" type="Boolean" format="DashName"/>
 			
@@ -161,6 +194,8 @@
 				"VivadoInstallationRoot"
 				"ISERelease"
 				"ISEInstallationRoot"
+				"QuartusRelease"
+				"QuartusInstallationRoot"
 			</group>
 			<group name="AdvancedVivado" label="Vivado server advanced setup">
 				"TerminalMode"
@@ -185,6 +220,16 @@
 				"ISERemoteCommand"
 				"ISEBinDirectory"
 				"ISEUnisimsAbsolutePath"
+			</group>
+			<group name="AdvancedQuartus" label="Quartus server advanced setup">
+				"QuartusTerminalMode"
+				"QuartusShellSwitches"
+				"QuartusPreSSH"
+				"QuartusSSHSwitches"
+				"QuartusSSHExtra"
+				"QuartusConsole"
+				"QuartusRelativeExeOptions"
+				"QuartusRemoteCommand"
 			</group>
 		</input>
 	</package>
@@ -223,7 +268,7 @@
 
 		<parameter id="VivadoIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
 			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
-<!-- ISE parameters -->			
+		<!-- ISE parameters -->			
 		<parameter id="ISEProjectRoot" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on ISE server"
 			type="String" default="vdt_ise" format="RemoteRootSyntax" readonly="false" />
 
@@ -242,163 +287,192 @@
 
 		<parameter id="ISEIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
 			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
+		<!--  Quartus parameters  -->
+		<parameter	id="part" label="Device" tooltip= "FPGA part number (device) to use"
+        		default="" visible="true" omit="" type="String" format="CopyValue"/>
+		<parameter id="QuartusProjectRoot" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on Quartus server"
+			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
+
+		<parameter id="QuartusRemoteDir" label="Remote Quartus directory" tooltip="Remote Quartus output subdirectroy for snapshot and result files"
+			type="Pathname" default="quartus_build" format="CopyValue" readonly="false" />
+
+		<parameter id="QuartusLocalDir" label="Local Quartus directory" tooltip="Local project subdirectroy for Quartus snapshot files"
+			type="Pathname" default="quartus_state" format="CopyValue" readonly="false" />
+
+		<parameter id="QuartusLocalResultDir" label="Local Quartus results directory"
+		    tooltip="Local project subdirectroy for Xilinx Quartus generated result files"
+			type="Pathname" default="quartus_results" format="CopyValue" readonly="false" />
+
+		<parameter id="QuartusLogDir" label="Local Quartus tool logs directory" tooltip="Local project subdirectroy for Quartus tools log files"
+			type="Pathname" default="quartus_logs" format="CopyValue" readonly="false" />
+
+		<parameter id="QuartusIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
+			type="String" default="" format="CopyValue" readonly="false" />
 			
 			
 <!-- Calculated -->
-<!-- 	<parameter id="VivadoProjectRoot" label="" tooltip="Relative (to user home directory) path of the project on Vivado server"
-			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" /> -->
-			
-	 	    <parameter id="SnapshotSynth"
-	        label="Synthesis snapshot" tooltip="Name of Vivado snapshot archive after synthesis"
-	        default="%%ProjectName-synth.dcp"
+		<parameter id="SnapshotSynth"
+			label="Synthesis snapshot" tooltip="Name of Vivado snapshot archive after synthesis"
+			default="%%ProjectName-synth.dcp"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="SnapshotOptPlace"
-	        label="Placement snapshot" tooltip="Name of Vivado snapshot archive after optimization/placement"
-	        default="%%ProjectName-opt-place.dcp"
+		<parameter id="SnapshotOptPlace"
+			label="Placement snapshot" tooltip="Name of Vivado snapshot archive after optimization/placement"
+			default="%%ProjectName-opt-place.dcp"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="SnapshotOpt"
-	        label="Optimization snapshot" tooltip="Name of Vivado snapshot archive after optimization"
-	        default="%%ProjectName-opt.dcp"
+		<parameter id="SnapshotOpt"
+			label="Optimization snapshot" tooltip="Name of Vivado snapshot archive after optimization"
+			default="%%ProjectName-opt.dcp"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="SnapshotOptPower"
-	        label="Power optimization snapshot" tooltip="Name of Vivado snapshot archive after power optimization"
-	        default="%%ProjectName-opt-power.dcp"
+		<parameter id="SnapshotOptPower"
+			label="Power optimization snapshot" tooltip="Name of Vivado snapshot archive after power optimization"
+			default="%%ProjectName-opt-power.dcp"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="SnapshotPlace"
-	        label="Placement snapshot" tooltip="Name of Vivado snapshot archive after placement"
-	        default="%%ProjectName-place.dcp"
+		<parameter id="SnapshotPlace"
+			label="Placement snapshot" tooltip="Name of Vivado snapshot archive after placement"
+			default="%%ProjectName-place.dcp"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="SnapshotOptPhys"
-	        label="Physical optimization snapshot" tooltip="Name of Vivado snapshot archive after physical optimization"
-	        default="%%ProjectName-opt-phys.dcp"
+		<parameter id="SnapshotOptPhys"
+			label="Physical optimization snapshot" tooltip="Name of Vivado snapshot archive after physical optimization"
+			default="%%ProjectName-opt-phys.dcp"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="SnapshotRoute"
-	        label="Routing snapshot" tooltip="Name of Vivado snapshot archive after routing"
-	        default="%%ProjectName-route.dcp"
+		<parameter id="SnapshotRoute"
+			label="Routing snapshot" tooltip="Name of Vivado snapshot archive after routing"
+			default="%%ProjectName-route.dcp"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="DisableVivadoSynth"
-	        label="Disable Vivado synthesis" tooltip="Disable tool Vivado Synthesis"
-	        default="false"
+		<parameter id="DisableVivadoSynth"
+			label="Disable Vivado synthesis" tooltip="Disable tool Vivado Synthesis"
+			default="false"
 			type="Boolean" format="None" />
 
-	 	    <parameter id="DisableVivadoOptPlace"
-	        label="Disable Vivado opt/place" tooltip="Disable tool Vivado Optimize and Place"
-	        default="false"
+		<parameter id="DisableVivadoOptPlace"
+			label="Disable Vivado opt/place" tooltip="Disable tool Vivado Optimize and Place"
+			default="false"
 			type="Boolean" format="None" />
 
-	 	    <parameter id="DisableVivadoOpt"
-	        label="Disable Vivado optimization" tooltip="Disable tool Vivado Optimize"
-	        default="false"
+		<parameter id="DisableVivadoOpt"
+			label="Disable Vivado optimization" tooltip="Disable tool Vivado Optimize"
+			default="false"
 			type="Boolean" format="None" />
 
-	 	    <parameter id="DisableVivadoOptPower"
-	        label="Disable Vivado power optimization" tooltip="Disable reduction of power consumption"
-	        default="false"
+		<parameter id="DisableVivadoOptPower"
+			label="Disable Vivado power optimization" tooltip="Disable reduction of power consumption"
+			default="false"
 			type="Boolean" format="None" />
 
-	 	    <parameter id="DisableVivadoPlace"
-	        label="Disable placement" tooltip="Disable tool Vivado Place"
-	        default="false"
+		<parameter id="DisableVivadoPlace"
+			label="Disable placement" tooltip="Disable tool Vivado Place"
+			default="false"
 			type="Boolean" format="None" />
 
-	 	    <parameter id="DisableVivadoOptPhys"
-	        label="Disable phys. optimization" tooltip="Disable tool Vivado Physical (post-placement) Optimization"
-	        default="false"
+		<parameter id="DisableVivadoOptPhys"
+			label="Disable phys. optimization" tooltip="Disable tool Vivado Physical (post-placement) Optimization"
+			default="false"
 			type="Boolean" format="None" />
 
-	 	    <parameter id="DisableVivadoRoute"
-	        label="Disable Vivado route" tooltip="Disable tool Vivado route"
-	        default="false"
+		<parameter id="DisableVivadoRoute"
+			label="Disable Vivado route" tooltip="Disable tool Vivado route"
+			default="false"
 			type="Boolean" format="None" />
-			
-	 	    <parameter id="DisableVivadoBitsteam"
-	        label="Disable Vivado bitstream" tooltip="Disable tool Vivado bitstream generator"
-	        default="false"
+
+		<parameter id="DisableVivadoBitsteam"
+			label="Disable Vivado bitstream" tooltip="Disable tool Vivado bitstream generator"
+			default="false"
 			type="Boolean" format="None" />
  				"" <!--  same as in project -->
 
-<!-- Invisible (calculated) project-wide parameters -->			
+		<!-- Invisible (calculated) project-wide parameters -->			
 		<parameter id="SimulDirSlash" type="Pathname" visible="false"
-		 default="?%SimulDir=:,%SimulDir/" format="CopyValue"/>
+			default="?%SimulDir=:,%SimulDir/" format="CopyValue"/>
 		<parameter id="VivadoSedPaths" type="String" format="CopyValue"
-		label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running Vivado tools"
-		default="sed -u 's@/home/%RemoteUser/%VivadoProjectRoot/%%ProjectName/@@'"/>
-	
+			label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running Vivado tools"
+			default="sed -u 's@/home/%RemoteUser/%VivadoProjectRoot/%%ProjectName/@@'"/>
+
 		<parameter id="ISESedPaths" type="String" format="CopyValue"
-		label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running ISE tools"
-		default="sed -u 's@/home/%RemoteUser/%ISEProjectRoot/%%ProjectName/@@'"/>
+			label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running ISE tools"
+			default="sed -u 's@/home/%RemoteUser/%ISEProjectRoot/%%ProjectName/@@'"/>
+
+		<parameter id="QuartusSedPaths" type="String" format="CopyValue"
+			label="sed command line" tooltip="Remote file prefix to be removed for the local error parser when running Quartus tools"
+			default="sed -u 's@/home/%RemoteUser/%QuartusProjectRoot/%%ProjectName/@@'"/>
 
 		<parameter id="ISEWorkspace" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on ISE server"
 			type="String" default="%ISEProjectRoot" format="CopyValue" readonly="true" />
 
 
-	 	    <parameter id="ISESnapshotSynth"
-	        label="Synthesis snapshot" tooltip="Name of ISE snapshot archive after synthesis"
-	        default="%%ProjectName-synth.tgz"
+		<parameter id="ISESnapshotSynth"
+			label="Synthesis snapshot" tooltip="Name of ISE snapshot archive after synthesis"
+			default="%%ProjectName-synth.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotNGDBuild"
-	        label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after NGDBuild"
-	        default="%%ProjectName-ngdbuild.tgz"
+		<parameter id="ISESnapshotNGDBuild"
+			label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after NGDBuild"
+			default="%%ProjectName-ngdbuild.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotMap"
-	        label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after map"
-	        default="%%ProjectName-map.tgz"
+		<parameter id="ISESnapshotMap"
+			label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after map"
+			default="%%ProjectName-map.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotPAR"
-	        label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after PAR"
-	        default="%%ProjectName-par.tgz"
+		<parameter id="ISESnapshotPAR"
+			label="NGDBuild snapshot" tooltip="Name of ISE snapshot archive after PAR"
+			default="%%ProjectName-par.tgz"
 			type="String" format="CopyValue" />
 
 
-	 	    <parameter id="ISESnapshotOptPlace"
-	        label="Placement snapshot" tooltip="Name of ISE snapshot archive after optimization/placement"
-	        default="%%ProjectName-opt-place.tgz"
+		<parameter id="ISESnapshotOptPlace"
+			label="Placement snapshot" tooltip="Name of ISE snapshot archive after optimization/placement"
+			default="%%ProjectName-opt-place.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotOpt"
-	        label="Optimization snapshot" tooltip="Name of ISE snapshot archive after optimization"
-	        default="%%ProjectName-opt.tgz"
+		<parameter id="ISESnapshotOpt"
+			label="Optimization snapshot" tooltip="Name of ISE snapshot archive after optimization"
+			default="%%ProjectName-opt.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotOptPower"
-	        label="Power optimization snapshot" tooltip="Name of ISE snapshot archive after power optimization"
-	        default="%%ProjectName-opt-power.tgz"
+		<parameter id="ISESnapshotOptPower"
+			label="Power optimization snapshot" tooltip="Name of ISE snapshot archive after power optimization"
+			default="%%ProjectName-opt-power.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotPlace"
-	        label="Placement snapshot" tooltip="Name of ISE snapshot archive after placement"
-	        default="%%ProjectName-place.tgz"
+		<parameter id="ISESnapshotPlace"
+			label="Placement snapshot" tooltip="Name of ISE snapshot archive after placement"
+			default="%%ProjectName-place.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotOptPhys"
-	        label="Physical optimization snapshot" tooltip="Name of ISE snapshot archive after physical optimization"
-	        default="%%ProjectName-opt-phys.tgz"
+		<parameter id="ISESnapshotOptPhys"
+			label="Physical optimization snapshot" tooltip="Name of ISE snapshot archive after physical optimization"
+			default="%%ProjectName-opt-phys.tgz"
 			type="String" format="CopyValue" />
 
-	 	    <parameter id="ISESnapshotRoute"
-	        label="Routing snapshot" tooltip="Name of ISE snapshot archive after routing"
-	        default="%%ProjectName-route.tgz"
+		<parameter id="ISESnapshotRoute"
+			label="Routing snapshot" tooltip="Name of ISE snapshot archive after routing"
+			default="%%ProjectName-route.tgz"
 			type="String" format="CopyValue" />
 
-        <parameter 	id="ISECleanRestore" label="ISE Clean restore"
-                    tooltip= "Remove remote ISE project files before unpacking snapshot archives"
-        			default="true" visible="true" type="Boolean" format="None"/>
+		<parameter 	id="ISECleanRestore" label="ISE Clean restore"
+			tooltip= "Remove remote ISE project files before unpacking snapshot archives"
+			default="true" visible="true" type="Boolean" format="None"/>
 
-			
+		<parameter id="QuartusSnapshotSynth"
+			label="Synthesis snapshot" tooltip="Name of Quartus snapshot archive"
+			default="%%ProjectName-synth.qar"
+			type="String" format="CopyValue" />
 
-			
+		<parameter id="QuartusSnapshotPlace"
+			label="Place and route snapshot" tooltip="Name of Quartus snapshot archive"
+			default="%%ProjectName-par.qar"
+			type="String" format="CopyValue" />
+
 		<input>
-			<group name="Genaral" label="General parameters">
+			<group name="General" label="General parameters">
 			    "part"
 				"ImplementationTopFile"
 			</group>
@@ -459,8 +533,15 @@
 				"ISESnapshotOptPhys"
 				"ISESnapshotRoute"
 			</group>
+			<group name="Quartus" label="Quartus general properties">
+				"QuartusProjectRoot"
+				"QuartusRemoteDir"
+				"QuartusLocalDir"
+				"QuartusLocalResultDir"
+				"QuartusLogDir"
+				"QuartusIgnoreSource"
+				"QuartusSedPaths"
+			</group>
 		</input>
-		<output>
-		</output>
 	</project>
 </vdt-project>

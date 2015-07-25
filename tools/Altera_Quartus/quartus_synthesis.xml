@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ /*******************************************************************************
+ * Copyright (c) 2015 Elphel, Inc.
+ * This file is a part of VDT plug-in.
+ * VDT plug-in is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * VDT plug-in is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  Additional permission under GNU GPL version 3 section 7:
+ * If you modify this Program, or any covered work, by linking or combining it
+ * with Eclipse or Eclipse plugins (or a modified version of those libraries),
+ * containing parts covered by the terms of EPL/CPL, the licensors of this
+ * Program grant you additional permission to convey the resulting work.
+ * {Corresponding Source for a non-source form of such a combination shall
+ * include the source code for the parts of Eclipse or Eclipse plugins used
+ * as well as that of the covered work.}
+ *******************************************************************************/
+ -->
+<vdt-project>
+	<interface name="QuartusSynthesisInterface" extends="QuartusInterface">
+ 		<syntax name="read_qdc_syntax" format="%(read_qdc %%ParamValue%|\n%)" />
+		<typedef name="FSMType">
+			<paramtype kind="enum" base="String">
+				<item value="auto"			label="Allows Analysis and Synthesis to choose the best encoding for the state machine."/>
+				<item value="one_hot"		label="Encodes the state machine in one-hot style."/>
+				<item value="minimal_bits"	label="Uses the minimal number of bits to encode a state machine."/>
+				<item value="user_encoded"	label="Encodes the state machine in the manner specified by user."/>
+			</paramtype>
+		</typedef>
+		<typedef name="SynthesisEffort">
+			<paramtype kind="enum" base="String">
+				<item value="auto" label="Maximum synthesis effort."/>
+				<item value="fast" label="Synthesis process is streamlined to improve the runtime at the cost of design performance and/or resource usage.
+Use this option when the FItter early_timing_estimate mode is used or when fast-synthesis compilation is needed
+whitout the need to run the Fitter. When this option is used with the regular Fitter, Fitter performance
+may decrease as fast-synthesis netlists take longer to route."/>
+			</paramtype>
+		</typedef>
+		<typedef name="OptimizeDesign">
+			<paramtype kind="enum" base="String">
+				<item value="area"		label="Makes the design as small as possible in order to minimize resource usage."/>
+				<item value="speed"		label="Chooses a design implementation that has the fastest fmax."/>
+				<item value="balanced"	label="Chooses a design implementation that has a high-speed performance with minimal logic usage."/>
+			</paramtype>
+		</typedef>
+		<typedef name="IncrementalCompilation">
+			<paramtype kind="enum" base="String">
+				<item value="off" label="Turn off incremental compilation" />
+				<item value="full_incremental_compilation" label="Turn on full incremental compilaation" />
+			</paramtype>
+		</typedef>
+	</interface>
+
+	<tool name="QuartusSynthesis" label="Load Source files to Quartus and Synthesize"
+	    project="FPGA_project"
+		interface="QuartusSynthesisInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%QuartusIgnoreSource"
+		description="Quartus Synthesis"
+		result="QuartusSnapshotSynth"
+		log-dir="QuartusLogDir"
+		state-dir="QuartusLocalDir"
+		restore="RestoreQuartusSynthesis"
+		disable="DisableQuartusSynth"
+		save="SaveQuartusSynthesis"
+		autosave="AutosaveQuartusSynthesis"
+		inherits="QuartusToolPrototype"
+		>
+
+		<extensions-list>
+			<extension mask="v"/>
+			<extension mask="tf"/>
+		</extensions-list>
+		<depends-list>
+			<depends files="FilteredSourceListPar"/>
+			<depends files="FilteredIncludesListPar"/>			
+			<depends files="ConstraintsFiles"/>
+		</depends-list>
+
+		<parameter id="analysis_and_elaboration" label="Analysis and elaboration" tooltip= "Option to check all the design files in a design for syntax and
+semantec errors, and perform a netlist exraction."
+			default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
+		<parameter id="effort" label="Synthesis effort" tooltip="Option to select synthesis effort level"
+			default="auto" visible="true" readonly="false" omit="auto" type="SynthesisEffort" format="DoubleDash"/>
+		<parameter id="family" outid="family" label="Device family" tooltip= "Option to target the specified device family. The family name should not contain any 
+spaces. If you need to add space between words in the family name, make sure that you enclose the family name in double quotation marks."
+			default="CycloneV" visible="true" readonly="false" omit="" type="String" format="DoubleDash"/>
+		<parameter id="ignore_carry_buffers" label="Ignore CARRY_SUM buffers" tooltip="Ignore CARRY_SUM buffers that are instantiated in  the design."
+			default="false" visible="true" omit="false" type="Bool_on_off" format="DoubleDash"/>
+		<parameter id="ignore_cascade_buffers" label="Ignore CASCADE buffers" tooltip="Ignore CASCADE buffers that are instantiated in  the design."
+			default="false" visible="true" omit="false" type="Bool_on_off" format="DoubleDash"/>
+		<parameter id="incremental_compilation" label="Incremental compilation" tooltip="Option to specify the incremental compilation mode."
+			default="off" visible="true" omit="off" type="IncrementalCompilation" format="DoubleDash"/>
+		<parameter id="lower_priority" label="Lower priority" tooltip="Option to lower priority of the current process."
+			default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
+		<parameter id="optimize" label="Optimize design" tooltip="Option to optimeze the design to achieve maximum speed performance,
+			minimum area usage or high speed performance with minimal area cost during synthesis."
+			default="balanced" visible="true" readonly="false" omit="balanced" type="OptimizeDesign" format="DoubleDash"/>
+		<parameter id="parallel" label="# of processors to use" tooltip="Controls parallel compilation. If 0 is specified, the Quartus software
+uses all processors detected on the system. Otherwise, the software attempts to use the specified number of processors.
+Note: this feature is not licenced for the Web Edition and this parameter should be set to 1"
+			default="1" visible="true" readonly="false" omit="0" type="Cardinal" format="DoubleDash"/>
+		<parameter id="part_synth" outid="part" label="Part (see Project)" tooltip="Altera device to use (configured in 'project' dialog)"
+			default="%part" visible="true" readonly="true" omit="" type="String" format="DoubleDash"/>
+		<parameter id="state_machine_encoding" label="FSM encoding" tooltip="Finite state machine encoding."
+			default="auto" visible="true" readonly="false" omit="auto" type="FSMType" format="DoubleDash"/>
+        <parameter	id="top" label="Design top module" tooltip= "Top module of the design, determined by the project top file"
+			default="%%TopModule" visible="true" omit="" readonly="true" type="String" format="Dash"/>
+
+ 		<parameter id="read_qdc" type="Filelist"
+			format="read_qdc_syntax" default="%ConstraintsFiles" visible="false" />
+		<parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
+			format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true" />
+		<parameter id="FilteredIncludesListPar" type="Filelist" label="FilteredIncludesListPar"
+			format="ParamListSyntax" default="%%FilteredIncludesList" readonly="false" visible="true" />
+		<parameter id="QuartusSynthActionIndex" default="%%ChosenActionIndex"
+			type="String" format="CopyValue" visible="false"  />
+		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
+			default="" label="Constraints files" tooltip="Select constraint files to load to Quartus" readonly="false"
+			visible="true" />
+			
+		<parameter id="AutosaveQuartusSynthesis" label="Create snapshot" tooltip="Automatically create snapshot after successful synthesis"
+		           default="true" type= "Boolean" format="None"/>
+		<parameter id="ResetProject" label="Reset project" tooltip="Reset project before loading source files"
+		           default="true" type= "Boolean" format="None"/>
+		<parameter id="SkipPreSynth" label="Skip pre-synthesis" tooltip="Do not run pre-synthesis TCL commands"
+		           default="false" type= "Boolean" format="None"/>
+		<parameter id="PreTCL" label="Pre-synthesis TCL commands" tooltip="TCL commands to run before synthesis"
+			type="Stringlist" format="ProgramSyntax" default="" omit=""
+			readonly="false" visible="true" />
+
+		<input>
+			<group name="General">
+			    "FilteredSourceListPar"
+			    "FilteredIncludesListPar"
+				"ConstraintsFiles"
+				"AutosaveQuartusSynthesis"
+ 				"QuartusSnapshotSynth" <!--  same as in project -->
+				"ResetProject"
+				"---"
+				"SkipPreSynth"
+				"PreTCL"
+			</group>
+			<group name="Synthesis">
+				"analysis_and_elaboration"
+				"effort"
+				"family"
+				"part_synth"
+				"ignore_carry_buffers"
+				"ignore_cascade_buffers"
+				"incremental_compilation"
+				"lower_priority"
+				"optimize"
+				"parallel"
+				"state_machine_encoding"
+			</group>
+		</input>
+
+		<output>
+			<!-- mkdir -p vdt/npmtest -->
+			<line name="quartus_copy_pre_synth">
+				"-c"
+				"ssh"
+				"-oBatchMode=yes"
+				"-l %RemoteUser %RemoteHost"
+				"'"
+				"mkdir -p"
+				"%QuartusProjectRoot"
+				"' ;"
+				"rsync -avrR -e ssh"
+				"%FilteredSourceListPar"
+				"%FilteredIncludesListPar"
+			    <if QuartusSynthActionIndex="0">
+					"%ConstraintsFiles"
+				</if>
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot"
+			</line>
+			<!-- Assemble quartus_map arguments line -->
+			<line name="quartus_assemble_args"
+				  dest="QuartusConsole"
+				  sep=" ">
+				"set synth_args \""
+				"%part_synth"
+				"%family"
+				"%analysis_and_elaboration"
+				"%effort"
+				"%ignore_carry_buffers"
+				"%ignore_cascade_buffers"
+				"%incremental_compilation"
+				"%lower_priority"
+				"%optimize"
+				"%parallel"
+				"%state_machine_encoding"
+				"\"\n"
+			</line>
+			<line name="quartus_run_synth"
+			      dest="QuartusConsole"
+			      mark="``" 
+			      sep="\n"
+				  prompt="@@FINISH@@"
+				  success="@@FINISH@@"
+				  log=""
+				  stdout="parser_Quartus">
+				"cd ~/%QuartusProjectRoot"
+				"load_package flow"
+				"set projectName %%ProjectName"
+			    "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir"
+				"file mkdir $outputDir"
+				<!-- Load all project files -->
+				<if ResetProject="true">
+					"if [is_project_open] { project_close }"
+				</if>
+				"if [project_exists $projectName] {"
+				"project_open $projectName"
+				"} else {"
+				"project_new $projectName }"
+				"foreach file [list %FilteredSourceListPar] {"
+				"puts \"Adding $file to project\""
+				"set_global_assignment -name VERILOG_FILE $file }"
+				<if QuartusSynthActionIndex="0">
+					<if ConstraintsFiles="">
+						"puts \"No constraints files specified, skipping read_qdc command\";"
+					</if>
+					<if-not ConstraintsFiles="">
+						"%read_qdc"
+					</if-not>
+				</if>
+				<!-- Run pre-synthesis TCL commands (if specified) -->
+				<if SkipPreSynth="false">
+					<if-not PreTCL="">
+						"%PreTCL"
+					</if-not>
+					<if PreTCL="">
+						"puts \"No pre-synthesis TCL commands specified\""
+					</if>
+				</if>
+				<!-- Start synthesizer -->
+				"if {[catch {execute_module -tool map -args $synth_args} result]} {"
+				"puts \"Result: $result\""
+				"puts \"ERROR: Analysis and Synthesis faild. See the report file.\""
+				"} else {"
+				"puts \"INFO: Analysis and Synthesis was successful.\""
+				"}"
+				"puts \"@@FINISH@@\""
+			</line>
+		</output>
+	</tool>
+	
+	<!--  Restore tool for QuartusSynthesis -->
+	<tool name="RestoreQuartusSynthesis"
+		project="FPGA_project"
+		interface="QuartusInterface"
+		package="FPGA_package"
+		inherits="RestoreQuartus"/>
+	<!--  Save tool for QuartusSynthesis -->
+
+	<tool name="SaveQuartusSynthesis"
+		project="FPGA_project"
+		interface="QuartusInterface"
+		package="FPGA_package"
+		inherits="SaveQuartus"/>
+</vdt-project>

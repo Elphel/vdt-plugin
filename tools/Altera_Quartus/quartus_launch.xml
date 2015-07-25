@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ /*******************************************************************************
+ * Copyright (c) 2015 Elphel, Inc.
+ * This file is a part of VDT plug-in.
+ * VDT plug-in is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * VDT plug-in is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  Additional permission under GNU GPL version 3 section 7:
+ * If you modify this Program, or any covered work, by linking or combining it
+ * with Eclipse or Eclipse plugins (or a modified version of those libraries),
+ * containing parts covered by the terms of EPL/CPL, the licensors of this
+ * Program grant you additional permission to convey the resulting work.
+ * {Corresponding Source for a non-source form of such a combination shall
+ * include the source code for the parts of Eclipse or Eclipse plugins used
+ * as well as that of the covered work.}
+ *******************************************************************************/
+ -->
+<vdt-project>
+	<tool name="Quartus"
+		label="Launch Quartus"
+		project="FPGA_project"
+		package="FPGA_package"
+		shell="/bin/bash" interface="QuartusInterface" description="Launching remote Quartus in console">	
+		<action-menu>
+			<action label="Launch Quartus" resource="" icon="door_in.png" />
+			<action label="Generate public key" resource="" icon="key.png" />
+			<action label="Setup connection to" resource="%RemoteUser@%RemoteHost"
+			        check-extension="false" check-existence="false" icon="setup.png" />
+		</action-menu>
+		<parameter   id="command" label="Shell command" default="bash"
+					type="String" format="CopyValue" visible="true" readonly="false"  />
+
+		<parameter   id="actionIndex" default="%%ChosenActionIndex"
+					type="String" format="CopyValue" visible="false"  />
+		
+		<input>
+			<group name="General">
+ 				"QuartusRemoteCommand"
+			</group>
+			<group name="Shell">
+		 		"command"
+			</group>
+		</input>
+
+		<output>
+			<if actionIndex="0">
+				<line name="Quartus"
+				      timeout="1"
+				      keep-open= "true">
+					"%QuartusShellSwitches"
+					"%QuartusPreSSH"
+					"ssh"
+					"-oBatchMode=yes"
+					<if TerminalMode = "true">
+					  "-t -t"
+					</if>
+					"%QuartusSSHSwitches"
+					"-l"
+					"%RemoteUser"
+					"%RemoteHost"
+					"'"
+					"%QuartusRemoteCommand"
+					"'"
+					"%QuartusSSHExtra"
+					"|| { echo '*** ssh connection to the server %RemoteUser@%RemoteHost failed ***';"
+					"echo 'You may need to configure connection - it is done in \"Package Setup\"';"
+					"echo 'Then generate a public key (if it is not done already), and post it to';"
+					"echo 'the remote server (currently set as %RemoteUser@%RemoteHost)';"
+					"exit 1; } ;"
+				</line>
+				<line name="quartus_check"
+					dest="QuartusConsole"
+					mark="``" 
+					sep=""
+					success="All rights reserved."
+					prompt="@@FINISH@@">
+					<!--success="Finished parsing RTL primitives"-->
+					"puts \"@@FINISH@@\"\n"
+				</line>
+				
+			</if>
+			<if actionIndex="1">
+				<line name="Keygen">
+					"%QuartusShellSwitches"
+					"echo \"Generating public key with command:\";"
+					"echo \"ssh-keygen -t rsa -q -f ~/.ssh/id_rsa -N ''\";"
+					"ssh-keygen -t rsa -q -f ~/.ssh/id_rsa -N ''"
+				</line>
+			</if>
+			<if actionIndex="2">
+				<line name="SSHCopyID">
+					"%QuartusShellSwitches"
+					"echo \"*********************************************\";"
+					"echo \"**                                         **\";"
+					"echo \"** This command requires you to be able    **\";"
+					"echo \"** to login to the remote system and enter **\";"
+					"echo \"** a password once to post your public key **\";"
+					"echo \"** there.                                  **\";"
+					"echo \"**                                         **\";"
+					"echo \"** For this you need 'ssh-askpass' to be   **\";"
+					"echo \"** installed in your system.               **\";"
+					"echo \"**                                         **\";"
+					"echo \"** If the command  will fail, you need to  **\";"
+					"echo \"** install 'ssh-askpass' and try again or  **\";"
+					"echo \"** just manually run:                      **\";"
+					"echo \"\n   ssh-copy-id %RemoteUser@%RemoteHost\n\";"
+					"echo \"** from the system terminal and enter your **\";"
+					"echo \"** password when prompted.                 **\";"
+					"echo \"**                                         **\";"
+					"echo \"** If you see nothing below this box, that **\";"
+					"echo \"** likely means that Eclipse is launched   **\";"
+					"echo \"** from the terminal, and the system asks  **\";"
+					"echo \"** your password (or permission to add     **\";"
+					"echo \"** key of the remote host first) in that   **\";"
+					"echo \"** terminal - just switch to it and        **\";"
+					"echo \"** complete the setup.                     **\";"
+					"echo \"**                                         **\";"
+					"echo \"*********************************************\";"
+					"ssh-copy-id %RemoteUser@%RemoteHost;"
+				</line>
+			</if>
+		</output>
+	</tool>
+</vdt-project>
