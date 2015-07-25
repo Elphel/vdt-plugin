@@ -180,7 +180,7 @@
         </menu>
 		<menu name="Quartus"
 			label="Quartus tools"
-			icon="xilinx.png">
+			icon="quartus16x16.png">
 			<menuitem name="Quartus Server"
 				label="Start remote Quartus session"
 				icon="door_in.png"
