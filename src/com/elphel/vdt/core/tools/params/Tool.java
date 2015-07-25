@@ -46,7 +46,7 @@ import com.elphel.vdt.core.tools.params.types.ParamTypeBool;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString.KIND;
 import com.elphel.vdt.core.tools.params.types.RunFor;
-import com.elphel.vdt.ui.MessageUI;
+//import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.VDTPluginImages;
 import com.elphel.vdt.ui.views.DesignFlowView;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
@@ -227,6 +227,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.stateDirString=      stateDirString;
         
         this.disabledString=      disabledString;          // to disable tools from automatic running
+        
         this.resultString=        resultString;            // parameter name of kind of file that represents state after running this tool
         this.restoreString=       restoreString;           // name of tool that restores the state of this tool ran (has own dependencies)
         this.saveString=          saveString;             // name of tool that saves the state of this tool run 
@@ -239,7 +240,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         result=null;
         dependStates=null;
         dependFiles=null;
-
+		DEBUG_PRINT("Created tool"+name+" disabledString = "+disabledString);
         pinned=false;
         openState=null;
         openTool=null;
@@ -577,14 +578,20 @@ public class Tool extends Context implements Cloneable, Inheritable {
                                       "' must be of type '" + ParamTypeBool.NAME + 
                                       "'");
         }
+		DEBUG_PRINT("initDisabled() tool "+name+" disabled = "+disabled); // parameter, not value
     }
     
     public boolean isDisabled(){
     	if (abstractTool) return true; // abstract are always disabled
     	if (disabled==null) return false;
     	List<String> values=disabled.getValue(new FormatProcessor(this)); // null for topFormatProcessor
-    	if ((values==null) || (values.size()==0)) return false;
-    	return (!values.get(0).equals("true"));
+    	if ((values==null) || (values.size()==0)) {
+    		DEBUG_PRINT(name+".isDisabled() ==> FALSE (((values==null) || (values.size()==0)))");
+    		return false;
+    	}
+		DEBUG_PRINT(name+".isDisabled() ==> "+values.get(0).equals("true"));
+//    	return (!values.get(0).equals("true"));
+    	return (values.get(0).equals("true"));
     }
     
     public void initDepends() throws ConfigException{

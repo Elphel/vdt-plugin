@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ /*******************************************************************************
+ * Copyright (c) 2015 Elphel, Inc.
+ * This file is a part of VDT plug-in.
+ * VDT plug-in is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * VDT plug-in is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  Additional permission under GNU GPL version 3 section 7:
+ * If you modify this Program, or any covered work, by linking or combining it
+ * with Eclipse or Eclipse plugins (or a modified version of those libraries),
+ * containing parts covered by the terms of EPL/CPL, the licensors of this
+ * Program grant you additional permission to convey the resulting work.
+ * {Corresponding Source for a non-source form of such a combination shall
+ * include the source code for the parts of Eclipse or Eclipse plugins used
+ * as well as that of the covered work.}
+ *******************************************************************************/
+ -->
+<vdt-project>
+	<interface name="QuartusPlaceInterface" extends="QuartusInterface">
+		<typedef name="PackRegisters">
+			<paramtype kind="enum" base="String">
+				<item value="off"			label="The Fitters does not attempt to place a pair of logic functions in a single logic cell"/>
+				<item value="normal"		label="The Fitter places both a combinational and a sequential operation in logic cell when it is expected that the
+placement will not affect performance"/>
+				<item value="minimize area"	label="The Fitter agressively combines unrelated combinational and sequential functions into a single logic cell to reduce the
+logic element count, even at the expence of performance"/>
+				<item value="minimize with chains"	label="The Fitter agressively combines sequential and combinational functions that are part of arithmetic or 
+register cascade chains, or that can be converted to register cascade chains"/>
+				<item value="auto"			label="The Fitter automatically chooses the best method to fit the design"/>
+			</paramtype>
+		</typedef>
+		<typedef name="QuartusPlaceEffort">
+			<paramtype kind="enum" base="String">
+				<item value="auto"			label="Directs the Fitter to reduce effort after meeting timing requirements. Decreases compilation time only when
+timing and fitting requirements can be met"/>
+				<item value="standard"		label="Directs the Fitter not to decrease effort. Preserves fmax but does not decrease compilation time"/>
+				<item value="fast"			label="Directs the Fitter to descrease effort. Descreases compilation time by up to 50%, with a possible reduction in fmax"/>
+			</paramtype>
+		</typedef>
+		<typedef name="QuartusRegPack">
+			<paramtype kind="enum" base="String">
+				<item value="auto"			label="The Fitter automatically chooses the best method to fit the design"/>
+				<item value="off"			label="The Fitter does not attempt to place a pair of logic functions in a single logic  cell"/>
+				<item value="normal"		label="The fitter places both a combinational and a sequential operation in a logic cell when
+it is expected that the placement will not affect performance"/>
+				<item value="minimize_area"	label="The Fitter agressively combines unrelated sequential and combinational functions into a single
+logic cell to reduce the logic element count, even at the expense of performance"/>
+				<item value="minimize_area_with_chains" label="The Fitter aggressively combines combinational and sequential functions that are part of arithmetic or
+register cascade chains, or that can be converted to register cascade chains"/>				
+			</paramtype>
+		</typedef>
+	</interface>
+
+	<tool name="QuartusPlace" label="Place and route design"
+	    project="FPGA_project"
+		interface="QuartusPlaceInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%QuartusIgnoreSource"
+		description="Quartus place and route design"
+		result="QuartusSnapshotPlace"
+		log-dir="QuartusLogDir"
+		state-dir="QuartusLocalDir"
+		restore="RestoreQuartusPlace"
+		save="SaveQuartusPlace"
+		autosave="AutosaveQuartusPlace"
+		inherits="QuartusToolPrototype"
+		>
+
+		<action-menu>
+			<action lable="Place" resource="" icon="mondrian2x2.png"/>
+		</action-menu>
+		<depends-list>
+			<depends state="QuartusSnapshotSynth"/>
+		</depends-list>
+
+		<!-- Interfce parameters -->	
+		<parameter id="AutosaveQuartusPlace" label="Create snapshot" tooltip="Automaticaly create snapshot after fitter"
+					default="true" type="Boolean" format="None"/>
+
+		<!-- Command line parameters -->
+		<!-- TODO: consider moving this option to separate design menu item -->
+		<parameter id="check_netlist" label="Run legality checking" tooltip="Option to run only legality checking on the current netlist.
+Analysis and synthesis must be run successfully before you use this option."
+					default="false" visible="true" omit="false" readonly="false" type="Boolean" format="DoubleDashName"/>
+		<parameter id="par_effort" outid="effort" label="Placement effort" tooltip="Option to specify the level of effor you want the Fitter to use"
+					default="auto" visible="true" omit="auto" readonly="false" type="QuartusPlaceEffort" format="DoubleDash"/>
+		<parameter id="incremental_signaltap" label="Incremental SignalTap" tooltip="Option to perform an incremental SignalTap(R) II compilation.
+Use this option when only SignalTap settings have changed since the last compilation"
+					default="false" visible="true" omit="false" readonly="false" type="Boolean" format="DoubleDashName"/>
+		<parameter id="inner_num" label="Placement effort multiplier" tooltip="Option to specify a value for the loop multiplier 
+used during placement. Use of a higher value increases compilation time, but may increase the quality of placement"
+					default="1" visible="true" omit="1" readonly="false" type="Cardinal" format="DoubleDash"/>
+		<parameter id="lower_priority" label="Lower priority" tooltip="Option to lower priority of the current process."
+					default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
+		<parameter id="one_fit_attempt" label="One fit attempt" tooltip="Option to perform only one fitting attempt, giving a no fit if that
+attempt fails. When this option is turned off, the fitter may perform additional attemps"
+					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
+		<parameter id="optimize_io_register_for_timing" label="Optimize IO registers" tooltip="Option to optimize I/O register placement for timing.
+This option is used for timing-driven compilation"
+					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
+		<parameter id="pack_register" label="Pack registers" tooltip="Option to implement register packing for appropriate pairs of
+registers and logic functions"
+					default="auto" visible="true" readonly="false" omit="auto" type="QuartusRegPack" format="DoubleDash"/>
+		<parameter id="parallel" label="# of processors to use" tooltip="Controls parallel compilation. If 0 is specified, the Quartus software
+uses all processors detected on the system. Otherwise, the software attempts to use the specified number of processors.
+Note: this feature is not licenced for the Web Edition and this parameter should be set to 1"
+					default="1" visible="true" readonly="false" omit="0" type="Cardinal" format="DoubleDash"/>
+		<parameter id="part_par" outid="part" label="Part (see Project)" tooltip="Altera device to use (configured in 'project' dialog)"
+					default="%part" visible="true" readonly="true" omit="" type="String" format="DoubleDash"/>
+		<parameter id="plan" label="Plan" tooltip="This flow will place all periphery elements (such as IOs and PLLs) and determine a legal
+clock plan. No core placement or routing will be performed"
+					default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
+		<parameter id="recompile" label="Rapid recompile" tooltip="Option to run Quartus Fit in Rapid Recompile mode"
+					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
+		<parameter id="seed" label="Seed" tooltip="Option to used the specified seed value. The Fitter uses this value as the initial placement configuration
+when attempting to optimize the design timing requirements, including fmax"
+					default="1" visible="true" omit="1" readonly="false" type="Cardinal" format="DoubleDash"/>
+		<parameter id="tdc" label="Timing-driven compilation" tooltip="Option to use timing-driven compilation. This option optimizes place and route based on
+timing information"
+					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
+		<input>
+			<group name="General">
+				<!-- Same as in project settings-->
+				"AutosaveQuartusPlace"
+				"QuartusSnapshotPlace"
+			</group>
+			<group name="Placement">
+				"check_netlist"
+				"par_effort"
+				"incremental_signaltap"
+				"inner_num"
+				"lower_priority"
+				"one_fit_attempt"
+				"optimize_io_register_for_timing"
+				"pack_register"
+				"parallel"
+				"part_par"
+				"plan"
+				"recompile"
+				"seed"
+				"tdc"
+			</group>
+		</input>
+
+		<output>
+			<!-- Assemble quartus_fit arguments line -->
+			<line name="quartus_assemble_args"
+				  dest="QuartusConsole"
+				  sep=" ">
+				"set par_args \""
+				"%check_netlist"
+				"%par_effort"
+				"%incremental_signaltap"
+				"%inner_num"
+				"%lower_priority"
+				"%one_fit_attempt"
+				"%optimize_io_register_for_timing"
+				"%pack_register"
+				"%parallel"
+				"%part_par"
+				"%plan"
+				"%recompile"
+				"%seed"
+				"%tdc"
+				"\"\n"
+			</line>
+			<!-- Start fitter -->
+			<line name="quartus_run_synth"
+			      dest="QuartusConsole"
+			      mark="``" 
+			      sep="\n"
+				  prompt="@@FINISH@@"
+				  success="@@FINISH@@"
+				  log=""
+				  stdout="parser_Quartus">
+				"cd ~/%QuartusProjectRoot"
+				"set projectName %%ProjectName"
+			    "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir"
+				"file mkdir $outputDir"
+				"load_package flow"
+				<!-- Reopen project if it was closed somehow -->
+				"if [is_project_open] {"
+				"puts \"Project is open, starting fitter\""
+				"} else {"
+				"project_open $projectName"
+				"}"
+				"if {[catch {execute_module -tool fit -args $par_args} result]} {"
+				"puts \"Result: $result\""
+				"puts \"ERROR: Place and route faild. See the report file.\""
+				"} else {"
+				"puts \"INFO: Place and route was successful.\""
+				"}"
+				"puts \"@@FINISH@@\""
+			</line>
+		</output>
+	</tool>
+	
+	<!--  Restore tool for QuartusSynthesis -->
+	<tool name="RestoreQuartusPlace"
+		project="FPGA_project"
+		interface="QuartusInterface"
+		package="FPGA_package"
+		inherits="RestoreQuartus"/>
+	<!--  Save tool for QuartusSynthesis -->
+
+	<tool name="SaveQuartusPlace"
+		project="FPGA_project"
+		interface="QuartusInterface"
+		package="FPGA_package"
+		inherits="SaveQuartus"/>
+</vdt-project>

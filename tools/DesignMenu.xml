@@ -82,8 +82,7 @@
                           icon="clock.png"
                           call="ISETraceMap"/>
                	<menuitem name="ISEPAR"
-                          label="Place &amp; route design"
-                          icon="route66.png"
+                          label="Place &amp; route design" icon="route66.png"
                           call="ISEPAR"/>
                	<menuitem name="ISETracePAR"
                           label="Report post-implementation timing"
@@ -178,9 +177,24 @@
                           label="Generate bitstream"
                           icon="bitstream.png"
                           call="VivadoBitstream"/>
-                          
-                          
         </menu>
+		<menu name="Quartus"
+			label="Quartus tools"
+			icon="quartus16x16.png">
+			<menuitem name="Quartus Server"
+				label="Start remote Quartus session"
+				icon="door_in.png"
+				call="Quartus"/>
+			<menuitem name="QuartusSynthesis"
+				label="Synthesize design"
+				icon="Retort.png"
+				call="QuartusSynthesis"/>
+			<menuitem name="QuartusFitter"
+				label="Place and route design"
+				icon="route66.png"
+				call="QuartusPlace"/>
+		</menu>
+                          
                           
     </menu>
     

@@ -194,7 +194,7 @@
         		   default="off" visible="true" omit="off" type="PRIOType" format="Dash"/>
                    <!-- default not clear , disabling omit-->
 		<parameter id="register_duplication"  label="Register duplication"
-				   tooltip="PRegister duplication (disabled if '-global_opt' is used, reguires '-timing')"
+				   tooltip="Register duplication (disabled if '-global_opt' is used, reguires '-timing')"
 		           default="true" omit="" type= "Bool_on_off" format="Dash"/>
 		<parameter id="register_ordering" outid="r" label="Register ordering"
 				   tooltip="Register ordering in a slice (use 4 or 8)"

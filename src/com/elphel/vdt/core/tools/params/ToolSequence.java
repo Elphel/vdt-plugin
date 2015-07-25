@@ -530,8 +530,8 @@ java.lang.NullPointerException
 					DEBUG_PRINT("Could not find enabled tool to provide state "+state);
 					return null;
 				} else {
-					MessageUI.error("No tool provide state "+state);
-					DEBUG_PRINT("No tool provide state "+state);
+					MessageUI.error("No tool provides state "+state);
+					DEBUG_PRINT("No tool provides state "+state);
 					return null;
 				}
 			}
@@ -698,8 +698,8 @@ java.lang.NullPointerException
 				if ((dependStates!=null) && (dependStates.size()>0)){
 					for (String state:dependStates){
 						if (!stateProviders.containsKey(state)){
-							MessageUI.error("No tool provide output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
-							System.out.println("No tool provide output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
+							MessageUI.error("No tool provides output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
+							System.out.println("No tool provides output state '"+state+"' needed to satisfy dependency of the tool "+tool.getName());
 						}
 					}
 				}
@@ -716,8 +716,10 @@ java.lang.NullPointerException
 			String ignoreFilter) throws CoreException {
 		if (!okToRun()) return;
 		
+		// Set this tool dirty (not to try reports on this tool before it ran)
+		DEBUG_PRINT("launchToolSequence("+tool.getName()+", setting its state to \"Dirty\"");
+		tool.setDirty(true);
 		setStateProvides(); // just testing
-		
 		//    		tool.setDesignFlowView(designFlowView);
 		tool.setDesignFlowView(designFlowView); // maybe will not be needed with ToolSequencing class
 		tool.setMode(mode) ; //TOOL_MODE.RUN);
@@ -1603,11 +1605,11 @@ java.lang.NullPointerException
     public void setDependState(Tool tool){
     	DEBUG_PRINT("++++++++ setDependState("+tool.getName()+")");
     	tool.clearDependStamps(); // is it needed?
-    	Map <String,String> depStates=makeDependStates(tool);
+    	Map <String,String> depStates=makeDependStates(tool,false);
     	for (String state:depStates.keySet()){
 			tool.setStateTimeStamp(state,depStates.get(state)); // name of the state file including timestamp
     	}
-    	Map <String,String> depFiles=makeDependFiles(tool);
+    	Map <String,String> depFiles=makeDependFiles(tool,false);
     	for (String file:depFiles.keySet()){
     		DEBUG_PRINT("setDependState("+tool.getName()+"), file="+file+" stamp="+depFiles.get(file));
 			tool.setFileTimeStamp(file,depFiles.get(file)); 
@@ -1621,14 +1623,25 @@ java.lang.NullPointerException
      * @return true if all timestamps matched, false otherwise
      */
     public boolean matchDependState(Tool tool){
-    	Map <String,String> depStates=makeDependStates(tool);
-    	Map <String,String> depFiles=makeDependFiles(tool);
+    	Map <String,String> depStates=makeDependStates(tool, true);
+    	Map <String,String> depFiles=makeDependFiles(tool,true);
         Map <String,String> storedDepStates = tool.getDependStatesTimestamps();
         Map <String,String> storedDepFiles =  tool.getDependFilesTimestamps();
+        if (depStates == null) {
+        	DEBUG_PRINT("matchDependState("+tool.getName()+") :"+
+            " depStates == null");
+        	return false;  
+        }
+        
         if (depStates.size()!=storedDepStates.size()) {
         	DEBUG_PRINT("matchDependState("+tool.getName()+") :"+
             " depStates.size()!=storedDepStates.size() - "+depStates.size()+"!="+storedDepStates.size());
         	return false;  
+        }
+        if (depFiles == null) {
+        	DEBUG_PRINT("matchDependState("+tool.getName()+") :"+
+                    " depFiles == null");
+        	return false; 
         }
         if (depFiles.size()!=storedDepFiles.size()) {
         	DEBUG_PRINT("matchDependState("+tool.getName()+") :"+
@@ -1662,7 +1675,7 @@ java.lang.NullPointerException
      * @param tool tool just ran
      * @return map of states (link names) to states files (full with timestamps) 
      */
-    private  Map <String,String> makeDependStates(Tool tool){
+    private  Map <String,String> makeDependStates(Tool tool, boolean failOnMissing){
     	Map <String,String> depStates=new Hashtable<String,String>();    	
     	List<String> dependStates=tool.getDependStates();
     	if (dependStates!=null) for (String state: dependStates){
@@ -1670,6 +1683,10 @@ java.lang.NullPointerException
     			ToolStateStamp tss=currentStates.get(state);
     			depStates.put(state,tss.getToolStateFile()); // name of the state file including timestamp
     		} else {
+				if (failOnMissing) {
+	    			DEBUG_PRINT("makeDependStates: no information for state "+state+" on which tool "+tool.getName()+" depends, failing");
+					return null;
+				}
     			DEBUG_PRINT("Seems a BUG (OK when called matchDependState): no information for state "+state+" on which tool "+tool.getName()+" depends");
 /*    			
     			DEBUG_PRINT("currentStates are:");
@@ -1681,10 +1698,10 @@ java.lang.NullPointerException
     	}
     	return depStates;
     }
-    private  Map <String,String> makeDependFiles(Tool tool){
+    private  Map <String,String> makeDependFiles(Tool tool, boolean failOnMissing){
     	DEBUG_PRINT("++++++ makeDependFiles("+tool.getName()+")");
     	Map <String,String> depFiles=new Hashtable<String,String>();    	
-    	List<String> dependFileNames=tool.getDependFiles();
+    	List<String> dependFileNames=tool.getDependFiles(); // files on which this tool depends
     	if (dependFileNames!=null) {
     		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
     		for (String depFile: dependFileNames){
@@ -1698,6 +1715,12 @@ java.lang.NullPointerException
     				DEBUG_PRINT("makeDependFiles(): file="+depFile+", stamp="+sourceFile.getModificationStamp()+
     						" ("+sourceFile.toString()+")");
     			} else {
+    				if (failOnMissing) {
+        				DEBUG_PRINT("makeDependFiles(): source file "+sourceFile.getLocation()+" on which tool "+
+    						tool.getName()+" depends does not exist, failing");
+        				return null;
+    					
+    				}
     				System.out.println("Seems a BUG:  source file "+sourceFile.getLocation()+" on which tool "+
     						tool.getName()+" depends does not exist");
     				depFiles.put(depFile, ""); // empty stamp for non-existent files?
