@@ -86,6 +86,12 @@
       			<item value= "no"   label="no"/>
       		</paramtype>
     	 </typedef>
+		 <typedef name="YesNoType">
+      		<paramtype kind= "enum" base="String">
+      			<item value= "yes"  label="yes"/>
+      			<item value= "no"   label="no"/>
+      		</paramtype>
+    	 </typedef>
 		 <typedef name="AutoYesNoType">
       		<paramtype kind= "enum" base="String">
       			<item value= "auto" label="auto "/>
@@ -243,6 +249,10 @@
 			<depends files="FilteredIncludesListPar"/>
 			<depends files="constraints"/>
 		</depends-list>
+<!-- Undocumented/hidden parameter to use old parser for old devices (such as Spartan3e) -->
+        <parameter	id="use_new_parser" label="Use new parser" tooltip= "Use new parser (not default for old devices such as Spartan3e)"
+        			default="yes" visible="true" omit="yes" type="YesNoType" format="Dash"/>
+		
 		<parameter	id="clean_start" label="Clean start" tooltip= "Delete all files on remote before running XST"
         			default="true" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
 		<parameter id="SkipSnapshotSynth" label="Skip snapshot" tooltip="Do not create snapshot after synthesis"
@@ -543,6 +553,7 @@
 		        "ISERemoteDir"
 		    </group>
 		    <group name ="Synthesis Options">
+		        "use_new_parser"
 			    "constraints" <!-- outid="uc" --> 
 			    "opt_mode"
 			    "opt_level"
@@ -702,6 +713,7 @@
 <!-- General options -->
 <!-- 			      "%ifmt"
 			      "%input_file"-->
+			      "%use_new_parser"
 			      "-ifn %xst_prj"
 			      "%output_format" <!-- outid="ofmt" -->
 			      "%output_file"
