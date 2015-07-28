@@ -64,36 +64,8 @@ git clone git://github.com/steveicarus/iverilog.git
 cd iverilog
 sh autoconf.sh
 ./configure
-Update: Removed instructions to modify Icarus code - current version does not need them anymore
-<!--
-```
-If you run ```make``` with unmodified code it will not be able to simulate the test project -
-[DDR3 Memory Interface](http://blog.elphel.com/2014/06/ddr3-memory-interface-on-xilinx-zynq-soc-free-software-compatible/)
-assert in vvp is triggered by the Micron DDR3 memory model. I do not understand what exactly
-is wrong but just disabling these assert statements in
-[vpi_vthr_vector.cc](https://github.com/steveicarus/iverilog/blob/master/vvp/vpi_vthr_vector.cc)
-allows vvp to proceed without any visible problems:
-
-```c++
-vpiHandle vpip_make_vthr_vector(unsigned base, unsigned wid, bool signed_flag)
-{
-    struct __vpiVThrVec*obj = new __vpiVThrVec;
-    if (base >= 65536)
-//      assert(base < 65536);
-        fprintf(stderr, "vvp error: base > 65535, base= 0x%x\n",base);
-    obj->bas = base;
-    if (wid >= 65536)
-//      assert(wid < 65536);
-        fprintf(stderr, "vvp error: wid > 65535, wid= 0x%x\n",wid);
-    obj->wid = wid;
-    obj->signed_flag = signed_flag? 1 : 0;
-    obj->name = vpip_name_string("T<>");
-    return obj;
-}
-```
-Then with the modified code
-```
--->
+Update: Removed instructions to modify Icarus code - current version does not need
+them anymore, so just proceed with
 make
 sudo make install
 ```
