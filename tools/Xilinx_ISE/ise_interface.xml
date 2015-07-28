@@ -100,7 +100,7 @@
 			      dest="ISEConsole"
 			      mark="``" 
 			      sep=" "
-			      failure="ERROR"
+			      failure="ERROR:"
 			      prompt="@@FINISH@@"
 			      log="">
 			      "cd ~/%ISEWorkspace\n"
@@ -134,7 +134,7 @@
 			      mark="``" 
 			      sep=" "
 			      prompt="@@FINISH@@"
-			      failure="ERROR"
+			      failure="ERROR:"
 			      log="">
 			      "cd ~/%ISEWorkspace\n"
 			<!-- Remove old snapshot if it exists (unlikely as it includes timestamp?) -->

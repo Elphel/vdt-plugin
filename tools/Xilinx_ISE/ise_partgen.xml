@@ -105,7 +105,7 @@
 			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="@@FINISH@@"
-			      failure="ERROR"
+			      failure="ERROR:"
 			      log=""
 			      stdout="parser_ISE">
 			      "mkdir -p"

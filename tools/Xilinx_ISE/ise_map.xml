@@ -312,7 +312,7 @@
 			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="@@FINISH@@"
-			      failure="ERROR"
+			      failure="ERROR:"
 			      log=""
 			      stdout="parser_ISE">
 			      "mkdir -p"
@@ -342,6 +342,7 @@
 			      "%register_duplication"
 			      "%register_ordering"
 			      "%smartguide"
+<!-- 			      "%speed_grade"  -->
 			      "%placer_cost_table"
 			      "%timing"
 			      "%do_not_remove_unused"
