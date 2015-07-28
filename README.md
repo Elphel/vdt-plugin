@@ -64,6 +64,8 @@ git clone git://github.com/steveicarus/iverilog.git
 cd iverilog
 sh autoconf.sh
 ./configure
+Update: Removed instructions to modify Icarus code - current version does not need them anymore
+<!--
 ```
 If you run ```make``` with unmodified code it will not be able to simulate the test project -
 [DDR3 Memory Interface](http://blog.elphel.com/2014/06/ddr3-memory-interface-on-xilinx-zynq-soc-free-software-compatible/)
@@ -91,6 +93,7 @@ vpiHandle vpip_make_vthr_vector(unsigned base, unsigned wid, bool signed_flag)
 ```
 Then with the modified code
 ```
+-->
 make
 sudo make install
 ```
