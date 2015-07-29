@@ -121,15 +121,15 @@
 			format="CopyValue" default="" readonly="false" visible="true" />
 
 		<parameter id="Param_Exe" label="Param_Exe" type="Filename"
-			format="CopyValue" default="/usr/bin/iverilog" readonly="false"
+			format="CopyValue" default="iverilog" readonly="false"
 			visible="true" />
 
 		<parameter id="VVP_Exe" label="VVP_Exe" type="Filename"
-			format="CopyValue" default="/usr/bin/vvp" readonly="false"
+			format="CopyValue" default="vvp" readonly="false"
 			visible="true" />
 
 		<parameter id="GtkWave_Exe" label="GtkWave_Exe" type="Filename"
-			format="CopyValue" default="/usr/bin/gtkwave" readonly="false"
+			format="CopyValue" default="gtkwave" readonly="false"
 			visible="true" />
 
 		<parameter id="Param_TopModule" label="Top module extracted from the chosen target file"
