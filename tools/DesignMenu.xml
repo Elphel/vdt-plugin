@@ -88,6 +88,10 @@
                           label="Report post-implementation timing"
                           icon="clock.png"
                           call="ISETracePAR"/>
+               	<menuitem name="ISEReportGen"
+                          label="Generate reports"
+                          icon="source_attach_attrib.gif"
+                          call="ISEReportGen"/>
                	<menuitem name="ISEBitgen"
                           label="Generate bitstream file(s)n"
                           icon="bitstream.png"

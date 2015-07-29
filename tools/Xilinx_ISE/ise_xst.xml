@@ -463,7 +463,7 @@
         <parameter	id="cross_clock_analysis" label="Cross clock analysis" tooltip= "Perform inter-clock domain analysis during timing optimization"
         			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
         <parameter	id="write_timing_constraints" label="Write timing constraints" tooltip= "Write timing constraints to the NGC file"
-        			default="false" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
+        			default="true" visible="true" omit="false" type="BoolYesNo" format="Dash"/>
 <!-- set option -->
         <parameter	id="tmpdir" label="TMP directory" tooltip= "temporary directory (clean up regularly)"
         			default="/tmp" visible="true" omit="/tmp" type="String" format="Dash"/>
@@ -694,7 +694,7 @@
 			      sep=" "
 			      prompt="@@FINISH@@"
 			      success="@@FINISH@@"
-			      failure="ERROR"
+			      failure="ERROR:"
 			      log=""
 			      stdout="parser_ISE">
 			      "mkdir -p"
