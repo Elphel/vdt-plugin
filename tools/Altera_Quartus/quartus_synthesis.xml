@@ -86,10 +86,13 @@ may decrease as fast-synthesis netlists take longer to route."/>
 			<depends files="FilteredIncludesListPar"/>			
 			<depends files="ConstraintsFiles"/>
 		</depends-list>
+		<action-menu>
+			<action label="Synthesise with Quartus" resourse="%ImplementationTopFile"
+				check-extension="false" check-existance="true" icon="Retort.png"/>
+			<action label="Check by Quartus" resource="%ImplementationTopFile"
+				check-extension="false" check-existance="true" icon="IconTestTube.png"/>
+		</action-menu>
 
-		<parameter id="analysis_and_elaboration" label="Analysis and elaboration" tooltip= "Option to check all the design files in a design for syntax and
-semantec errors, and perform a netlist exraction."
-			default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
 		<parameter id="effort" label="Synthesis effort" tooltip="Option to select synthesis effort level"
 			default="auto" visible="true" readonly="false" omit="auto" type="SynthesisEffort" format="DoubleDash"/>
 		<parameter id="family" outid="family" label="Device family" tooltip= "Option to target the specified device family. The family name should not contain any 
@@ -117,17 +120,13 @@ Note: this feature is not licenced for the Web Edition and this parameter should
         <parameter	id="top" label="Design top module" tooltip= "Top module of the design, determined by the project top file"
 			default="%%TopModule" visible="true" omit="" readonly="true" type="String" format="Dash"/>
 
- 		<parameter id="read_qdc" type="Filelist"
-			format="read_qdc_syntax" default="%ConstraintsFiles" visible="false" />
 		<parameter id="FilteredSourceListPar" type="Filelist" label="FilteredSourceListPar"
-			format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true" />
+			format="ParamListSyntax" default="%%FilteredSourceList" readonly="false" visible="true"/>
 		<parameter id="FilteredIncludesListPar" type="Filelist" label="FilteredIncludesListPar"
-			format="ParamListSyntax" default="%%FilteredIncludesList" readonly="false" visible="true" />
-		<parameter id="QuartusSynthActionIndex" default="%%ChosenActionIndex"
-			type="String" format="CopyValue" visible="false"  />
+			format="ParamListSyntax" default="%%FilteredIncludesList" readonly="false" visible="true"/>
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
 			default="" label="Constraints files" tooltip="Select constraint files to load to Quartus" readonly="false"
-			visible="true" />
+			visible="true"/>
 			
 		<parameter id="AutosaveQuartusSynthesis" label="Create snapshot" tooltip="Automatically create snapshot after successful synthesis"
 		           default="true" type= "Boolean" format="None"/>
@@ -137,7 +136,16 @@ Note: this feature is not licenced for the Web Edition and this parameter should
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="PreTCL" label="Pre-synthesis TCL commands" tooltip="TCL commands to run before synthesis"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
-			readonly="false" visible="true" />
+			readonly="false" visible="true"/>
+
+		<!-- invisible or calculated parameters -->
+ 		<parameter id="read_qdc" type="Filelist"
+			format="read_qdc_syntax" default="%ConstraintsFiles" visible="false"/>
+		<parameter id="analysis_and_elaboration" label="Analysis and elaboration" tooltip="Option to check all the design files in a design for syntax and
+semantec errors, and perform a netlist exraction."
+			default="true" visible="false" readonly="false" omit="" type="Boolean" format="DoubleDashName"/>
+		<parameter id="QuartusSynthActionIndex" default="%%ChosenActionIndex"
+			type="String" format="CopyValue" visible="false"/>
 
 		<input>
 			<group name="General">
@@ -152,7 +160,6 @@ Note: this feature is not licenced for the Web Edition and this parameter should
 				"PreTCL"
 			</group>
 			<group name="Synthesis">
-				"analysis_and_elaboration"
 				"effort"
 				"family"
 				"part_synth"
@@ -190,17 +197,21 @@ Note: this feature is not licenced for the Web Edition and this parameter should
 				  dest="QuartusConsole"
 				  sep=" ">
 				"set synth_args \""
-				"%part_synth"
-				"%family"
-				"%analysis_and_elaboration"
-				"%effort"
-				"%ignore_carry_buffers"
-				"%ignore_cascade_buffers"
-				"%incremental_compilation"
-				"%lower_priority"
-				"%optimize"
 				"%parallel"
-				"%state_machine_encoding"
+				<if QuartusSynthActionIndex="0">
+					"%part_synth"
+					"%family"
+					"%effort"
+					"%ignore_carry_buffers"
+					"%ignore_cascade_buffers"
+					"%incremental_compilation"
+					"%lower_priority"
+					"%optimize"
+					"%state_machine_encoding"
+				</if>
+				<if QuartusSynthActionIndex="1">
+					"%analysis_and_elaboration"
+				</if>
 				"\"\n"
 			</line>
 			<line name="quartus_run_synth"
@@ -263,7 +274,6 @@ Note: this feature is not licenced for the Web Edition and this parameter should
 		package="FPGA_package"
 		inherits="RestoreQuartus"/>
 	<!--  Save tool for QuartusSynthesis -->
-
 	<tool name="SaveQuartusSynthesis"
 		project="FPGA_project"
 		interface="QuartusInterface"

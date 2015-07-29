@@ -124,7 +124,7 @@ clock plan. No core placement or routing will be performed"
 					default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
 		<parameter id="recompile" label="Rapid recompile" tooltip="Option to run Quartus Fit in Rapid Recompile mode"
 					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
-		<parameter id="seed" label="Seed" tooltip="Option to used the specified seed value. The Fitter uses this value as the initial placement configuration
+		<parameter id="seed" label="Seed" tooltip="Option to use the specified seed value. The Fitter uses this value as the initial placement configuration
 when attempting to optimize the design timing requirements, including fmax"
 					default="1" visible="true" omit="1" readonly="false" type="Cardinal" format="DoubleDash"/>
 		<parameter id="tdc" label="Timing-driven compilation" tooltip="Option to use timing-driven compilation. This option optimizes place and route based on
