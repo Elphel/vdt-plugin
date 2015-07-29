@@ -44,7 +44,7 @@
 
 		<!-- Vivado options -->
 		<parameter id="VivadoRelease" label="Vivado release" tooltip="Vivado release number (part of the path)"
-			type="String" format="CopyValue" default="2013.4" readonly="false"
+			type="String" format="CopyValue" default="2015.2" readonly="false"
 			visible="true" />
 
 		<parameter id="VivadoInstallationRoot" label="Vivado root" tooltip="Vivado Installation Root"
