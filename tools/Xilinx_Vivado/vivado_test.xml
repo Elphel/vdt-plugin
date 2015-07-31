@@ -41,7 +41,7 @@
 		</extensions-list>
 
 		<action-menu>
-			<action label="Vivado Command" resource="" icon="xilinx.png" />
+			<action label="Vivado Command" resource="" icon="vivado_logo.png" />
 		</action-menu>
 
 		<parameter id="TCLCommand" label="Remote TCL Command to send"

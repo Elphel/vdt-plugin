@@ -100,7 +100,7 @@
                           
         <menu name="Vivado" 
               label="Vivado Tools"
-              icon="xilinx.png">
+              icon="vivado_logo.png">
                 <menu name="VivadoUtils" 
               	      label="Vivado utilities"
               		  icon="setup.png">
