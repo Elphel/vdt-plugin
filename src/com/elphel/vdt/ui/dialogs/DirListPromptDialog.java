@@ -37,13 +37,26 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class DirListPromptDialog extends ListPromptDialog {
 
-	public DirListPromptDialog( final Shell parentShell, String title) {
+	public DirListPromptDialog(
+			final Shell parentShell,
+			String title,
+			final String projectPath
+) {
 		super( parentShell
              , title
  			 , new IAddAction() {
 				 public String getNewValue() {
 					 DirectoryDialog dialog = new DirectoryDialog(parentShell);
 					 String selectedDir = dialog.open();
+// try to replace prefix with ${"verilog_project_loc"}					 
+				    	if ((selectedDir!=null) && selectedDir.startsWith(projectPath)) {
+				        	if (selectedDir.equals(projectPath)){
+				        		System.out.println("DirListPromptDialog(): Path equals to project path = \""+selectedDir+"\", returning \"${verilog_project_path}\"");
+				        		return "${verilog_project_loc}";
+				        	}
+				    		return "${verilog_project_loc}"+selectedDir.substring(projectPath.length());
+				    	}
+					 
 					 return selectedDir;
 				 }
 			 }
