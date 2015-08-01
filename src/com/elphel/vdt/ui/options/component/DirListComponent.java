@@ -26,9 +26,13 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.options.component;
 
+import org.eclipse.core.resources.IProject;
+
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.ui.dialogs.ListPromptDialog;
 import com.elphel.vdt.ui.dialogs.DirListPromptDialog;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
+
 
 public class DirListComponent extends ListComponent {
 
@@ -37,8 +41,16 @@ public class DirListComponent extends ListComponent {
     }
     
     protected ListPromptDialog createDialog() {
+    	IProject project = SelectedResourceManager.getDefault().getSelectedProject();
+    	String projectPath=null;
+    	if (project!=null) {
+    		projectPath=project.getLocation().toString();
+    	}
+    	final String fProjectPath=projectPath;
+    	
         return new DirListPromptDialog( promptField.getVisibleNameField().getShell()
-                                      , "Directory list prompt" );
+                                      , "Directory list prompt",
+                                      fProjectPath);
     }
 
 }

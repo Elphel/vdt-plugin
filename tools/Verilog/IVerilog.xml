@@ -124,6 +124,10 @@
 			format="CopyValue" default="iverilog" readonly="false"
 			visible="true" />
 
+		<parameter id="VVP_prefix" label="VVP command prefix" type="String"
+			format="CopyValue" default="time stdbuf -i0 -o0 -e0" omit="" readonly="false"
+			visible="true" />
+
 		<parameter id="VVP_Exe" label="VVP_Exe" type="Filename"
 			format="CopyValue" default="vvp" readonly="false"
 			visible="true" />
@@ -304,6 +308,7 @@
 				"Param_Exe"
 				"Param_Shell_Options"
 				"IVerilogOther"
+				"VVP_prefix"
 				"VVP_Exe"
 				"GtkWave_Exe"
 				"LogFile"
@@ -382,6 +387,7 @@
 					<!-- "time vvp -v" -->
 					"%Param_1"
 					"trap 'killall vvp; ' EXIT;"
+					"%VVP_prefix"
 					"%VVP_Exe -v"
 					"%Param_2"
 					"%OutFileFull"

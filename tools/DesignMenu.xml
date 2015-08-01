@@ -46,8 +46,8 @@
                       call="iverilog"/>
         </menu>
         <menu name="ISE" 
-              label="ISE Tools"
-              icon="xilinx.png">
+              label="Xilinx ISE Tools"
+              icon="ise_logo.png">
               <menu name="ISE_utils" 
                     label="ISE utilities"
                     icon="setup.png">
@@ -99,7 +99,7 @@
         </menu>
                           
         <menu name="Vivado" 
-              label="Vivado Tools"
+              label="Xilinx Vivado Tools"
               icon="vivado_logo.png">
                 <menu name="VivadoUtils" 
               	      label="Vivado utilities"
@@ -183,7 +183,7 @@
                           call="VivadoBitstream"/>
         </menu>
 		<menu name="Quartus"
-			label="Quartus tools"
+			label="Altera Quartus tools"
 			icon="quartus16x16.png">
 			<menuitem name="Quartus Server"
 				label="Start remote Quartus session"
