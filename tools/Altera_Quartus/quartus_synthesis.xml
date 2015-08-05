@@ -212,7 +212,7 @@ semantec errors, and perform a netlist exraction."
 				<if QuartusSynthActionIndex="1">
 					"%analysis_and_elaboration"
 				</if>
-				"\"\n"
+				"\""
 			</line>
 			<line name="quartus_run_synth"
 			      dest="QuartusConsole"
@@ -235,6 +235,8 @@ semantec errors, and perform a netlist exraction."
 				"project_open $projectName"
 				"} else {"
 				"project_new $projectName }"
+				"set_global_assignment -name VERILOG_FILE %ImplementationTopFile"
+				"set_global_assignment -name TOP_LEVEL_ENTITY %ImplementationTopModule"
 				"foreach file [list %FilteredSourceListPar] {"
 				"puts \"Adding $file to project\""
 				"set_global_assignment -name VERILOG_FILE $file }"
