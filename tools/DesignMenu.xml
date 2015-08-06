@@ -197,9 +197,11 @@
 				label="Place and route design"
 				icon="route66.png"
 				call="QuartusPlace"/>
+			<menuitem name="QuartusTimeQuest"
+				label="Timing analizer"
+				icon="clock.png"
+				call="QuartusTimequest"/>
 		</menu>
-                          
-                          
     </menu>
     
     <menu name="MainDesignMenu2"

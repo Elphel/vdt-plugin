@@ -50,7 +50,7 @@ timing and fitting requirements can be met"/>
 		</typedef>
 		<typedef name="QuartusRegPack">
 			<paramtype kind="enum" base="String">
-				<item value="auto"			label="The Fitter automatically chooses the best method to fit the design"/>
+				<item value="auto"			label="The Fitter automatically chooses the best method to fit the design ℃"/>
 				<item value="off"			label="The Fitter does not attempt to place a pair of logic functions in a single logic  cell"/>
 				<item value="normal"		label="The fitter places both a combinational and a sequential operation in a logic cell when
 it is expected that the placement will not affect performance"/>
@@ -78,9 +78,6 @@ register cascade chains, or that can be converted to register cascade chains"/>
 		inherits="QuartusToolPrototype"
 		>
 
-		<action-menu>
-			<action lable="Place" resource="" icon="mondrian2x2.png"/>
-		</action-menu>
 		<depends-list>
 			<depends state="QuartusSnapshotSynth"/>
 		</depends-list>
