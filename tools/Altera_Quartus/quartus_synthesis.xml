@@ -28,7 +28,6 @@
  -->
 <vdt-project>
 	<interface name="QuartusSynthesisInterface" extends="QuartusInterface">
- 		<syntax name="read_qdc_syntax" format="%(read_qdc %%ParamValue%|\n%)" />
 		<typedef name="FSMType">
 			<paramtype kind="enum" base="String">
 				<item value="auto"			label="Allows Analysis and Synthesis to choose the best encoding for the state machine."/>
@@ -127,6 +126,8 @@ Note: this feature is not licenced for the Web Edition and this parameter should
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
 			default="" label="Constraints files" tooltip="Select constraint files to load to Quartus" readonly="false"
 			visible="true"/>
+		<parameter id="PinAssignment" label="Pin assignment file" tooltip="Select pin assignment Tcl script to load to Quartus project"
+			type="Filename" default="" visible="true" readonly="false" format="ParamListSyntax"/>
 			
 		<parameter id="AutosaveQuartusSynthesis" label="Create snapshot" tooltip="Automatically create snapshot after successful synthesis"
 		           default="true" type= "Boolean" format="None"/>
@@ -139,8 +140,6 @@ Note: this feature is not licenced for the Web Edition and this parameter should
 			readonly="false" visible="true"/>
 
 		<!-- invisible or calculated parameters -->
- 		<parameter id="read_qdc" type="Filelist"
-			format="read_qdc_syntax" default="%ConstraintsFiles" visible="false"/>
 		<parameter id="analysis_and_elaboration" label="Analysis and elaboration" tooltip="Option to check all the design files in a design for syntax and
 semantec errors, and perform a netlist exraction."
 			default="true" visible="false" readonly="false" omit="" type="Boolean" format="DoubleDashName"/>
@@ -152,6 +151,7 @@ semantec errors, and perform a netlist exraction."
 			    "FilteredSourceListPar"
 			    "FilteredIncludesListPar"
 				"ConstraintsFiles"
+				"PinAssignment"
 				"AutosaveQuartusSynthesis"
  				"QuartusSnapshotSynth" <!--  same as in project -->
 				"ResetProject"
@@ -189,6 +189,7 @@ semantec errors, and perform a netlist exraction."
 				"%FilteredIncludesListPar"
 			    <if QuartusSynthActionIndex="0">
 					"%ConstraintsFiles"
+					"%PinAssignment"
 				</if>
 				"%RemoteUser@%RemoteHost:%QuartusProjectRoot"
 			</line>
@@ -235,17 +236,31 @@ semantec errors, and perform a netlist exraction."
 				"project_open $projectName"
 				"} else {"
 				"project_new $projectName }"
-				"set_global_assignment -name VERILOG_FILE %ImplementationTopFile"
+				<!--"set_global_assignment -name VERILOG_FILE %ImplementationTopFile"-->
 				"set_global_assignment -name TOP_LEVEL_ENTITY %ImplementationTopModule"
 				"foreach file [list %FilteredSourceListPar] {"
 				"puts \"Adding $file to project\""
 				"set_global_assignment -name VERILOG_FILE $file }"
+				<!-- Add pin assignment to project -->
+				<if QuartusSynthActionIndex="0">
+					<if-not PinAssignment="">
+						"source %PinAssignment"
+					</if-not>
+					<if PinAssignment="">
+						"puts \"No pin assignment file specified\""
+					</if>
+				</if>
+				<!-- Add constraints file(s) to project
+				     Note: the alternative way of adding constraints is through 'read_sdc' Tcl command but
+					 it is supported in quartus_fit and quartus_sta only -->
 				<if QuartusSynthActionIndex="0">
 					<if ConstraintsFiles="">
-						"puts \"No constraints files specified, skipping read_qdc command\";"
+						"puts \"No constraints files specified\""
 					</if>
 					<if-not ConstraintsFiles="">
-						"%read_qdc"
+						"foreach file [list %ConstraintsFiles] {"
+						"puts \"Adding constraints file $file to project\""
+						"set_global_assignment -name SDC_FILE $file }"
 					</if-not>
 				</if>
 				<!-- Run pre-synthesis TCL commands (if specified) -->
