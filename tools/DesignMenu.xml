@@ -201,6 +201,10 @@
 				label="Timing analizer"
 				icon="clock.png"
 				call="QuartusTimequest"/>
+			<menuitem name="QuartusAssembler"
+				label="Generate bitsream"
+				icon="bitstream.png"
+				call="QuartusAssembler"/>
 		</menu>
     </menu>
     

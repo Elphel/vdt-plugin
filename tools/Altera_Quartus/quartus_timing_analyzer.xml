@@ -57,12 +57,19 @@
 		log-dir="QuartusLogDir"
 		state-dir="QuartusLocalDir"
 		inherits="QuartusToolPrototype"
+		disable="DisableTool"
 		>
 
 		<depends-list>
 			<depends state="QuartusSnapshotPlace"/>
 		</depends-list>
+		<action-menu>
+			<action label="Run timing analizer" resourse="" icon="clock.png"/>
+		</action-menu>
 
+		<!-- General parameters-->
+		<parameter id="DisableTool" label="Disable autorun" tooltip="Disable automatic launch of this tool"
+			type="Boolean" default="false" visible="true" readonly="false" format="None"/>
 		<!-- Command line parameters -->
 		<parameter id="lower_priority" label="Lower priority" tooltip="Option to lower priority of the current process."
 			type="Boolean" default="false" visible="true" readonly="false" omit="false" format="DoubleDashName"/>
@@ -118,6 +125,9 @@ the TimeQuest Timing Analyzer"
 			type="Cardinal" default="" visible="true" readonly="false" omit="" format="DoubleDashName"/>
 
 		<input>
+			<group name="General">
+				"DisableTool"
+			</group>
 			<group name="Timing analizer">
 				"lower_priority"
 				"parallel"
@@ -154,8 +164,8 @@ the TimeQuest Timing Analyzer"
 				"%voltage"
 				"\""
 			</line>
-			<!-- Start fitter -->
-			<line name="quartus_run_synth"
+			<!-- Start timing analyze r-->
+			<line name="quartus_run_timing_analyser"
 			      dest="QuartusConsole"
 			      mark="``" 
 			      sep="\n"
@@ -176,9 +186,9 @@ the TimeQuest Timing Analyzer"
 				"}"
 				"if {[catch {execute_module -tool sta -args $sta_args} result]} {"
 				"puts \"Result: $result\""
-				"puts \"ERROR: Timing analizer faild. See the report file.\""
+				"puts \"Error: Timing analizer faild. See the report file.\""
 				"} else {"
-				"puts \"INFO: Timing analysis was successful.\""
+				"puts \"Info: Timing analysis was successful.\""
 				"}"
 				"puts \"@@FINISH@@\""
 			</line>

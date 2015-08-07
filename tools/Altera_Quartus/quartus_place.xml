@@ -81,6 +81,9 @@ register cascade chains, or that can be converted to register cascade chains"/>
 		<depends-list>
 			<depends state="QuartusSnapshotSynth"/>
 		</depends-list>
+		<action-menu>
+			<action label="Place and route design" resourse="" icon="route66.png"/>
+		</action-menu>
 
 		<!-- Interfce parameters -->	
 		<parameter id="AutosaveQuartusPlace" label="Create snapshot" tooltip="Automaticaly create snapshot after fitter"
@@ -174,7 +177,7 @@ timing information"
 				"\"\n"
 			</line>
 			<!-- Start fitter -->
-			<line name="quartus_run_synth"
+			<line name="quartus_run_pace_and_route"
 			      dest="QuartusConsole"
 			      mark="``" 
 			      sep="\n"
@@ -195,9 +198,9 @@ timing information"
 				"}"
 				"if {[catch {execute_module -tool fit -args $par_args} result]} {"
 				"puts \"Result: $result\""
-				"puts \"ERROR: Place and route faild. See the report file.\""
+				"puts \"Error: Place and route faild. See the report file.\""
 				"} else {"
-				"puts \"INFO: Place and route was successful.\""
+				"puts \"Info: Place and route was successful.\""
 				"}"
 				"puts \"@@FINISH@@\""
 			</line>
