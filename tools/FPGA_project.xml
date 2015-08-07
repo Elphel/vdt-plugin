@@ -302,7 +302,7 @@
 			type="Pathname" default="quartus_state" format="CopyValue" readonly="false" />
 
 		<parameter id="QuartusLocalResultDir" label="Local Quartus results directory"
-		    tooltip="Local project subdirectroy for Xilinx Quartus generated result files"
+		    tooltip="Local project subdirectory for Quartus generated result files"
 			type="Pathname" default="quartus_results" format="CopyValue" readonly="false" />
 
 		<parameter id="QuartusLogDir" label="Local Quartus tool logs directory" tooltip="Local project subdirectroy for Quartus tools log files"

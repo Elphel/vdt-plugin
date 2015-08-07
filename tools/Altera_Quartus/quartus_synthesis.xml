@@ -282,9 +282,16 @@ semantec errors, and perform a netlist exraction."
 				"}"
 				"puts \"@@FINISH@@\""
 			</line>
+			<line name="quartus_copy_reports">
+				"-c"
+				"mkdir -p %QuartusLocalResultDir ;"
+				"rsync -av -e ssh"
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot/*.rpt"
+				"%QuartusLocalResultDir/"
+			</line>
 		</output>
 	</tool>
-	
+
 	<!--  Restore tool for QuartusSynthesis -->
 	<tool name="RestoreQuartusSynthesis"
 		project="FPGA_project"
@@ -297,4 +304,5 @@ semantec errors, and perform a netlist exraction."
 		interface="QuartusInterface"
 		package="FPGA_package"
 		inherits="SaveQuartus"/>
+
 </vdt-project>

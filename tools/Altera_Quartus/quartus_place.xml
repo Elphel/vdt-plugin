@@ -204,6 +204,13 @@ timing information"
 				"}"
 				"puts \"@@FINISH@@\""
 			</line>
+			<line name="quartus_copy_reports">
+				"-c"
+				"mkdir -p %QuartusLocalResultDir ;"
+				"rsync -av -e ssh"
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot/*.rpt"
+				"%QuartusLocalResultDir/"
+			</line>
 		</output>
 	</tool>
 	
