@@ -124,6 +124,26 @@ the TimeQuest Timing Analyzer"
 the TimeQuest Timing Analyzer"
 			type="Cardinal" default="" visible="true" readonly="false" omit="" format="DoubleDashName"/>
 
+		<!-- parser parameters, these can differ from base tool and will be stored separately -->
+        <parameter id="PatternErrors"/>
+		<parameter id="PatternWarnings"/>
+		<parameter id="PatternInfo"/>
+		<parameter id="InstanceCapture"/>
+		<parameter id="InstanceSeparator"/>
+		<parameter id="InstanceSuffix"/>
+		<parameter id="ShowWarnings"/>
+		<parameter id="ShowInfo"/>
+		<parameter id="PreGrepW"/>
+		<parameter id="PreGrepI"/>
+		<parameter id="GrepEWI"/>
+		<parameter id="MaxMsg"/>
+		<parameter id="parser_mode"/>
+		<parameter id="parsers_path"/>
+		<parameter id="parser_name"/>
+		<parameter id="include_msg_id"/>
+		<parameter id="exclude_id_list"/>
+		<parameter id="disable_exclude_list"/>
+
 		<input>
 			<group name="General">
 				"DisableTool"

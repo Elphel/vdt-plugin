@@ -140,6 +140,26 @@ Note: this feature is not licenced for the Web Edition and this parameter should
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
 			readonly="false" visible="true"/>
 
+		<!-- parser parameters, these can differ from base tool and will be stored separately -->
+        <parameter id="PatternErrors"/>
+		<parameter id="PatternWarnings"/>
+		<parameter id="PatternInfo"/>
+		<parameter id="InstanceCapture"/>
+		<parameter id="InstanceSeparator"/>
+		<parameter id="InstanceSuffix"/>
+		<parameter id="ShowWarnings"/>
+		<parameter id="ShowInfo"/>
+		<parameter id="PreGrepW"/>
+		<parameter id="PreGrepI"/>
+		<parameter id="GrepEWI"/>
+		<parameter id="MaxMsg"/>
+		<parameter id="parser_mode"/>
+		<parameter id="parsers_path"/>
+		<parameter id="parser_name"/>
+		<parameter id="include_msg_id"/>
+		<parameter id="exclude_id_list"/>
+		<parameter id="disable_exclude_list"/>
+
 		<!-- invisible or calculated parameters -->
 		<parameter id="analysis_and_elaboration" label="Analysis and elaboration" tooltip="Option to check all the design files in a design for syntax and
 semantec errors, and perform a netlist exraction."

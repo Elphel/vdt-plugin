@@ -61,6 +61,26 @@
 		<parameter id="CreateHex" label="Create .hexout" tooltip="Create Hexadecimal (Intel format) Output File (.hexout)"
 			type="Boolean" default="false" visible="true" readonly="false" format="None"/>
 
+		<!-- parser parameters, these can differ from base tool and will be stored separately -->
+        <parameter id="PatternErrors"/>
+		<parameter id="PatternWarnings"/>
+		<parameter id="PatternInfo"/>
+		<parameter id="InstanceCapture"/>
+		<parameter id="InstanceSeparator"/>
+		<parameter id="InstanceSuffix"/>
+		<parameter id="ShowWarnings"/>
+		<parameter id="ShowInfo"/>
+		<parameter id="PreGrepW"/>
+		<parameter id="PreGrepI"/>
+		<parameter id="GrepEWI"/>
+		<parameter id="MaxMsg"/>
+		<parameter id="parser_mode"/>
+		<parameter id="parsers_path"/>
+		<parameter id="parser_name"/>
+		<parameter id="include_msg_id"/>
+		<parameter id="exclude_id_list"/>
+		<parameter id="disable_exclude_list"/>
+
 		<input>
 			<group name="General">
 				"DisableTool"
@@ -148,6 +168,13 @@
 					"%RemoteUser@%RemoteHost:%QuartusProjectRoot/%BitfileName.hexout"
 					"%QuartusLocalResultDir/;"
 				</if>
+			</line>
+			<line name="quartus_copy_reports">
+				"-c"
+				"mkdir -p %QuartusLocalResultDir ;"
+				"rsync -av -e ssh"
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot/*.rpt"
+				"%QuartusLocalResultDir/"
 			</line>
 		</output>
 	</tool>

@@ -130,6 +130,27 @@ when attempting to optimize the design timing requirements, including fmax"
 		<parameter id="tdc" label="Timing-driven compilation" tooltip="Option to use timing-driven compilation. This option optimizes place and route based on
 timing information"
 					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
+
+		<!-- parser parameters, these can differ from base tool and will be stored separately -->
+        <parameter id="PatternErrors"/>
+		<parameter id="PatternWarnings"/>
+		<parameter id="PatternInfo"/>
+		<parameter id="InstanceCapture"/>
+		<parameter id="InstanceSeparator"/>
+		<parameter id="InstanceSuffix"/>
+		<parameter id="ShowWarnings"/>
+		<parameter id="ShowInfo"/>
+		<parameter id="PreGrepW"/>
+		<parameter id="PreGrepI"/>
+		<parameter id="GrepEWI"/>
+		<parameter id="MaxMsg"/>
+		<parameter id="parser_mode"/>
+		<parameter id="parsers_path"/>
+		<parameter id="parser_name"/>
+		<parameter id="include_msg_id"/>
+		<parameter id="exclude_id_list"/>
+		<parameter id="disable_exclude_list"/>
+
 		<input>
 			<group name="General">
 				<!-- Same as in project settings-->

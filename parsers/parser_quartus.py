@@ -32,10 +32,12 @@ g_topModule = ""
 g_toolName = ""
 g_mode = ""
 g_includeMsgId = True
+g_excludeIdList = []
+g_disableExcludeList = False
 # Lines starting with these markers are of lines of interest
 g_msgTypeMarkers = ("Info", "Warning", "Error", "Critical Warning", "Extra Info")
 # Command line paramerters, these names should be in sync with those that are passed to the script in XML files (quartus_proto.xml probably)
-g_optNames = ["top_module", "tool_name", "parser_mode", "include_msg_id"]
+g_optNames = ["top_module", "tool_name", "parser_mode", "include_msg_id", "exclude_id_list", "disable_exclude_list"]
 
 # Search patterns
 patternMsgType = re.compile(".*?:")
@@ -67,6 +69,8 @@ def getParameters():
 	global g_toolName
 	global g_mode
 	global g_includeMsgId
+        global g_excludeIdList
+        global g_disableExcludeList
 
 	parser = argparse.ArgumentParser()
 	for opt in g_optNames:
@@ -83,6 +87,13 @@ def getParameters():
 			g_includeMsgId = True
 		else:
 			g_includeMsgId = False
+        if args.exclude_id_list:
+            g_excludeIdList = [int(elem) for elem in args.exclude_id_list.split('-')]
+        if args.disable_exclude_list:
+            if args.disable_exclude_list == "true":
+                g_disableExcludeList = True
+            else:
+                g_disableExcludeList = False
 
 def isProblem(line):
 	"""Check if the line contains meaningful information"""
@@ -158,8 +169,10 @@ def getMsgText(line, msg):
 
 def filterMessage(msg):
 	"""Decide whether this message should be redirected to output or filtered out"""
-	#just a stub
-	return True
+        retVal = True
+        if msg.msgId in g_excludeIdList and not g_disableExcludeList:
+            retVal = False
+	return retVal
 
 def assembleLine(msg):
 	"""Assemble and return output line"""
@@ -180,6 +193,7 @@ def assembleLine(msg):
 	return line
 
 if __name__ == "__main__":
+        isFiltered = False
 	getParameters()
 	for line in iter(sys.stdin.readline, ''):
 		if isProblem(line):
@@ -191,3 +205,7 @@ if __name__ == "__main__":
 			if filterMessage(msg):
 				logLine = assembleLine(msg)
 				sys.stdout.write(logLine)
+                        else:
+                                isFiltered = True
+        if isFiltered:
+            sys.stdout.write("Info: some messages were filtered by python parser in accordance with settings\n")

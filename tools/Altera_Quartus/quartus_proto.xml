@@ -78,8 +78,12 @@
 		<parameter id="parser_name" label="Quartus parser name" tooltip="Quartus output parser script path"
 			default="parser_quartus.py" visible="true" omit="" type="String" format="CopyValue"/>
 
-		<parameter id="include_msg_id" label="Inlcude message ID" tooltip="Include message ID to output"
+		<parameter id="include_msg_id" label="Include message ID" tooltip="Include message ID to output"
 			type="Boolean" default="true" visible="true" readonly="false" format="CmdLineParameterSyntax"/>
+		<parameter id="exclude_id_list" label="Exclude message ID" tooltip="Exclude messages with these IDs from output"
+			type="Stringlist" default="" visible="true" readnonly="false" omit="" format="MsgIdList"/>
+		<parameter id="disable_exclude_list" label="Disable exclude list" tooltip="This option allows temporary disable exclude ID list"
+			type="Boolean" default="false" visible="true" readonly="false" omit="false" format="CmdLineParameterSyntax"/>
 
 		<!-- Invisible parameters-->
 		<parameter id="tool_name" type="String" default="%%ToolName" visible="false" format="CmdLineParameterSyntax"/>
@@ -96,6 +100,8 @@
 				"GrepEWI"
 				"---"
 				"include_msg_id"
+				"exclude_id_list"
+				"disable_exclude_list"
 				"---"
 				"PatternErrors"
 				"PatternWarnings"
@@ -115,7 +121,7 @@
  				instance-separator="InstanceSeparator"
  				instance-suffix="InstanceSuffix">
 				"-c"
-				"python -u %parsers_path%parser_name %tool_name %top_module %parser_mode %include_msg_id | "
+				"python -u %parsers_path%parser_name %tool_name %top_module %parser_mode %include_msg_id %exclude_id_list %disable_exclude_list | "
 				"%GrepEWI"
 			</line>
 		</output>
