@@ -116,7 +116,7 @@ the TimeQuest Timing Analyzer reads the default 'rev'.sdc file if it exists"
 			type="Filename" default="" visible="true" readonly="false" omit="" format="DoubleDashName"/>
 		<parameter id="speed" label="Speed grade" tooltip="Option to specify the device speed grade to use when running
 the TimeQuest Timing Analyzer"
-			type="Cardinal_1" default="" visible="true" readonly="false" omit="" format="DoubleDashName"/>
+			type="Cardinal_1" default="" visible="true" readonly="false" omit="" format="DoubleDash"/>
 		<parameter id="temperature" label="Temperature" tooltip="Option to specify the device temperature ℃ to use when running
 the TimeQuest Timing Analyzer"
 			type="TemperatureRange" default="" visible="true" readonly="false" omit="" format="DoubleDashName"/>

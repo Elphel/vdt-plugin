@@ -201,6 +201,10 @@
 				label="Timing analizer"
 				icon="clock.png"
 				call="QuartusTimequest"/>
+			<menuitem name="QuartusPowerAnalizer"
+				label="Estimate power comsumption"
+				icon="fire.png"
+				call="QuartusPowerAnalyzer"/>
 			<menuitem name="QuartusAssembler"
 				label="Generate bitsream"
 				icon="bitstream.png"

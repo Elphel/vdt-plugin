@@ -252,6 +252,7 @@ semantec errors, and perform a netlist exraction."
 				<!-- Load all project files -->
 				<if ResetProject="true">
 					"if [is_project_open] { project_close }"
+					"project_new $projectName -overwrite"
 				</if>
 				"if [project_exists $projectName] {"
 				"project_open $projectName"
