@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ /*******************************************************************************
+ * Copyright (c) 2015 Elphel, Inc.
+ * This file is a part of VDT plug-in.
+ * VDT plug-in is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * VDT plug-in is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  Additional permission under GNU GPL version 3 section 7:
+ * If you modify this Program, or any covered work, by linking or combining it
+ * with Eclipse or Eclipse plugins (or a modified version of those libraries),
+ * containing parts covered by the terms of EPL/CPL, the licensors of this
+ * Program grant you additional permission to convey the resulting work.
+ * {Corresponding Source for a non-source form of such a combination shall
+ * include the source code for the parts of Eclipse or Eclipse plugins used
+ * as well as that of the covered work.}
+ *******************************************************************************/
+ -->
+<vdt-project>
+	<interface name="QuartusDrcInterface" extends="QuartusInterface">
+		<syntax name="DoubleDashValue" format="--%%ParamValue"/>
+		<typedef name="ModeType">
+			<paramtype kind="enum" base="String">
+				<item value="None" label=""/>
+				<item value="post_fit" label="Option to perform post-fit design analysis"/>
+				<item value="post_syn" label="Option to perform post-synthesis design analysis"/>
+				<item value="rtl" label="Option to perform pre-synthesis design analysis"/>
+			</paramtype>
+		</typedef>
+	</interface>
+
+	<tool name="QuartusDrc" label="Perform design check"
+	    project="FPGA_project"
+		interface="QuartusDrcInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		description="Check the reliability of a design on a set of design rules"
+		log-dir="QuartusLogDir"
+		inherits="QuartusToolPrototype"
+		disable="DisableTool"
+		>
+
+		<depends-list>
+			<depends state="QuartusSnapshotPlace"/>
+		</depends-list>
+		<action-menu>
+			<action label="Design check" resourse="" icon="check.png"/>
+		</action-menu>
+
+		<!-- Interfce parameters -->	
+		<parameter id="DisableTool" label="Disable autorun" tooltip="Disable automatic launch of this tool"
+			type="Boolean" default="false" visible="true" readonly="false" format="None"/>
+		<parameter id="Mode" label="Analysis mode" tooltip="Select analysis mode"
+			type="ModeType" default="None" omit="None" visible="true" readonly="false" format="DoubleDashValue"/>
+		<parameter id="lower_priority" label="Lower priority" tooltip="Option to lower priority of the current process"
+			default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
+
+		<!-- parser parameters, these can differ from base tool and will be stored separately -->
+        <parameter id="PatternErrors"/>
+		<parameter id="PatternWarnings"/>
+		<parameter id="PatternInfo"/>
+		<parameter id="InstanceCapture"/>
+		<parameter id="InstanceSeparator"/>
+		<parameter id="InstanceSuffix"/>
+		<parameter id="ShowWarnings"/>
+		<parameter id="ShowInfo"/>
+		<parameter id="PreGrepW"/>
+		<parameter id="PreGrepI"/>
+		<parameter id="GrepEWI"/>
+		<parameter id="MaxMsg"/>
+		<parameter id="parser_mode"/>
+		<parameter id="parsers_path"/>
+		<parameter id="parser_name"/>
+		<parameter id="include_msg_id"/>
+		<parameter id="exclude_id_list"/>
+		<parameter id="disable_exclude_list"/>
+
+		<input>
+			<group name="General">
+				"DisableTool"
+				"Mode"
+				"lower_priority"
+			</group>
+		</input>
+
+		<output>
+			<!-- Assemble quartus_drc arguments line -->
+			<line name="quartus_drc_args"
+				  dest="QuartusConsole"
+				  sep=" ">
+				"set drc_args \""
+				"%lower_priority"
+				"%Mode"
+				"\"\n"
+			</line>
+			<!-- Start Design Assistant -->
+			<line name="quartus_run_drc"
+			      dest="QuartusConsole"
+			      mark="``" 
+			      sep="\n"
+				  prompt="@@FINISH@@"
+				  success="@@FINISH@@"
+				  log=""
+				  stdout="parser_Quartus">
+				"cd ~/%QuartusProjectRoot"
+				"set projectName %%ProjectName"
+			    "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir"
+				"file mkdir $outputDir"
+				"load_package flow"
+				<!-- Reopen project if it was closed somehow -->
+				"if [is_project_open] {"
+				"puts \"Project is open, starting assembler\""
+				"} else {"
+				"project_open $projectName"
+				"}"
+				"if {$drc_args ne \" \"} {"
+				"if {[catch {execute_module -tool drc -args $drc_args} result]} {"
+				"puts \"Result: $result\""
+				"puts \"Error: Design check faild. See the report file.\""
+				"} else {"
+				"puts \"Info: Design check was successful.\""
+				"}"
+				"} else {"
+				"if {[catch {execute_module -tool drc} result]} {"
+				"puts \"Result: $result\""
+				"puts \"Error: Design check faild. See the report file.\""
+				"} else {"
+				"puts \"Info: Design check was successful.\""
+				"}"
+				"}"
+				"puts \"@@FINISH@@\""
+			</line>
+			<line name="quartus_copy_reports">
+				"-c"
+				"mkdir -p %QuartusLocalResultDir ;"
+				"rsync -av -e ssh"
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot/*.rpt"
+				"%QuartusLocalResultDir/"
+			</line>
+		</output>
+	</tool>
+	
+</vdt-project>

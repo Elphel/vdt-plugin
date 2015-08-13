@@ -205,6 +205,10 @@
 				label="Estimate power comsumption"
 				icon="fire.png"
 				call="QuartusPowerAnalyzer"/>
+			<menuitem name="QuartusDrc"
+				label="Check Design"
+				icon="check.png"
+				call="QuartusDrc"/>
 			<menuitem name="QuartusAssembler"
 				label="Generate bitsream"
 				icon="bitstream.png"
