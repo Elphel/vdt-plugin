@@ -58,6 +58,8 @@
 		<parameter id="PreOptTCL" label="Pre-optimize TCL commands" tooltip="TCL commands to run before power_opt_design"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
 			readonly="false" visible="true" />
+		<parameter id="SkipSnapshotOptPower" label="Skip snapshot save" tooltip="Do not create snapshot after power optimization"
+		           default="false" type= "Boolean" format="None"/>
 <!-- power_opt_design arguments -->  
         <parameter	id="quiet_pwr_opt" outid="quiet" label="Quiet" tooltip= "Ignore errors, return TCL_OK in any case"
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
@@ -104,6 +106,7 @@
 			<group name="General">
 				"SkipPreOptimization"
 				"SkipPowerOptimization"
+				"SkipSnapshotOptPower"
 				"---"
  				"SnapshotOptPower" <!--  same as in project -->
 			</group>

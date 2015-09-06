@@ -35,5 +35,95 @@
 		description="Quartus tool prototype"
 		abstract="true"
 		>
+		<!-- parser parameters -->
+        <parameter id="PatternErrors" label="Errors" tooltip="Regular expression for error messages"
+			default=".*(Error:)(.*)\[(.*):([0-9]+)\]"
+			visible="true" type="String" format="CopyValue"/>
+		<parameter id="PatternWarnings" label="Warnings" tooltip="Regular expression for warnings messages"
+			default=".*(Warning:|Critical Warning:)(.*)\[(.*):([0-9]+)\]"
+			visible="true" type="String" format="CopyValue"/>
+		<parameter id="PatternInfo" label="Info" tooltip="Regular expression for info messages"
+			default=".*(Info:)(.*)\[(.*):([0-9]+)\]"
+			visible="true" type="String" format="CopyValue"/>
+		<parameter id="InstanceCapture" label="Instance capture"
+			tooltip="Regular expression to extract hierarchical instance name (outer '()' enclose the hierarchical name itself)"
+			default="((([#a-zA-Z_$]([a-zA-Z_$0-9]|\[[0-9:]+\])*)(\.|:))+([a-zA-Z_$]([a-zA-Z_$0-9]|\[[0-9:]+\])*))"
+			visible="true" type="String" format="CopyValue"/>
+		<parameter id="InstanceSeparator" label="Instance separator"
+			tooltip="Regular expression to extract hierarchical name separator, for literal '.' it is '\.'"
+			default="\."
+			visible="true" type="String" format="CopyValue"/>
+		<parameter id="InstanceSuffix" label="Instance suffix"
+			tooltip="Regular expression to match/remove name suffixes automatically added by the tools"
+			default="_reg|__parameterized[0-9]*"
+			visible="true" type="String" format="CopyValue"/>
+		<parameter id="ShowWarnings" label="Show Warnings" tooltip="Parse warning messages"
+			default="true" type="Boolean" format="None"/>
+		<parameter id="ShowInfo" label="Show info" tooltip="Parse info messages"
+			default="true" type="Boolean" format="None"/>
+		<parameter id="PreGrepW" visible="false"
+			type="String" format="None" default="?%ShowWarnings=true: |Warning, "/>
+		<parameter id="PreGrepI" visible="false"
+			type="String" format="None"	default="?%ShowInfo=true: |Info, "/>
+		<parameter id="GrepEWI" label="Grep filter" tooltip="Calculated grep filter"
+			default="grep --line-buffered -E 'Error|CRITICAL WARNING%PreGrepW%PreGrepI'"
+			type="String" format="CopyValue" visible="true" readonly="true"/>
+		<parameter id="MaxMsg" outid="set_param messaging.defaultLimit"	label="Maximal messages" tooltip="Maximum number of messages to output (per type)"
+			default="1000" visible="true" omit="100" type="Cardinal" format="NameValue"/>
+
+		<parameter id="parser_mode" label="Parser mode" tooltip="Parser mode (consolidation of bits of the same instance)"
+			default="1" visible="true" omit="" type="ParserModeType" format="CmdLineParameterSyntax"/>
+		<parameter id="parsers_path" label="Parsers Path" tooltip="parsers directory in plugins"
+			default="%%ParsersPath" visible="true" omit="" type="String" format="CopyValue"/>
+		<parameter id="parser_name" label="Quartus parser name" tooltip="Quartus output parser script path"
+			default="parser_quartus.py" visible="true" omit="" type="String" format="CopyValue"/>
+
+		<parameter id="include_msg_id" label="Include message ID" tooltip="Include message ID to output"
+			type="Boolean" default="true" visible="true" readonly="false" format="CmdLineParameterSyntax"/>
+		<parameter id="exclude_id_list" label="Exclude message ID" tooltip="Exclude messages with these IDs from output"
+			type="Stringlist" default="" visible="true" readnonly="false" omit="" format="MsgIdList"/>
+		<parameter id="disable_exclude_list" label="Disable exclude list" tooltip="This option allows temporary disable exclude ID list"
+			type="Boolean" default="false" visible="true" readonly="false" omit="false" format="CmdLineParameterSyntax"/>
+
+		<!-- Invisible parameters-->
+		<parameter id="tool_name" type="String" default="%%ToolName" visible="false" format="CmdLineParameterSyntax"/>
+		<parameter id="top_module" type="String" default="%%TopModule" visible="false" format="CmdLineParameterSyntax"/>
+
+		<input>
+			<group name="Parser" weight="10">
+				"parsers_path"
+				"parser_name"
+				"---"
+				"ShowWarnings"
+				"ShowInfo"
+				"MaxMsg"
+				"GrepEWI"
+				"---"
+				"include_msg_id"
+				"exclude_id_list"
+				"disable_exclude_list"
+				"---"
+				"PatternErrors"
+				"PatternWarnings"
+ 				"PatternInfo"
+ 				"InstanceCapture"
+ 				"InstanceSeparator"
+ 				"InstanceSuffix"
+ 				"parser_mode"
+			</group>
+		</input>
+		<output>
+			<line name="parser_Quartus"
+				errors="PatternErrors"
+				warnings="PatternWarnings"
+				info="PatternInfo"
+				instance-capture="InstanceCapture"
+ 				instance-separator="InstanceSeparator"
+ 				instance-suffix="InstanceSuffix">
+				"-c"
+				"python -u %parsers_path%parser_name %tool_name %top_module %parser_mode %include_msg_id %exclude_id_list %disable_exclude_list | "
+				"%GrepEWI"
+			</line>
+		</output>
 	</tool>
 </vdt-project>

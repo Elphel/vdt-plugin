@@ -149,6 +149,7 @@
 			<group name="General">
 				"SkipPreRoute"
 				"SkipSnapshotRoute"
+				"---"
  				"SnapshotRoute" <!--  same as in project -->
 			</group>
 			<group name="Pre-routing commands">

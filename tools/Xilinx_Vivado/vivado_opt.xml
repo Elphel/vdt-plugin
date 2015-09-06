@@ -67,7 +67,9 @@
 		           default="false" type= "Boolean" format="None"/>
 		<parameter id="SkipOptimization" label="Skip optimize" tooltip="Do not run opt_design"
 		           default="false" type= "Boolean" format="None"/>
-
+		<parameter id="SkipSnapshotOpt" label="Skip snapshot" tooltip="Do not create snapshot after Optimization"
+		           default="false"
+		           type= "Boolean" format="None"/>
                    
 		<parameter id="PreOptTCL" label="Pre-optimize TCL commands" tooltip="TCL commands to run before opt_design"
 			type="Stringlist" format="ProgramSyntax" default="" omit=""
@@ -135,6 +137,7 @@
 			<group name="General">
 				"SkipPreOptimization"
 				"SkipOptimization"
+				"SkipSnapshotOpt"
 				"---"
  				"SnapshotOpt" <!--  same as in project -->
 			</group>

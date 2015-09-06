@@ -143,6 +143,7 @@
 			<group name="General">
 				"SkipPreOptimization"
 				"SkipPlacement"
+				"SkipSnapshotPlace"				
 				"---"
  				"SnapshotPlace" <!--  same as in project -->
 			</group>
