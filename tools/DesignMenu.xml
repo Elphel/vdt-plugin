@@ -47,7 +47,7 @@
         </menu>
         <menu name="ISE" 
               label="ISE Tools"
-              icon="xilinx.png">
+              icon="ise_logo.png">
               <menu name="ISE_utils" 
                     label="ISE utilities"
                     icon="setup.png">
