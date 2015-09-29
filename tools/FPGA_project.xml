@@ -245,6 +245,8 @@
 			type="String" default="" format="CopyValue" readonly="false" />
 		<parameter id="ImplementationTopFile" label="Implementation top file" tooltip="Project file with top implementation module"
 			type="Filename" default="" format="CopyValue" readonly="false" />
+		<parameter id="ImplementationTopModule" label="Implementation top module" tooltip="Project top implementation module"
+			type="String" default="" format="CopyValue" readonly="false" />
 		<parameter id="SimulDir" label="Simulation directory" tooltip="Project simulation directory"
 			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
 		<!--  Vivado parameters  -->
@@ -300,7 +302,7 @@
 			type="Pathname" default="quartus_state" format="CopyValue" readonly="false" />
 
 		<parameter id="QuartusLocalResultDir" label="Local Quartus results directory"
-		    tooltip="Local project subdirectroy for Xilinx Quartus generated result files"
+		    tooltip="Local project subdirectory for Quartus generated result files"
 			type="Pathname" default="quartus_results" format="CopyValue" readonly="false" />
 
 		<parameter id="QuartusLogDir" label="Local Quartus tool logs directory" tooltip="Local project subdirectroy for Quartus tools log files"
@@ -385,7 +387,6 @@
 			label="Disable Vivado bitstream" tooltip="Disable tool Vivado bitstream generator"
 			default="false"
 			type="Boolean" format="None" />
- 				"" <!--  same as in project -->
 
 		<!-- Invisible (calculated) project-wide parameters -->			
 		<parameter id="SimulDirSlash" type="Pathname" visible="false"
@@ -475,6 +476,7 @@
 			<group name="General" label="General parameters">
 			    "part"
 				"ImplementationTopFile"
+				"ImplementationTopModule"
 			</group>
 			<group name="Simulation" label="Simulation properties">
 				"SimulationTopFile"

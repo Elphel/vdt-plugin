@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ /*******************************************************************************
+ * Copyright (c) 2015 Elphel, Inc.
+ * This file is a part of VDT plug-in.
+ * VDT plug-in is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * VDT plug-in is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  Additional permission under GNU GPL version 3 section 7:
+ * If you modify this Program, or any covered work, by linking or combining it
+ * with Eclipse or Eclipse plugins (or a modified version of those libraries),
+ * containing parts covered by the terms of EPL/CPL, the licensors of this
+ * Program grant you additional permission to convey the resulting work.
+ * {Corresponding Source for a non-source form of such a combination shall
+ * include the source code for the parts of Eclipse or Eclipse plugins used
+ * as well as that of the covered work.}
+ *******************************************************************************/
+ -->
+<vdt-project>
+	<interface name="QuartusPowInterface" extends="QuartusInterface">
+		<syntax name="InputFileListSyntax" format="%(--%%ParamName=%%ParamValue%| %)"/>
+		<typedef name="ToggleRateType">
+			<paramtype kind="enum" base="String">
+				<item value="Percent" label="Specify toggle rate in percent"/>
+				<item value="Transitions per second" label="Specify toggle rate in transitions per second"/>
+			</paramtype>
+		</typedef>
+		<typedef name="InputFileType">
+			<paramtype kind="enum" base="String">
+				<item value="SAF" label="Use the specified Signal Activity File (.saf) as input. The SAF contains toggle rates and static probabilities for
+output signals in the design"/>
+				<item value="VCD" label="Use the specified Value Change Dum p(.vcd) as input"/>
+				<item value="No input" label="Option to instruct the Power Analyzer not to use an input file
+to initialize the toggle rates and static probabilities for output signals in the design"/>
+			</paramtype>
+		</typedef>
+	</interface>
+
+	<tool name="QuartusPowerAnalyzer" label="Estimate power consumption"
+	    project="FPGA_project"
+		interface="QuartusPowInterface"
+		package="FPGA_package"
+		shell="/bin/bash"
+		ignore="%QuartusIgnoreSource"
+		description="Power analyser estimates thermal dynamic power and thermal static poer consumed by the design"
+		log-dir="QuartusLogDir"
+		inherits="QuartusToolPrototype"
+		disable="DisableTool"
+		>
+
+		<depends-list>
+			<depends state="QuartusSnapshotPlace"/>
+		</depends-list>
+		<action-menu>
+			<action label="Estimate power consumption" resourse="" icon="fire.png"/>
+		</action-menu>
+
+		<!-- Interface parameters -->	
+		<parameter id="DisableTool" label="Disable autorun" tooltip="Disable automatic launch of this tool"
+			type="Boolean" default="false" visible="true" readonly="false" format="None"/>
+		<parameter id="default_input_io_toggle_rate" label="Default input IO toggle rate in %" tooltip="Option to specify a default toggle rate to be used on input I/O pin
+signals during power analysis. This value is used if an input I/O pin's toggle rate is not specified by some other mean such as an input
+file or user assignment. To specify a default toggle rate for all other signals in the design use the --default_toggle_rate command line option"
+			type="String" default="" omit="" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="default_toggle_rate" label="Default toggle rate in %" tooltip="Option to specify a default toggle rate to be used for all output 
+signals except input I/O pin signals during power analysis. This value is used if a signal's toggle rate is not specified by some other mean such as 
+an input file or user assignment and vectorless estimation should not be used"
+			type="String" default="" omit="" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="estimate_power" label="Estimate power" tooltip="Specifying a value of 'off' reduces processing time. For	example, 
+specify the value 'off' for this option if the only desired action is to process a Value Change Dump (VCD) file to produce a Signal Activity File (SAF).
+By default, a power estimate is produced"
+			type="Bool_on_off" default="true" omit="true" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="input_file_type" label="Input file type" tooltip="Select the type of input file. Input file will not be used in case you select 'No file'"
+			type="InputFileType" default="No input" visible="true" readonly="false" format="None"/>
+		<parameter id="input_saf" label="Input SAF file" tooltip="Select input SAF file"
+			type="Filename" default="" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="input_vcd" label="Input VCD file" tooltip="Select input VCD file(s)"
+			type="Filelist" default="" visible="true" readonly="false" format="InputFileListSyntax"/>
+		<parameter id="output_epe" label="Output Early Power Estimation file" tooltip="Option to write an Early Power Estimation file, summarizing the resources used by 
+the design. The file can be used to import design information into the PowerPlay Early Power Estimator spreadsheet available from the Altera website"
+			type="Filename" default="" omit="" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="output_saf" label="Output SAF file" tooltip="Option to write out the toggle rates and static probabilities used by the Power Analyzer during the power
+analysis to the specified Signal Activity File (.saf)"
+			type="Filename" default="" omit="" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="vcd_filter_glitches" label="Use glitch filtering when reading VCD" tooltip="Option to use glitch filtering when reading VCD Files (.vcd) as input"
+			type="Bool_on_off" default="true" omit="true" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="voltage" label="Voltage" tooltip="Option to specify the device voltage (mV) when running the PowerPlay Power Analyzer"
+			type="String" default="" omit="" visible="true" readonly="false" format="DoubleDash"/>
+		<parameter id="lower_priority" label="Lower priority" tooltip="Option to lower priority of the current process"
+					default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
+		<parameter id="use_vectorless_estimation" label="Use vectorless estimation" tooltip="Option to specify whether or not vectorless estimation should be used to 
+calculate unspecified toggle rates and static probabilities for the output signals in the design. If set to 'on' then vectorless estimation is used by the PowerPlay Power 
+Analyzer and the --default_toggle_rate command line option or the value stored in the Quartus II Settings File (.qsf) will be ignored. If set to 'off' then the 
+PowerPlay Power Analyzer uses the value specified by the command line option --default_toggle_rate or the value stored in the Quartus Settings File (.qsf) as the default toggle rate"
+			default="false" visible="true" readonly="false" type="Boolean" format="DoubleDashName"/>
+
+		<!-- parser parameters, these can differ from base tool and will be stored separately -->
+        <parameter id="PatternErrors"/>
+		<parameter id="PatternWarnings"/>
+		<parameter id="PatternInfo"/>
+		<parameter id="InstanceCapture"/>
+		<parameter id="InstanceSeparator"/>
+		<parameter id="InstanceSuffix"/>
+		<parameter id="ShowWarnings"/>
+		<parameter id="ShowInfo"/>
+		<parameter id="PreGrepW"/>
+		<parameter id="PreGrepI"/>
+		<parameter id="GrepEWI"/>
+		<parameter id="MaxMsg"/>
+		<parameter id="parser_mode"/>
+		<parameter id="parsers_path"/>
+		<parameter id="parser_name"/>
+		<parameter id="include_msg_id"/>
+		<parameter id="exclude_id_list"/>
+		<parameter id="disable_exclude_list"/>
+
+		<input>
+			<group name="General">
+				"DisableTool"
+				"use_vectorless_estimation"
+				"default_input_io_toggle_rate"
+				"default_toggle_rate"
+				"estimate_power"
+				"input_file_type"
+				"input_saf"
+				"input_vcd"
+				"output_epe"
+				"output_saf"
+				"vcd_filter_glitches"
+				"voltage"
+				"lower_priority"
+			</group>
+		</input>
+
+		<output>
+			<!-- Assemble quartus_pow arguments line -->
+			<line name="quartus_assemble_args"
+				  dest="QuartusConsole"
+				  sep=" ">
+				"set pow_args \""
+				<if-not default_input_io_toggle_rate="">
+					"%default_input_io_toggle_rate%"
+				</if-not>
+				<if-not use_vectorless_estimation="true">
+					<if-not default_toggle_rate="">
+						"%default_toggle_rate%"
+					</if-not>
+				</if-not>
+				<if use_vectorless_estimation="true">
+					"%use_vectorless_estimation"
+				</if>
+				"%estimate_power"
+				"%lower_priority"
+				<if input_file_type="SAF">
+					<if-not input_saf="">
+						"%input_saf"
+					</if-not>
+				</if>
+				<if input_file_type="VCD">
+					<if-not input_vcd="">
+						"%input_vcd"
+					</if-not>
+				</if>
+				<if input_file_type="No file">
+					"--no_input_file"
+				</if>
+				"%output_epe"
+				"%output_saf"
+				"%vcd_filter_glitches"
+				"%voltage"
+				"\"\n"
+			</line>
+			<!-- Start power optimiser-->
+			<line name="quartus_run_pow"
+			      dest="QuartusConsole"
+			      mark="``" 
+			      sep="\n"
+				  prompt="@@FINISH@@"
+				  success="@@FINISH@@"
+				  log=""
+				  stdout="parser_Quartus">
+				"cd ~/%QuartusProjectRoot"
+				"set projectName %%ProjectName"
+			    "set outputDir ~/%QuartusProjectRoot/%QuartusRemoteDir"
+				"file mkdir $outputDir"
+				"load_package flow"
+				<!-- Reopen project if it was closed somehow -->
+				"if [is_project_open] {"
+				"puts \"Project is open, starting power optimiser\""
+				"} else {"
+				"project_open $projectName"
+				"}"
+				"if {[catch {execute_module -tool pow -args $pow_args} result]} {"
+				"puts \"Result: $result\""
+				"puts \"Error: Power optimiser faild. See the report file.\""
+				"} else {"
+				"puts \"Info: Power optimiser finished successfully.\""
+				"}"
+				"puts \"@@FINISH@@\""
+			</line>
+			<line name="quartus_copy_reports">
+				"-c"
+				"mkdir -p %QuartusLocalResultDir ;"
+				"rsync -av -e ssh"
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot/*.rpt"
+				"%QuartusLocalResultDir/"
+			</line>
+		</output>
+	</tool>
+	
+</vdt-project>

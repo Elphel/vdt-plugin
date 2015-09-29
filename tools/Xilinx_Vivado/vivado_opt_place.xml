@@ -106,7 +106,7 @@
 		<parameter id="SkipPhysOpt" label="Skip physical optimize" tooltip="Do not run phys_opt_design"
 		           default="false" type= "Boolean" format="None"/>
 		           
-		<parameter id="SkipSnapshotPlace" label="Skip snapshot save" tooltip="Do not create snapshot after placement"
+		<parameter id="SkipSnapshotOptPlace" label="Skip snapshot save" tooltip="Do not create snapshot after placement optimization"
 		           default="false" type= "Boolean" format="None"/>
 
                    
@@ -236,7 +236,7 @@
 				"SkipPowerOptimization"
 				"SkipPlacement"
 				"SkipPhysOpt"
-				"SkipSnapshotPlace"
+				"SkipSnapshotOptPlace"
 				"---"
  				"SnapshotOptPlace" <!--  same as in project -->
 			</group>

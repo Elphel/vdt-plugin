@@ -30,6 +30,8 @@
 	<interface name="QuartusInterface" extends="FPGAPprojectInterface">
 		<syntax name="GrepFilterProblemSyntax"        format='| grep --line-buffered -v  "\[%%ParamName"' />
 		<syntax name="GrepFilterProblemOtherSyntax"   format='%(| grep --line-buffered -v  "\[%%ParamValue"%|\n%)' />
+		<syntax name="CmdLineParameterSyntax"         format="--%%ParamName %%ParamValue"/>
+		<syntax name="MsgIdList"                      format="--exclude_id_list %(%%ParamValue%|-%)"/>
 	    <typedef name="ParserModeType">
       		<paramtype kind= "enum" base="String">
       			<item value="0"   label="Tool output is parsed immediately"/>
@@ -116,5 +118,5 @@
 			</line>
 		</output>		
 	</tool>
-	
+
 </vdt-project>

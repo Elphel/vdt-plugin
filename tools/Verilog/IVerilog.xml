@@ -47,19 +47,19 @@
 			
 		<syntax name="LogFileSyntax" format="%%ParamValue-%%BuildStamp.log" />
 		<syntax name="OutFileSyntax" format="%%ParamValue-%%BuildStamp.ivlg" />
-		<syntax name="LxtFileSyntax" format="%%ParamValue-%%BuildStamp.lxt" />
+		<syntax name="FstFileSyntax" format="%%ParamValue-%%BuildStamp.fst" />
 
 		<syntax name="LogFileLatestSyntax"
 		    format="ln -sf %%ParamValue-%%BuildStamp.log %SimulDir/%%ParamValue-latest.log;" />
 		<syntax name="OutputFileLatestSyntax"
 			format="ln -sf %%ParamValue-%%BuildStamp.ivlg %SimulDir/%%ParamValue-latest.ivlg;" />
-		<syntax name="LxtFileLatestSyntax"
-		    format="ln -sf %%ParamValue-%%BuildStamp.lxt %SimulDir/%%ParamValue-latest.lxt;" />
+		<syntax name="FstFileLatestSyntax"
+		    format="ln -sf %%ParamValue-%%BuildStamp.fst %SimulDir/%%ParamValue-latest.fst;" />
 
 		<!-- include file has target, not link value -->
 		
- 		<syntax name="LxtParamFileSyntax"
-			format="parameter lxtname=&quot;%%ParamValue-%%BuildStamp.lxt&quot;;" />
+ 		<syntax name="FstParamFileSyntax"
+			format="parameter fstname=&quot;%%ParamValue-%%BuildStamp.fst&quot;;" />
 		<syntax name="IncludeParamSyntax" format="%(%%ParamValue%|\n%)" />
 		
 		
@@ -204,8 +204,8 @@
 		<parameter id="OutFile" label="Simulator intermediate file prefix"
 			type="String" default="%%CurrentFileBase" format="OutFileSyntax"
 			readonly="false" />
-		<parameter id="LxtDumpFile" label="Simulator LXT dump file prefix"
-			type="String" default="%%CurrentFileBase" format="LxtFileSyntax"
+		<parameter id="FstDumpFile" label="Simulator FST dump file prefix"
+			type="String" default="%%CurrentFileBase" format="FstFileSyntax"
 			readonly="false" />
 
 		<parameter id="GTKWaveSavFile" label="GTKWave sav file"
@@ -260,8 +260,8 @@
 		<parameter id="iverilog_include_file" default="IVERILOG_INCLUDE.v"
 			type="Filename" format="CopyValue" visible="false" />
 
-		<parameter id="LxtDumpFileParameter" default="%LxtDumpFileFull" 
-			type="String" format="LxtParamFileSyntax" visible="false" />
+		<parameter id="FstDumpFileParameter" default="%FstDumpFileFull" 
+			type="String" format="FstParamFileSyntax" visible="false" />
 			
 		<parameter id="LogFileLatest" default="%LogFile" 
 			type="String" format="LogFileLatestSyntax" visible="false" />
@@ -269,8 +269,8 @@
 		<parameter id="OutFileLatest" type="String" default="%OutFile" 
 			format="OutputFileLatestSyntax" visible="false" />
 			
-		<parameter id="LxtDumpFileLatest" default="%LxtDumpFile" 
-			type="String" format="LxtFileLatestSyntax" visible="false" />
+		<parameter id="FstDumpFileLatest" default="%FstDumpFile" 
+			type="String" format="FstFileLatestSyntax" visible="false" />
 
 		<parameter id="LogFileFull" default="%SimulDir/%LogFile" 
 			visible="false" type="String" format="LogFileSyntax"/>
@@ -278,8 +278,8 @@
 		<parameter id="OutFileFull" default="%SimulDir/%OutFile" 
 		    visible="false"	type="String" format="OutFileSyntax"/>
 		    
-		<parameter id="LxtDumpFileFull" default="%SimulDir/%LxtDumpFile" 
-			visible="false"	type="String" format="LxtFileSyntax"/>
+		<parameter id="FstDumpFileFull" default="%SimulDir/%FstDumpFile" 
+			visible="false"	type="String" format="FstFileSyntax"/>
 
 		<input>
 			<group name="files" label="Files">
@@ -313,7 +313,7 @@
 				"GtkWave_Exe"
 				"LogFile"
 				"OutFile"
-				"LxtDumpFile"
+				"FstDumpFile"
 				"GrepFindErr"
 				"GrepFindErrWarn"
 				"GrepSkip1"
@@ -391,20 +391,20 @@
 					"%VVP_Exe -v"
 					"%Param_2"
 					"%OutFileFull"
-					"-lxt2 "
+					"-fst "
 					<if SaveLogsSimulator="true">
 						"| tee -a"
 						"%LogFileFull"
 					</if>
 					"|| { echo '*** vvp failed ***'; exit 1; } ;"
-					"%LxtDumpFileLatest"
+					"%FstDumpFileLatest"
 					 <!-- no trap for GTKWave -->
 					"trap '' EXIT;"
 					<!-- "%Param_2" -->
 					"%Param_3"
 					<if ShowWaves="true">
 						"%GtkWave_Exe"
-						"%LxtDumpFileFull"
+						"%FstDumpFileFull"
 						"%GTKWaveSavFile"
 						"&amp; "
 					</if>
@@ -413,7 +413,7 @@
 			</line>
 			<line name="IverilogIncludeFile" dest="iverilog_include_file"
 				sep="\n">
-				"%LxtDumpFileParameter"
+				"%FstDumpFileParameter"
 				"%IncludeParametersList"
 			</line>
 		</output>

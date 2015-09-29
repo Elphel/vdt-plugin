@@ -50,7 +50,7 @@ timing and fitting requirements can be met"/>
 		</typedef>
 		<typedef name="QuartusRegPack">
 			<paramtype kind="enum" base="String">
-				<item value="auto"			label="The Fitter automatically chooses the best method to fit the design"/>
+				<item value="auto"			label="The Fitter automatically chooses the best method to fit the design ℃"/>
 				<item value="off"			label="The Fitter does not attempt to place a pair of logic functions in a single logic  cell"/>
 				<item value="normal"		label="The fitter places both a combinational and a sequential operation in a logic cell when
 it is expected that the placement will not affect performance"/>
@@ -78,12 +78,12 @@ register cascade chains, or that can be converted to register cascade chains"/>
 		inherits="QuartusToolPrototype"
 		>
 
-		<action-menu>
-			<action lable="Place" resource="" icon="mondrian2x2.png"/>
-		</action-menu>
 		<depends-list>
 			<depends state="QuartusSnapshotSynth"/>
 		</depends-list>
+		<action-menu>
+			<action label="Place and route design" resourse="" icon="route66.png"/>
+		</action-menu>
 
 		<!-- Interfce parameters -->	
 		<parameter id="AutosaveQuartusPlace" label="Create snapshot" tooltip="Automaticaly create snapshot after fitter"
@@ -124,12 +124,33 @@ clock plan. No core placement or routing will be performed"
 					default="false" visible="true" readonly="false" omit="false" type="Boolean" format="DoubleDashName"/>
 		<parameter id="recompile" label="Rapid recompile" tooltip="Option to run Quartus Fit in Rapid Recompile mode"
 					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
-		<parameter id="seed" label="Seed" tooltip="Option to used the specified seed value. The Fitter uses this value as the initial placement configuration
+		<parameter id="seed" label="Seed" tooltip="Option to use the specified seed value. The Fitter uses this value as the initial placement configuration
 when attempting to optimize the design timing requirements, including fmax"
 					default="1" visible="true" omit="1" readonly="false" type="Cardinal" format="DoubleDash"/>
 		<parameter id="tdc" label="Timing-driven compilation" tooltip="Option to use timing-driven compilation. This option optimizes place and route based on
 timing information"
 					default="false" visible="true" readonly="false" omit="false" type="Bool_on_off" format="DoubleDash"/>
+
+		<!-- parser parameters, these can differ from base tool and will be stored separately -->
+        <parameter id="PatternErrors"/>
+		<parameter id="PatternWarnings"/>
+		<parameter id="PatternInfo"/>
+		<parameter id="InstanceCapture"/>
+		<parameter id="InstanceSeparator"/>
+		<parameter id="InstanceSuffix"/>
+		<parameter id="ShowWarnings"/>
+		<parameter id="ShowInfo"/>
+		<parameter id="PreGrepW"/>
+		<parameter id="PreGrepI"/>
+		<parameter id="GrepEWI"/>
+		<parameter id="MaxMsg"/>
+		<parameter id="parser_mode"/>
+		<parameter id="parsers_path"/>
+		<parameter id="parser_name"/>
+		<parameter id="include_msg_id"/>
+		<parameter id="exclude_id_list"/>
+		<parameter id="disable_exclude_list"/>
+
 		<input>
 			<group name="General">
 				<!-- Same as in project settings-->
@@ -177,7 +198,7 @@ timing information"
 				"\"\n"
 			</line>
 			<!-- Start fitter -->
-			<line name="quartus_run_synth"
+			<line name="quartus_run_pace_and_route"
 			      dest="QuartusConsole"
 			      mark="``" 
 			      sep="\n"
@@ -198,11 +219,18 @@ timing information"
 				"}"
 				"if {[catch {execute_module -tool fit -args $par_args} result]} {"
 				"puts \"Result: $result\""
-				"puts \"ERROR: Place and route faild. See the report file.\""
+				"puts \"Error: Place and route faild. See the report file.\""
 				"} else {"
-				"puts \"INFO: Place and route was successful.\""
+				"puts \"Info: Place and route was successful.\""
 				"}"
 				"puts \"@@FINISH@@\""
+			</line>
+			<line name="quartus_copy_reports">
+				"-c"
+				"mkdir -p %QuartusLocalResultDir ;"
+				"rsync -av -e ssh"
+				"%RemoteUser@%RemoteHost:%QuartusProjectRoot/*.rpt"
+				"%QuartusLocalResultDir/"
 			</line>
 		</output>
 	</tool>

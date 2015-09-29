@@ -46,7 +46,7 @@
                       call="iverilog"/>
         </menu>
         <menu name="ISE" 
-              label="Xilinx ISE Tools"
+              label="ISE Tools"
               icon="ise_logo.png">
               <menu name="ISE_utils" 
                     label="ISE utilities"
@@ -99,7 +99,7 @@
         </menu>
                           
         <menu name="Vivado" 
-              label="Xilinx Vivado Tools"
+              label="Vivado Tools"
               icon="vivado_logo.png">
                 <menu name="VivadoUtils" 
               	      label="Vivado utilities"
@@ -183,7 +183,7 @@
                           call="VivadoBitstream"/>
         </menu>
 		<menu name="Quartus"
-			label="Altera Quartus tools"
+			label="Quartus tools"
 			icon="quartus16x16.png">
 			<menuitem name="Quartus Server"
 				label="Start remote Quartus session"
@@ -197,9 +197,23 @@
 				label="Place and route design"
 				icon="route66.png"
 				call="QuartusPlace"/>
+			<menuitem name="QuartusTimeQuest"
+				label="Timing analizer"
+				icon="clock.png"
+				call="QuartusTimequest"/>
+			<menuitem name="QuartusPowerAnalizer"
+				label="Estimate power comsumption"
+				icon="fire.png"
+				call="QuartusPowerAnalyzer"/>
+			<menuitem name="QuartusDrc"
+				label="Check Design"
+				icon="check.png"
+				call="QuartusDrc"/>
+			<menuitem name="QuartusAssembler"
+				label="Generate bitsream"
+				icon="bitstream.png"
+				call="QuartusAssembler"/>
 		</menu>
-                          
-                          
     </menu>
     
     <menu name="MainDesignMenu2"
