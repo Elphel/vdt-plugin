@@ -67,13 +67,13 @@ public abstract class Context {
     protected List<CommandLinesBlock> commandLinesBlocks;
     protected List<ParamGroup> visibleParamGroups = new ArrayList<ParamGroup>();
     protected Config config;
-
+    protected boolean needsReparse;
     private StringConditionParser conditionParser = new StringConditionParser(this); 
     private List<String> createdControlFiles = new ArrayList<String>();    
     private boolean initialized = false; 
     private String workingDirectory;
     private String version;
-    private Context context=null;
+//    private Context context=null;
     private int currentHash; // calculated during buildparam from non-parser command blocks and command files.
     protected Context(String name,
                       String controlInterfaceName,
@@ -92,6 +92,16 @@ public abstract class Context {
         this.inputDialogLabel = inputDialogLabel;
         this.paramGroups = paramGroups;        
         this.paramContainer = new ParameterContainer(params);
+        this.needsReparse = false;
+    }
+    
+    // Tree needed to be reparsed for closure rebuild (slow)
+    public boolean needsTreeReparse(){
+    	return needsReparse;
+    }
+    public void setTreeReparse(boolean needsReparse){
+//    	System.out.println("Tool.setTreeReparse("+needsReparse+") - "+getName());
+    	this.needsReparse = needsReparse;
     }
     
     /**

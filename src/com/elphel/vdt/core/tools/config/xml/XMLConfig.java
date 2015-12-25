@@ -146,7 +146,10 @@ public class XMLConfig extends Config {
     static final String CONTEXT_TOOL_AUTOSAVE =       "autosave"; // Parameter name of boolean type that controls automatic save after success
     static final String CONTEXT_TOOL_ABSTRACT =       "abstract"; // true for the prototype tools used only for inheritance by others
     static final String CONTEXT_TOOL_PRIORITY =       "priority"; // lower the value, first to run among otherwise equivalent report tools (taht do not change state)
-    
+
+    static final String CONTEXT_TOOL_TOP_FILE =       "top-file"; // Top file for this tool
+    static final String CONTEXT_TOOL_DEFINE =         "define";   // Tool-specific define used to resolve dependencies
+
 
     static final String CONTEXT_LINEBLOCK_TAG =           "line";
     static final String CONTEXT_LINEBLOCK_NAME_ATTR =     "name";
@@ -664,6 +667,8 @@ public class XMLConfig extends Config {
                 
                 String priorityString = getAttributeValue(contextNode, CONTEXT_TOOL_PRIORITY);
 
+                String topFile =        getAttributeValue(contextNode, CONTEXT_TOOL_TOP_FILE);
+                String toolDefine =     getAttributeValue(contextNode, CONTEXT_TOOL_DEFINE);
 
                 double priority=Double.NaN;;
                 if (priorityString!=null){
@@ -735,6 +740,8 @@ public class XMLConfig extends Config {
                                    autoSaveString,
                                    isAbstract,
                                    priority,
+                                   topFile,
+                                   toolDefine,
                                    null,
                                    null,
                                    null);

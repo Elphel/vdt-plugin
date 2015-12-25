@@ -68,6 +68,7 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
                                FormatProcessor topProcessor) 
     {
         super(prefix, suffix, separator, topProcessor ); 
+//  		System.out.println("FilteredSourceListGenerator( "+prefix+","+suffix+", "+separator+",.prefix..)");
     }
     
     public String getName() {
@@ -76,16 +77,22 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
 
     protected String[] getStringValues() {
         String ignoreFilter= SelectedResourceManager.getDefault().getFilter(); // old version
-    	
-//    	System.out.println("FilteredSourceListGenerator(), tool0="+((tool0==null)?null:(tool0.getName()+tool0.getIgnoreFilter())));
-//    	System.out.print("FilteredSourceListGenerator(): ");
+        String topFile =    null;
+        String toolDefine = null;
     	if (topProcessor!=null){
     		Tool tool=topProcessor.getCurrentTool();
 //    		System.out.println(", tool="+tool+" tool name="+((tool!=null)?tool.getName():null));
     		if (tool != null) {
     			ignoreFilter=tool.getIgnoreFilter();
-//        		System.out.println(" tool="+tool.getName()+", ignoreFilter="+ignoreFilter);
-
+//        		System.out.println("FilteredSourceListGenerator().getStringValue(): tool="+tool.getName()+", ignoreFilter="+ignoreFilter);
+                topFile = tool.getTopFile();
+                toolDefine = tool.getDefine();
+                if ((toolDefine == null) || (toolDefine == "")) {
+                	if ((topFile == null ) || (topFile == "")) toolDefine = null; // no need to reparse tree for this tool
+                    else toolDefine = ""; // reparse for this tool - top file may have different defines
+                }
+                if (!tool.needsTreeReparse()) toolDefine = null;
+//        		System.out.println("topFile="+topFile+ " toolDefine="+toolDefine);
     		} else {
     			System.out.println("FilteredSourceListGenerator():  topProcessor.getCurrentTool() is null");
     		}
@@ -94,6 +101,13 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
     	}
         String[] file_names = null;
         IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
+        if ((topFile != null) && (topFile !="") && (resource !=null)) {
+        	IResource resource1 = resource.getProject().getFile(topFile);
+        	if ((resource1 != null) && (resource1.getType() == IResource.FILE)){
+        		resource = resource1;
+//        		System.out.println("resource1="+resource1);
+        	}
+        }
         Pattern ignorePattern = null;
         if (ignoreFilter!=null){
         	try {
@@ -104,8 +118,10 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
         	}
         }
         
+        
         if (resource != null && resource.getType() == IResource.FILE) {
-        	IFile[] files = VerilogUtils.getDependencies((IFile)resource); // returned just the same x353_1.tf
+        	IFile[] files = VerilogUtils.getDependencies((IFile)resource, toolDefine); // returned just the same x353_1.tf
+//    		System.out.println("FilteredSourceListGenerator():  resource = "+resource);
         	List<String> fileList=new ArrayList<String>();
             for (int i=0; i < files.length; i++) {
             	String fileName=files[i].getProjectRelativePath().toOSString(); //.getName();

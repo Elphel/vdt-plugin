@@ -27,7 +27,9 @@
 package com.elphel.vdt;
 
 import java.util.ArrayList;
+//import java.util.HashMap;
 import java.util.List;
+//import java.util.Map;
 
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 import com.elphel.vdt.veditor.VerilogPlugin;
@@ -185,25 +187,53 @@ public class VerilogUtils {
     	return outlineDatabase.getClosureSorted(topFiles);
     } // getDependencies()
     
-    public static IFile[] getDependencies(IFile topFile) {
-    	return getDependencies(new IFile [] {topFile});
+    public static IFile[] getDependencies(IFile topFile, String toolDefine) {
+///		System.out.println("===VerilogUtils.getDependencies("+topFile+")");
+        IProject project = topFile.getProject();
+        if (toolDefine != null) {
+            OutlineDatabase outlineDatabase=new OutlineDatabase(project); // new OutlineDatabase just for this scan
+            outlineDatabase.scanFilesWithDefine(topFile,toolDefine);
+//    		System.out.println("-->>>VerilogUtils.getDependencies number of files="+outlineDatabase.getDatabaseFileList().length);
+//    		for (int i=0; i<outlineDatabase.getDatabaseFileList().length; i++){
+//    			System.out.println(i+": "+outlineDatabase.getDatabaseFileList()[i]);
+//    		}
+    		IFile[] topFiles = {topFile}; 
+    		return outlineDatabase.getClosureSorted(topFiles);
+        } else {
+///    		System.out.println("===---VerilogUtils.getDependencies("+topFile+") - using editor depends");
+        	return getDependencies(new IFile [] {topFile});	
+        }
     }    
 
     /**
      * Returns included files dependency closure for given verilog file.
      */
 
+    public static IFile[] getIncludedDependencies(IFile topFile, String toolDefine) {
+//		System.out.println("===VerilogUtils.getIncludedDependencies("+topFile+", "+toolDefine+")");
+        IProject project = topFile.getProject();
+        if (toolDefine != null) {
+            OutlineDatabase outlineDatabase=new OutlineDatabase(project); // new OutlineDatabase just for this scan
+            outlineDatabase.scanFilesWithDefine(topFile,toolDefine);
+//    		System.out.println("-->>>VerilogUtils.getDependencies number of files="+outlineDatabase.getDatabaseFileList().length);
+//    		for (int i=0; i<outlineDatabase.getDatabaseFileList().length; i++){
+//    			System.out.println(i+": "+outlineDatabase.getDatabaseFileList()[i]);
+//    		}
+    		IFile[] topFiles = {topFile}; 
+    		return outlineDatabase.getClosureIncludes(topFiles);
+        } else {
+        	return getIncludedDependencies(new IFile [] {topFile});
+        }
+    }    
+    
     public static IFile[] getIncludedDependencies(IFile [] topFiles) {
     	if (topFiles==null) return null;
         IProject project = topFiles[0].getProject();
         OutlineDatabase outlineDatabase=getVeditorOutlineDatabase(project);
-    	return outlineDatabase.getCLosureIncludes(topFiles);
+    	return outlineDatabase.getClosureIncludes(topFiles);
     } // getDependencies()
     
-    public static IFile[] getIncludedDependencies(IFile topFile) {
-    	return getIncludedDependencies(new IFile [] {topFile});
-    }    
-    
+
     /* for now all modules, including library ones */
     
     public static OutlineElement[] getModuleListVeditor(IProject project) {

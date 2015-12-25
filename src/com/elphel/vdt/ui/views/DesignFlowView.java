@@ -1072,6 +1072,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     private int openToolPropertiesDialog(DesignMenuModel.Item item) {
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
         Context context = item.getTool();
+        context.setTreeReparse(true); 
         ContextOptionsDialog dialog = new ContextOptionsDialog( shell
                                                               , context 
                                                               , selectedResource.getProject() );

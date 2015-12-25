@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IResource;
 
 //import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
+import com.elphel.vdt.core.tools.params.Tool;
 //import com.elphel.vdt.core.verilog.VerilogUtils;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
@@ -64,8 +65,14 @@ public class SourceListGenerator extends AbstractGenerator {
         String[] file_names = null;
 //        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
         IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
+        String toolName = null;
+        if (topProcessor!=null){
+                Tool tool=topProcessor.getCurrentTool();
+                if (tool != null) toolName=tool.getName();
+        }
+        
         if (resource != null && resource.getType() == IResource.FILE) {
-        	IFile[] files = VerilogUtils.getDependencies((IFile)resource); // returned just the same x353_1.tf
+        	IFile[] files = VerilogUtils.getDependencies((IFile)resource, toolName); // returned just the same x353_1.tf
             file_names = new String[files.length];
             for (int i=0; i < files.length; i++)
                 file_names[i] = files[i].getProjectRelativePath().toOSString(); //.getName();

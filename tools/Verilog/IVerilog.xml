@@ -95,7 +95,10 @@
 		package="FPGA_package"
 		interface="IVerilog" errors="(.*):([0-9]+): [a-z_\- ]*error: (.*)"
 		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)"
-		info="(.*):([0-9]+): [a-z_\-  ]*sorry: (.*)">
+		info="(.*):([0-9]+): [a-z_\-  ]*sorry: (.*)"
+		top-file="%IcarusTopFile"
+		define="IVERILOG"
+		>
 
 		<extensions-list>
 			<extension mask="v" />
@@ -103,7 +106,7 @@
 		</extensions-list>
 
 		<action-menu>
-			<action label="Simulate project " resource="%SimulationTopFile"
+			<action label="Simulate project " resource="%IcarusTopFile"
 				check-extension="false" check-existence="true" icon="iverilog.ico" />
 			<action label="Simulate selected" resource="%%SelectedFile"
 				check-extension="true" check-existence="true" icon="iverilog_pointer.png" />
@@ -112,6 +115,12 @@
 <!-- 		<action label="Empty" resource="" icon="sample.gif" />
 			<action label="Just try for" resource="%%OS" />  -->	
 		</action-menu>
+
+        <parameter id="IcarusTopFile"
+                        label="Simulation top file" tooltip="IVerilog simulator top file"
+                        default="%SimulationTopFile"
+                        type="String" format="CopyValue" />
+
 
 		<parameter id="Param_Shell_Options" label="Param_Shell_Options"
 			type="String" format="CopyValue" default="-c" readonly="false"
@@ -284,6 +293,7 @@
 		<input>
 			<group name="files" label="Files">
 				<!-- "SimulationTopFile" -->
+				"IcarusTopFile"
 				"Param_TopModule"
 				"TopModulesOther"
 				"ExtraFiles"

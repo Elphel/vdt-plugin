@@ -90,6 +90,8 @@
 		autosave="AutosaveVivadoSynthesis"
 		save="SaveVivadoSynthesis"
 		inherits="VivadoToolPrototype"
+		top-file="%VivadoTopFile"
+		define="%VivadoDefine"
 		>
 		
 		<extensions-list>
@@ -109,6 +111,16 @@
 			<depends files="FilteredIncludesListPar"/>			
 			<depends files="ConstraintsFiles"/>
 		</depends-list>
+ 		
+		<parameter id="VivadoTopFile"
+			label="Synthesis top file" tooltip="Synthesis Verilog top file"
+			default="%ImplementationTopFile"
+			type="String" format="CopyValue" />
+
+		<parameter id="VivadoDefine"
+			label="Synthesis define" tooltip="`define specific to this tool"
+			default="VIVADO_SYNTHESIS"
+			type="String" format="CopyValue" />
  		
 		<parameter id="ConstraintsFiles" type="Filelist" format="ParamListSyntax"
 			default="" label="Constraints files" tooltip="Select constraint files to load to Vivado" readonly="false"
@@ -228,6 +240,8 @@
 			
 		<input>
 			<group name="General">
+			    "VivadoTopFile"
+			    "VivadoDefine"
 			    "FilteredSourceListPar"
 			    "FilteredIncludesListPar"
 				"ConstraintsFiles"

@@ -66,7 +66,7 @@ import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.dialogs.PackageLocationDialog;
 import com.elphel.vdt.ui.dialogs.ToolLocationDialog;
 import com.elphel.vdt.ui.preferences.PreferencePage;
-import com.elphel.vdt.ui.views.DesignFlowView;
+//import com.elphel.vdt.ui.views.DesignFlowView;
 
 /**
  * Support for launching verilog development tools programmatically.
@@ -134,8 +134,9 @@ public class LaunchCore {
     public static void updateLaunchConfiguration( ILaunchConfigurationWorkingCopy workingCopy
                                                 , Tool tool ) throws CoreException
     {
-        for (Iterator i = tool.getParams().iterator(); i.hasNext(); ) {
-            Parameter param = (Parameter)i.next();
+
+        for (Iterator<Parameter> i = tool.getParams().iterator(); i.hasNext(); ) {
+            Parameter param = i.next();
             String valueAttrName = LaunchCore.getValueAttributeName(param);
 
             if(param.getType().isList())
@@ -159,6 +160,7 @@ public class LaunchCore {
     } // updateLaunchConfiguration()
     
     public static void updateContextOptions(Tool tool, IProject project) throws ToolException, CoreException {
+        tool.setTreeReparse(true);
         PackageContext packageContext = tool.getParentPackage();
         if (packageContext != null) {
             OptionsCore.doLoadContextOptions(packageContext);

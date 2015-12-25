@@ -160,7 +160,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
     private TOOL_MODE lastRunMode;           // last running (not STOP) mode
     private int lastRunHash;                 // hash code of the last run
     private ToolWaitingArguments toolWaitingArguments; // save here launch parameters when tool need to wait for other tools to run/get restored
-    private double priority; // the lower the earlier tool will run among those with the same dependencies
+    private double priority;                 // the lower the earlier tool will run among those with the same dependencies
+    private String topFile;                  // Tool-specific project top file (may be different for different tools)
+    private String toolDefine;               // Tool-specific define that may be used to distinguish for closure 
+    
 	private static void DEBUG_PRINT(String msg){
 		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_TOOL_SEQUENCE)) {
 			System.out.println(msg);
@@ -193,6 +196,10 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 String autoSaveString,          // name of boolean that turns on/off auto-save after the tool run
                 boolean abstractTool,
                 double priority,
+                
+                String topFile,
+                String toolDefine,
+                
                 /* never used ??? */
                 List<Parameter> params,
                 List<ParamGroup> paramGroups,
@@ -234,7 +241,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
         this.autoSaveString=      autoSaveString;         // name of boolean that turns on/off auto-save after the tool run
         this.abstractTool=        abstractTool;
         this.priority =           priority;
-
+        
+        this.topFile =            topFile;
+        this.toolDefine =         toolDefine;
+        
+        
         disabled=null;
         restoreTool=null;
         result=null;
@@ -559,7 +570,11 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (restoreString==  null) restoreString =  baseTool.restoreString;
     	if (saveString==     null) saveString =     baseTool.saveString;
     	if (autoSaveString== null) autoSaveString = baseTool.autoSaveString;
-//    	System.out.println("copyBaseAttributes(), tool="+getName());
+
+    	if (topFile==        null) topFile =        baseTool.topFile;
+    	if (toolDefine==     null) toolDefine =     baseTool.toolDefine;
+    	
+    	//    	System.out.println("copyBaseAttributes(), tool="+getName());
     	if (Double.isNaN(priority)) priority=       baseTool.priority;
 //  What about output lines attributes?  	
 
@@ -657,6 +672,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     public List<String> getDependFiles(){
     	DEBUG_PRINT("------ getDependFiles()");
+    	setTreeReparse(true); // Set actual dependence    	
     	if ((dependFiles == null) || (dependFiles.size()==0)) return null;
     	List<String> list = new ArrayList<String>();
     	for (Iterator<Parameter> iter= dependFiles.iterator(); iter.hasNext();) {
@@ -669,6 +685,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
     			}
 //    			list.addAll(vList);
     		}
+    	}
+    	for (String item:list){
+    		System.out.println("-----> "+getName()+".getDependFiles()->"+item);
     	}
     	return list;
     }
@@ -1335,8 +1354,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
         return actualActions;
     }
     // Should be called after getMenuActions to have updateContextOptions() already ran
-    public String getIgnoreFilter(){ // calculate and get
-    	if (ignoreFilter==null) return null;
+    
+    private String parseParameterString(String par){
+    	if (par==null) return null;
     	FormatProcessor topProcessor=new FormatProcessor(this);
         FormatProcessor processor = new FormatProcessor(
                 new Recognizer[] {
@@ -1346,17 +1366,29 @@ public class Tool extends Context implements Cloneable, Inheritable {
                 		},topProcessor); // null for topFormatProcessor - this generator can not reference other parameters
         List<String> results=null;
         try {
-			results=processor.process(ignoreFilter);
+			results=processor.process(par);
         } catch (ToolException e) {
         	return null;
         }
     	if ((results == null) || (results.size()==0)) return null;
     	return results.get(0);
     }
+    public String getIgnoreFilter(){ // calculate and get
+    	return parseParameterString (this.ignoreFilter);
+    }
+    
+    public String getTopFile(){
+    	return parseParameterString (this.topFile);
+    }
+
+    public String getDefine(){
+    	return parseParameterString (this.toolDefine);
+    }
     
 //    private void updateContextOptions (IProject project){
     public void updateContextOptions (IProject project){ // public to be able to update parameters before setting "dirty" flags
     	DEBUG_PRINT("~~~updateContextOptions(project) for tool "+getName());
+    	setTreeReparse(false);
         PackageContext packageContext = getParentPackage();
         if (packageContext != null) {
             OptionsCore.doLoadContextOptions(packageContext);
@@ -1465,9 +1497,12 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	return buildParams(false);
     }
     
-      public BuildParamsItem[] buildParams(boolean dryRun) throws ToolException {
-    	  DEBUG_PRINT("buildParams("+dryRun+"): tool "+getName()+" state="+getState()+" dirty="+isDirty()+" hashMatch()="+hashMatch()+" pinned="+isPinned());
-    	
+    public BuildParamsItem[] buildParams(boolean dryRun) throws ToolException {
+    	  
+    	DEBUG_PRINT("buildParams("+dryRun+"): tool "+getName()+" state="+getState()+" dirty="+isDirty()+" hashMatch()="+hashMatch()+" pinned="+isPinned());
+
+    	setTreeReparse(!dryRun);
+    	  
         if(parentPackage != null)
             parentPackage.buildParams();
 
