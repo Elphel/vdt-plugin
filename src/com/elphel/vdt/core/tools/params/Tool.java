@@ -128,6 +128,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     // TODO: Compare dependFiles with literary result of other tools, if match - these are states, not files
     private List<Parameter> dependStates; // snapshot names
     private List<Parameter> dependFiles;
+    private List<String> dependFilesCache = null; // list of resolved file relative paths calculated earlier 
     
     private Map <String,String> dependStatesTimestamps;
     private Map <String,String> dependFilesTimestamps;
@@ -251,6 +252,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
         result=null;
         dependStates=null;
         dependFiles=null;
+        dependFilesCache=null;
 		DEBUG_PRINT("Created tool"+name+" disabledString = "+disabledString);
         pinned=false;
         openState=null;
@@ -669,27 +671,31 @@ public class Tool extends Context implements Cloneable, Inheritable {
     			}
     		}
     	}
+    	dependFilesCache = null; //invalidate, will be recreated
     }
-    public List<String> getDependFiles(){
-    	DEBUG_PRINT("------ getDependFiles()");
-    	setTreeReparse(true); // Set actual dependence    	
-    	if ((dependFiles == null) || (dependFiles.size()==0)) return null;
-    	List<String> list = new ArrayList<String>();
-    	for (Iterator<Parameter> iter= dependFiles.iterator(); iter.hasNext();) {
-    		List<String> vList=iter.next().getValue(new FormatProcessor(this)); // null for topFormatProcessor
-    		if (vList!=null) {
-    			for (String item:vList){
-    				if ((item!=null) && (item.trim().length()>0)){
-    					list.add(item.trim());
-    				}
-    			}
-//    			list.addAll(vList);
-    		}
+    public List<String> getDependFiles(boolean rebuild){
+    	if (rebuild || (dependFilesCache == null)) {
+	    	DEBUG_PRINT("------ getDependFiles(rebuild="+rebuild+"), rebuilding");
+	    	setTreeReparse(true); // Set actual dependence    	
+	    	if ((dependFiles == null) || (dependFiles.size()==0)) return null;
+	    	dependFilesCache = new ArrayList<String>();
+	    	for (Iterator<Parameter> iter= dependFiles.iterator(); iter.hasNext();) {
+	    		List<String> vList=iter.next().getValue(new FormatProcessor(this)); // null for topFormatProcessor
+	    		if (vList!=null) {
+	    			for (String item:vList){
+	    				if ((item!=null) && (item.trim().length()>0)){
+	    					dependFilesCache.add(item.trim());
+	    				}
+	    			}
+	    		}
+	    	}
+    	} else {
+	    	DEBUG_PRINT("------ getDependFiles(rebuild="+rebuild+"), using cache");
     	}
-    	for (String item:list){
+    	for (String item:dependFilesCache){
     		DEBUG_PRINT("-----> "+getName()+".getDependFiles()->"+item);
     	}
-    	return list;
+    	return dependFilesCache;
     }
 
     public List<String> getDependStates(){

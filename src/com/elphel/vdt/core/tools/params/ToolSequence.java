@@ -1720,8 +1720,9 @@ java.lang.NullPointerException
     }
     private  Map <String,String> makeDependFiles(Tool tool, boolean failOnMissing){
     	DEBUG_PRINT("++++++ makeDependFiles("+tool.getName()+")");
-    	Map <String,String> depFiles=new Hashtable<String,String>();    	
-    	List<String> dependFileNames=tool.getDependFiles(); // files on which this tool depends - make cached version
+    	Map <String,String> depFiles=new Hashtable<String,String>();
+    	// Use depend files cache if available
+    	List<String> dependFileNames=tool.getDependFiles(false); // files on which this tool depends - make cached version
     	if (dependFileNames!=null) {
     		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
     		for (String depFile: dependFileNames){
