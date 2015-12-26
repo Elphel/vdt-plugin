@@ -188,7 +188,7 @@ public class VerilogUtils {
     } // getDependencies()
     
     public static IFile[] getDependencies(IFile topFile, String toolDefine) {
-///		System.out.println("===VerilogUtils.getDependencies("+topFile+")");
+//		System.out.println("===VerilogUtils.getDependencies("+topFile+")");
         IProject project = topFile.getProject();
         if (toolDefine != null) {
             OutlineDatabase outlineDatabase=new OutlineDatabase(project); // new OutlineDatabase just for this scan
@@ -200,7 +200,7 @@ public class VerilogUtils {
     		IFile[] topFiles = {topFile}; 
     		return outlineDatabase.getClosureSorted(topFiles);
         } else {
-///    		System.out.println("===---VerilogUtils.getDependencies("+topFile+") - using editor depends");
+//    		System.out.println("===---VerilogUtils.getDependencies("+topFile+") - using editor depends");
         	return getDependencies(new IFile [] {topFile});	
         }
     }    

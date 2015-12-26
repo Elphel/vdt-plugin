@@ -29,6 +29,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.swt.widgets.Display;
@@ -88,6 +92,9 @@ public class ToolSequence {
 	private Map<String,ToolStateStamp> currentStates;
 	private IMemento unfinishedMemento=null;
 	private String menuName=null;
+	
+	private DependChangeListener dependChangeListener;
+	
 //	private IProgressMonitor monitor;
 	
 	private static void DEBUG_PRINT(String msg){
@@ -99,6 +106,7 @@ public class ToolSequence {
 	public ToolSequence(DesignFlowView designFlowView){
 		this.designFlowView=designFlowView;
 		this.currentStates=new Hashtable<String,ToolStateStamp>();
+		this.dependChangeListener = new DependChangeListener();
 	}
 
 	public void clearToolStates(){
@@ -230,8 +238,19 @@ public class ToolSequence {
 			bars.getStatusLineManager().setMessage("");
 //			designFlowView.changeMenuTitle(menuName);
 			designFlowView.finalizeAfterVEditorDB(unfinishedMemento);
+			DEBUG_PRINT("==============finalizeBootAfterVEditor()");
+			addResourceChangeListener();
 //		}
 	}
+	
+	public void addResourceChangeListener(){
+		VerilogPlugin.getWorkspace().addResourceChangeListener(
+				dependChangeListener, IResourceChangeEvent.POST_CHANGE);
+		DEBUG_PRINT("==============addResourceChangeListener()");
+		
+	}
+	
+	
 	
 	public void toolFinished(Tool tool){
 		if (tool!=null) doToolFinished(tool);
@@ -1517,7 +1536,7 @@ java.lang.NullPointerException
 		        	// tool.updateContextOptions(project) recalculates parameters, but not the hashcodes
 		        	tool.updateContextOptions(project); // Fill in parameters - it parses here too - at least some parameters? (not in menu mode)
 		        	try {
-						tool.buildParams(true); // dryRun
+						tool.buildParams(true, true); // dryRun and re-parse for dependencies
 					} catch (ToolException e) {
 						System.out.println("setToolsDirtyFlag(): failed to buildParams() for tool "+tool.getName());
 					}
@@ -1590,6 +1609,7 @@ java.lang.NullPointerException
 				if (!met) {
 					tool.setDirty(true);
 					newDirty=true;
+					DEBUG_PRINT("propagateDirty(): Setting dirty flag for "+tool.getName());
 				}
 			}
 		}
@@ -1701,7 +1721,7 @@ java.lang.NullPointerException
     private  Map <String,String> makeDependFiles(Tool tool, boolean failOnMissing){
     	DEBUG_PRINT("++++++ makeDependFiles("+tool.getName()+")");
     	Map <String,String> depFiles=new Hashtable<String,String>();    	
-    	List<String> dependFileNames=tool.getDependFiles(); // files on which this tool depends
+    	List<String> dependFileNames=tool.getDependFiles(); // files on which this tool depends - make cached version
     	if (dependFileNames!=null) {
     		IProject project = SelectedResourceManager.getDefault().getSelectedProject(); // should not be null when we got here
     		for (String depFile: dependFileNames){
@@ -1729,5 +1749,64 @@ java.lang.NullPointerException
     	}
     	return depFiles;
     }
+    
+	class DeltaPrinter implements IResourceDeltaVisitor {
+		public boolean visit(IResourceDelta delta) {
+			IResource res = delta.getResource();
+			if ((res instanceof IFile) && (delta.getFlags() != IResourceDelta.MARKERS)) {
+				IFile file = (IFile) res;
+				switch (delta.getKind()) {
+				case IResourceDelta.ADDED:
+					break;
+				case IResourceDelta.REMOVED:
+				    DEBUG_PRINT("=====>>> DependChangeListener: removed "+file);
+			        setToolsDirtyFlag(false);
+					break;
+				case IResourceDelta.CHANGED:
+					DEBUG_PRINT("=====>>> DependChangeListener: changed "+file+String.format("0x%x", delta.getFlags()));
+		            setToolsDirtyFlag(false);
+					break;
+				}
+			}
+			return true; // visit the children
+		}
+	}
+    
+    // Check dependency on resource change event
+    /**
+     * Class used to keep track of workspace resources
+     */
+    class DependChangeListener implements IResourceChangeListener {
+        /**
+         * Called when a resource is changed
+         */
+        public void resourceChanged(IResourceChangeEvent event) {
+//            	if (isAnyToolRunnigOrWaiting()) {
+//    				DEBUG_PRINT("=====DependChangeListener.resourceChanged(): Tool is running");
+//            		return;
+//            	}
+//				DEBUG_PRINT("=====DependChangeListener.resourceChanged() start: "+event.getType());
+        	
+            switch (event.getType()) {
+            case IResourceChangeEvent.PRE_CLOSE:
+                    break;
+            case IResourceChangeEvent.PRE_DELETE:
+                    break;
+            case IResourceChangeEvent.POST_CHANGE:
+    				try {
+    					event.getDelta().accept(new DeltaPrinter());
+    				} catch (CoreException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}
+                    break;
+            case IResourceChangeEvent.PRE_BUILD:
+                    break;
+            case IResourceChangeEvent.POST_BUILD:
+                    break;
+            }
+        }
+    }
+    
 }
 

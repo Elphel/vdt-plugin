@@ -687,7 +687,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
     		}
     	}
     	for (String item:list){
-    		System.out.println("-----> "+getName()+".getDependFiles()->"+item);
+    		DEBUG_PRINT("-----> "+getName()+".getDependFiles()->"+item);
     	}
     	return list;
     }
@@ -1035,7 +1035,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
         	try {project.setPersistentProperty(qn, dependFilesTimestamps.get(file));}
         	catch (CoreException e)  {System.out.println(project+"Failed setPersistentProperty("+qn+", "+dependFilesTimestamps.get(file)+", e="+e);}
         }
-        DEBUG_PRINT("*** Updated persistent properties for tool "+getName()+ "  in the project "+project.toString());
+        DEBUG_PRINT("*** Updated persistent properties for tool "+getName()+ "  in the project "+project.toString()+
+        		", state="+getState().toString());
     }
 
     public void restoreState(IProject project) {
@@ -1137,6 +1138,7 @@ public class Tool extends Context implements Cloneable, Inheritable {
 //		if (getName().equals("ISExst")){
 //			System.out.println("restoreState(memento): Debugging ISExst");
 //		}
+  	    DEBUG_PRINT(name+" isDirty() == "+isDirty());
     	IMemento[] toolMementos=memento.getChildren(MEMENTO_TOOL_TYPE);
     	IMemento toolMemento=null;
     	for (IMemento tm:toolMementos){
@@ -1156,6 +1158,9 @@ public class Tool extends Context implements Cloneable, Inheritable {
     	if (state!=null){
     		try {
     			setStateJustThis(TOOL_STATE.valueOf(state));
+ 			  	DEBUG_PRINT("Got memento data for "+name+" state="+state.toString());
+    			
+    			
     		} catch (IllegalArgumentException e){
     			System.out.println("Invalid tool state: "+state+" for tool "+name+" in memento");
     		}
@@ -1192,6 +1197,8 @@ public class Tool extends Context implements Cloneable, Inheritable {
 //    			DEBUG_PRINT("Got memento data for "+name+":" + MEMENTO_TOOL_FILEDEPSTAMP+": name="+depName+" stamp="+value);
      		}
      	}
+  	    DEBUG_PRINT(name+" isDirty() == "+isDirty());
+     	
     }
     
     public void checkBaseTool() throws ConfigException {
@@ -1498,10 +1505,13 @@ public class Tool extends Context implements Cloneable, Inheritable {
     }
     
     public BuildParamsItem[] buildParams(boolean dryRun) throws ToolException {
+    	return buildParams(dryRun, !dryRun);
+    }
+    public BuildParamsItem[] buildParams(boolean dryRun, boolean reParse) throws ToolException {
     	  
-    	DEBUG_PRINT("buildParams("+dryRun+"): tool "+getName()+" state="+getState()+" dirty="+isDirty()+" hashMatch()="+hashMatch()+" pinned="+isPinned());
+    	DEBUG_PRINT("buildParams("+dryRun+", "+reParse+"): tool "+getName()+" state="+getState()+" dirty="+isDirty()+" hashMatch()="+hashMatch()+" pinned="+isPinned());
 
-    	setTreeReparse(!dryRun);
+    	setTreeReparse(reParse);
     	  
         if(parentPackage != null)
             parentPackage.buildParams();
