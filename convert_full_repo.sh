@@ -24,6 +24,15 @@
 # include the source code for the parts of Eclipse or Eclipse plugins used
 # as well as that of the covered work.}
 ################################################################################
+#Usage:
+# 1 - run ./create_vdt_veditor_patch.sh
+# 2 - commit it
+# 3 - remove/rename ../vdt-plugin if it exists
+# 4 - run this script, it will create ../vdt-plugin repository
+# 5 - edit ../vdt-plugin.gitignore - it may have duplicates
+# 6 - run "git remote set-url origin git@github.com:Elphel/vdt-plugin.git" in the new repo
+# 7 ? Had conflicts in vdt-veditor.patch. Used new version, "git add vdt-veditor.patch", "git commit -i vdt-veditor.patch"
+
 #TMPDIR="tmp"
 #GITURL="https://github.com/Elphel/unmodified_veditor_1_2_0_clone.git"
 #GITREPO="unmodified_veditor_1_2_0_clone"
