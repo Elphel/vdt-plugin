@@ -59,7 +59,7 @@
         <parameter 	id="rawfile" label="Bitstream filename" tooltip= "Bitstream file name (will add *.bit extension)."
         			default="%%ProjectName" visible="true" omit="" type="String" format="CopyValue"/>
         <parameter 	id="force" label="Force (overwrite)" tooltip= "Overwrite existent files."
-        			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
+        			default="true" visible="true" omit="false" type="Boolean" format="DashName"/>
         <parameter 	id="raw_bitfile" label="Write raw bitfile" tooltip= "Write bitfile in ASCII (*.rbt)."
         			default="false" visible="true" omit="false" type="Boolean" format="DashName"/>
         <parameter 	id="no_binary_bitfile" label="Do not write .bit" tooltip= "Do not write to binary bitfile (*.bit)."

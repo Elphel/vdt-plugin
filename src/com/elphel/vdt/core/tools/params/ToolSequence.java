@@ -53,6 +53,7 @@ import com.elphel.vdt.ui.options.FilteredFileSelector;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 import com.elphel.vdt.ui.views.DesignFlowView;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.parser.OutlineDatabase;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 import java.io.File;
@@ -734,9 +735,13 @@ java.lang.NullPointerException
 			String fullPath,
 			String ignoreFilter) throws CoreException {
 		if (!okToRun()) return;
+		// Just testing://
+//		OutlineDatabase.getProjectsDatabase(SelectedResourceManager.getDefault().getSelectedProject()).invalidateToolCache();
+		
 		
 		// Set this tool dirty (not to try reports on this tool before it ran)
 		DEBUG_PRINT("launchToolSequence("+tool.getName()+", setting its state to \"Dirty\"");
+		
 		tool.setDirty(true);
 		setStateProvides(); // just testing
 		//    		tool.setDesignFlowView(designFlowView);

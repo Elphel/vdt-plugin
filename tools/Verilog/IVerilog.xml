@@ -226,7 +226,7 @@
 			visible="true" />
 
 		<parameter id="GrepFindErrWarn" label="Grep pattern for both errors and warnings"
-			type="String" format="GrepFindSyntax" default="error|warning"
+			type="String" format="GrepFindSyntax" default="error|warning|sorry"
 			readonly="false" visible="true" />
 
 		<parameter id="GrepSkip1" label="Grep skip pattern" type="String"
@@ -361,7 +361,7 @@
 				<if-not IVerilogActionIndex="2">
 					"%OutFileFull"
 				</if-not>
-				" -D IVERILOG"
+				" -DIVERILOG"
 				"%IVerilogOther"
 				"%Param_TopModule"
 				"%TopModulesOther"

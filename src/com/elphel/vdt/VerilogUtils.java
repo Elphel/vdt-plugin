@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 //import java.util.Map;
 
+
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.veditor.document.HdlDocument;
@@ -100,6 +101,7 @@ public class VerilogUtils {
 			System.out.println("database is null, and no Verilog file is selected to create one.");
 			return null;
 		}
+		// getChosenVerilogFile() sometimes returns project (after switching projects)
 		hdlDocument=new VerilogDocument(project, (IFile) SelectedResourceManager.getDefault().getChosenVerilogFile());
 		return hdlDocument.getOutlineDatabase(); /* will create a new one if does not exist */
 	}
@@ -156,7 +158,7 @@ public class VerilogUtils {
     public static OutlineElement[] getTopModulesVeditor(IFile file) {
         IProject project = file.getProject();
         if (project==null){
-        	System.out.println("getTopModulesVeditor(): Projectis null for file="+file.getFullPath());
+        	System.out.println("getTopModulesVeditor(): Project is null for file="+file.getFullPath());
         	return null;
         }
         OutlineDatabase outlineDatabase=getVeditorOutlineDatabase(project);
@@ -193,14 +195,18 @@ public class VerilogUtils {
         if (toolDefine != null) {
             OutlineDatabase outlineDatabase=new OutlineDatabase(project); // new OutlineDatabase just for this scan
             outlineDatabase.scanFilesWithDefine(topFile,toolDefine);
-//    		System.out.println("-->>>VerilogUtils.getDependencies number of files="+outlineDatabase.getDatabaseFileList().length);
-//    		for (int i=0; i<outlineDatabase.getDatabaseFileList().length; i++){
-//    			System.out.println(i+": "+outlineDatabase.getDatabaseFileList()[i]);
-//    		}
+       		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_CLOSURE)) {
+	    		System.out.println("-->>>VerilogUtils.getDependencies number of files="+outlineDatabase.getDatabaseFileList().length);
+	    		for (int i=0; i<outlineDatabase.getDatabaseFileList().length; i++){
+	    			System.out.println(i+": "+outlineDatabase.getDatabaseFileList()[i]);
+	    		}
+       		}
     		IFile[] topFiles = {topFile}; 
     		return outlineDatabase.getClosureSorted(topFiles);
         } else {
-//    		System.out.println("===---VerilogUtils.getDependencies("+topFile+") - using editor depends");
+       		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_CLOSURE)) {
+       			System.out.println("===---VerilogUtils.getDependencies("+topFile+") - using editor depends");
+       		}
         	return getDependencies(new IFile [] {topFile});	
         }
     }    

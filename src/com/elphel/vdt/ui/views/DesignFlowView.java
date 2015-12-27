@@ -1271,7 +1271,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         // Initialize VEditor database build
    	    IResource HDLFile=SelectedResourceManager.getDefault().getChosenVerilogFile();
    	    	// restore properties from the project, overwrite global ones
-   	    restoreCurrentState(selectedResource.getProject()); // null OK
+   	    IProject project;
+   	    if (selectedResource == null) {
+   	    	project = SelectedResourceManager.getDefault().getSelectedProject();
+   	    } else {
+   	    	project = HDLFile.getProject();
+   	    }
+//   	    restoreCurrentState(selectedResource.getProject()); // null OK
+   	    restoreCurrentState(project); // null OK
    	    
    	    if ((HDLFile!=null) && HDLFile.exists()){
    	    	toolSequence.setUnfinishedBoot(memento,true);

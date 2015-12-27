@@ -41,6 +41,7 @@ import org.eclipse.core.resources.IResource;
 
 
 
+
 //import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.core.tools.params.FormatProcessor;
@@ -48,6 +49,8 @@ import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.ui.MessageUI;
 //import com.elphel.vdt.core.verilog.VerilogUtils;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
+import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 /**
  * Generate the file name list of dependency closure for last selected 
@@ -84,7 +87,9 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
 //    		System.out.println(", tool="+tool+" tool name="+((tool!=null)?tool.getName():null));
     		if (tool != null) {
     			ignoreFilter=tool.getIgnoreFilter();
-//        		System.out.println("FilteredSourceListGenerator().getStringValue(): tool="+tool.getName()+", ignoreFilter="+ignoreFilter);
+           		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_CLOSURE)) {
+           			System.out.println("FilteredSourceListGenerator().getStringValue(): tool="+tool.getName()+", ignoreFilter="+ignoreFilter);
+           		}
                 topFile = tool.getTopFile();
                 toolDefine = tool.getDefine();
                 if ((toolDefine == null) || (toolDefine == "")) {
@@ -92,7 +97,9 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
                     else toolDefine = ""; // reparse for this tool - top file may have different defines
                 }
                 if (!tool.needsTreeReparse()) toolDefine = null;
-//        		System.out.println("topFile="+topFile+ " toolDefine="+toolDefine);
+           		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_CLOSURE)) {
+           			System.out.println("topFile="+topFile+ " toolDefine="+toolDefine);
+           		}
     		} else {
     			System.out.println("FilteredSourceListGenerator():  topProcessor.getCurrentTool() is null");
     		}
@@ -121,16 +128,29 @@ public class FilteredSourceListGenerator extends AbstractGenerator {
         
         if (resource != null && resource.getType() == IResource.FILE) {
         	IFile[] files = VerilogUtils.getDependencies((IFile)resource, toolDefine); // returned just the same x353_1.tf
-//    		System.out.println("FilteredSourceListGenerator():  resource = "+resource);
+       		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_CLOSURE)) {
+	            for (IFile fl: files) {
+	    		    System.out.println("FilteredSourceListGenerator()"+fl);
+	            }
+	            System.out.println("FilteredSourceListGenerator():  resource = "+resource);
+       		}
         	List<String> fileList=new ArrayList<String>();
             for (int i=0; i < files.length; i++) {
             	String fileName=files[i].getProjectRelativePath().toOSString(); //.getName();
             	if ((ignorePattern!=null) &&ignorePattern.matcher(fileName).matches()) {
+//        		    System.out.println("FilteredSourceListGenerator() IGNORE "+fileName+" ("+files[i]+")");
             			continue;
             	}
             	fileList.add(fileName);            		
+//    		    System.out.println("FilteredSourceListGenerator() ADDED "+fileName+" ("+files[i]+")");
             }
             file_names=fileList.toArray(new String[0]);
+       		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_CLOSURE)) {
+       			for (String fn: file_names) {
+       				System.out.println(String.format("FilteredSourceListGenerator() %s ",fn));
+              }
+       		}
+            
         } else {
 //            fault("There is no selected project");
             System.out.println(getName()+": no project selected");
