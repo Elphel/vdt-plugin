@@ -30,6 +30,7 @@ Table of Contents
       
 ##VDT plugin documentation
 Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
+Here are some [screenshots](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
 ##Instalation of VDT plugin and related programs
 VDT plugin for Eclipse is designed to integrate different tools for Verilog-based FPGA design.
 Currently it supports only GNU/Linux operating system and tool specification file support
