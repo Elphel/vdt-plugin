@@ -53,7 +53,6 @@ import com.elphel.vdt.ui.options.FilteredFileSelector;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 import com.elphel.vdt.ui.views.DesignFlowView;
 import com.elphel.vdt.veditor.VerilogPlugin;
-import com.elphel.vdt.veditor.parser.OutlineDatabase;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
 
 import java.io.File;
@@ -605,6 +604,16 @@ java.lang.NullPointerException
 		Map<String,String> openStates=new ConcurrentHashMap<String,String>();
 		for (Tool session:sessions){
 			if (session.getOpenStateName() != null) openStates.put(session.getOpenStateName(),session.getOpenStateFile());
+		} // Got open state that is now dirty
+		// Remove open states that correspond to dirty tools
+		for (String state:openStates.keySet()){
+			for (Tool tool:ToolsCore.getConfig().getContextManager().getToolList()){
+//				if ((tool.getStateLink().equals(state)) && tool.isDirty()){
+	      		if (state.equals(tool.getStateLink()) && tool.isDirty()){
+					openStates.remove(state);
+					DEBUG_PRINT("Removing state "+state+" as the tool "+tool.getName()+" is dirty.");
+				}
+			}
 		}
 		if (openStates.size()==0) return null;
 		for (Tool tool:ToolsCore.getConfig().getContextManager().getToolList()){
