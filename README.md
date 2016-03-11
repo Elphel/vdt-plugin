@@ -263,6 +263,13 @@ Run patch command from the unisms subdirectory of the eddr3 project :
 ```bash
 ~/git/eddr3/unisims$ patch -p1 < ../unisims_patches/OSERDESE1.diff
 ```
+In x393_sata project this command will be
+```bash
+~/git/eddr3/unisims$ patch -p1 < ../x393/unisims_patches/OSERDESE1.diff
+```
+After new files are added he project needs to be refreshed - you may click on the project name in the navigator window
+And press F5 key or right-click -> Refresh
+
 ## Simulating eddr3 project with Icarus Verilog
 ```
 Design Menu -> Verilog Development tools -> Icarus Verilog simulator
