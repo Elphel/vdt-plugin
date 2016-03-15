@@ -51,7 +51,7 @@ sudo apt-get install gtkwave
 ```
 #### other programs needed for building Icarus Verilog
 ```
-sudo apt-get install autoconf gperf flex bison g++ zlib1g-dev libbz2-dev
+sudo apt-get install autoconf gperf flex bison g++ zlib1g-dev libbz2-dev git
 ```
 #### Java JDK
 For most tasks JRE is sufficient, but if you would like to be able to modify and recompile Verilog
