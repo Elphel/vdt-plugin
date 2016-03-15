@@ -66,8 +66,10 @@ git clone git://github.com/steveicarus/iverilog.git
 cd iverilog
 sh autoconf.sh
 ./configure
+```
 Update: Removed instructions to modify Icarus code - current version does not need
 them anymore, so just proceed with
+```
 make
 sudo make install
 ```
