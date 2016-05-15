@@ -262,6 +262,8 @@ In x393_sata project this command will be
 After new files are added the project needs to be refreshed - you may click on the project name in the navigator window
 and press F5 key or right-click -> Refresh
 
+There are many files in the library so refreshing make take a while.
+
 ## Simulating x393 project with Icarus Verilog
 ```
 Design Menu -> Verilog Development tools -> Icarus Verilog simulator
