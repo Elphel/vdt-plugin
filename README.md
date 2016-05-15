@@ -30,10 +30,12 @@ Table of Contents
       
 ##VDT plugin documentation
 Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
+Here are some [screenshots](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
 ##Instalation of VDT plugin and related programs
 VDT plugin for Eclipse is designed to integrate different tools for Verilog-based FPGA design.
 Currently it supports only GNU/Linux operating system and tool specification file support
-Icarus Verilog simulator and Xilinx ISE and Vivado Webpack design suites.
+Icarus Verilog simulator and Xilinx ISE and Vivado Webpack design suites. It also works with Altera
+Quartus tools for synthesising FPGA code for Altera devices.
 Below is detailed step-by-step installation procedure for Kubuntu 14.04 LTS (other GNU/Linux systems
 should not require significantly different installation). Latest tested versions of the programs
 are also specified. 
