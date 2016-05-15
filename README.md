@@ -87,25 +87,10 @@ Unzip it in any convenient location - this location will be provided to Eclipse 
 ### Eclipse IDE
 
 You will need _Eclipse IDE for Java EE Developers_  (capable of plugin development),
-latest tested version is Luna 
-(eclipse-jee-luna-SR1-linux-gtk-x86_64.tar.gz). VDT plugin is experimental and I would
-recommend to have a separate (from your other development) installation. VDT uses
-modified version of [VEditor](http://sourceforge.net/projects/veditor/) and any other
-versions of VEditor installed will conflict with VDT.
-
-**Update:** Mars ( eclipse-jee-mars-R-linux-gtk-x86_64.tar.gz ) seems to be working too if
-Gtk3 is disabled (Gtk2 used instead) by adding the following 2 lines:
-```
---launcher.GTK_version
-2
-```
-are added just before line
-```
---launcher.appendVmargs.
-```
-in the eclipse.ini file. With Gtk 3 the hover text (such as problems, module instance templates)
-is shown black on black background and tool states icons are invisible. 
-
+latest tested version is Mars (eclipse-jee-mars-2-linux-gtk-x86_64.tar.gz). VDT plugin
+is experimental and I would recommend to have a separate (from your other development)
+installation. VDT uses modified version of [VEditor](http://sourceforge.net/projects/veditor/)
+and any other versions of VEditor installed will conflict with VDT.
 
 ### Installation of VDT plugin itself
 
@@ -174,9 +159,11 @@ an existing one. We will use DDR3 memory interface project as an example.
 Sample project is a DDR3 memory interface for Xilinx Zynq SOC that does not depend on
 undocumented featuers and encrypted modules and can be simulated with the Free Software
 tools.
-### Import eddr3 project
+### Import x393 project
+You may already have it if you installed other software for Elphel NC393 camera development, if that
+is the case you can skip the next step and use ~/git/elphel393/fpga-elphel/x393/
 ```
-git clone git@github.com:Elphel/eddr3.git
+git clone git@github.com:Elphel/x393.git
 ```
 From the Eclipse instance that runs VDT plugin (not the one with the VDT source code)
 use the same steps as for importing VDT plugin code (described above):  
@@ -184,18 +171,17 @@ use the same steps as for importing VDT plugin code (described above):
 File->Import->Git->Projects from Git->Existing local repository-> Select directory where you cloned eddr3
 Import Existing Projects (wizard selection)
 ```
-Keep **eddr3** checked and press **Finish**
+Keep both **x393** and **py393** checked and press **Finish**
 
-### Configuration of VDT for eddr3 project
-The cloned eddr3 project does not include Verilog modules of Xilinx primitives that are
+### Configuration of VDT for x393 project
+The cloned x393 project does not include Verilog modules of Xilinx primitives that are
 required even for simulation of the design. The required library (unisims) is included
 with the Xilinx Vivado software and the proprietary license does not allow to redistribute
 it. VDT provides means to copy this library from your Vivado installation to the project,
 So for the next step you need Xilinx software to be installed on the same or different
 computer running GNU/Linux.
 
-Open the top module (ddrc_test01.v) in the Editor (seems to be a bug that prevents
-configuration without that step)
+Open the top module (x393.v) in the Editor (or any othe Verilog file of the project)
 
 Open "Verilog/VHDL' perspective:
 ```
@@ -229,6 +215,10 @@ to be installed, you can do this with
 ```
 sudo apt-get install ssh-askpass
 ```
+Update: In Kubuntu 16.04 ssh-askpass is not required, there is a similar program available in base
+installation. Just pay attention that the first pop-up window will ask not for the password, but for
+"yes".
+
 If ssh will not find *ssh-askpass* or a similar program, it will fail and Eclipse console output will
 output the resolution suggestions.
 
