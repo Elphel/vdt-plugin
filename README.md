@@ -57,7 +57,7 @@ sudo apt-get install autoconf gperf flex bison g++ zlib1g-dev libbz2-dev git
 For most tasks JRE is sufficient, but if you would like to be able to modify and recompile Verilog
 language parsing you will need java compiler that comes with the full JDK
 ```
-sudo apt-get install openjdk-7-jdk
+sudo apt-get install default-jdk
 ```
 ### Icarus Verilog
 Icarus Verilog has to be compiled from the source code that is available in git repository:
