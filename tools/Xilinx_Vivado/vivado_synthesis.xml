@@ -28,7 +28,7 @@
  -->
 <vdt-project>
 	<interface name="VivadoSynthesisInterface" extends="VivadoInterface">
- 		<syntax name="read_xdc_syntax" format="%(read_xdc %%ParamValue%|\n%)" />	
+ 		<syntax name="read_xdc_syntax" format="%(read_xdc -unmanaged %%ParamValue%|\n%)" />	
 	    <typedef name="FlattenHierarchyType">
       		<paramtype kind= "enum" base="String">
       			<item value="rebuilt" label="Attempt to rebuild hierarchy after synthesis is completed"/>
