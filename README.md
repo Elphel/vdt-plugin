@@ -266,8 +266,10 @@ and press F5 key or right-click -> Refresh
 ```
 Design Menu -> Verilog Development tools -> Icarus Verilog simulator
 ```
-If everything will work correctly, Icarus will compile and simulate the design (some warnings in the beginning are not fixed yet). After that GTKWave will
-open the simulation results.
+If you get many errors "Unknown module type", you may need to refresh the project (press F5) after adding unisims library
+files.
+
+If everything will work correctly, Icarus will compile and simulate the design (some warnings in the beginning are not fixed yet). After that GTKWave will open the simulation results.
 
 In the case of problems you may get more verbose output in the console if you right-click on the 
 *Icarus Verilog Simulator*, select *Tool parameters*, open *Options tab*  and check *Show output
