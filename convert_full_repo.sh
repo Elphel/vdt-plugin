@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# 
+#
 #  Additional permission under GNU GPL version 3 section 7:
 # If you modify this Program, or any covered work, by linking or combining it
 # with Eclipse or Eclipse plugins (or a modified version of those libraries),
@@ -29,7 +29,7 @@
 # 2 - commit it
 # 3 - remove/rename ../vdt-plugin if it exists
 # 4 - run this script, it will create ../vdt-plugin repository
-# 5 - edit ../vdt-plugin.gitignore - it may have duplicates
+# 5 - edit ../vdt-plugin/.gitignore - it may have duplicates
 # 6 - run "git remote set-url origin git@github.com:Elphel/vdt-plugin.git" in the new repo
 # 7 ? Had conflicts in vdt-veditor.patch. Used new version, "git add vdt-veditor.patch", "git commit -i vdt-veditor.patch"
 
