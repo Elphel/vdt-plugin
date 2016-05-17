@@ -21,12 +21,12 @@ Table of Contents
       * [Configuring JavaCC (optional)](#configuring-javacc-optional)
       * [Building and running VDT](#building-and-running-vdt)
   * [Import and configuration of the sample project in VDT](#import-and-configuration-of-the-sample-project-in-vdt)
-    * [Import eddr3 project](#import-eddr3-project)
-    * [Configuration of VDT for eddr3 project](#configuration-of-vdt-for-eddr3-project)
+    * [Import x393 project](#import-x393-project)
+    * [Configuration of VDT for x393 project](#configuration-of-vdt-for-x393-project)
       * [Configure access to the server with Xilinx tools](#configure-access-to-the-server-with-xilinx-tools)
       * [Copy unisims library to the local directory](#copy-unisims-library-to-the-local-directory)
       * [Patch primitive(s) to work with Icarus Verilog](#patch-primitives-to-work-with-icarus-verilog)
-  * [Simulating eddr3 project with Icarus Verilog](#simulating-eddr3-project-with-icarus-verilog)
+  * [Simulating x393 project with Icarus Verilog](#simulating-x393-project-with-icarus-verilog)
       
 ##VDT plugin documentation
 Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
@@ -177,12 +177,16 @@ tools.
 You may already have it if you installed other software for Elphel NC393 camera development, if that
 is the case you can skip the next step and use ~/git/elphel393/fpga-elphel/x393/
 ```
-git clone git@github.com:Elphel/x393.git
+git clone https://github.com/Elphel/x393.git
+cd x393
+./INIT_PROJECT
 ```
+The last command copies Eclipse .project and .pydevproject files to the working directory.
+
 From the Eclipse instance that runs VDT plugin (not the one with the VDT source code)
 use the same steps as for importing VDT plugin code (described above):  
 ```
-File->Import->Git->Projects from Git->Existing local repository-> Select directory where you cloned eddr3
+File->Import->Git->Projects from Git->Existing local repository-> Select directory where you cloned x393
 Import Existing Projects (wizard selection)
 ```
 Keep both **x393** and **py393** checked and press **Finish**
@@ -263,9 +267,9 @@ Vivado Tools -> Vivado utilities -> Copy Vivado primitives library to the local 
 ```
 #### Patch primitive(s) to work with Icarus Verilog
 Some of the Xilinx primitives can not be simulated correctly with Icarus Verilog, we will add more patches
-when we'll hit particular problems, for eddr3 only one file needs to be patched - OSERDESE1.v
+when we'll hit particular problems, for x393 only one file needs to be patched - OSERDESE1.v
 
-Run patch command from the unisms subdirectory of the eddr3 project :  
+Run patch command from the unisms subdirectory of the x393 project :  
 ```bash
 patch -p1 < ../unisims_patches/OSERDESE1.diff
 ```
@@ -290,14 +294,3 @@ If everything will work correctly, Icarus will compile and simulate the design (
 In the case of problems you may get more verbose output in the console if you right-click on the 
 *Icarus Verilog Simulator*, select *Tool parameters*, open *Options tab*  and check *Show output
 with no errors/warnings*
-  
- 
-
-
-
-
-
-
- 
-
-  
