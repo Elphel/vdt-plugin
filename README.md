@@ -106,6 +106,10 @@ are added just before line
 Additionally a fix is required to make menu tooltips visible (https://github.com/dirruk1/gnome-breeze/issues/7#issuecomment-109325330) :
 «go to system settings > color > options and make sure "apply colors to non-Qt colors" is switched off, then log out and back in and see if the colors are normal. The tooltips are not supposed to have a light background.» 
 
+It is also useful to install Pydev plugin as Elphel (and many other) FPGA projects use Python for
+helper scripts. It can be installed in Eclipse by going to Help->Eclipse Marketplace... and entering
+"pydev" into search window.
+
 ### Installation of VDT plugin itself
 
 VDT plugin uses modified VEditor plugin for Eclipse and because of the license incompatibility
@@ -114,7 +118,7 @@ it is not possible to distribute a pre-compiled version (.jar file), so the plug
 merged (using provided script) and compiled/built as Eclipse plugin project.
 ####Clone VDT plugin source code
 ```
-git clone git@github.com:Elphel/vdt-plugin.git
+git clone https://github.com/Elphel/vdt-plugin.git
 ```
 ###Run VEditor installation/patch script from within the top directory of vdt-plugin
 ```
