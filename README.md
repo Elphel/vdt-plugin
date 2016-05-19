@@ -114,7 +114,7 @@ it is not possible to distribute a pre-compiled version (.jar file), so the plug
 merged (using provided script) and compiled/built as Eclipse plugin project.
 ####Clone VDT plugin source code
 ```
-git clone git@github.com:Elphel/vdt-plugin.git
+git clone https://github.com/Elphel/vdt-plugin.git
 ```
 ###Run VEditor installation/patch script from within the top directory of vdt-plugin
 ```
