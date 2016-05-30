@@ -1,7 +1,7 @@
 VDT plugin
 ==========
 
-There is a [video tutorial](http://blog.elphel.com/2016/05/tutorial-02-eclipse-based-fpga-development-environment-for-elphel-cameras) that shows installation of thkis plugin.
+There is a [video tutorial](http://blog.elphel.com/2016/05/tutorial-02-eclipse-based-fpga-development-environment-for-elphel-cameras) that shows installation of this plugin.
 
 Table of Contents                                                                                                                                                                                                                                                             
 -----------------
