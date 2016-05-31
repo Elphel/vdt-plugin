@@ -1,6 +1,8 @@
 VDT plugin
 ==========
 
+There is a [video tutorial](http://blog.elphel.com/2016/05/tutorial-02-eclipse-based-fpga-development-environment-for-elphel-cameras) that shows installation of this plugin and related software.
+
 Table of Contents                                                                                                                                                                                                                                                             
 -----------------
                                                                                                                                                                                                                                                              
@@ -105,10 +107,6 @@ are added just before line
 
 Additionally a fix is required to make menu tooltips visible (https://github.com/dirruk1/gnome-breeze/issues/7#issuecomment-109325330) :
 «go to system settings > color > options and make sure "apply colors to non-Qt colors" is switched off, then log out and back in and see if the colors are normal. The tooltips are not supposed to have a light background.» 
-
-It is also useful to install Pydev plugin as Elphel (and many other) FPGA projects use Python for
-helper scripts. It can be installed in Eclipse by going to Help->Eclipse Marketplace... and entering
-"pydev" into search window.
 
 ### Installation of VDT plugin itself
 
