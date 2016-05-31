@@ -243,6 +243,12 @@
             id="com.elphel.vdt.veditor.actions.OpenDeclaration">
       </command>
       <command
+            name="GotoDriver"
+            description="Goto signal driver"
+            categoryId="com.elphel.vdt.veditor.commands"
+            id="com.elphel.vdt.veditor.actions.GotoDriver">
+      </command>
+      <command
             name="%command.name.4"
             description="%command.description.4"
             categoryId="com.elphel.vdt.veditor.commands"
@@ -323,6 +329,12 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             contextId="com.elphel.vdt.veditor.scope"
             commandId="com.elphel.vdt.veditor.actions.OpenDeclaration">
+      </key>
+      <key
+            sequence="F4"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="com.elphel.vdt.veditor.scope"
+            commandId="com.elphel.vdt.veditor.actions.GotoDriver">
       </key>
       <key
             sequence="M1+F12"
