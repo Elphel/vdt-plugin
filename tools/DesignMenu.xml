@@ -28,12 +28,11 @@
  -->
 <vdt-project>
     <menu name="MainDesignMenu"
-          label="Design Menu"
-          icon="sample.gif"
-          tip="This is a common menu that contains common items">
-
+          label="Verilog Tools Menu"
+          icon="setup.png"
+          tip="Launch Verilog simulation and synthesis tools">
         <menu name="Verilog" 
-              label="Verilog Development Tools"
+              label="Simulation"
               icon="newmod_wiz.gif">
             <menuitem name="IVerilog"
                       label="Icarus Verilog Simulator"
@@ -45,59 +44,6 @@
                       icon="gtkwave.ico"
                       call="iverilog"/>
         </menu>
-        <menu name="ISE" 
-              label="ISE Tools"
-              icon="ise_logo.png">
-              <menu name="ISE_utils" 
-                    label="ISE utilities"
-                    icon="setup.png">
-                <menuitem name="ISECopyUnisims"
-                          label="Copy Xilinx ISE primitives library to the local project"
-                          icon="copy.png"
-                          call="ISEUnisims"/>
-                <menuitem name="ISEPartgen"
-                          label="Run ISE partgen"
-                          icon="bitstream.png"
-                          call="ISEPartgen"/>
-              </menu>
-              
-                <menuitem name="ISE Server"
-                          label="Start remote ISE session"
-                          icon="door_in.png"
-                          call="ISE"/>
-               	<menuitem name="ISESynthesis"
-                          label="Synthesize design"
-                          icon="Retort.png"
-                          call="ISExst"/>
-               	<menuitem name="ISENGDBuild"
-                          label="Run NGDBuild"
-                          icon="opt_blue.png"
-                          call="ISENGDBuild"/>
-               	<menuitem name="ISEMap"
-                          label="Map design"
-                          icon="map_icon.png"
-                          call="ISEMap"/>
-               	<menuitem name="ISETraceMap"
-                          label="Report post-map timing"
-                          icon="clock.png"
-                          call="ISETraceMap"/>
-               	<menuitem name="ISEPAR"
-                          label="Place &amp; route design" icon="route66.png"
-                          call="ISEPAR"/>
-               	<menuitem name="ISETracePAR"
-                          label="Report post-implementation timing"
-                          icon="clock.png"
-                          call="ISETracePAR"/>
-               	<menuitem name="ISEReportGen"
-                          label="Generate reports"
-                          icon="source_attach_attrib.gif"
-                          call="ISEReportGen"/>
-               	<menuitem name="ISEBitgen"
-                          label="Generate bitstream file(s)n"
-                          icon="bitstream.png"
-                          call="ISEBitgen"/>
-        </menu>
-                          
         <menu name="Vivado" 
               label="Vivado Tools"
               icon="vivado_logo.png">
@@ -182,6 +128,60 @@
                           icon="bitstream.png"
                           call="VivadoBitstream"/>
         </menu>
+        
+        <menu name="ISE" 
+              label="ISE Tools"
+              icon="ise_logo.png">
+              <menu name="ISE_utils" 
+                    label="ISE utilities"
+                    icon="setup.png">
+                <menuitem name="ISECopyUnisims"
+                          label="Copy Xilinx ISE primitives library to the local project"
+                          icon="copy.png"
+                          call="ISEUnisims"/>
+                <menuitem name="ISEPartgen"
+                          label="Run ISE partgen"
+                          icon="bitstream.png"
+                          call="ISEPartgen"/>
+              </menu>
+              
+                <menuitem name="ISE Server"
+                          label="Start remote ISE session"
+                          icon="door_in.png"
+                          call="ISE"/>
+               	<menuitem name="ISESynthesis"
+                          label="Synthesize design"
+                          icon="Retort.png"
+                          call="ISExst"/>
+               	<menuitem name="ISENGDBuild"
+                          label="Run NGDBuild"
+                          icon="opt_blue.png"
+                          call="ISENGDBuild"/>
+               	<menuitem name="ISEMap"
+                          label="Map design"
+                          icon="map_icon.png"
+                          call="ISEMap"/>
+               	<menuitem name="ISETraceMap"
+                          label="Report post-map timing"
+                          icon="clock.png"
+                          call="ISETraceMap"/>
+               	<menuitem name="ISEPAR"
+                          label="Place &amp; route design" icon="route66.png"
+                          call="ISEPAR"/>
+               	<menuitem name="ISETracePAR"
+                          label="Report post-implementation timing"
+                          icon="clock.png"
+                          call="ISETracePAR"/>
+               	<menuitem name="ISEReportGen"
+                          label="Generate reports"
+                          icon="source_attach_attrib.gif"
+                          call="ISEReportGen"/>
+               	<menuitem name="ISEBitgen"
+                          label="Generate bitstream file(s)n"
+                          icon="bitstream.png"
+                          call="ISEBitgen"/>
+        </menu>
+        
 		<menu name="Quartus"
 			label="Quartus tools"
 			icon="quartus16x16.png">
