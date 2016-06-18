@@ -338,7 +338,9 @@
 			      </if>
 			      "%MaxMsg\n"
 			      "synth_design"
-		          "%top"
+ 		          "%top"
+<!--                   "-top"
+		          "%%TopModule"  -->
 			      <if VivadoSynthActionIndex="0">
 		 		      "%name"
 			          <!-- "%part"  -->

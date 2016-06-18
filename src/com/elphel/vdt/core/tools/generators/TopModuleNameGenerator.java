@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
+import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 /**
@@ -50,8 +51,24 @@ public class TopModuleNameGenerator extends AbstractGenerator {
         return NAME;
     }
     protected String[] getStringValues() {
-//        IResource resource = SelectedResourceManager.getDefault().getSelectedVerilogFile();
         IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
+    	// Use tool top file if available, otherwise use getChosenVerilogFile() as before
+    	String topFile = null;
+    	if (topProcessor!=null){
+    		Tool tool=topProcessor.getCurrentTool();
+    		if (tool != null) {
+    			topFile=tool.getTopFile();
+    		} else {
+    			System.out.println("ToolNameGenerator():  topProcessor.getCurrentTool() is null");
+    		}
+            if ((topFile != null) && (topFile !="") && (resource !=null)) {
+            	IResource resource1 = resource.getProject().getFile(topFile);
+            	if ((resource1 != null) && (resource1.getType() == IResource.FILE)){
+            		resource = resource1;
+            	}
+            }
+    	}
+        
         if ((resource != null) && (resource.getType() == IResource.FILE)) {
         	String[] outlineElementsNames= VerilogUtils.getTopModuleNames((IFile)resource);
         	if ((outlineElementsNames!=null) && (outlineElementsNames.length>0)) return new String[] {outlineElementsNames[0]};
