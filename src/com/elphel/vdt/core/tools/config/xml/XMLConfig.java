@@ -472,7 +472,13 @@ public class XMLConfig extends Config {
         
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(configFile);
+        Document document;
+        try {
+        	document = builder.parse(configFile);
+        } catch(SAXException e){
+        	System.out.println("\n====== Problem parsing '" + configFile + "' - is it empty? =====\n");
+        	return;
+        }
         currentConfigFileName = configFile.getAbsolutePath();
         findRootNode(document);
         
