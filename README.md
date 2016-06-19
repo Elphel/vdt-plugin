@@ -7,7 +7,7 @@ Table of Contents
 -----------------
                                                                                                                                                                                                                                                              
   * [VDT plugin documentation](#vdt-plugin-documentation)
-  * [Instalation of VDT plugin and related programs](#instalation-of-vdt-plugin-and-related-programs)
+  * [Installation of VDT plugin and related programs](#installation-of-vdt-plugin-and-related-programs)
     * [Installation of Xilinx tools](#installation-of-xilinx-tools)
     * [Programs and libraries installed from (K)ubuntu repositories](#programs-and-libraries-installed-from-kubuntu-repositories)
       * [GtkWave (3.3.58-1)](#gtkwave-3358-1)
@@ -33,7 +33,7 @@ Table of Contents
 ##VDT plugin documentation
 Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
 Here are some [screenshots](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
-##Instalation of VDT plugin and related programs
+##Installation of VDT plugin and related programs
 VDT plugin for Eclipse is designed to integrate different tools for Verilog-based FPGA design.
 Currently it supports only GNU/Linux operating system and tool specification file support
 Icarus Verilog simulator and Xilinx ISE and Vivado Webpack design suites. It also works with Altera
