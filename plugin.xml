@@ -360,6 +360,12 @@
             contextId="com.elphel.vdt.veditor.scope"
             commandId="com.elphel.vdt.veditor.actions.Uncomment">
       </key>
+      <key
+            sequence="M1+M2+H"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            contextId="com.elphel.vdt.veditor.scope"
+            commandId="com.elphel.vdt.veditor.actions.ShowInHierarchy">
+      </key>
    </extension>
 
    <extension
