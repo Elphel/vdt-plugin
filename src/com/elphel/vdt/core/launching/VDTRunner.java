@@ -245,12 +245,12 @@ public class VDTRunner {
 				if (debugPrint)  System.out.println("Fire!");
 				fiCons.firePropertyChange(fiCons,"org.eclipse.jface.text", consoleName, fConsoleName); 
 			}
-			if (debugPrint)  System.out.println("return - waiting to be awaken");
 			int timeout=argumentsItemsArray[numItem].getTimeout();
 			//keepOpen()
 			final boolean fKeepOpen=argumentsItemsArray[numItem].keepOpen();
 			if (fKeepOpen) runConfig.setKeptOpen(true);
 			if (fKeepOpen && (timeout<1)) timeout=1; // some minimal timeout
+			if (debugPrint)  System.out.println("return - waiting to be awaken, timeout = "+timeout);
 			if (timeout>0){
 				if (debugPrint)  System.out.println ("timeout="+timeout+"s, keep-open="+ fKeepOpen);
 				// implementation will require keeping track of it and canceling if program terminated earlier.

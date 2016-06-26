@@ -25,38 +25,31 @@
  *******************************************************************************/
 package com.elphel.vdt.core.tools.generators;
 
+import java.io.File;
 import java.net.URI;
-import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
 
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.veditor.VerilogPlugin;
 
 
-public class ParsersPathGenerator extends AbstractGenerator {
-    public static final String NAME = VDT.GENERATOR_PARSERS_PATH;
+public class PluginPathGenerator extends AbstractGenerator {
+    public static final String NAME = VDT.GENERATOR_PLUGIN_ROOT;
     
     public String getName() {
         return NAME;
     }
-    public ParsersPathGenerator()
+    public PluginPathGenerator()
     {
     	super(null); // null for topFormatProcessor - this generator can not reference other parameters
     }
 
     protected String[] getStringValues() {
-        String path = "$nl$/" + VDT.PATH_TO_PARSERS; //$NON-NLS-1$
         try {
-        	URL url=FileLocator.find(VerilogPlugin.getDefault().getBundle(), new Path(path), null);
-        	if(url != null) {
-        		URI uri=FileLocator.resolve(url).toURI();
-//        		System.out.println("ParsersPathGenerator()->"+uri.getRawPath()+" : "+uri.toString());
-//        		return new String[]{uri.getRawPath()};
-        		return new String[]{uri.normalize().getPath()};
-        	}
-        	return null;
+        	File path=FileLocator.getBundleFile(VerilogPlugin.getDefault().getBundle());
+        	String normalized = new URI(path.getAbsolutePath()).normalize().getPath();
+        	return new String[]{normalized};
         } catch (Exception e){
         	return null;
         }

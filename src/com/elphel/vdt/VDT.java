@@ -169,6 +169,7 @@ public class VDT {
     public static final String GENERATOR_ID_STATE_FILE    = "StateFile"; 
 
     public static final String GENERATOR_PARSERS_PATH     = "ParsersPath";
+    public static final String GENERATOR_PLUGIN_ROOT      = "PluginRoot";
     public static final String PATH_TO_PARSERS            = "parsers";
 
     public static final String TIME_STAMP_FORMAT          = "yyyyMMddHHmmssSSS";

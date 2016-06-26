@@ -38,7 +38,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
-
+import org.eclipse.ui.console.TextConsole;
+import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import com.elphel.vdt.core.tools.ToolsCore;
 import com.elphel.vdt.core.tools.params.Tool;
 import com.elphel.vdt.core.tools.params.Tool.TOOL_MODE;
@@ -82,9 +83,9 @@ public class RunningBuilds {
 		parserListeners= new ConcurrentHashMap<IConsole,MonListener>();
 		unfinishedBuilds = new ConcurrentHashMap<String, VDTRunnerConfiguration>();
 		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
-			System.out.println("***Addded console listeners");
-		}
+//		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+//			System.out.println("***Addded console listeners");
+//		}
 		manager.addConsoleListener(new IConsoleListener(){
 			public void consolesAdded(IConsole[] consoles){
 				for (int i=0;i<consoles.length;i++){
@@ -101,10 +102,14 @@ public class RunningBuilds {
 					}
 					//					unfinishedBuilds.remove(consoles[i]);
 					removeMonListener(consoles[i]); // remove listeners that provided input data for parsers
-					removeConsole(consoles[i]);
+					removeConsole(consoles[i], null);
 				}
 			}
 		});
+		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+			System.out.println("***Addded console listeners");
+		}
+		
 	}
 	
 	public void addMonListener(IConsole parserConsole, IStreamMonitor monitor, IStreamListener listener){
@@ -165,18 +170,6 @@ public class RunningBuilds {
 		String consoleName=findConsoleParent(console);
 		if (consoleName!=null){
 			VDTRunnerConfiguration runConfig=unfinishedBuilds.get(consoleName);
-/*			
-			runConfig.removeConsole(console);
-			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
-				System.out.println("Removing console "+console.getName()+" from runConfig for "+consoleName);
-			}
-			if (runConfig.noConsoles()){
-				if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
-					System.out.println("No consoles left in unfinished "+consoleName+" - removing it too");
-				}
-				unfinishedBuilds.remove(consoleName);
-			}
-*/			
 		} else {
 			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
 				System.out.println("Console "+console.getName()+" did not belong here");
@@ -263,12 +256,22 @@ public class RunningBuilds {
 				final String fConsoleName=fIconsole.getName();	
 				final IPropertyChangeListener fListener =new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
+//						ProcessConsole console = (ProcessConsole) event.getSource();
+//						TextConsole console = (TextConsole) event.getSource();
+						if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+							String txt = ((TextConsole) event.getSource()).getDocument().get();
+							System.out.println("==== Console contents at "+event.getProperty()+" ====");
+							System.out.println("fConsoleName="+fConsoleName+" fIconsole.getName()="+fIconsole.getName());
+							System.out.println(txt);
+							System.out.println("==== End of console contents at "+event.getProperty()+" ====");
+						}
 						if (!fConsoleName.equals(fIconsole.getName())){
 							fIconsole.removePropertyChangeListener(this);
 							if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
 								System.out.println(">>> "+fConsoleName+" -> "+fIconsole.getName());
 							}
-							removeConsole(fIconsole); // changed name means "<terminated>..."
+							String ctxt = ((TextConsole) event.getSource()).getDocument().get(); // To search for good/bad completion
+							removeConsole(fIconsole, ctxt); // changed name means "<terminated>..."
 						}
 					}
 				};
@@ -283,12 +286,25 @@ public class RunningBuilds {
 	}
 
 	// Only for closing consoles
-	public boolean removeConsole(IConsole iConsole){ // from add console;
+	public boolean removeConsole(IConsole iConsole, String consoleText){ // from add console;
 		Iterator<String> iter=unfinishedBuilds.keySet().iterator();
 		while (iter.hasNext()) {
 			String consoleName=iter.next();
 			VDTRunnerConfiguration runConfig=unfinishedBuilds.get(consoleName);
 			if (runConfig.getIConsole()==iConsole){ // same instance
+				boolean hasGood = false;
+				boolean hasBad = false;
+				boolean goodSet = false;
+				boolean badSet = false;
+				if (consoleText != null){
+					goodSet = runConfig.isSetGood();
+					badSet =  runConfig.isSetBad();
+					if (goodSet || badSet) {
+						runConfig.addConsoleText(consoleText);
+						hasGood = runConfig.gotGood();
+						hasBad =  runConfig.gotBad();
+					}
+				}
 				runConfig.setIConsole(null);
 				Tool tool=ToolsCore.getTool(runConfig.getToolName());
 				if (tool.getState()==TOOL_STATE.KEPT_OPEN) {
@@ -297,6 +313,10 @@ public class RunningBuilds {
 					removeConfiguration(consoleName);
 					if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) System.out.print("Killed open console");
 					return true;
+				} else {
+					if      (hasBad)  tool.setState(TOOL_STATE.FAILURE);
+					else if (hasGood) tool.setState(TOOL_STATE.SUCCESS);
+					else if (goodSet) tool.setState(TOOL_STATE.FAILURE);
 				}
 			}
 		}

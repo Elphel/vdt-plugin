@@ -243,12 +243,19 @@
 			readonly="false" />
 		<parameter id="SimulationTopModule" label="Simulation top module" tooltip="Project top simulation module"
 			type="String" default="" format="CopyValue" readonly="false" />
+		<parameter id="DUTTopFile" label="DUT top file" tooltip="Cocotb DUT top Veilog file"
+			type="Filename" default="" format="CopyValue"
+			readonly="false" />
+		<parameter id="DUTTopModule" label="DUT top module" tooltip="Cocotb DUT top simulation module"
+			type="String" default="" format="CopyValue" readonly="false" />
 		<parameter id="ImplementationTopFile" label="Implementation top file" tooltip="Project file with top implementation module"
 			type="Filename" default="" format="CopyValue" readonly="false" />
 		<parameter id="ImplementationTopModule" label="Implementation top module" tooltip="Project top implementation module"
 			type="String" default="" format="CopyValue" readonly="false" />
 		<parameter id="SimulDir" label="Simulation directory" tooltip="Project simulation directory"
 			type="Pathname" default="simulation" format="CopyValue" readonly="false" />
+		<parameter id="CocotbFilesDir" label="Cocotb Simulation directory" tooltip="Cocotb simulation files directory for the project"
+			type="Pathname" default="cocotb" format="CopyValue" readonly="false" />
 		<!--  Vivado parameters  -->
 		<parameter	id="part" label="Device" tooltip= "FPGA part number (device) to use"
         		default="" visible="true" omit="" type="String" format="CopyValue"/>
@@ -481,6 +488,9 @@
 			<group name="Simulation" label="Simulation properties">
 				"SimulationTopFile"
 				"SimulationTopModule"
+				"DUTTopFile"
+				"DUTTopModule"
+				"CocotbFilesDir"				
 				"SimulDir"
 			</group>
 			

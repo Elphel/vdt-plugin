@@ -28,8 +28,10 @@ package com.elphel.vdt.core.tools.generators;
 
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.ui.variables.SelectedResourceManager;
@@ -56,9 +58,18 @@ public class ProjectPathGenerator extends AbstractGenerator {
         String[] value = null;
         IResource resource = SelectedResourceManager.getDefault().getSelectedResource();
         if (resource != null) {
+        	/*
             String workspaceRoot=resource.getWorkspace().getRoot().getLocation().toString();
-            String project_name = workspaceRoot+resource.getProject().getFullPath().toString()+File.separator; 
+            String project_name = workspaceRoot+resource.getProject().getFullPath().toString()+File.separator;
+            String projectRoot=resource.getWorkspace().getRoot().getLocation().toString();
+            IPath apath = resource.getProject().getRawLocation().makeAbsolute();
             value = new String[]{project_name};
+            */
+        	try {
+        		value = new String[]{resource.getProject().getRawLocation().makeAbsolute().toString()};
+        	} catch (NullPointerException npe){
+        		return new String[] {""};
+        	}
         } else {
 //            fault("There is no selected project");
             System.out.println(getName()+": no project selected");

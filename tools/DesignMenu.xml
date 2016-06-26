@@ -39,6 +39,11 @@
                       icon="iverilog.ico"
                       call="iverilog"/>
 
+            <menuitem name="cocotb"
+                      label="Cocotb Python Verification"
+                      icon="pv_logo_32x32.png"
+                      call="cocotb"/>
+
             <menuitem name="GTKWave"
                       label="GTKWave (Waves viewer)"
                       icon="gtkwave.ico"

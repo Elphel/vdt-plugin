@@ -52,6 +52,10 @@
       <paramtype kind="bool" formatTrue="on" formatFalse="off" />
     </typedef>
 
+    <typedef name = "Bool_1_0">
+      <paramtype kind="bool" formatTrue="1" formatFalse="0" />
+    </typedef>
+
     <typedef name = "Cardinal">
       <paramtype kind="number" lo="0" hi="65535" format="%d" />
     </typedef>
@@ -125,6 +129,7 @@
 	<syntax name="NameValue"           format=" %%ParamName %%ParamValue" />
 	<syntax name="DoubleDash"			format="--%%ParamName=%%ParamValue" />
 	<syntax name="DoubleDashName"		format="--%%ParamName" />
+	<syntax name="NameEqValue"	    	format="%%ParamName=%%ParamValue" />
 <!--
 Does not work according to 2.2.1. "Inside text-repetitor, one and only one pattern-generator is mandatory".
 	

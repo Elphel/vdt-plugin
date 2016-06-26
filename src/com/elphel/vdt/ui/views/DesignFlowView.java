@@ -42,6 +42,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
 //import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.jface.action.*;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
@@ -72,6 +73,8 @@ import com.elphel.vdt.Txt;
 import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.veditor.VerilogPlugin;
+import com.elphel.vdt.veditor.document.HdlDocument;
+import com.elphel.vdt.veditor.editor.HdlEditor;
 import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.ui.MessageUI;
 import com.elphel.vdt.ui.VDTPluginImages;
@@ -362,7 +365,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         manager.add(clearProjectPropertiesAction);
         manager.add(clearToolPropertiesAction);
         manager.add(new Separator());
-        manager.add(selectDesignMenuAction);
+        manager.add(selectDesignMenuAction); // got null
         manager.add(new Separator());
         manager.add(clearStateFilesAction);
         manager.add(clearLogFilesAction);
@@ -577,6 +580,14 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         clearToolPropertiesAction.setImageDescriptor(VDTPluginImages.DESC_TOOL_PROPERTIES);
         selectDesignMenuAction = new Action() {
             public void run() {
+                if (selectedResource == null){
+                	HdlEditor editor = HdlEditor.current();
+                	if ((editor != null) && (editor.getDocument() != null) && (editor.getDocument() instanceof HdlDocument) ){
+                		selectedResource = ((HdlDocument)editor.getDocument()).getFile();
+                	} else {
+                		return;
+                	}
+                }
                 openDesignMenuSelectionDialog(selectedResource.getProject());
             }
         };

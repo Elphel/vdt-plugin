@@ -273,20 +273,7 @@ public class VDTRunnerConfiguration {
 	public VDTProgramRunner getProgramRunner(){
 		return this.programRunner;
 	}
-/*	
-	public void addConsole(IConsole console){ // not used
-		consoles.add(console);
-	}
-	public void removeConsole(IConsole console){ // from VDTRunnerConfiguration
-		consoles.remove(console);
-	}
-	public boolean noConsoles(){
-		return consoles.isEmpty();
-	}
-	public boolean hasConsole(IConsole console){
-		return consoles.contains(console);
-	}
-*/	
+
 	public void setConsoleFinish(String consoleFinish){
 		this.consoleFinish=consoleFinish;
 		if ((this.consoleFinish!=null) && ((this.consoleFinish.length()+extraChars) > maxLength)){
@@ -357,6 +344,15 @@ public class VDTRunnerConfiguration {
 	public boolean gotGood(){
 		return hasGood;
 	}
+	public boolean isSetGood(){
+		return consoleGood != null;
+		
+	}
+	public boolean isSetBad(){
+		return consoleBad != null;
+		
+	}
+	
 	public String getConsoluBuffer(){
 		return consoleBuffer; // just for debugging
 	}

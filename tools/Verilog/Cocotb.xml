@@ -28,26 +28,45 @@
  -->
 <vdt-project>
 
-	<interface name="IVerilog" extends="FPGAPprojectInterface">
+	<interface name="Cocotb" extends="FPGAPprojectInterface">
 		<!-- Syntax definitions -->
+	    <typedef name="CocotbSimulatorsType">
+      		<paramtype kind= "enum" base="String">
+      			<item value="aldec"    label="Aldec simulator"/>
+      			<item value="cvc"      label="CVC simulator"/>
+      			<item value="ghdl"     label="GHDL simulator"/>
+      			<item value="icarus"   label="Icarus Verilog simulator"/>
+      			<item value="ius"      label="IUS simulator"/>
+      			<item value="modelsim" label="Modelsim simulator"/>
+      			<item value="nvc"      label="NVC simulator"/>
+      			<item value="questa"   label="Questa simulator"/>
+      			<item value="vcs"      label="VCS simulator"/>
+      		</paramtype>
+    	</typedef>
+		<syntax name="ListEqMultiline"         format="%%ParamName = %(%%ParamValue%| \\n%)" />
+		<syntax name="ListEqMultilineAbs"      format="%%ParamName = %($(PROJECT_ROOT)/%%ParamValue%| \\n%)" />
+		<syntax name="MakeCleanItems"          format="clean::\n%(\t-@rm -f %%ParamValue%|\n%)"/>
+		<syntax name="ListEqComma"             format="%%ParamName = %(%%ParamValue%|,%)" />
+		<syntax name="CocotbIncludeDirSyntax"  format="%%ParamName += %(-I%%ParamValue%| %)" />
 
-		<syntax name="D_ParamSyntax" format="-D%%ParamName" />
-		<syntax name="g_ParamSyntax" format="-g%%ParamName" />
-		<syntax name="NospecifySyntax" format="-gno-specify" />
-		<syntax name="TopModuleSyntax" format="-s%%TopModule" />
+		
+		<syntax name="D_ParamSyntax"         format="-D%%ParamName" />
+		<syntax name="g_ParamSyntax"         format="-g%%ParamName" />
+		<syntax name="NospecifySyntax"       format="-gno-specify" />
+		<syntax name="TopModuleSyntax"       format="-s%%TopModule" />
 		<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
-		<syntax name="ModuleLibrarySyntax" format="%(-y%%ParamValue%| %)" />
+		<syntax name="ModuleLibrarySyntax"   format="%(-y%%ParamValue%| %)" />
 		<syntax name="IncludeDirSyntax" format="%(-I%%ParamValue%| %)" />
-		<syntax name="ExtraFilesSyntax" format="%(%%ParamValue%| %)" />
-		<syntax name="SwitchSyntax" format="-%%ParamName" />
+		<syntax name="ExtraFilesSyntax"      format="%(%%ParamValue%| %)" />
+		<syntax name="SwitchSyntax"          format="-%%ParamName" />
 		<syntax name="GrepFindSyntax"
 			format="| { grep --line-buffered -E &quot;%%ParamValue&quot; || true; }" />
 		<syntax name="GrepSkipSyntax"
 			format="| { grep --line-buffered -v &quot;%%ParamValue&quot; || true; }" />
 			
-		<syntax name="LogFileSyntax" format="%%ParamValue-%%BuildStamp.log" />
-		<syntax name="OutFileSyntax" format="%%ParamValue-%%BuildStamp.ivlg" />
-		<syntax name="FstFileSyntax" format="%%ParamValue-%%BuildStamp.fst" />
+		<syntax name="LogFileSyntax"         format="%%ParamValue-%%BuildStamp.log" />
+		<syntax name="OutFileSyntax"         format="%%ParamValue-%%BuildStamp.ivlg" />
+		<syntax name="FstFileSyntax"         format="%%ParamValue-%%BuildStamp.fst" />
 
 		<syntax name="LogFileLatestSyntax"
 		    format="ln -sf %%ParamValue-%%BuildStamp.log %SimulDir/%%ParamValue-latest.log;" />
@@ -90,15 +109,15 @@
 
 	</interface>
 
-	<tool name="iverilog" project="FPGA_project" label="Icarus Verilog compiler"
+	<tool name="cocotb" project="FPGA_project" label="COroutine based COsimulation TestBench"
 		shell="bash"
 		package="FPGA_package"
-		interface="IVerilog"
+		interface="Cocotb"
 		errors="(.*):([0-9]+): [a-z_\- ]*error[: ]?(.*)"
 		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)"
 		info="(.*):([0-9]+): [a-z_\-  ]*sorry: (.*)"
-		top-file="%IcarusTopFile"
-		define="IVERILOG"
+		top-file="%CocotbDutTopFile"
+		define="COCOTB"
 		>
 
 		<extensions-list>
@@ -107,16 +126,75 @@
 		</extensions-list>
 
 		<action-menu>
-			<action label="Simulate project " resource="%IcarusTopFile"
-				check-extension="false" check-existence="true" icon="iverilog.ico" />
-			<action label="Simulate selected" resource="%%SelectedFile"
-				check-extension="true" check-existence="true" icon="iverilog_pointer.png" />
-			<action label="Verify" resource="%%SelectedFile"
-				check-extension="true" check-existence="true" icon="iverilog_check.png" />
-<!-- 		<action label="Empty" resource="" icon="sample.gif" />
-			<action label="Just try for" resource="%%OS" />  -->	
+			<action label="Simulate with Cocotb " resource="%CocotbDutTopFile"
+				check-extension="false" check-existence="true" icon="pv_wave.png" />
+			<action label="Regression analysis" resource="%CocotbDutTopFile"
+				check-extension="true" check-existence="true" icon="pv_hc.png" />
+			<action label="Clear Cocotb workspace" resource=""
+				check-extension="true" check-existence="true" icon="pv_eraser.png" />
 		</action-menu>
+		
+		<parameter id="CocotbGUI" outid="GUI" type="Bool_1_0" format="NameEqValue"
+			default="false" label="GUI" tooltip="Set this to 1 to enable the GUI mode in the simulator (if supported)" />
+		<parameter id="CocotbSIM" outid="SIM" type="CocotbSimulatorsType" format="NameEqValue"
+			default="icarus" label="Simulator" tooltip="Selects which simulator Makefile to use. Attempts to include a simulator specific makefile from cocotb/makefiles/makefile.$(SIM)" />
+	    <parameter id="CocotbVERILOG_SOURCES" outid="VERILOG_SOURCES" type="Filelist" label="Verilog sources" tooltip="Verilog source files (relative to project)"
+			 format="ListEqMultilineAbs" default="%%FilteredSourceList" readonly="false" visible="true" />
+	    <parameter id="CocotbVHDL_SOURCES" outid="VHDL_SOURCES" type="Filelist" label="VHDL sources" tooltip="VHDL source files (relative to project)"
+			 format="ListEqMultilineAbs" default="" omit="" readonly="false" visible="true" />
+			 
+	    <parameter id="CocotbCOMPILE_ARGS" outid="COMPILE_ARGS" type="String" label="Simulator compilation flags" tooltip="Any arguments or flags to pass to the compile stage of the simulation. Only applies to simulators with a separate compilation stage (currently Icarus and VCS)"
+			 format="NameEqValue" default="" omit="" readonly="false" visible="true" />
+	    <parameter id="CocotbSIM_ARGS" outid="SIM_ARGS" type="String" label="Simulator run flags" tooltip="Any arguments or flags to pass to the execution of the compiled simulation. Only applies to simulators with a separate compilation stage (currently Icarus and VCS)."
+			 format="NameEqValue" default="-fst" omit="" readonly="false" visible="true" />
+	    <parameter id="CocotbEXTRA_ARGS" outid="EXTRA_ARGS" type="String" label="Simulator flags" tooltip="Passed to both the compile and execute phases of simulators with two rules, or passed to the single compile and run command for simulators which don’t have a distinct compilation stage."
+			 format="NameEqValue" default="" omit="" readonly="false" visible="true" />
+	    <parameter id="CocotbCUSTOM_COMPILE_DEPS" outid="CUSTOM_COMPILE_DEPS" type="Filelist" label="Custom compile dependencies" tooltip="Any other dependencies but Verilog/VHDL sources (relative to project)."
+			 format="ListEqMultilineAbs" default="" omit="" readonly="false" visible="true" />
+	    <parameter id="CocotbCUSTOM_SIM_DEPS" outid="CUSTOM_SIM_DEPS" type="Filelist" label="Custom simulation dependencies" tooltip="Use to add additional dependencies to the simulation target (relative to project)."
+			 format="ListEqMultilineAbs" default="" omit="" readonly="false" visible="true" />
+        <parameter id="CocotbDutTopFile"
+                        label="Simulation top file" tooltip="File including top Verilog module of DUT"
+                        default="%DUTTopFile"
+                        type="String" format="CopyValue" />
+		<parameter id="CocotbDutTopModule" outid="TOPLEVEL" label="DUT top module" tooltip="DUT top module extracted from the chosen target file"
+			type="String" format="NameEqValue" default="%%TopModule"
+			readonly="true" visible="true" />
+	    <parameter id="CocotbRANDOM_SEED" outid="RANDOM_SEED" type="LongCardinal" label="Random seed" tooltip="Seed the Python random module to recreate a previous test stimulus. At the beginning of every test a message is displayed with the seed used for that execution."
+			 format="NameEqValue" default="0" omit="0" readonly="false" visible="true" />
+		<parameter id="COCOTB_ANSI_OUTPUT" outid="COCOTB_ANSI_OUTPUT" type="Bool_1_0" format="NameEqValue"
+			default="false" label="Force ANSI output" tooltip="Use this to override the default behaviour of annotating cocotb output with ANSI colour codes if the output is a terminal (isatty())." />
+	    <parameter id="CocotbMODULE" outid="MODULE" type="Stringlist" label="Simulation Python module(s)" tooltip="The name of the module(s) to search for test functions."
+			 format="ListEqComma" default="" omit="" readonly="false" visible="true" />
+	    <parameter id="CocotbTESTCASE" outid="TESTCASE" type="Stringlist" label="Test funcion(s) to run" tooltip="The name of the test function(s) to run. If this variable is not defined cocotb discovers and executes all functions decorated with @cocotb.test() decorator in the supplied modules."
+			 format="ListEqComma" default="" omit="" readonly="false" visible="true" />
+	    <parameter id="MakeCleanPatterns" type="Stringlist" label="Make clean" tooltip="File patterns to remove at make clean"
+			 format="MakeCleanItems" default="*.pyc results.xml" readonly="false" visible="true" />
 
+<!--	    <parameter id="CocotbMakefileDir" type="Pathname" label="Makefile directory" tooltip="Cocotb project Makefile directory"
+			 format="CopyValue" default="%CocotbFilesDir" readonly="false" visible="true" />-->
+
+	    <parameter id="CocotbRoot" outid="COCOTB" type="Pathname" label="Cocotb installation" tooltip="Cocotb installation root directory"
+			 format="NameEqValue" default="%%PluginRoot/cocotb" readonly="false" visible="true" />
+			 
+		<parameter id="ProjectAbsolutePath" outid="PROJECT_ROOT" default="%%ProjectPath" label = "Project absolute path"
+			type="Pathname" format="NameEqValue" visible="true" />
+			 
+		<parameter id="GTKWaveSavFile" label="GTKWave sav file"
+			type="Filename" default="%%CurrentFileBase.sav" format="CopyValue"
+			omit="" readonly="false" />
+			 
+			 
+	    <parameter id="ParsersRoot" outid="ParsersRoot" type="Pathname" label="Parsers root dir" tooltip="Tools output parsers root directory"
+			 format="NameEqValue" default="%%ParsersPath" readonly="false" visible="true" />
+			 
+		<parameter id="CocotbIncludeDir" outid="COMPILE_ARGS" type="IncludeDirType"
+			format="CocotbIncludeDirSyntax" default="" label="Select include file directories"
+			omit="" readonly="false" visible="true" />
+			 
+		<parameter id="ShowWaves" type="BoolYesNo" format="None"
+			default="true" label="Show simulation result in waveform viewer" />
+		
         <parameter id="IcarusTopFile"
                         label="Simulation top file" tooltip="IVerilog simulator top file"
                         default="%SimulationTopFile"
@@ -202,8 +280,6 @@
 		<parameter id="SaveLogsSimulator" type="BoolYesNo" format="None"
 			default="false" label="Save simulator log output" />
 
-		<parameter id="ShowWaves" type="BoolYesNo" format="None"
-			default="true" label="Show simulation result in waveform viewer" />
 
 		<!-- Advanced Section -->
 
@@ -218,9 +294,6 @@
 			type="String" default="%%CurrentFileBase" format="FstFileSyntax"
 			readonly="false" />
 
-		<parameter id="GTKWaveSavFile" label="GTKWave sav file"
-			type="Filename" default="%%CurrentFileBase.sav" format="CopyValue"
-			omit="" readonly="false" />
 
 		<parameter id="GrepFindErr" label="Grep pattern for errors only"
 			type="String" format="GrepFindSyntax" default="error" readonly="false"
@@ -288,11 +361,46 @@
 		<parameter id="OutFileFull" default="%SimulDir/%OutFile" 
 		    visible="false"	type="String" format="OutFileSyntax"/>
 		    
-		<parameter id="FstDumpFileFull" default="%SimulDir/%FstDumpFile" 
+		<parameter id="FstDumpFileFull" default="%%ProjectPath/%SimulDir/%FstDumpFile" 
 			visible="false"	type="String" format="FstFileSyntax"/>
+
+<!--		<parameter id="cocotbMakefile" default="%CocotbMakefileDir/Makefile"
+			type="Filename" format="CopyValue" visible="false" />   -->
+		<parameter id="cocotbMakefile" default="%CocotbFilesDir/Makefile"
+			type="Filename" format="CopyValue" visible="false" />
+		<parameter id="cocotbInstallDir" default="%CocotbRoot"
+			type="String" format="CopyValue" visible="false" />  -->
+			
+			
 
 
 		<input>
+			<group name="cocotb" label="Cocotb">
+				"CocotbGUI"
+				"CocotbSIM"
+				"CocotbVERILOG_SOURCES"
+				"CocotbVHDL_SOURCES"
+				"CocotbCOMPILE_ARGS"
+				"CocotbSIM_ARGS"
+				"CocotbEXTRA_ARGS"
+				"CocotbCUSTOM_COMPILE_DEPS"
+				"CocotbCUSTOM_SIM_DEPS"
+				"CocotbDutTopFile"
+				"CocotbDutTopModule"
+				"CocotbRANDOM_SEED"
+				"COCOTB_ANSI_OUTPUT"
+				"CocotbMODULE"
+				"CocotbTESTCASE"
+				"CocotbRoot"
+				"CocotbFilesDir"
+				"CocotbIncludeDir"
+				"MakeCleanPatterns"
+				"ShowWaves"
+				"GTKWaveSavFile"
+				<!-- "CocotbMakefileDir" -->
+				"ParsersRoot"
+				"ProjectAbsolutePath"
+			</group>
 			<group name="files" label="Files">
 				<!-- "SimulationTopFile" -->
 				"IcarusTopFile"
@@ -301,11 +409,10 @@
 				"ExtraFiles"
 				"ModuleLibrary"
 				"IncludeDir"
-				"GTKWaveSavFile"
 				"IncludeParametersList"
 			</group>
 			<group name="options" label="Options">
-				"ShowWaves"
+				<!--"ShowWaves"   -->
 				"ShowNoProblem"
 				"ShowWarnings"
 				"RemoveBugs"
@@ -336,108 +443,117 @@
 			</group>
 		</input>
 		<output>
+		    <line name="install_cocotb"
+		    	  sep=" "
+				  success = "COCOTB INSTALLED"
+			>
+				"%Param_Shell_Options"
+				"if [ -d '%cocotbInstallDir' ]; then"
+				"echo 'COCOTB INSTALLED';"
+				"exit 0;"
+				"else"
+				"cd %%PluginRoot;"
+				"git clone https://github.com/potentialventures/cocotb.git ;"
+				"fi;"
+				"if [ -d '%cocotbInstallDir' ]; then"
+				"echo 'COCOTB INSTALLED';"
+				"exit 0;"
+	- 			"else echo 'FAILURE';"
+				"fi"
+			
+			<!--
+				"%Param_Shell_Options"
+				"while true; do"
+				"    read -p 'Do you wish to install this program? ' yn;"
+				"    case $yn in"
+				"        [Yy]* ) echo 'Installing...'; break;;"
+				"        [Nn]* ) exit;;"
+				"        * ) echo 'Please answer yes or no.';;"
+				"    esac"
+				"done"
+				  -->
+		    </line>
 		<!-- TODO: watch for new lines inserted inside quoted tokens during autoformat - they break output
 		Maybe add filter to the code to transform white spaces -->
 			<line name="command_line"
-			       sep=" "
-			       success = "SIMULATION FINISHED SUCCESSFULLY"
-			>
+			 sep=" "
+			 success = "SIMULATION FINISHED SUCCESSFULLY"
+			 failure = "recipe for target '[^']*' failed"
+	         >
+<!--          success="SIMULATION FINISHED SUCCESSFULLY" -->
+
+
 				"%Param_Shell_Options"
 				"%Param_PreExe"
 <!--  MKDIR - ALWAYS -->				
 			    "mkdir -p"
 			    "%SimulDir"
 			    ";"
-<!-- 		    "(&gt;&amp;2 echo 'unisims/RAMB36E1.v:100: warning: choosing typ expression.');"  -->	
-				<if SaveLogsPreprocessor="true"
-				    SaveLogsSimulator="true">
-					"touch"
-					"%LogFileFull"
-					";"
-					"%LogFileLatest"
-				</if>
-				
-				"trap 'killall iverilog; ' EXIT;"
-				"echo 'current PID='$$;"
-				"%Param_Exe"
-				"-o"
-				<if IVerilogActionIndex="2">
-					"/dev/null"
-				</if>
-				<if-not IVerilogActionIndex="2">
-					"%OutFileFull"
-				</if-not>
-				" -DIVERILOG"
-				"%IVerilogOther"
-				"%Param_TopModule"
-				"%TopModulesOther"
-				"%ModuleLibrary"
-				<!-- Always include top project dir (where IVERILOG_INCLUDE.v is) -->
-				"-I%%ProjectPath"
-				"%IncludeDir"
-				"%legacy_model"
-				"%no_specify"
-				"%v"
-				"%SourceListPar"
-				"%ExtraFiles"
-				<if ShowNoProblem="false">
-					"2&gt;&amp;1"
-				</if>
-				<if SaveLogsPreprocessor="true">
-					"| tee -a"
-					"%LogFileFull"
-				</if>
-				<if ShowNoProblem="false">
-					<if ShowWarnings="true">
-						"%GrepFindErrWarn"
-					</if>
-					<if ShowWarnings="false">
-						"%GrepFindErr"
-					</if>
-					<if RemoveBugs="true">
-						"%GrepSkip1"
-					</if>
-				</if>
-				"|| { echo '*** iverilog failed ***'; exit 1; } ;"
-				"trap '' EXIT;"
-				<if-not IVerilogActionIndex="2">
-				    "%OutFileLatest" 
-					<!-- "time vvp -v" -->
-					"%Param_1"
-					"trap 'killall vvp; ' EXIT;"
-					"%VVP_prefix"
-					"%VVP_Exe -v"
-					"%Param_2"
-					"%OutFileFull"
-					"-fst "
-					<if SaveLogsSimulator="true">
-						"| tee -a"
-						"%LogFileFull"
-					</if>
-					"|| { echo '*** vvp failed ***'; exit 1; } ;"
-					"%FstDumpFileLatest"
-					 <!-- no trap for GTKWave -->
-					"trap '' EXIT;"
-					<!-- "%Param_2" -->
-					"%Param_3"
+			    "cd %CocotbFilesDir"
+			    ";"
+				<if IVerilogActionIndex="0">
+					"make sim;"
+				    "if [ $? -ne 0 ]; then  echo 'SIMULATION FAILED'; sleep 1; exit 1; fi;"
+					<!-- Add gtkwave here -->
 					<if ShowWaves="true">
+			            "if [ $? -eq 0 ]; then"
 						"%GtkWave_Exe"
 						"%FstDumpFileFull"
 						"%GTKWaveSavFile"
 						"&lt;/dev/null &amp;&gt;/dev/null"
-						"&amp; "
+						"&amp; \n"
+  						"fi;"						
 					</if>
-					"%Param_4"
-				</if-not>
+				</if>
+				<if IVerilogActionIndex="1">
+					"make regression;"
+				</if>
+				<if IVerilogActionIndex="2">
+					"make clean;"
+				</if>
 			    "if [ $? -eq 0 ]; then  echo 'SIMULATION FINISHED SUCCESSFULLY'; else echo 'SIMULATION FAILED'; fi;"
 			    "sleep 1"
-				
+			    
 			</line>
+			
+			
 			<line name="IverilogIncludeFile" dest="iverilog_include_file"
 				sep="\n">
 				"%FstDumpFileParameter"
 				"%IncludeParametersList"
 			</line>
+			<line name="CocotbMakefile" dest="cocotbMakefile"
+				sep="\n">
+				"%ProjectAbsolutePath"
+				"%CocotbDutTopModule"
+				"%CocotbMODULE"
+				"%CocotbTESTCASE"
+				"%CocotbVERILOG_SOURCES"
+				"%CocotbVHDL_SOURCES"
+				"%CocotbGUI"
+				"%CocotbSIM"
+				"%CocotbCOMPILE_ARGS"
+				<!-- Always include top project dir (where IVERILOG_INCLUDE.v is) -->
+				"COMPILE_ARGS += -I/$(PROJECT_ROOT)"
+				"%CocotbIncludeDir"
+				"%CocotbSIM_ARGS"
+				"%CocotbEXTRA_ARGS"
+				"%CocotbCUSTOM_COMPILE_DEPS"
+			<!--"CUSTOM_COMPILE_DEPS += %%ProjectPath/IVERILOG_INCLUDE.v"-->
+				""CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/IVERILOG_INCLUDE.v
+				"%CocotbCUSTOM_SIM_DEPS"
+				"%CocotbRANDOM_SEED"
+				"%COCOTB_ANSI_OUTPUT"
+				"%CocotbRoot"
+				"include $(COCOTB)/makefiles/Makefile.inc"
+				"include $(COCOTB)/makefiles/Makefile.sim"
+				"%MakeCleanPatterns"
+<!-- 			"clean::"
+				"\t-@rm -f *.pyc"
+				"\t-@rm -f *.jpg"
+				"\t-@rm -f results.xml"  -->	
+			</line>
+			
 		</output>
 
 

@@ -65,7 +65,7 @@ public class TopModulesNameGenerator extends AbstractGenerator {
     		} else {
     			System.out.println("ToolNameGenerator():  topProcessor.getCurrentTool() is null");
     		}
-            if ((topFile != null) && (topFile !="") && (resource !=null)) {
+            if ((topFile != null) && (!topFile.equals("")) && (resource !=null)) {
             	IResource resource1 = resource.getProject().getFile(topFile);
             	if ((resource1 != null) && (resource1.getType() == IResource.FILE)){
             		resource = resource1;

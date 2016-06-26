@@ -147,6 +147,12 @@ public class VDTProgramRunner {
 
         	}
         }
+        
+        // AF2016
+        // Adding good/bad console messages - same as for VDTConsoleRunner
+        runConfig.setConsoleFinish(buildParamsItem.getPrompt());
+        runConfig.setConsoleBad(buildParamsItem.getFailureString());
+        runConfig.setConsoleGood(buildParamsItem.getSuccessString());
 
         String[] cmdLine;
         if (isShell && (arguments != null) && (arguments.length > 0)){ /* first argument is passed as a parameter to shell*/

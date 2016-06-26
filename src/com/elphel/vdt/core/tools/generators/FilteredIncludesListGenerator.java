@@ -97,7 +97,7 @@ public class FilteredIncludesListGenerator extends AbstractGenerator {
     	}
         String[] file_names = null;
         IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
-        if ((topFile != null) && (topFile !="") && (resource !=null)) {
+        if ((topFile != null) && (!topFile.equals("")) && (resource !=null)) {
             IResource resource1 = resource.getProject().getFile(topFile);
             if ((resource1 != null) && (resource1.getType() == IResource.FILE)){
                 resource = resource1;
