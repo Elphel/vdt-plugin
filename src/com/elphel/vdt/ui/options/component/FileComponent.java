@@ -26,6 +26,7 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.options.component;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.FileDialog;
 
 import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.types.ParamTypeString;
+import com.elphel.vdt.ui.variables.SelectedResourceManager;
 
 public class FileComponent extends BrowsableComponent {
 
@@ -59,10 +61,27 @@ public class FileComponent extends BrowsableComponent {
                 }
                 
                 FileDialog dialog = (FileDialog)locationField.getBrowseDialog();
-                String selectedFile = dialog.open();
+	            String selectedFile = dialog.open();
+	
+	            if(selectedFile != null) {
+	            	// try to convert to project-relative
+	            	IProject project = SelectedResourceManager.getDefault().getSelectedProject();
+	            	String projectPath=null;
+	            	if (project!=null) {
+	            		projectPath=project.getLocation().toString();
 
-                if(selectedFile != null)
-                    locationField.getBrowsedNameField().setText(selectedFile);
+	    		    	if ((selectedFile!=null) && selectedFile.startsWith(projectPath)) {
+	    		        	if (selectedFile.equals(projectPath)){
+	    		        		System.out.println("FileListPromptDialog(): Path equals to project path = \""+selectedFile+"\", returning \".\"");
+	    		        		selectedFile = ".";
+	    		        	}
+	    		        	selectedFile = selectedFile.substring(projectPath.length()+1);
+	    		    	}
+	            	}
+	            	locationField.getBrowsedNameField().setText(selectedFile);
+            	
+                }
+                
             }
         });
         

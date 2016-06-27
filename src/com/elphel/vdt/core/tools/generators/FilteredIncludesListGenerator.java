@@ -34,13 +34,6 @@ import java.util.regex.PatternSyntaxException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
-
-
-
-
-
-
-
 //import com.elphel.vdt.VDT;
 import com.elphel.vdt.VerilogUtils;
 import com.elphel.vdt.core.tools.params.FormatProcessor;
@@ -98,11 +91,23 @@ public class FilteredIncludesListGenerator extends AbstractGenerator {
         String[] file_names = null;
         IResource resource = SelectedResourceManager.getDefault().getChosenVerilogFile();
         if ((topFile != null) && (!topFile.equals("")) && (resource !=null)) {
-            IResource resource1 = resource.getProject().getFile(topFile);
-            if ((resource1 != null) && (resource1.getType() == IResource.FILE)){
-                resource = resource1;
-//                System.out.println("resource1="+resource1);
-            }
+        	// If topFile is absolute, try to convert top file to project resource
+        	if (topFile.startsWith("/")){
+        		String aPojectStr=resource.getProject().getLocation().toOSString();
+        		if (topFile.startsWith(aPojectStr)){
+        			topFile =  topFile.substring(aPojectStr.length()+1);
+        		}
+        	} 
+        	// Only apply if topFile is not absolute anymore
+        	if (!topFile.startsWith("/")){
+	            IResource resource1 = resource.getProject().getFile(topFile);
+	            if ((resource1 != null) && (resource1.getType() == IResource.FILE)){
+	                resource = resource1;
+	//                System.out.println("resource1="+resource1);
+	            }
+        	}
+            
+            
         }
         Pattern ignorePattern = null;
         if (ignoreFilter!=null){

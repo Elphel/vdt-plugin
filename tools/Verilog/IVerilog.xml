@@ -341,6 +341,7 @@
 			<line name="command_line"
 			       sep=" "
 			       success = "SIMULATION FINISHED SUCCESSFULLY"
+			       failure = "invalid option"
 			>
 				"%Param_Shell_Options"
 				"%Param_PreExe"

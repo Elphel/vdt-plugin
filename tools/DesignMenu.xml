@@ -41,7 +41,7 @@
 
             <menuitem name="cocotb"
                       label="Cocotb Python Verification"
-                      icon="pv_logo_32x32.png"
+                      icon="pv_hc.png"
                       call="cocotb"/>
 
             <menuitem name="GTKWave"

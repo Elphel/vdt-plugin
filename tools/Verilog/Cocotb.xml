@@ -43,21 +43,21 @@
       			<item value="vcs"      label="VCS simulator"/>
       		</paramtype>
     	</typedef>
-		<syntax name="ListEqMultiline"         format="%%ParamName = %(%%ParamValue%| \\n%)" />
-		<syntax name="ListEqMultilineAbs"      format="%%ParamName = %($(PROJECT_ROOT)/%%ParamValue%| \\n%)" />
-		<syntax name="MakeCleanItems"          format="clean::\n%(\t-@rm -f %%ParamValue%|\n%)"/>
-		<syntax name="ListEqComma"             format="%%ParamName = %(%%ParamValue%|,%)" />
-		<syntax name="CocotbIncludeDirSyntax"  format="%%ParamName += %(-I%%ParamValue%| %)" />
-
+		<syntax name="ListEqMultiline"             format="%%ParamName  = %(%%ParamValue%| \\n%)" />
+		<syntax name="ListEqMultilineAbs"          format="%%ParamName  = %($(PROJECT_ROOT)/%%ParamValue%| \\n%)" />
+		<syntax name="ListEqMultilineAbsExtra"     format="%%ParamName += %($(PROJECT_ROOT)/%%ParamValue%| \\n%)" />
+		<syntax name="MakeCleanItems"              format="clean::\n%(\t-@rm -f %%ParamValue%|\n%)"/>
+		<syntax name="ListEqComma"                 format="%%ParamName  = %(%%ParamValue%|,%)" />
+		<syntax name="CocotbIncludeDirSyntax"      format="%%ParamName += %(-I%%ParamValue%| %)" />
+		<syntax name="CocotbTopModulesOtherSyntax" format="%%ParamName += %(-s%%ParamValue%| %)" />
+		<syntax name="CocotbModuleLibrarySyntax"   format="%%ParamName += %(-y%%ParamValue%| %)" />
+		
+		
 		
 		<syntax name="D_ParamSyntax"         format="-D%%ParamName" />
 		<syntax name="g_ParamSyntax"         format="-g%%ParamName" />
 		<syntax name="NospecifySyntax"       format="-gno-specify" />
-		<syntax name="TopModuleSyntax"       format="-s%%TopModule" />
-		<syntax name="TopModulesOtherSyntax" format="%(-s%%ParamValue%| %)" />
-		<syntax name="ModuleLibrarySyntax"   format="%(-y%%ParamValue%| %)" />
-		<syntax name="IncludeDirSyntax" format="%(-I%%ParamValue%| %)" />
-		<syntax name="ExtraFilesSyntax"      format="%(%%ParamValue%| %)" />
+
 		<syntax name="SwitchSyntax"          format="-%%ParamName" />
 		<syntax name="GrepFindSyntax"
 			format="| { grep --line-buffered -E &quot;%%ParamValue&quot; || true; }" />
@@ -174,8 +174,8 @@
 <!--	    <parameter id="CocotbMakefileDir" type="Pathname" label="Makefile directory" tooltip="Cocotb project Makefile directory"
 			 format="CopyValue" default="%CocotbFilesDir" readonly="false" visible="true" />-->
 
-	    <parameter id="CocotbRoot" outid="COCOTB" type="Pathname" label="Cocotb installation" tooltip="Cocotb installation root directory"
-			 format="NameEqValue" default="%%PluginRoot/cocotb" readonly="false" visible="true" />
+	    <parameter id="CocotbRootRel" type="String" label="Cocotb installation" tooltip="Cocotb installation root directory relative to VDT plugin root"
+			 format="CopyValue" default="cocotb" readonly="false" visible="true" />
 			 
 		<parameter id="ProjectAbsolutePath" outid="PROJECT_ROOT" default="%%ProjectPath" label = "Project absolute path"
 			type="Pathname" format="NameEqValue" visible="true" />
@@ -195,11 +195,23 @@
 		<parameter id="ShowWaves" type="BoolYesNo" format="None"
 			default="true" label="Show simulation result in waveform viewer" />
 		
-        <parameter id="IcarusTopFile"
-                        label="Simulation top file" tooltip="IVerilog simulator top file"
-                        default="%SimulationTopFile"
-                        type="String" format="CopyValue" />
+		
+		<parameter id="CocotbTopModulesOther" outid="COMPILE_ARGS" type="Stringlist"
+			format="CocotbTopModulesOtherSyntax" default="" omit=""
+			label="Select top modules not referenced by the chosen target"
+			readonly="false" visible="true" />
 
+		<parameter id="CocotbModuleLibrary" outid="COMPILE_ARGS" type="ModuleLibraryType"
+			format="CocotbModuleLibrarySyntax" default="" label="Select additional libraries to include"
+			omit="" readonly="false" visible="true" />
+
+		<parameter id="CocotbExtraFiles"  outid="VERILOG_SOURCES" type="Filelist" format="ListEqMultilineAbsExtra"
+			default="" label="Select additional Verilog files to include" omit="" readonly="false"
+			visible="true" />
+
+
+
+		
 
 		<parameter id="Param_Shell_Options" label="Param_Shell_Options"
 			type="String" format="CopyValue" default="-c" readonly="false"
@@ -223,28 +235,6 @@
 		<parameter id="GtkWave_Exe" label="GtkWave_Exe" type="Filename"
 			format="CopyValue" default="gtkwave" readonly="false"
 			visible="true" />
-
-		<parameter id="Param_TopModule" label="Top module extracted from the chosen target file"
-			type="String" format="TopModuleSyntax" default="%%TopModule"
-			readonly="true" visible="true" />
-
-		<parameter id="TopModulesOther" type="Stringlist"
-			format="TopModulesOtherSyntax" default="" omit=""
-			label="Select top modules not referenced by the chosen target"
-			readonly="false" visible="true" />
-
-		<parameter id="ModuleLibrary" type="ModuleLibraryType"
-			format="ModuleLibrarySyntax" default="" label="Select additional libraries to include"
-			omit="" readonly="false" visible="true" />
-
-
-		<parameter id="ExtraFiles" type="Filelist" format="ExtraFilesSyntax"
-			default="" label="Select additional files to include" readonly="false"
-			visible="true" />
-
-		<parameter id="IncludeDir" type="IncludeDirType"
-			format="IncludeDirSyntax" default="" label="Select include file directories"
-			omit="" readonly="false" visible="true" />
 
 
 		<parameter id="legacy_model" outid="legacy_model" type="D_ParamType"
@@ -371,45 +361,36 @@
 		<parameter id="cocotbInstallDir" default="%CocotbRoot"
 			type="String" format="CopyValue" visible="false" />  -->
 			
-			
-
+		<parameter id="CocotbRoot" outid="COCOTB" type="String"
+			 format="NameEqValue" default="%%PluginRoot/%CocotbRootRel" visible="false" />
 
 		<input>
 			<group name="cocotb" label="Cocotb">
+				"CocotbMODULE"
+				"CocotbTESTCASE"
+				"CocotbDutTopFile"
+				"CocotbDutTopModule"
+				"ShowWaves"
+				"CocotbVERILOG_SOURCES"
+				"CocotbExtraFiles"
+				"CocotbTopModulesOther"
+				"GTKWaveSavFile"
+				"CocotbIncludeDir"
+				"IncludeParametersList"
+				"---"
 				"CocotbGUI"
 				"CocotbSIM"
-				"CocotbVERILOG_SOURCES"
 				"CocotbVHDL_SOURCES"
 				"CocotbCOMPILE_ARGS"
 				"CocotbSIM_ARGS"
 				"CocotbEXTRA_ARGS"
 				"CocotbCUSTOM_COMPILE_DEPS"
 				"CocotbCUSTOM_SIM_DEPS"
-				"CocotbDutTopFile"
-				"CocotbDutTopModule"
 				"CocotbRANDOM_SEED"
 				"COCOTB_ANSI_OUTPUT"
-				"CocotbMODULE"
-				"CocotbTESTCASE"
-				"CocotbRoot"
-				"CocotbFilesDir"
-				"CocotbIncludeDir"
+				"CocotbRootRel"
 				"MakeCleanPatterns"
-				"ShowWaves"
-				"GTKWaveSavFile"
-				<!-- "CocotbMakefileDir" -->
-				"ParsersRoot"
-				"ProjectAbsolutePath"
-			</group>
-			<group name="files" label="Files">
-				<!-- "SimulationTopFile" -->
-				"IcarusTopFile"
-				"Param_TopModule"
-				"TopModulesOther"
-				"ExtraFiles"
-				"ModuleLibrary"
-				"IncludeDir"
-				"IncludeParametersList"
+				"CocotbModuleLibrary"
 			</group>
 			<group name="options" label="Options">
 				<!--"ShowWaves"   -->
@@ -460,29 +441,13 @@
 				"exit 0;"
 	- 			"else echo 'FAILURE';"
 				"fi"
-			
-			<!--
-				"%Param_Shell_Options"
-				"while true; do"
-				"    read -p 'Do you wish to install this program? ' yn;"
-				"    case $yn in"
-				"        [Yy]* ) echo 'Installing...'; break;;"
-				"        [Nn]* ) exit;;"
-				"        * ) echo 'Please answer yes or no.';;"
-				"    esac"
-				"done"
-				  -->
 		    </line>
 		<!-- TODO: watch for new lines inserted inside quoted tokens during autoformat - they break output
 		Maybe add filter to the code to transform white spaces -->
 			<line name="command_line"
 			 sep=" "
 			 success = "SIMULATION FINISHED SUCCESSFULLY"
-			 failure = "recipe for target '[^']*' failed"
 	         >
-<!--          success="SIMULATION FINISHED SUCCESSFULLY" -->
-
-
 				"%Param_Shell_Options"
 				"%Param_PreExe"
 <!--  MKDIR - ALWAYS -->				
@@ -529,18 +494,26 @@
 				"%CocotbMODULE"
 				"%CocotbTESTCASE"
 				"%CocotbVERILOG_SOURCES"
+				"%CocotbExtraFiles"				
 				"%CocotbVHDL_SOURCES"
 				"%CocotbGUI"
 				"%CocotbSIM"
 				"%CocotbCOMPILE_ARGS"
 				<!-- Always include top project dir (where IVERILOG_INCLUDE.v is) -->
 				"COMPILE_ARGS += -I/$(PROJECT_ROOT)"
+				<if ShowWaves="true">
+					"COMPILE_ARGS += -DTRACE"
+				</if>
+				"%CocotbTopModulesOther"
+				"%CocotbModuleLibrary"
+				
 				"%CocotbIncludeDir"
 				"%CocotbSIM_ARGS"
 				"%CocotbEXTRA_ARGS"
 				"%CocotbCUSTOM_COMPILE_DEPS"
 			<!--"CUSTOM_COMPILE_DEPS += %%ProjectPath/IVERILOG_INCLUDE.v"-->
-				""CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/IVERILOG_INCLUDE.v
+				"CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/IVERILOG_INCLUDE.v"
+				
 				"%CocotbCUSTOM_SIM_DEPS"
 				"%CocotbRANDOM_SEED"
 				"%COCOTB_ANSI_OUTPUT"
@@ -548,10 +521,6 @@
 				"include $(COCOTB)/makefiles/Makefile.inc"
 				"include $(COCOTB)/makefiles/Makefile.sim"
 				"%MakeCleanPatterns"
-<!-- 			"clean::"
-				"\t-@rm -f *.pyc"
-				"\t-@rm -f *.jpg"
-				"\t-@rm -f results.xml"  -->	
 			</line>
 			
 		</output>
