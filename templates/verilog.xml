@@ -148,7 +148,7 @@ endmodule
     enabled="true"
     id="com.elphel.vdt.veditor.templates.verilog.newFile.GPL"
     name="Verilog GPL File"
->/!
+>/*!
  * &lt;b&gt;Module:&lt;/b&gt; ${modulename}
  * @file ${modulename}.v
  * @date ${year}-${month}-${day}  
