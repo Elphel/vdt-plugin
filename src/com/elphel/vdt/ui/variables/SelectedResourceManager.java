@@ -363,7 +363,9 @@ public class SelectedResourceManager implements IWindowListener, ISelectionListe
     	if (project.getFullPath().toPortableString().equals(rslt.getProject().getFullPath().toPortableString())){
     		return (fChosenVerilogFile!=null)?fChosenVerilogFile:fSelectedVerilogFile;
     	} else {
-    		System.out.println("Wrong getChosenVerilogFile="+rslt+" for project "+project);
+    		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+    			System.out.println("Wrong getChosenVerilogFile="+rslt+" for project "+project);
+    		}
     		fChosenVerilogFile = null; // invalidate
     		if (fSelectedVerilogFile==null) return null;
     		if (project.getFullPath().toPortableString().equals(fSelectedVerilogFile.getProject().getFullPath().toPortableString())){

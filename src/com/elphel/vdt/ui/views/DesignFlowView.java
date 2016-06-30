@@ -581,7 +581,7 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         selectDesignMenuAction = new Action() {
             public void run() {
                 if (selectedResource == null){
-                	HdlEditor editor = HdlEditor.current();
+                	HdlEditor editor = HdlEditor.getCurrentEditor();
                 	if ((editor != null) && (editor.getDocument() != null) && (editor.getDocument() instanceof HdlDocument) ){
                 		selectedResource = ((HdlDocument)editor.getDocument()).getFile();
                 	} else {
@@ -1358,7 +1358,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
             			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
             				System.out.println("Setting HDL file to "+HDLFile.toString());
             		} else {
-                		System.out.println("*** Wrong HDLFile "+HDLLocation+" for project "+project.getFullPath().toPortableString());
+                		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+                			System.out.println("**** Wrong HDLFile "+HDLLocation+" for project "+project.getFullPath().toPortableString());
+                		}
             		}
             	}
             }
@@ -1460,7 +1462,9 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
         		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER))
         			System.out.println("project.setPersistentProperty("+qn.toString()+","+HDLFile.getFullPath().toPortableString()+")");
         	} else {
-        		System.out.println("*** Wrong HDLFile "+HDLFile+" for project "+project);
+        		if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_OTHER)) {
+        			System.out.println("*** Wrong HDLFile "+HDLFile+" for project "+project);
+        		}
         		return;
         	}
         }
