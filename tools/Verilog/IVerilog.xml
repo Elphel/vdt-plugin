@@ -369,6 +369,7 @@
 					"%OutFileFull"
 				</if-not>
 				" -DIVERILOG"
+				" -DTRACE"
 				"%IVerilogOther"
 				"%Param_TopModule"
 				"%TopModulesOther"
