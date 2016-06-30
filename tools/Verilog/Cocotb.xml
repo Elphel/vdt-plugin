@@ -48,11 +48,12 @@
 		<syntax name="ListEqMultilineAbsExtra"     format="%%ParamName += %($(PROJECT_ROOT)/%%ParamValue%| \\n%)" />
 		<syntax name="MakeCleanItems"              format="clean::\n%(\t-@rm -f %%ParamValue%|\n%)"/>
 		<syntax name="ListEqComma"                 format="%%ParamName  = %(%%ParamValue%|,%)" />
-		<syntax name="CocotbIncludeDirSyntax"      format="%%ParamName += %(-I%%ParamValue%| %)" />
-		<syntax name="CocotbTopModulesOtherSyntax" format="%%ParamName += %(-s%%ParamValue%| %)" />
-		<syntax name="CocotbModuleLibrarySyntax"   format="%%ParamName += %(-y%%ParamValue%| %)" />
-		
-		
+		<syntax name="CocotbIncludeDirSyntax"      format="%%ParamName += %(-I%%ParamValue%| \\n%)" />
+		<syntax name="CocotbTopModulesOtherSyntax" format="%%ParamName += %(-s%%ParamValue%| \\n%)" />
+		<syntax name="CocotbModuleLibrarySyntax"   format="%%ParamName += %(-y%%ParamValue%| \\n%)" />
+
+		<syntax name="D_ParamValueSyntax"          format="%%ParamName += -D%%ParamValue" />
+		<syntax name="D_ParamValuesSyntax"         format="%(-D%%ParamValue%| )" />
 		
 		<syntax name="D_ParamSyntax"         format="-D%%ParamName" />
 		<syntax name="g_ParamSyntax"         format="-g%%ParamName" />
@@ -79,6 +80,7 @@
 		
  		<syntax name="FstParamFileSyntax"
 			format="parameter fstname=&quot;%%ParamValue-%%BuildStamp.fst&quot;;" />
+			
 		<syntax name="IncludeParamSyntax" format="%(%%ParamValue%|\n%)" />
 		
 		
@@ -209,9 +211,9 @@
 			default="" label="Select additional Verilog files to include" omit="" readonly="false"
 			visible="true" />
 
+	    <parameter id="ExtraDefines" outid="MODULE" type="Stringlist" label="Simulation Python module(s)" tooltip="The name of the module(s) to search for test functions."
+			 format="ListEqComma" default="" omit="" readonly="false" visible="true" />
 
-
-		
 
 		<parameter id="Param_Shell_Options" label="Param_Shell_Options"
 			type="String" format="CopyValue" default="-c" readonly="false"
@@ -447,6 +449,7 @@
 			<line name="command_line"
 			 sep=" "
 			 success = "SIMULATION FINISHED SUCCESSFULLY"
+			 failure = "ERROR|CRITICAL"
 	         >
 				"%Param_Shell_Options"
 				"%Param_PreExe"
@@ -484,8 +487,12 @@
 			
 			<line name="IverilogIncludeFile" dest="iverilog_include_file"
 				sep="\n">
-				"%FstDumpFileParameter"
-				"%IncludeParametersList"
+				"`ifndef IVERILOG_INCLUDE"
+				"    `define IVERILOG_INCLUDE"
+				"    `define ROOTPATH \&quot;%%ProjectPath\&quot;"
+				"    %FstDumpFileParameter // SuppressThisWarning VEditor - maybe not used"
+				"    %IncludeParametersList"
+				"`endif"
 			</line>
 			<line name="CocotbMakefile" dest="cocotbMakefile"
 				sep="\n">
@@ -500,13 +507,19 @@
 				"%CocotbSIM"
 				"%CocotbCOMPILE_ARGS"
 				<!-- Always include top project dir (where IVERILOG_INCLUDE.v is) -->
-				"COMPILE_ARGS += -I/$(PROJECT_ROOT)"
+				"COMPILE_ARGS += -DCOCOTB"
+				<!-- So code may use PROJECT_ROOT_PATH to reference data files
+				     Does not work when passing string parameters, had to use include file -->
+<!-- 			"COMPILE_ARGS += -DROOTPATH=\&quot;%%ProjectPath\&quot;"
+				"COMPILE_ARGS += -DFSTNAME=\&quot;%%ParamValue-%%BuildStamp.fst\&quot;"-->
+				
 				<if ShowWaves="true">
 					"COMPILE_ARGS += -DTRACE"
 				</if>
 				"%CocotbTopModulesOther"
 				"%CocotbModuleLibrary"
 				
+				"COMPILE_ARGS += -I$(PROJECT_ROOT)"
 				"%CocotbIncludeDir"
 				"%CocotbSIM_ARGS"
 				"%CocotbEXTRA_ARGS"

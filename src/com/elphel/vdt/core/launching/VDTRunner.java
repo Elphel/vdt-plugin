@@ -104,7 +104,7 @@ public class VDTRunner {
 	
 	public void abortLaunch(String consoleName){
 		final VDTRunnerConfiguration runConfig=runningBuilds.resumeConfiguration(consoleName);
-    	Tool tool=ToolsCore.getTool(runConfig.getToolName());
+    	Tool tool=ToolsCore.getTool(runConfig.getToolName()); // null pointer with Icarus/gtkwave - seems it is already closed sometimes
 		tool.setDirty(false);
 		tool.setState(TOOL_STATE.FAILURE);
 //		tool.setRunning(false);
