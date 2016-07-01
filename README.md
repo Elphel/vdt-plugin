@@ -63,8 +63,6 @@ language parsing you will need java compiler that comes with the full JDK.
 ```
 sudo apt-get install default-jdk
 ```
-Eclipse Neon requires jdk version to be >= 1.8, in Eclipse you can select which one to use
-(if there are multiple installed). Go to Window->Preferences->Java->Installed JREs
 
 ### Icarus Verilog
 Icarus Verilog has to be compiled from the source code that is available in git repository:
