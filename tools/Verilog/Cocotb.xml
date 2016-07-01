@@ -116,12 +116,12 @@
 		package="FPGA_package"
 		interface="Cocotb"
 		errors="(.*):([0-9]+): [a-z_\- ]*error[: ]?(.*)"
-		warnings="(.*):([0-9]+): [a-z_\- ]*warning: (.*)"
-		info="(.*):([0-9]+): [a-z_\-  ]*sorry: (.*)"
+		warnings="(.*):([0-9]+): [a-z_\- ]*[warning|sorry]: (.*)"
+		info="\s*File\s+&quot;(.*)&quot;, line ([0-9]+)[, in ]?(.*)"
 		top-file="%CocotbDutTopFile"
 		define="COCOTB"
 		>
-
+<!-- 		info="(.*):([0-9]+): [a-z_\-  ]*sorry: (.*)" -->
 		<extensions-list>
 			<extension mask="v" />
 			<extension mask="tf" />

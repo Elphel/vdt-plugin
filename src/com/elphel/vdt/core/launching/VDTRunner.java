@@ -104,16 +104,24 @@ public class VDTRunner {
 	
 	public void abortLaunch(String consoleName){
 		final VDTRunnerConfiguration runConfig=runningBuilds.resumeConfiguration(consoleName);
-    	Tool tool=ToolsCore.getTool(runConfig.getToolName()); // null pointer with Icarus/gtkwave - seems it is already closed sometimes
-		tool.setDirty(false);
-		tool.setState(TOOL_STATE.FAILURE);
-//		tool.setRunning(false);
-		System.out.println("VDTRunner#abortLaunch("+consoleName+"), tool="+tool.getName()+" "+tool.toString()+"  state="+tool.getState()+" threadID="+Thread.currentThread().getId());
-		tool.setMode(TOOL_MODE.STOP);
-//		tool.setTimeStamp(); // will set at start
-		tool.toolFinished();
+		try {
+			Tool tool=ToolsCore.getTool(runConfig.getToolName()); // null pointer with Icarus/gtkwave - seems it is already closed sometimes
+			tool.setDirty(false);
+			tool.setState(TOOL_STATE.FAILURE);
+	//		tool.setRunning(false);
+			System.out.println("VDTRunner#abortLaunch("+consoleName+"), tool="+tool.getName()+" "+tool.toString()+"  state="+tool.getState()+" threadID="+Thread.currentThread().getId());
+			tool.setMode(TOOL_MODE.STOP);
+	//		tool.setTimeStamp(); // will set at start
+			tool.toolFinished();
+		} catch (NullPointerException npe){
+			System.out.println("VDTRunner#abortLaunch("+consoleName+"), tool= null, threadID="+Thread.currentThread().getId());
+		}
 		//removeConfiguration
-		runningBuilds.removeConfiguration(runConfig.getOriginalConsoleName());
+		try {
+			runningBuilds.removeConfiguration(runConfig.getOriginalConsoleName()); // null pointer here
+		} catch (NullPointerException npe){
+			System.out.println("VDTRunner#abortLaunch("+consoleName+")???, tool= null, threadID="+Thread.currentThread().getId());
+		}
 	}
 
     public void resumeLaunch(String consoleName, int expectedStep) throws CoreException {
