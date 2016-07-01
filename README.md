@@ -100,7 +100,8 @@ installation. VDT uses modified version of [VEditor](http://sourceforge.net/proj
 and any other versions of VEditor installed will conflict with VDT.
 
 There are still issues with GTK3 (refresh of the windows content, animated icons), all seems
-to work if Gtk3 is disabled (Gtk2 used instead) by adding the following 2 lines in the eclipse.ini file. 
+to work if Gtk3 is disabled (Gtk2 used instead) by adding the following 2 lines in the eclipse.ini
+file (it is in the same directory as eclipse executable) . 
 ```
 --launcher.GTK_version
 2
@@ -115,11 +116,11 @@ Additionally a fix is required to make menu tooltips visible (https://github.com
 
 __Update for Eclipse Neon__: Tested, instructions above are still valid (including using GTK2 instead of GTK3),
 in the installer the needed _Eclipse IDE for Java EE Developers_ is __the second choice__ in the menu. You also need to
-remove the following line:
+remove the following line in eclipse.ini. By default Neon installs executable and ini file to ~/eclipse/jee-neon/:
 
 -XX:+UseStringDeduplication
 
-As it is not recognized on GNU/Linux (at least on my installation) and causes a crash at startup.
+As it is not recognized on GNU/Linux (at least on my installation) and causes a crash at startup. 
 
 ### Installation of VDT plugin itself
 
