@@ -75,6 +75,7 @@
 			format="ln -sf %%ParamValue-%%BuildStamp.ivlg %SimulDir/%%ParamValue-latest.ivlg;" />
 		<syntax name="FstFileLatestSyntax"
 		    format="ln -sf %%ParamValue-%%BuildStamp.fst %SimulDir/%%ParamValue-latest.fst;" />
+    	<syntax name="MakefileExport"	    	format="export %%ParamName=%%ParamValue" />
 
 		<!-- include file has target, not link value -->
 		
@@ -163,9 +164,11 @@
 			type="String" format="NameEqValue" default="%%TopModule"
 			readonly="true" visible="true" />
 	    <parameter id="CocotbRANDOM_SEED" outid="RANDOM_SEED" type="LongCardinal" label="Random seed" tooltip="Seed the Python random module to recreate a previous test stimulus. At the beginning of every test a message is displayed with the seed used for that execution."
-			 format="NameEqValue" default="0" omit="0" readonly="false" visible="true" />
-		<parameter id="COCOTB_ANSI_OUTPUT" outid="COCOTB_ANSI_OUTPUT" type="Bool_1_0" format="NameEqValue"
-			default="false" label="Force ANSI output" tooltip="Use this to override the default behaviour of annotating cocotb output with ANSI colour codes if the output is a terminal (isatty())." />
+			 format="MakefileExport" default="0" omit="0" readonly="false" visible="true" />
+		<parameter id="COCOTB_ANSI_OUTPUT" outid="COCOTB_ANSI_OUTPUT" type="Bool_1_0" format="MakefileExport"
+			default="false" omit="false" label="Force ANSI output" tooltip="Use this to override the default behaviour of annotating cocotb output with ANSI colour codes if the output is a terminal (isatty())." />
+		<parameter id="COCOTB_DEBUG" outid="COCOTB_DEBUG" type="Bool_1_0" format="MakefileExport"
+			default="false" omit="false" label="Debug" tooltip="Enable debug mode in simulation Python module(s)" />
 	    <parameter id="CocotbMODULE" outid="MODULE" type="Stringlist" label="Simulation Python module(s)" tooltip="The name of the module(s) to search for test functions."
 			 format="ListEqComma" default="" omit="" readonly="false" visible="true" />
 	    <parameter id="CocotbTESTCASE" outid="TESTCASE" type="Stringlist" label="Test funcion(s) to run" tooltip="The name of the test function(s) to run. If this variable is not defined cocotb discovers and executes all functions decorated with @cocotb.test() decorator in the supplied modules."
@@ -389,6 +392,7 @@
 				"CocotbCUSTOM_COMPILE_DEPS"
 				"CocotbCUSTOM_SIM_DEPS"
 				"CocotbRANDOM_SEED"
+				"COCOTB_DEBUG"
 				"COCOTB_ANSI_OUTPUT"
 				"CocotbRootRel"
 				"MakeCleanPatterns"
@@ -498,8 +502,12 @@
 				sep="\n">
 				"%ProjectAbsolutePath"
 				"%CocotbDutTopModule"
-				"%CocotbMODULE"
-				"%CocotbTESTCASE"
+				"export %CocotbMODULE"
+				"export %CocotbTESTCASE"
+				"%CocotbRANDOM_SEED"
+				"%COCOTB_DEBUG"
+				"%COCOTB_ANSI_OUTPUT"
+
 				"%CocotbVERILOG_SOURCES"
 				"%CocotbExtraFiles"				
 				"%CocotbVHDL_SOURCES"
@@ -528,8 +536,6 @@
 				"CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/IVERILOG_INCLUDE.v"
 				
 				"%CocotbCUSTOM_SIM_DEPS"
-				"%CocotbRANDOM_SEED"
-				"%COCOTB_ANSI_OUTPUT"
 				"%CocotbRoot"
 				"include $(COCOTB)/makefiles/Makefile.inc"
 				"include $(COCOTB)/makefiles/Makefile.sim"

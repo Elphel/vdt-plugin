@@ -58,10 +58,12 @@ sudo apt-get install autoconf gperf flex bison g++ zlib1g-dev libbz2-dev git
 ```
 #### Java JDK
 For most tasks JRE is sufficient, but if you would like to be able to modify and recompile Verilog
-language parsing you will need java compiler that comes with the full JDK
+language parsing you will need java compiler that comes with the full JDK.
+
 ```
 sudo apt-get install default-jdk
 ```
+
 ### Icarus Verilog
 Icarus Verilog has to be compiled from the source code that is available in git repository:
 ```
@@ -96,7 +98,8 @@ installation. VDT uses modified version of [VEditor](http://sourceforge.net/proj
 and any other versions of VEditor installed will conflict with VDT.
 
 There are still issues with GTK3 (refresh of the windows content, animated icons), all seems
-to work if Gtk3 is disabled (Gtk2 used instead) by adding the following 2 lines in the eclipse.ini file. 
+to work if Gtk3 is disabled (Gtk2 used instead) by adding the following 2 lines in the eclipse.ini
+file (it is in the same directory as eclipse executable) . 
 ```
 --launcher.GTK_version
 2
@@ -108,6 +111,14 @@ are added just before line
 
 Additionally a fix is required to make menu tooltips visible (https://github.com/dirruk1/gnome-breeze/issues/7#issuecomment-109325330) :
 «go to system settings > color > options and make sure "apply colors to non-Qt colors" is switched off, then log out and back in and see if the colors are normal. The tooltips are not supposed to have a light background.» 
+
+__Update for Eclipse Neon__: Tested, instructions above are still valid (including using GTK2 instead of GTK3),
+in the installer the needed _Eclipse IDE for Java EE Developers_ is __the second choice__ in the menu. You also need to
+remove the following line in eclipse.ini. By default Neon installs executable and ini file to ~/eclipse/jee-neon/:
+
+-XX:+UseStringDeduplication
+
+As it is not recognized on GNU/Linux (at least on my installation) and causes a crash at startup. 
 
 ### Installation of VDT plugin itself
 

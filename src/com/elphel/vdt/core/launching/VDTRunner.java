@@ -140,8 +140,10 @@ public class VDTRunner {
 	private void doResumeLaunch(String consoleName, int numItem) throws CoreException {
 		final VDTRunnerConfiguration runConfig=runningBuilds.resumeConfiguration(consoleName);
 		if (runConfig==null){
-			System.out.println("Turned out nothing to do. Probably a bug");
-			MessageUI.error("Turned out nothing to do. Probably a bug");
+			if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) {
+				System.out.println("Turned out nothing to do. Probably a bug, consoleName = "+consoleName);
+				MessageUI.error("Turned out nothing to do. Probably a bug, consoleName = "+consoleName);
+			}
     		abortLaunch(consoleName);    		
 			return;
 		}
@@ -339,7 +341,7 @@ public class VDTRunner {
         final boolean debugPrint=VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING);
 
 		if (runConfig==null){
-			System.out.println("Turned out nothing to do. Probably a bug");
+			System.out.println("Turned out nothing to do. Probably a bug, consoleName = "+consoleName);
 			return;
 		}
 		
