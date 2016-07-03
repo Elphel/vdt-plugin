@@ -26,8 +26,7 @@
  * as well as that of the covered work.}
  *******************************************************************************/
  -->
-<vdt-project>
-
+<vdt-project version="0.8">
 	<interface name="Cocotb" extends="FPGAPprojectInterface">
 		<!-- Syntax definitions -->
 	    <typedef name="CocotbSimulatorsType">
@@ -255,9 +254,9 @@
 
 <!-- 	<parameter id="Param_SourceList" label="Param_SourceList"
 			type="Stringlist" format="SourceListSyntax" default="" readonly="true"
-			visible="true" />  -->
+			visible="true" />
 		<parameter id="SourceListPar"  label="Param_SourceList" type="Filelist"
-			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />
+			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />   -->
 
 
 		<parameter id="ShowNoProblem" type="BoolYesNo" format="None"

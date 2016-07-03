@@ -26,7 +26,7 @@
  * as well as that of the covered work.}
  *******************************************************************************/
  -->
-<vdt-project>
+<vdt-project version="1.0">
     <menu name="MainDesignMenu"
           label="Verilog Tools Menu"
           icon="setup.png"
@@ -221,90 +221,5 @@
 		</menu>
     </menu>
     
-    <menu name="MainDesignMenu2"
-          label="Design Menu 2"
-          icon="sample.gif"
-          tip="This is an user menu"
-          inherits="MainDesignMenu">
-         <menu name="Python tests" 
-              label="Tests with remote Python console"
-              icon="python.png">
-        
-                <menuitem name="RemotePython"
-                          label="Run remote Python session"
-                          icon="python.png"
-                          call="RemotePython"/>
-                <menuitem name="RemotePythonCommand"
-                          label="Send a command to the remote Python session"
-                          icon="my_tool.gif"
-                          call="RemotePythonCommand"/>
-        </menu>
-                              
-        <menu name="OtherStuff" 
-              label="Various Sample Tools">
-
-            <menuitem name="tool1"
-                      label="MyTool_exe"
-                      icon="my_tool.gif"
-                      call="MyTool_exe"/>
-
-            <menuitem name="tool2"
-                      label="MyTool2_exe"
-                      icon="my_tool.gif"
-                      call="MyTool2_exe"/>
-
-            <menuitem name="tool3"
-                      label="MyTool"
-                      icon="my_tool.gif"
-                      call="MyTool"/>
-           <menuitem name="Test VDT"
-             label="Testing some VDT features"
-             icon="sample.gif"
-             call="VDTTest"/>
-<!--              
-           <menuitem name="Test VDT-A"
-             label="Testing some VDT features"
-             icon="sample.gif"
-             tool-instance="VDTTest_inst2"
-             call="VDTTest"/>
-               -->
-           <menuitem name="Test VDT1"
-             label="Testing some VDT features - variant 1"
-             icon="sample.gif"
-             call="VDTTest1"/>
-        </menu>
-
-    </menu>
-
-    <menu name="MainDesignMenu3"
-          label="Design Menu 3"
-          icon="sample.gif"
-          tip="This is another custom user menu"
-          inherits="MainDesignMenu2">
-                              
-        <menu name="JustAnotherStuff"
-              label="Just Another Stuff"
-              icon="sample.gif"
-              inherits="MainDesignMenu2"
-              after="Python tests"/>
-
-        <menuitem name="GREP"
-                  label="Run GREP"
-                  call="grep"/>
-        <menu name="Python tests" 
-              label="Tests with remote Python console"
-              icon="python.png">
-        
-                <menuitem name="RemotePython"
-                          label="Run remote Python session"
-                          icon="python.png"
-                          call="RemotePython"/>
-                <menuitem name="RemotePythonCommand"
-                          label="Send a command to the remote Python session"
-                          icon="my_tool.gif"
-                          call="RemotePythonCommand"/>
-        </menu>                  
-
-    </menu>
 
 </vdt-project>

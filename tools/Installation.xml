@@ -26,7 +26,7 @@
  * as well as that of the covered work.}
  *******************************************************************************/
  -->
-<vdt-project>
+<vdt-project version="1.0">
     <interface name = "installation_interface">
         <typedef name = "OSKind">
             <paramtype kind="enum" base="String">

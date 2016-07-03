@@ -26,7 +26,7 @@
  * as well as that of the covered work.}
  *******************************************************************************/
  -->
-<vdt-project>
+<vdt-project version="1.0">
 	<interface name="FPGAPprojectInterface">
 		<syntax name="RemoteRootSyntax" format="%%ParamValue/%%ProjectName" />
 		<syntax name="ProgramSyntax" format="%(%%ParamValue%|\n%)" />
@@ -297,8 +297,8 @@
 		<parameter id="ISEIgnoreSource" label="Ignore source files" tooltip="Pattern to ignore source files that match this regular expression"
 			type="String" default=".*unisims.*" format="CopyValue" readonly="false" />
 		<!--  Quartus parameters  -->
-		<parameter	id="part" label="Device" tooltip= "FPGA part number (device) to use"
-        		default="" visible="true" omit="" type="String" format="CopyValue"/>
+<!-- 	<parameter	id="part" label="Device" tooltip= "FPGA part number (device) to use"
+        		default="" visible="true" omit="" type="String" format="CopyValue"/> -->
 		<parameter id="QuartusProjectRoot" label="Workspace directory" tooltip="Relative (to user home directory) path of the workspace on Quartus server"
 			type="String" default="vdt" format="RemoteRootSyntax" readonly="false" />
 

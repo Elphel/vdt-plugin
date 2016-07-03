@@ -26,8 +26,7 @@
  * as well as that of the covered work.}
  *******************************************************************************/
  -->
-<vdt-project>
-
+<vdt-project version="1.1">
 	<interface name="IVerilog" extends="FPGAPprojectInterface">
 		<!-- Syntax definitions -->
 
@@ -182,9 +181,9 @@
 
 <!-- 	<parameter id="Param_SourceList" label="Param_SourceList"
 			type="Stringlist" format="SourceListSyntax" default="" readonly="true"
-			visible="true" />  -->
+			visible="true" />
 		<parameter id="SourceListPar"  label="Param_SourceList" type="Filelist"
-			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />
+			format="ParamListSyntax" default="%%FilteredSourceList" readonly="true" visible="false" />  -->
 
 
 		<parameter id="ShowNoProblem" type="BoolYesNo" format="None"

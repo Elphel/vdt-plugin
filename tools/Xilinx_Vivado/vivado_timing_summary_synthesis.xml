@@ -43,7 +43,7 @@
 		<action-menu>
 			<action label="Report post-synthesis timing summary" resource="" icon="clock_sum.png" />
 		</action-menu>
-		<parameter id="DisableVivadoTimingSummary"/>
+<!-- 		<parameter id="DisableVivadoTimingSummary"/> -->
 		<parameter id="DisableVivadoTimingSummary" label="Disable" tooltip="Disable post-synthesis timing summary report"
 		           default="false" type= "Boolean" format="None"/>
 		
