@@ -219,25 +219,16 @@ public class OptionsCore {
     }
 
     public static void doStoreContextOptions(Context context, IProject project) {
-    	if ("cocotb".equals(context.getName())){
-    		System.out.println("doStoreContextOptions('cocotb'), project="+project);
-    	}
         IPreferenceStore store = getPreferenceStore(context, project);
         doStoreContextOptions(context, store);
     }
 
     public static void doStoreContextOptions(Context context) {
-    	if ("cocotb".equals(context.getName())){
-    		System.out.println("doStoreContextOptions('cocotb')");
-    	}
         IPreferenceStore store = VerilogPlugin.getDefault().getPreferenceStore();
         doStoreContextOptions(context, store);
     }
 
     public static void doStoreContextOptions(Context context, IPreferenceStore store) {
-    	if ("cocotb".equals(context.getName())){
-    		System.out.println("static doStoreContextOptions('cocotb')");
-    	}
     	
         List<Parameter> list = context.getParams();
         if (list.isEmpty())
