@@ -250,9 +250,6 @@ class OptionsUtils {
     {
         boolean compatible;
         final String versionKey = getVersionKey(contextID);
-        if (versionKey.endsWith("ocotb")){
-        	System.out.println("isVersionCompatible(cocotb)");
-        }
         if (version == null) {
             compatible = ! store.contains(versionKey);
         } else if (store.contains(versionKey)) {
