@@ -94,7 +94,7 @@ public class ValueBasedListOption extends Option {
     /**
      * Load the default option value from persistent storage
      * 
-     * @return the sequnce of the list items separated by SEPARATOR.
+     * @return the sequence of the list items separated by SEPARATOR.
      */
     public String doLoadDefault() {
         List<String> list = doLoadDefaultList();
@@ -110,7 +110,7 @@ public class ValueBasedListOption extends Option {
     /**
      * Save value to persistent storage
      * 
-     * @param value the sequnce of the list items separated by SEPARATOR.
+     * @param value the sequence of the list items separated by SEPARATOR.
      */
     public boolean doStore(String value) {
         List<String> list = OptionsUtils.convertStringToList(value);

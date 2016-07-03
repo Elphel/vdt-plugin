@@ -28,8 +28,12 @@ package com.elphel.vdt.core.options;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -51,6 +55,7 @@ class OptionsUtils {
     public static final String KEY_VERSION = "com.elphel.store.version.";
     
     private static final String SEPARATOR = "<-@##@->";
+    private static final String CONTEXT_SEPARATOR = "_@_";
     
     public static String convertListToString(List<String> list) {
         String value = "";
@@ -94,9 +99,21 @@ class OptionsUtils {
     }
     
     public static String toKey(Parameter param) {
-        Context context = param.getContext();
-        int index = context.getParams().indexOf(param);
-        return "" + param.getContext().getName() + "_" + index + "_" + param.getID();
+//        Context context = param.getContext();
+//        int index = context.getParams().indexOf(param);
+//        return "" + param.getContext().getName() + "_" + index + "_" + param.getID();
+        return "" + param.getContext().getName() + CONTEXT_SEPARATOR + param.getID();
+        
+  /* TODO: 07/02/2016: Disabled using parameter index in the key - that was causing VDT to forget all settings
+   * when number of tool parameters was modified.
+   *  ContextOptionsDialog */       
+        
+        
+//TODO: 07/01/2016: Understand why index is needed? It changes when xml files are edited (added/deleted parameters
+//      But each parameter ID + context should already be unique
+//      So meanwhile I'll add searching for same context/parameter with other indices if the exact match is not found         
+        
+        
     }
     
     
@@ -172,6 +189,49 @@ class OptionsUtils {
         store.setToDefault(getVersionKey(contextID));
     }
 
+    public static void updateStore(final String contextID, IPreferenceStore store) {
+        List<String> contextList = getStoreContext(contextID, store);
+        Map<String,String> newKeyValues= new HashMap<String,String>();
+        Pattern patt_new=Pattern.compile("[a-zA-Z0-9_]*"+CONTEXT_SEPARATOR);
+        Pattern patt_indx=Pattern.compile("([a-zA-Z0-9_]*)_[0-9]+_(.*)");
+        for (String key : contextList) {
+        	if (patt_new.matcher(key).lookingAt()){
+        		newKeyValues.put(key, store.getString(key)); // Found new <context>_@_<parameter>
+        	} else {
+        		Matcher matcher = patt_indx.matcher(key);
+        		if (matcher.lookingAt()) {
+        			String newKey = matcher.group(1)+CONTEXT_SEPARATOR+matcher.group(2);
+        			
+        			if (!newKeyValues.containsKey(newKey)){ // Only if it is not yet set - not to overwrite the new value
+                		newKeyValues.put(newKey, store.getString(key)); // Found new <context>_@_<parameter>
+        			}
+        					
+        		}
+        	}
+            store.setToDefault(key);
+        }
+        // Save converted/filtered values, if they are not empty (will not be able to overwrite non-empty default)
+        for (String key :newKeyValues.keySet()){
+        	store.putValue(key,newKeyValues.get(key));
+        }
+        // now regenerate context string
+        //Rebuild the list, getting rid of indexed entries 
+        contextList = new ArrayList<String>();
+        for (String key :newKeyValues.keySet()){
+        	contextList.add(key);
+        }
+        
+        
+        final String contentKey = getContentKey(contextID);
+        ValueBasedListOption option = new ValueBasedListOption(contentKey, contextID, contextList);
+        option.setPreferenceStore(store);
+        option.doStore(contextList);
+//        store.setToDefault(getContentKey(contextID));
+        store.setToDefault(getVersionKey(contextID));
+    }
+
+    
+    
     public static void setStoreVersion( final String version
                                       , final String contextID
                                       , IPreferenceStore store)
@@ -190,6 +250,9 @@ class OptionsUtils {
     {
         boolean compatible;
         final String versionKey = getVersionKey(contextID);
+        if (versionKey.endsWith("ocotb")){
+        	System.out.println("isVersionCompatible(cocotb)");
+        }
         if (version == null) {
             compatible = ! store.contains(versionKey);
         } else if (store.contains(versionKey)) {
@@ -200,7 +263,8 @@ class OptionsUtils {
         return compatible;
     }
     
-    private static List<String> getStoreContext( final String contextID
+    public static List<String> getStoreContext( final String contextID
+//    private static List<String> getStoreContext( final String contextID
                                                , IPreferenceStore store ) {
         List<String> context = new ArrayList<String>();
         ValueBasedListOption option = new ValueBasedListOption(getContentKey(contextID), contextID, context);

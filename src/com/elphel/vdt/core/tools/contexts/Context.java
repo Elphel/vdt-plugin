@@ -72,7 +72,7 @@ public abstract class Context {
     private List<String> createdControlFiles = new ArrayList<String>();    
     private boolean initialized = false; 
     private String workingDirectory;
-    private String version;
+    private String contextVersion;
 //    private Context context=null;
     private int currentHash; // calculated during buildparam from non-parser command blocks and command files.
     protected Context(String name,
@@ -127,12 +127,12 @@ public abstract class Context {
         initialized = true;
     }
     
-    public void setVersion(String version) {
-        this.version = version;
+    public void setContextVersion(String version) {
+        this.contextVersion = version;
     }
     
-    public String getVersion() {
-        return version;
+    public String getContextVersion() {
+        return contextVersion;
     }
     
     public void setParams(List<Parameter> params) throws ConfigException {

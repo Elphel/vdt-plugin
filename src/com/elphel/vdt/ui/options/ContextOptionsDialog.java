@@ -86,6 +86,17 @@ public class ContextOptionsDialog extends Dialog {
     }
     
     protected void okPressed() {
+    	/* Currently multiple same-named parameters in the same context have warnings.
+    	 * What happens is that after parameters are changed in the dialog, the new value is
+    	 * applied only to the first entry, then the saecond (unmodified) entry is processed
+    	 * and overwrites the modified value (effectively disabling modification. Another
+    	 * option would be to partially restore name+index in the preference store - just
+    	 * instead of the index of all parameters, use index among those with the same ID.
+    	 * In that case rare use of multiple same-name parameters (as was used in the demo
+    	 * tools.xml - same name parameters where inside <if></if>) will not cause troubles
+    	 * as it was when every change of the number of tool parameters made VDT to forget
+    	 * tool settings */
+    	
     	optionsBlock.performApply();
         OptionsCore.doStoreContextOptions(context, store);
         context.setWorkingDirectory(location);

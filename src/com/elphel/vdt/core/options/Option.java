@@ -26,6 +26,8 @@
  *******************************************************************************/
 package com.elphel.vdt.core.options;
 
+import java.util.List;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
@@ -97,6 +99,24 @@ public abstract class Option {
             value = store.getString(key);
             setValue(value);
         } else {
+        	// Trying to get with different index
+        	//See TODO: 07/01/2016 in OptionUtils 
+ //    public static List<String> getStoreContext( final String contextID
+//        	if (contextID.equals("cocotb")) {
+        	if (!key.startsWith(OptionsUtils.KEY_CONTENT)){ // Otherwise will be infinite loop
+	        	List<String> context = OptionsUtils.getStoreContext(contextID,store);
+	        	String patt=contextID+"_[^_]*"+key.substring( key.indexOf("_",contextID.length()+1));
+	        	for (String skey:context){
+	        		if (skey.matches(patt)){
+	                    value = store.getString(skey);
+	                    setValue(value);
+	                    System.out.println("Option.doLoad(): in context "+contextID+" - found replacement for "+key+": "+skey);
+	                    return value;
+	        		}
+	        	}
+        	}
+        	
+        	
             value = doLoadDefault();
         }
         return value;    

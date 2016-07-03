@@ -774,7 +774,7 @@ public class XMLConfig extends Config {
         context.setInputDialogLabel(contextInputDefinition.getLabel());
         context.setCommandLinesBlocks(contextCommandLinesBlocks);
         
-        context.setVersion(currentFileVersion);
+        context.setContextVersion(currentFileVersion);
         
         return context;
     }
@@ -1363,6 +1363,7 @@ public class XMLConfig extends Config {
                 rootNode = node;
                 
                 currentFileVersion = getAttributeValue(node, ROOT_VERSION_ATTR);
+                
             }
         }
         

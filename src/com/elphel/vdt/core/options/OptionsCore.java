@@ -186,6 +186,7 @@ public class OptionsCore {
     }
 
     public static void doLoadContextOptions(Context context, IPreferenceStore store) {
+//    	System.out.println("doLoadContextOptions("+context.getName()+")");
         List<Parameter> list = context.getParams();
         if (list.isEmpty())
             return;
@@ -194,10 +195,11 @@ public class OptionsCore {
         
         for (Parameter param : list) {
             Option option;
-            if (param.getType().isList()) /* Null pointer here on error */
+        	if (param.getType().isList()) /* Null pointer here on error */
                 option = new ParamBasedListOption(param);
             else 
                 option = new ParamBasedOption(param);
+            
             option.setPreferenceStore(store);
             option.doLoad();
         }
@@ -217,16 +219,26 @@ public class OptionsCore {
     }
 
     public static void doStoreContextOptions(Context context, IProject project) {
+    	if ("cocotb".equals(context.getName())){
+    		System.out.println("doStoreContextOptions('cocotb'), project="+project);
+    	}
         IPreferenceStore store = getPreferenceStore(context, project);
         doStoreContextOptions(context, store);
     }
 
     public static void doStoreContextOptions(Context context) {
+    	if ("cocotb".equals(context.getName())){
+    		System.out.println("doStoreContextOptions('cocotb')");
+    	}
         IPreferenceStore store = VerilogPlugin.getDefault().getPreferenceStore();
         doStoreContextOptions(context, store);
     }
 
     public static void doStoreContextOptions(Context context, IPreferenceStore store) {
+    	if ("cocotb".equals(context.getName())){
+    		System.out.println("static doStoreContextOptions('cocotb')");
+    	}
+    	
         List<Parameter> list = context.getParams();
         if (list.isEmpty())
             return;
@@ -240,7 +252,7 @@ public class OptionsCore {
             option.setPreferenceStore(store);
             option.doStore();
         }
-        OptionsUtils.setStoreVersion(context.getVersion(), context.getName(), store);
+        OptionsUtils.setStoreVersion(context.getContextVersion(), context.getName(), store);
         finalizeDoStore(store);
     }
 
@@ -250,6 +262,7 @@ public class OptionsCore {
                 if (store.needsSaving())
                     ((ScopedPreferenceStore)store).save();
             } catch (IOException e) {
+            	System.out.println("finalizeDoStore() - out of sync (edited manually settings file?");
                   // Nothing do do, we don't need to bother the user
             }
         }    
@@ -284,19 +297,28 @@ public class OptionsCore {
     }
 
     private static void checkVersionCompatibility(Context context, IPreferenceStore store) {
-        if (OptionsUtils.isVersionCompatible(context.getVersion(), context.getName(), store))
+    	// Context Version is a version of the file, like <vdt-project version = "0.8">
+        if (OptionsUtils.isVersionCompatible(context.getContextVersion(), context.getName(), store))
             return;
 
         Shell shell = VerilogPlugin.getActiveWorkbenchShell();
-        String message = "Version of TSL description has been changed.\nDo you wish to delete stored values?";
+        String message = "Version of TSL description for context '"+ context.getName()+"' has been changed.\n"+
+                         "What do you wish to do with the stored values?\n"+
+        		         "'Delete' resets all context values to defaults\n"+
+                         "'Update' tries to convert settings to newer format\n"+
+        		         "'Cancel' does nothing, keeping existing files (until saved).";
         MessageDialog messageBox = new MessageDialog( shell, "Warning", null
                                                     , message
                                                     , MessageDialog.WARNING
-                                                    , new String[]{"Yes", "No"}
+                                                    , new String[]{"Delete", "Update", "Cancel"}
                                                     , 1);
         messageBox.open();
-        if (messageBox.getReturnCode() == 0) {
+        int returnCode = messageBox.getReturnCode();
+        if (returnCode == 0) {
             OptionsUtils.clearStore(context.getName(), store);
+            finalizeDoStore(store);
+        } else if (returnCode == 1) {
+        	OptionsUtils.updateStore(context.getName(), store);
             finalizeDoStore(store);
         }
     }

@@ -38,6 +38,7 @@ import com.elphel.vdt.core.tools.contexts.Context;
 
 public class ParamNodeReader extends AbstractConditionNodeReader {
     private List<Parameter> paramList = new ArrayList<Parameter>();
+    private List<String>    paramIdList = new ArrayList<String>();
 
     public ParamNodeReader(XMLConfig config, Context context) {
         super(config, context);
@@ -46,7 +47,14 @@ public class ParamNodeReader extends AbstractConditionNodeReader {
     public void readNode(Node node, Condition condition) throws ConfigException {
         if(XMLConfig.isElemNode(node, XMLConfig.PARAMETER_TAG)) {
             try {
-                paramList.add(readParam(node, condition));
+            	Parameter param = readParam(node, condition);
+            	String id=param.getID();
+            	if (paramIdList.contains(id)){
+            		System.out.println("Warning: duplicate parameter ('" + id + "') in context '" + context + "' defined in "+param.getSourceXML());
+//                    throw new ConfigException("Duplicate parameter ('" + id + "') in context '" + context + "' defined in "+param.getSourceXML());
+            	}
+                paramIdList.add(id);
+                paramList.add(param);
             } catch(ConfigException e) {
                 config.logError(e);
             }
