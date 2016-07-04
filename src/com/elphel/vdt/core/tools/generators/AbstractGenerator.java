@@ -155,7 +155,8 @@ public abstract class AbstractGenerator {
     protected String fault(String message) {
     	if (menuMode)
     		return "";
-        MessageUI.error("Generator '" + getName() + "' fault: " + message);
+//        MessageUI.error("Generator '" + getName() + "' fault: " + message);
+        System.out.println("Error: Generator '" + getName() + "' fault: " + message);
         return null;
     }
     

@@ -314,9 +314,13 @@ public class RunningBuilds {
 					if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)) System.out.print("Killed open console");
 					return true;
 				} else {
+					if (VerilogPlugin.getPreferenceBoolean(PreferenceStrings.DEBUG_LAUNCHING)){
+						System.out.print("removeConsole(): hasBad="+hasBad+", hasGood="+hasGood+", goodSet"+goodSet);
+					}
 					if      (hasBad)  tool.setState(TOOL_STATE.FAILURE);
 					else if (hasGood) tool.setState(TOOL_STATE.SUCCESS);
 					else if (goodSet) tool.setState(TOOL_STATE.FAILURE);
+					else              tool.setState(TOOL_STATE.SUCCESS); // No bad, and good is not specified
 				}
 			}
 		}

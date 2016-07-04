@@ -43,6 +43,7 @@ import com.elphel.vdt.veditor.preference.PreferenceStrings;
 import com.elphel.vdt.core.options.OptionsCore;
 import com.elphel.vdt.core.tools.contexts.Context;
 import com.elphel.vdt.core.tools.contexts.PackageContext;
+import com.elphel.vdt.core.tools.params.Parameter;
 import com.elphel.vdt.core.tools.params.ToolException;
 import com.elphel.vdt.core.tools.params.ToolSequence;
 import com.elphel.vdt.ui.MessageUI;
@@ -88,7 +89,7 @@ public class ContextOptionsDialog extends Dialog {
     protected void okPressed() {
     	/* Currently multiple same-named parameters in the same context have warnings.
     	 * What happens is that after parameters are changed in the dialog, the new value is
-    	 * applied only to the first entry, then the saecond (unmodified) entry is processed
+    	 * applied only to the first entry, then the second (unmodified) entry is processed
     	 * and overwrites the modified value (effectively disabling modification. Another
     	 * option would be to partially restore name+index in the preference store - just
     	 * instead of the index of all parameters, use index among those with the same ID.
@@ -98,6 +99,11 @@ public class ContextOptionsDialog extends Dialog {
     	 * tool settings */
     	
     	optionsBlock.performApply();
+    	//Debug:
+//    	for (Parameter par:context.getParams()){
+//    		System.out.println("okPressed() "+context.getName()+" ->"+par.getID());
+//    	}
+    	
         OptionsCore.doStoreContextOptions(context, store);
         context.setWorkingDirectory(location);
         try {

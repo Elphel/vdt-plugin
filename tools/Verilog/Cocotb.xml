@@ -115,9 +115,6 @@
 		shell="bash"
 		package="FPGA_package"
 		interface="Cocotb"
-		errors="(.*):([0-9]+): [a-z_\- ]*error[: ]?(.*)"
-		warnings="(.*):([0-9]+): [a-z_\- ]*[warning|sorry]: (.*)"
-		info="\s*File\s+&quot;(.*)&quot;, line ([0-9]+)[, in ]?(.*)"
 		top-file="%CocotbDutTopFile"
 		define="COCOTB"
 		>
@@ -265,6 +262,12 @@
 		<parameter id="ShowWarnings" type="BoolYesNo" format="None"
 			default="true" label="Show output warnings" />
 
+		<parameter id="ShowInfo" type="BoolYesNo" format="None"
+			default="true" label="Show info messages" />
+
+		<parameter id="FilterParser" type="BoolYesNo" format="None"
+			default="true" label="Filter simulation output with an external parser" />
+
 		<parameter id="RemoveBugs" type="BoolYesNo" format="None"
 			default="false" label="Remove buggy simulator output" />
 
@@ -288,15 +291,6 @@
 			type="String" default="%%CurrentFileBase" format="FstFileSyntax"
 			readonly="false" />
 
-
-		<parameter id="GrepFindErr" label="Grep pattern for errors only"
-			type="String" format="GrepFindSyntax" default="error" readonly="false"
-			visible="true" />
-
-		<parameter id="GrepFindErrWarn" label="Grep pattern for both errors and warnings"
-			type="String" format="GrepFindSyntax" default="error|warning|sorry"
-			readonly="false" visible="true" />
-
 		<parameter id="GrepSkip1" label="Grep skip pattern" type="String"
 			format="GrepSkipSyntax" default="(null)" readonly="false" visible="true" />
 			
@@ -308,6 +302,24 @@
 			format="IncludeParamSyntax" default="" omit=""
 			label="Verilog parameters definition to be included in the test fixture"
 			readonly="false" visible="true" />
+			
+        <parameter id="parsers_path" label="Parsers Path" tooltip= "parsers directory in plugins"
+        			default="%%ParsersPath" visible="true" omit="" type="String" format="CopyValue"/>
+        <parameter id="parser_name" label="Parser name" tooltip= "Cocotb/Python output parser path"
+        			default="parser_cocotb_icarus.py" visible="true" omit="" type="String" format="CopyValue"/>
+        			
+
+        <parameter	id="PatternErrors"   label="Errors" tooltip= "Regular expression for error messages"
+        			default="(.*):([0-9]+): [a-z_\- ]*error[: ]?(.*)"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternWarnings"   label="Warnings" tooltip= "Regular expression for warnings messages"
+        			default="(.*):([0-9]+): [a-z_\- ]*[warning|sorry]: (.*)"
+        			visible="true"  type="String" format="CopyValue"/>
+        <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
+        			default=".*[\s.](\w*\.py):([0-9]+)\s*\S*\s*\S*\s*(.*)"
+        			visible="true"  type="String" format="CopyValue"/>
+
+			
 			
 <!-- Temporary inserted into the command line, will be removed -->
 
@@ -367,6 +379,38 @@
 			
 		<parameter id="CocotbRoot" outid="COCOTB" type="String"
 			 format="NameEqValue" default="%%PluginRoot/%CocotbRootRel" visible="false" />
+		<if ShowWarnings="true">
+		     <parameter id="GrepWarning" type="String" label = "GrepWarning"
+			 format="CopyValue" default="|warning|WARNING" visible="true" />
+		</if>	 
+		<if-not ShowWarnings="true">
+		     <parameter id="GrepWarning" type="String" label = "GrepWarning"
+			 format="CopyValue" default="" visible="true" />
+		</if-not>
+			 
+		<if ShowInfo="true">
+		     <parameter id="GrepInfo" type="String" label = "GrepInfo"
+			 format="CopyValue" default="|info|INFO" visible="true" />
+		</if>	 
+		<if-not ShowInfo="true">
+		     <parameter id="GrepInfo" type="String" label = "GrepInfo"
+			 format="CopyValue" default="" visible="true" />
+		</if-not>	 
+
+		<if COCOTB_DEBUG="true">
+		     <parameter id="GrepDebug" type="String" label = "GrepDebug"
+			 format="CopyValue" default="|DEBUG" visible="true" />
+		</if>	 
+		<if-not COCOTB_DEBUG="true">
+		     <parameter id="GrepDebug" type="String" label = "GrepDebug"
+			 format="CopyValue" default="" visible="true" />
+		</if-not>	 
+
+
+        <parameter id="GrepEWI" type="String" label = "GrepWarning"
+		format="GrepFindSyntax" default="error|ERROR%GrepWarning%GrepInfo%GrepDebug" visible="true" readonly="true"/>
+
+
 
 		<input>
 			<group name="cocotb" label="Cocotb">
@@ -401,13 +445,26 @@
 				<!--"ShowWaves"   -->
 				"ShowNoProblem"
 				"ShowWarnings"
+				"ShowInfo"
 				"RemoveBugs"
 				"SaveLogsPreprocessor"
 				"SaveLogsSimulator"
 				"v"
 				"legacy_model"
 				"no_specify"
+				"---"
+				"FilterParser"
+				"parsers_path"
+				"parser_name"
+<!-- 			"GrepWarning"
+				"GrepInfo"  -->
+				"GrepEWI"
+		        "PatternErrors"
+		        "PatternWarnings"
+		        "PatternInfo"
+				
 			</group>
+			
 			<group name="Advanced" label="Advanced">
 				"Param_PreExe"
 				"Param_Exe"
@@ -419,8 +476,6 @@
 				"LogFile"
 				"OutFile"
 				"FstDumpFile"
-				"GrepFindErr"
-				"GrepFindErrWarn"
 				"GrepSkip1"
 				"Param_1"
 				"Param_2"
@@ -447,11 +502,12 @@
 	- 			"else echo 'FAILURE';"
 				"fi"
 		    </line>
-		<!-- TODO: watch for new lines inserted inside quoted tokens during autoformat - they break output
-		Maybe add filter to the code to transform white spaces -->
+
 			<line name="command_line"
 			 sep=" "
-			 success = "SIMULATION FINISHED SUCCESSFULLY"
+			 errors=   "PatternErrors"
+			 warnings= "PatternWarnings"
+			 info=     "PatternInfo"
 			 failure = "ERROR|CRITICAL"
 	         >
 				"%Param_Shell_Options"
@@ -463,7 +519,25 @@
 			    "cd %CocotbFilesDir"
 			    ";"
 				<if IVerilogActionIndex="0">
-					"make sim;"
+					"make sim"
+					<if ShowNoProblem="false">
+						"2&gt;&amp;1"
+					</if>
+					<if SaveLogsPreprocessor="true">
+						"| tee -a"
+						"%%ProjectPath/%LogFileFull"
+					</if>
+					<if FilterParser="true">
+					    "|python -u %parsers_path/%parser_name"
+					</if>					
+ 				    <if ShowNoProblem="false">
+ 				        "%GrepEWI"
+						<if RemoveBugs="true">
+							"%GrepSkip1"
+						</if>
+					</if>
+					
+					";"
 				    "if [ $? -ne 0 ]; then  echo 'SIMULATION FAILED'; sleep 1; exit 1; fi;"
 					<!-- Add gtkwave here -->
 					<if ShowWaves="true">
@@ -482,7 +556,7 @@
 				<if IVerilogActionIndex="2">
 					"make clean;"
 				</if>
-			    "if [ $? -eq 0 ]; then  echo 'SIMULATION FINISHED SUCCESSFULLY'; else echo 'SIMULATION FAILED'; fi;"
+			    "if [ $? -eq 0 ]; then  echo 'SIMULATION FINISHED'; else echo 'SIMULATION FAILED'; fi;"
 			    "sleep 1"
 			    
 			</line>
@@ -515,10 +589,6 @@
 				"%CocotbCOMPILE_ARGS"
 				<!-- Always include top project dir (where IVERILOG_INCLUDE.v is) -->
 				"COMPILE_ARGS += -DCOCOTB"
-				<!-- So code may use PROJECT_ROOT_PATH to reference data files
-				     Does not work when passing string parameters, had to use include file -->
-<!-- 			"COMPILE_ARGS += -DROOTPATH=\&quot;%%ProjectPath\&quot;"
-				"COMPILE_ARGS += -DFSTNAME=\&quot;%%ParamValue-%%BuildStamp.fst\&quot;"-->
 				
 				<if ShowWaves="true">
 					"COMPILE_ARGS += -DTRACE"
@@ -540,7 +610,7 @@
 				"include $(COCOTB)/makefiles/Makefile.sim"
 				"%MakeCleanPatterns"
 			</line>
-			
+
 		</output>
 
 

@@ -26,6 +26,9 @@
  *******************************************************************************/
 package com.elphel.vdt.ui.options.component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -43,6 +46,7 @@ import org.eclipse.swt.graphics.Color;
 //import com.elphel.vdt.VDTPlugin;
 import com.elphel.vdt.veditor.VerilogPlugin;
 import com.elphel.vdt.core.tools.params.Parameter;
+import com.elphel.vdt.core.tools.params.ToolException;
 
 public abstract class Component {
 
@@ -68,6 +72,14 @@ public abstract class Component {
 
     protected ChangeListener changeListener;
     
+    // To be able to apply the same value to all parameters having the same name in the same context
+    public List<Parameter> getSameParameters(){
+    	List<Parameter> lp = new ArrayList<Parameter>();
+    	for (Parameter par: param.getContext().getParams()){
+    		if ((param.getID().equals(par.getID())) && (param!=par) ) lp.add(par);
+    	}
+    	return lp;
+    }
     public Component(Parameter param) {
         this(param, null);
     }
@@ -131,6 +143,25 @@ public abstract class Component {
     }
     
     public abstract String performApply();
+
+    public void duplicateParamValue(Parameter param){
+    	if (isDisposed()) return;
+    	if (isDefault){
+    		param.setToDefault();
+    	} else if (param.getType().isList()){
+    		try {
+				param.setCurrentValue(this.param.getCurrentValue());
+			} catch (ToolException e) {
+				System.out.println("duplicateParamValue(): failed to set List value for "+param.getID()); 
+			}
+    	} else {
+			try {
+				param.setCurrentValue(this.param.getCurrentValue().get(0));
+			} catch (ToolException e) {
+				System.out.println("duplicateParamValue(): failed to set String value for "+param.getID()); 
+			}
+    	}
+    }
 
     public abstract void setPreferenceStore(IPreferenceStore store);
 

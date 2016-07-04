@@ -49,10 +49,12 @@ public class ParamNodeReader extends AbstractConditionNodeReader {
             try {
             	Parameter param = readParam(node, condition);
             	String id=param.getID();
+            	// It should now handle duplicate parameters (used for conditionals) AF 2016/07/04
+            	/*
             	if (paramIdList.contains(id)){
             		System.out.println("Warning: duplicate parameter ('" + id + "') in context '" + context + "' defined in "+param.getSourceXML());
-//                    throw new ConfigException("Duplicate parameter ('" + id + "') in context '" + context + "' defined in "+param.getSourceXML());
             	}
+            	*/
                 paramIdList.add(id);
                 paramList.add(param);
             } catch(ConfigException e) {

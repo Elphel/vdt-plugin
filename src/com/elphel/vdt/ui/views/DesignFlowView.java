@@ -1007,6 +1007,8 @@ public class DesignFlowView extends ViewPart implements ISelectionListener {
     		int choice,
     		String fullPath,
     		String ignoreFilter) throws CoreException {
+    	// Will delete conditionally (controlled by preferences)
+		VerilogPlugin.deleteExternalMarkers(selectedResource.getProject());
     	if (tool != null) {
     		toolSequence.launchToolSequence(tool,mode, choice, fullPath, ignoreFilter);
     	} else if (selectedItem.hasChildren()) {

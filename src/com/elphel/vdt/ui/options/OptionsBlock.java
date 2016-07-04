@@ -99,7 +99,16 @@ public class OptionsBlock {
         Iterator<Entry<Parameter, Component>> i = components.entrySet().iterator(); 
         while (i.hasNext()) {
             Component component = i.next().getValue();
+            List<Parameter> pl =  component.getSameParameters(); 
             component.performApply();
+            if (pl.size() > 0 ) {
+//            	System.out.println("performApply(): component->param->id="+component.getParam().getID()
+//            			+" has "+pl.size()+" extra parameter(s) in the same context:");
+            	for (Parameter param:pl){
+            		component.duplicateParamValue(param);
+            	}
+            	
+            }
         }
 	}
 
