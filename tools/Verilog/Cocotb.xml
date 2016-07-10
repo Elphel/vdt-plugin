@@ -265,6 +265,9 @@
 		<parameter id="ShowInfo" type="BoolYesNo" format="None"
 			default="true" label="Show info messages" />
 
+		<parameter id="ShowSim" type="BoolYesNo" format="None"
+			default="true" label="Show Simulator" tooltip="Show simulator output with filename/line" />
+
 		<parameter id="FilterParser" type="BoolYesNo" format="None"
 			default="true" label="Filter simulation output with an external parser" />
 
@@ -316,7 +319,7 @@
         			default="(.*):([0-9]+): [a-z_\- ]*[warning|sorry]: (.*)"
         			visible="true"  type="String" format="CopyValue"/>
         <parameter	id="PatternInfo"   label="Info" tooltip= "Regular expression for info messages"
-        			default=".*[\s.](\w*\.py):([0-9]+)\s*\S*\s*\S*\s*(.*)"
+        			default=".*[\s.]([\w-]*\.py|[\w/-]*\.[v|V][hH]?):\s*([0-9]+)\s*\S*\s*\S*\s*(.*)"
         			visible="true"  type="String" format="CopyValue"/>
 
 			
@@ -388,6 +391,15 @@
 			 format="CopyValue" default="" visible="true" />
 		</if-not>
 			 
+		<if ShowSim="true">
+		     <parameter id="GrepSim" type="String" label = "GrepSim"
+			 format="CopyValue" default="|SIM:" visible="true" />
+		</if>	 
+		<if-not ShowSim="true">
+		     <parameter id="GrepSim" type="String" label = "GrepSim"
+			 format="CopyValue" default="" visible="true" />
+		</if-not>	 
+
 		<if ShowInfo="true">
 		     <parameter id="GrepInfo" type="String" label = "GrepInfo"
 			 format="CopyValue" default="|info|INFO" visible="true" />
@@ -408,8 +420,10 @@
 
 
         <parameter id="GrepEWI" type="String" label = "GrepWarning"
-		format="GrepFindSyntax" default="error|ERROR%GrepWarning%GrepInfo%GrepDebug" visible="true" readonly="true"/>
+		format="GrepFindSyntax" default="error|ERROR%GrepWarning%GrepInfo%GrepDebug%GrepSim" visible="true" readonly="true"/>
 
+	    <parameter id="SIMULATION_PATH" type="String"
+			 format="MakefileExport" default= "%%ProjectPath/%SimulDir" visible="false" />
 
 
 		<input>
@@ -446,6 +460,7 @@
 				"ShowNoProblem"
 				"ShowWarnings"
 				"ShowInfo"
+				"ShowSim"
 				"RemoveBugs"
 				"SaveLogsPreprocessor"
 				"SaveLogsSimulator"
@@ -508,9 +523,11 @@
 			 errors=   "PatternErrors"
 			 warnings= "PatternWarnings"
 			 info=     "PatternInfo"
-			 failure = "ERROR|CRITICAL"
+			 failure = "CRITICAL"
 	         >
-				"%Param_Shell_Options"
+<!-- 			 failure = "ERROR|CRITICAL"
+ -->
+ 				"%Param_Shell_Options"
 				"%Param_PreExe"
 <!--  MKDIR - ALWAYS -->				
 			    "mkdir -p"
@@ -528,7 +545,7 @@
 						"%%ProjectPath/%LogFileFull"
 					</if>
 					<if FilterParser="true">
-					    "|python -u %parsers_path/%parser_name"
+					    "|python -u %parsers_path%parser_name"
 					</if>					
  				    <if ShowNoProblem="false">
  				        "%GrepEWI"
@@ -580,7 +597,7 @@
 				"%CocotbRANDOM_SEED"
 				"%COCOTB_DEBUG"
 				"%COCOTB_ANSI_OUTPUT"
-
+				"%SIMULATION_PATH"
 				"%CocotbVERILOG_SOURCES"
 				"%CocotbExtraFiles"				
 				"%CocotbVHDL_SOURCES"

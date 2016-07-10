@@ -43,6 +43,10 @@ RAISED_EXCEPTION="raised exception:"
 COMMA_LINE=", line"
 state = None # None - pass, cocotb - collecting Cocotb problem, python- just raw python problem
 lines = []
+PATTERN_PS =        re.compile(r"(\d+\.\d+) ps")
+PATTERN_FILE_LINE = re.compile('([\w/-]*\.[v|V][hH]?):\s*([0-9]+)')
+TRUNCATE_PATH =     True
+NS_FORMAT =         "%10.3fns"
 def report_python(lines):
     err_msg=lines[0]
     for i in range((len(lines)-1)//2):
@@ -59,6 +63,34 @@ def report_python(lines):
 
 for line in iter(sys.stdin.readline,''):
     sline = line.strip()
+    #Replace picoseconds with nanoseconds
+    ps=PATTERN_PS.match(sline)
+    while ps:
+        try:
+            ns=NS_FORMAT%(0.001*float(ps.group(1)))
+        except:
+            break
+        sline = sline[:ps.start(0)]+ns+sline[ps.end(0):]
+        ps = PATTERN_PS.match(sline)
+    #Recognize verilog file:line and get rid of spaces between them
+    
+    fl=PATTERN_FILE_LINE.search(sline)
+    if fl:
+        if fl.start(0)!=0: #Icarus compiler output, keep as is (controlled by warnings/errors/sorry
+            
+            #lsof -i TCP| fgrep LISTEN
+            fname=fl.group(1)
+            if TRUNCATE_PATH:
+                try:
+                    lastSlashIndex=fname.rindex('/')
+                    fname=fname[lastSlashIndex+1:]
+                except:
+                    pass
+            subl="SIM: %20s:%4d in simulator "%(fname,int(fl.group(2)))
+            sline = sline[:fl.start(0)]+subl+sline[fl.end(0):]
+            
+            
+            
     if state == "cocotb":
         if (len(lines)%2 == 0) or sline.startswith('File "'):
             lines.append(sline)
@@ -87,11 +119,9 @@ for line in iter(sys.stdin.readline,''):
             lines =[sline]
             sys.stdout.write(line)
             
-            
-            
             continue
         else:
-            sys.stdout.write(line)    
+            sys.stdout.write(sline+"\n")    
             
     
         
