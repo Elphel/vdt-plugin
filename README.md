@@ -200,7 +200,14 @@ is the case you can skip the next step and use ~/git/elphel393/fpga-elphel/x393/
 git clone https://github.com/Elphel/x393.git
 cd x393
 ./INIT_PROJECT
+
 ```
+Python program used on the target and during Cocotb simulation requires Python numpy module,
+on Ubuntu you may install it with
+```
+sudo apt-get install python-numpy
+```
+
 The last command copies Eclipse .project and .pydevproject files to the working directory.
 
 From the Eclipse instance that runs VDT plugin (not the one with the VDT source code)
