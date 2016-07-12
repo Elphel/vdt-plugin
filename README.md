@@ -13,6 +13,7 @@ Table of Contents
     * [Programs and libraries installed from (K)ubuntu repositories](#programs-and-libraries-installed-from-kubuntu-repositories)
       * [GtkWave (3.3.58-1)](#gtkwave-3358-1)
       * [other programs needed for building Icarus Verilog](#other-programs-needed-for-building-icarus-verilog)
+      * [For simulation with Cocotb](#for-simulation-with-cocotb)
       * [Java JDK](#java-jdk)
     * [Icarus Verilog](#icarus-verilog)
     * [JavaCC](#javacc)
@@ -56,6 +57,11 @@ sudo apt-get install gtkwave
 ```
 sudo apt-get install autoconf gperf flex bison g++ zlib1g-dev libbz2-dev git
 ```
+#### For simulation with Cocotb
+```
+sudo apt-get install python2.7-dev
+```
+
 #### Java JDK
 For most tasks JRE is sufficient, but if you would like to be able to modify and recompile Verilog
 language parsing you will need java compiler that comes with the full JDK.
