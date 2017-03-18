@@ -33,8 +33,8 @@ Table of Contents
   * [Simulating x393 project with Icarus Verilog](#simulating-x393-project-with-icarus-verilog)
       
 ##VDT plugin documentation
-Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
-Here are some [screenshots](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
+Documentation is available in a separate [vdt_docs](https://git.elphel.com/Elphel/vdt-docs) repository.
+Here are some [screenshots](https://git.elphel.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
 ##Installation of VDT plugin and related programs
 VDT plugin for Eclipse is designed to integrate different tools for Verilog-based FPGA design.
 Currently it supports only GNU/Linux operating system and tool specification file support
@@ -134,7 +134,7 @@ it is not possible to distribute a pre-compiled version (.jar file), so the plug
 merged (using provided script) and compiled/built as Eclipse plugin project.
 ####Clone VDT plugin source code
 ```
-git clone https://github.com/Elphel/vdt-plugin.git
+git clone https://git.elphel.com/Elphel/vdt-plugin.git
 ```
 ###Run VEditor installation/patch script from within the top directory of vdt-plugin
 ```
@@ -197,7 +197,7 @@ tools.
 You may already have it if you installed other software for Elphel NC393 camera development, if that
 is the case you can skip the next step and use ~/git/elphel393/fpga-elphel/x393/
 ```
-git clone https://github.com/Elphel/x393.git
+git clone https://git.elphel.com/Elphel/x393.git
 cd x393
 ./INIT_PROJECT
 
@@ -232,7 +232,7 @@ Open "Verilog/VHDL' perspective:
 ```
 Window->Open Perspective->Other->Verilog/VHDL
 ```
-It should look as shown on screenshots in [VDT-UserManualAddendum.pdf](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf?raw=true),
+It should look as shown on screenshots in [VDT-UserManualAddendum.pdf](https://git.elphel.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf?raw=true),
 with bottom-left panel showind "Design Menu" and FPGA-related tools
 
 #### Configure access to the server with Xilinx tools
