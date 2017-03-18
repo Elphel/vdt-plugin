@@ -33,6 +33,7 @@ Table of Contents
   * [Simulating x393 project with Icarus Verilog](#simulating-x393-project-with-icarus-verilog)
       
 ##VDT plugin documentation
+
 Documentation is available in a separate [vdt_docs](/Elphel/vdt-docs) repository.
 Here are some [screenshots](https://git.elphel.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
 ##Installation of VDT plugin and related programs
