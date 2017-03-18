@@ -32,10 +32,10 @@ Table of Contents
       * [Patch primitive(s) to work with Icarus Verilog](#patch-primitives-to-work-with-icarus-verilog)
   * [Simulating x393 project with Icarus Verilog](#simulating-x393-project-with-icarus-verilog)
       
-##VDT plugin documentation
+## VDT plugin documentation
 Documentation is available in a separate [vdt_docs](https://git.elphel.com/Elphel/vdt-docs) repository.
 Here are some [screenshots](https://git.elphel.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
-##Installation of VDT plugin and related programs
+## Installation of VDT plugin and related programs
 VDT plugin for Eclipse is designed to integrate different tools for Verilog-based FPGA design.
 Currently it supports only GNU/Linux operating system and tool specification file support
 Icarus Verilog simulator and Xilinx ISE and Vivado Webpack design suites. It also works with Altera
@@ -132,11 +132,11 @@ VDT plugin uses modified VEditor plugin for Eclipse and because of the license i
 (Eclipse Public License v1.0 for VEditor and GNU General Public License v3.0+ for VDT plugin)
 it is not possible to distribute a pre-compiled version (.jar file), so the plugin code has to be
 merged (using provided script) and compiled/built as Eclipse plugin project.
-####Clone VDT plugin source code
+#### Clone VDT plugin source code
 ```
 git clone https://git.elphel.com/Elphel/vdt-plugin.git
 ```
-###Run VEditor installation/patch script from within the top directory of vdt-plugin
+### Run VEditor installation/patch script from within the top directory of vdt-plugin
 ```
 ./install_and_patch_veditor.sh
 ```
@@ -147,7 +147,7 @@ files/directories are listed in .gitignore . When VEditor-related part of the VD
 will be changed (and so the vdt-veditor.patch) you will need to run
 ./install_and_patch_veditor.sh again
 
-####Import the VDT plugin project into the Eclipse workspace.
+#### Import the VDT plugin project into the Eclipse workspace.
 At this stage I hit GTK bug that caused Eclipse to crash, working solution is described
 in https://bugs.kde.org/show_bug.cgi?id=339174 :
  For oxygen, edit the normally already existing file
@@ -159,7 +159,7 @@ Import Existing Projects (wizard selection)
 ```
 Keep both **parsers** and **vdt** checked and press **Finish**
 
-####Configuring JavaCC (optional)
+#### Configuring JavaCC (optional)
 In the **Project Explorer** window, expand the **vdt** project folder, right-click
 the **buildjavacc.xml** file and select **Properties**.
 In the new dialog window select **Run/Debug Settings**, press **New** and agree to
@@ -175,7 +175,7 @@ Name: **JAVACC_HOME**
 
 Value: Folder path where **javacc-6.0.zip** was unpacked (ending with /javacc-6.0).
 
-####Building and running VDT
+#### Building and running VDT
 In the "Project Explorer" window, expand the 'vdt' project folder and double-click (open)
 the **plugin.xml** file.
 
