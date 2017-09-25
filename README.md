@@ -2,7 +2,7 @@ VDT plugin
 ==========
 ![VDT plugin screenshot](vdt_screenshot.png)
 
-There is a [![Elphel video](http://community.elphel.com/pictures/icons/playbutton3-32.png) video tutorial](http://blog.elphel.com/2016/05/tutorial-02-eclipse-based-fpga-development-environment-for-elphel-cameras) that shows installation of this plugin and related software.
+There is a [![Elphel video](https://community.elphel.com/pictures/icons/playbutton3-32.png) video tutorial](https://blog.elphel.com/2016/05/tutorial-02-eclipse-based-fpga-development-environment-for-elphel-cameras) that shows installation of this plugin and related software.
 
 Table of Contents                                                                                                                                                                                                                                                             
 -----------------
