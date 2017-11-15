@@ -222,11 +222,11 @@
 			omit="" readonly="false" />
 
 		<parameter id="GrepFindErr" label="Grep pattern for errors only"
-			type="String" format="GrepFindSyntax" default="error" readonly="false"
+			type="String" format="GrepFindSyntax" default="error|Error|ERROR" readonly="false"
 			visible="true" />
 
 		<parameter id="GrepFindErrWarn" label="Grep pattern for both errors and warnings"
-			type="String" format="GrepFindSyntax" default="error|warning|sorry"
+			type="String" format="GrepFindSyntax" default="error|Error|ERROR|warning|Warning|WARNING|sorry"
 			readonly="false" visible="true" />
 
 		<parameter id="GrepSkip1" label="Grep skip pattern" type="String"

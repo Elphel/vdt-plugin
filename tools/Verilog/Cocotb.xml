@@ -420,7 +420,7 @@
 
 
         <parameter id="GrepEWI" type="String" label = "GrepWarning"
-		format="GrepFindSyntax" default="error|ERROR%GrepWarning%GrepInfo%GrepDebug%GrepSim" visible="true" readonly="true"/>
+		format="GrepFindSyntax" default="Error|error|ERROR%GrepWarning%GrepInfo%GrepDebug%GrepSim" visible="true" readonly="true"/>
 
 	    <parameter id="SIMULATION_PATH" type="String"
 			 format="MakefileExport" default= "%%ProjectPath/%SimulDir" visible="false" />
