@@ -69,7 +69,8 @@ except:
 global_db={}
 global_pRef=()        
 
-sys.stdout.write("Running: %s %s %s %s\n" % (sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3]))
+#sys.stdout.write("Running: %s %s %s %s\n" % (sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3]))
+sys.stdout.write("Running: %s"%str(sys.argv))
 def isProblem(string):
     if string.startswith("ERROR:") or string.startswith("CRITICAL WARNING:") or string.startswith("WARNING:") or string.startswith("INFO:"):
         return True
