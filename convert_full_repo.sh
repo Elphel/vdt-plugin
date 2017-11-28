@@ -30,15 +30,12 @@
 # 3 - remove/rename ../vdt-plugin if it exists
 # 4 - run this script, it will create ../vdt-plugin repository
 # 5 - edit ../vdt-plugin/.gitignore - it may have duplicates
-# 6 - run "git remote set-url origin git@github.com:Elphel/vdt-plugin.git" in the new repo (git commit -i .gitignor -m "after auto")
+# 6 - run "git remote set-url origin git@git.elphel.com:Elphel/vdt-plugin.git" in the new repo (git commit -i .gitignor -m "after auto")
 # 7 ? Had conflicts in vdt-veditor.patch. Used new version, "git add vdt-veditor.patch", "git commit -i vdt-veditor.patch"
 
-#TMPDIR="tmp"
-#GITURL="https://github.com/Elphel/unmodified_veditor_1_2_0_clone.git"
-#GITREPO="unmodified_veditor_1_2_0_clone"
-#PATCH_FILE="vdt-veditor.patch"
 INITIAL_DIRECTORY=`pwd`
-FULL_REPO_URL="git@github.com:Elphel/vdt.git"
+#FULL_REPO_URL="git@github.com:Elphel/vdt.git"
+FULL_REPO_URL="git@git.elphel.com:Elphel/vdt.git"
 DERIVATIVE_REPO_NAME="vdt-plugin"
 #create derivative repo at the same level as current
 cd ../
