@@ -2,7 +2,7 @@ VDT plugin
 ==========
 ![VDT plugin screenshot](vdt_screenshot.png)
 
-There is a [![Elphel video](http://community.elphel.com/pictures/icons/playbutton3-32.png) video tutorial](http://blog.elphel.com/2016/05/tutorial-02-eclipse-based-fpga-development-environment-for-elphel-cameras) that shows installation of this plugin and related software.
+There is a [![Elphel video](https://community.elphel.com/pictures/icons/playbutton3-32.png) video tutorial](https://blog.elphel.com/2016/05/tutorial-02-eclipse-based-fpga-development-environment-for-elphel-cameras) that shows installation of this plugin and related software.
 
 Table of Contents                                                                                                                                                                                                                                                             
 -----------------
@@ -13,6 +13,7 @@ Table of Contents
     * [Programs and libraries installed from (K)ubuntu repositories](#programs-and-libraries-installed-from-kubuntu-repositories)
       * [GtkWave (3.3.58-1)](#gtkwave-3358-1)
       * [other programs needed for building Icarus Verilog](#other-programs-needed-for-building-icarus-verilog)
+      * [For simulation with Cocotb](#for-simulation-with-cocotb)
       * [Java JDK](#java-jdk)
     * [Icarus Verilog](#icarus-verilog)
     * [JavaCC](#javacc)
@@ -31,10 +32,10 @@ Table of Contents
       * [Patch primitive(s) to work with Icarus Verilog](#patch-primitives-to-work-with-icarus-verilog)
   * [Simulating x393 project with Icarus Verilog](#simulating-x393-project-with-icarus-verilog)
       
-##VDT plugin documentation
-Documentation is available in a separate [vdt_docs](https://github.com/Elphel/vdt-docs) repository.
-Here are some [screenshots](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
-##Installation of VDT plugin and related programs
+## VDT plugin documentation
+Documentation is available in a separate [vdt_docs](https://git.elphel.com/Elphel/vdt-docs) repository.
+Here are some [screenshots](https://git.elphel.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf)
+## Installation of VDT plugin and related programs
 VDT plugin for Eclipse is designed to integrate different tools for Verilog-based FPGA design.
 Currently it supports only GNU/Linux operating system and tool specification file support
 Icarus Verilog simulator and Xilinx ISE and Vivado Webpack design suites. It also works with Altera
@@ -56,6 +57,11 @@ sudo apt-get install gtkwave
 ```
 sudo apt-get install autoconf gperf flex bison g++ zlib1g-dev libbz2-dev git
 ```
+#### For simulation with Cocotb
+```
+sudo apt-get install python2.7-dev
+```
+
 #### Java JDK
 For most tasks JRE is sufficient, but if you would like to be able to modify and recompile Verilog
 language parsing you will need java compiler that comes with the full JDK.
@@ -126,11 +132,11 @@ VDT plugin uses modified VEditor plugin for Eclipse and because of the license i
 (Eclipse Public License v1.0 for VEditor and GNU General Public License v3.0+ for VDT plugin)
 it is not possible to distribute a pre-compiled version (.jar file), so the plugin code has to be
 merged (using provided script) and compiled/built as Eclipse plugin project.
-####Clone VDT plugin source code
+#### Clone VDT plugin source code
 ```
-git clone https://github.com/Elphel/vdt-plugin.git
+git clone https://git.elphel.com/Elphel/vdt-plugin.git
 ```
-###Run VEditor installation/patch script from within the top directory of vdt-plugin
+### Run VEditor installation/patch script from within the top directory of vdt-plugin
 ```
 ./install_and_patch_veditor.sh
 ```
@@ -141,7 +147,7 @@ files/directories are listed in .gitignore . When VEditor-related part of the VD
 will be changed (and so the vdt-veditor.patch) you will need to run
 ./install_and_patch_veditor.sh again
 
-####Import the VDT plugin project into the Eclipse workspace.
+#### Import the VDT plugin project into the Eclipse workspace.
 At this stage I hit GTK bug that caused Eclipse to crash, working solution is described
 in https://bugs.kde.org/show_bug.cgi?id=339174 :
  For oxygen, edit the normally already existing file
@@ -153,7 +159,7 @@ Import Existing Projects (wizard selection)
 ```
 Keep both **parsers** and **vdt** checked and press **Finish**
 
-####Configuring JavaCC (optional)
+#### Configuring JavaCC (optional)
 In the **Project Explorer** window, expand the **vdt** project folder, right-click
 the **buildjavacc.xml** file and select **Properties**.
 In the new dialog window select **Run/Debug Settings**, press **New** and agree to
@@ -169,7 +175,7 @@ Name: **JAVACC_HOME**
 
 Value: Folder path where **javacc-6.0.zip** was unpacked (ending with /javacc-6.0).
 
-####Building and running VDT
+#### Building and running VDT
 In the "Project Explorer" window, expand the 'vdt' project folder and double-click (open)
 the **plugin.xml** file.
 
@@ -191,10 +197,17 @@ tools.
 You may already have it if you installed other software for Elphel NC393 camera development, if that
 is the case you can skip the next step and use ~/git/elphel393/fpga-elphel/x393/
 ```
-git clone https://github.com/Elphel/x393.git
+git clone https://git.elphel.com/Elphel/x393.git
 cd x393
 ./INIT_PROJECT
+
 ```
+Python program used on the target and during Cocotb simulation requires Python numpy module,
+on Ubuntu you may install it with
+```
+sudo apt-get install python-numpy
+```
+
 The last command copies Eclipse .project and .pydevproject files to the working directory.
 
 From the Eclipse instance that runs VDT plugin (not the one with the VDT source code)
@@ -219,7 +232,7 @@ Open "Verilog/VHDL' perspective:
 ```
 Window->Open Perspective->Other->Verilog/VHDL
 ```
-It should look as shown on screenshots in [VDT-UserManualAddendum.pdf](https://github.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf?raw=true),
+It should look as shown on screenshots in [VDT-UserManualAddendum.pdf](https://git.elphel.com/Elphel/vdt-docs/blob/master/VDT-UserManualAddendum.pdf?raw=true),
 with bottom-left panel showind "Design Menu" and FPGA-related tools
 
 #### Configure access to the server with Xilinx tools
