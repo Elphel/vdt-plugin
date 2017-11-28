@@ -165,7 +165,7 @@ the **buildjavacc.xml** file and select **Properties**.
 In the new dialog window select **Run/Debug Settings**, press **New** and agree to
 the only suggested option: **Ant Build**.
 
-If the **New** is grayed-out, go to **Window > Preferences > General > Content Types > Text > XML > Ant Buildfile***
+If the **New** is grayed-out, go to **Window > Preferences > General > Content Types > Text > XML > Ant Buildfile**
 and add  **buildjavacc.xml**
 
 Then Select **Environment** tab and enter two variables by pressing **New** and then
