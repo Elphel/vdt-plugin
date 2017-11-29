@@ -194,7 +194,7 @@ and fix plugin errors). Next you may create a new FPGA development project or im
 an existing one. We will use DDR3 memory interface project as an example.
 
 If **Validation** window opens complaining about javax.xml.ws and org.apache.xmlrpc when you
-launch VDT plugin, you may disable it in ** Run -> Run Configurations... -> Eclipse application -> Plugins(tab)**
+launch VDT plugin, you may disable it in **Run -> Run Configurations... -> Eclipse application -> Plugins(tab)**
 uncheck **Validate Plug-ins automatically prior to launching**
 
 ## Import and configuration of the sample project in VDT
