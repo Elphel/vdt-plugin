@@ -192,6 +192,11 @@ A new instance of Eclipse will open, this new Eclipse will have VDT plugin activ
 You may minimize the original Eclipse window at this point (it can be used to monitor
 and fix plugin errors). Next you may create a new FPGA development project or import
 an existing one. We will use DDR3 memory interface project as an example.
+
+If **Validation** window opens complaining about javax.xml.ws and org.apache.xmlrpc when you
+launch VDT plugin, you may disable it in ** Run -> Run Configurations... -> Eclipse application -> Plugins(tab)**
+uncheck **Validate Plug-ins automatically prior to launching**
+
 ## Import and configuration of the sample project in VDT
 Sample project is a DDR3 memory interface for Xilinx Zynq SOC that does not depend on
 undocumented featuers and encrypted modules and can be simulated with the Free Software
