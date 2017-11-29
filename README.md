@@ -13,7 +13,7 @@ Table of Contents
     * [Programs and libraries installed from (K)ubuntu repositories](#programs-and-libraries-installed-from-kubuntu-repositories)
       * [GtkWave (3.3.58-1)](#gtkwave-3358-1)
       * [other programs needed for building Icarus Verilog](#other-programs-needed-for-building-icarus-verilog)
-      * [For simulation with Cocotb](#for-simulation-with-cocotb)
+      * [For simulation with Cocotb](#for-simulation-with-cocotb)Building and running VDT
       * [Java JDK](#java-jdk)
     * [Icarus Verilog](#icarus-verilog)
     * [JavaCC](#javacc)
@@ -194,7 +194,7 @@ and fix plugin errors). Next you may create a new FPGA development project or im
 an existing one. We will use DDR3 memory interface project as an example.
 
 If **Validation** window opens complaining about javax.xml.ws and org.apache.xmlrpc when you
-launch VDT plugin, you may disable it in **Run -> Run Configurations... -> Eclipse application -> Plugins(tab)**
+launch VDT plugin, you may disable it in **Run -> Run Configurations... -> Eclipse application -> Plugins** (tab)
 uncheck **Validate Plug-ins automatically prior to launching**
 
 ## Import and configuration of the sample project in VDT
